@@ -1,0 +1,36 @@
+/* Methan0l | Basic Syntax */
+/* Semicolons can be omitted, but must be used to write more than 1 expr on one line */
+
+/* Output operator */
+%%("Methan0l | Test" :: newl :: newl)	/* "newl" is a reserved identifier for the new line character */
+
+/* Variable assignment, all possible types: */
+foo = 123			/* Integer */
+bar = 456.5			/* Double */
+baz = true			/* Boolean */
+str = "Hello, Methan0l!"	/* String */
+
+/* Algebraic operators, if at least one of the operands in expr is Double, then the eval'd result is also Double */
+calc = ((foo + bar) * (foo / 25.375)) / 10
+%%("Calculation result: " :: calc :: newl)
+
+/* String concatenation with automatic type conversion */
+%%("Concatenation test: " :: str :: " " :: foo :: " " :: bar :: " " :: baz :: newl)
+
+/* Logical operators */
+%%("Equivalent string literals: " :: ("equality test" == "equality test") :: newl)
+a = 42; b = 42
+%%(a :: " == " :: b :: " : " :: (a == b) :: newl)
+a = a / 50.0
+%%(a :: " < " :: b :: " : " :: (a < b) :: newl)
+c = -100
+%%(c :: " <= " :: a :: " <= " :: b :: " : " :: ((c <= a) & (a <= b)) :: newl)
+%%("!false = " :: !false :: newl)
+
+/* Input operator */
+%%(newl :: "* Enter something: ")
+>>test
+%%("Your input: " :: test :: newl)
+
+/* Return operator; Any Unit can return a value. */
+foo!
