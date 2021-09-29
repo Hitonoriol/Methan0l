@@ -6,11 +6,116 @@
 #include "expression/BinaryOperatorExpression.h"
 #include "expression/PrefixExpr.h"
 #include "expression/PostfixExpr.h"
+#include "expression/UnitExpr.h"
+#include "expression/InvokeExpr.h"
+#include "expression/ListExpr.h"
 
 namespace mtl
 {
 
 ExprEvaluator::ExprEvaluator()
+{
+	init_io_oprs();
+	init_arithmetic_oprs();
+	init_logical_oprs();
+	init_comparison_oprs();
+
+	/* Inline concatenation */
+	binary_op(TokenType::INLINE_CONCAT, [this](auto lhs, auto rhs) {
+		auto lexpr = eval(lhs), rexpr = eval(rhs);
+		return Value(lexpr.to_string() + rexpr.to_string());
+	});
+
+	/* Return operator */
+	postfix_op(TokenType::EXCLAMATION, [this](auto lhs) {
+		auto unit = current_unit();
+		unit->save_return(eval(lhs));
+		return local_scope()->get(Unit::RETURN_KEYWORD);
+	});
+
+}
+
+void ExprEvaluator::init_comparison_oprs()
+{
+	/* Logic-arithmetic operators: >, <, >=, <= */
+	TokenType log_ar_ops[] = {
+			TokenType::GREATER, TokenType::GREATER_OR_EQ,
+			TokenType::LESS, TokenType::LESS_OR_EQ
+	};
+	for (size_t i = 0; i < std::size(log_ar_ops); ++i)
+		binary_op(log_ar_ops[i], [=](auto lhs,
+				auto rhs) {
+					Value lval = eval(lhs), rval = eval(rhs);
+					return Value(eval_logic_arithmetic(lval.as<double>(), log_ar_ops[i], rval.as<double>()));
+				});
+
+	binary_op(TokenType::EQUALS, [this](auto lhs, auto rhs) {
+		return Value(eval(lhs) == eval(rhs));
+	});
+}
+
+void ExprEvaluator::init_logical_oprs()
+{
+	/* Logical operators: BOOL (op) BOOL */
+	TokenType log_ops[] = {
+			TokenType::AND, TokenType::PIPE
+	};
+	for (size_t i = 0; i < std::size(log_ops); ++i)
+		binary_op(log_ops[i], [=](auto lhs, auto rhs) {
+			Value lexpr = eval(lhs), rexpr = eval(rhs);
+			return Value(eval_logical(lexpr.as<bool>(), log_ops[i], rexpr.as<bool>()));
+		});
+
+	/* Logical NOT operator */
+	prefix_op(TokenType::EXCLAMATION, [this](auto rhs) {
+		Value rval = eval(rhs);
+		return Value(!rval.as<bool>());
+	});
+}
+
+void ExprEvaluator::init_arithmetic_oprs()
+{
+	/* Arithmetic operators w\ implicit conversions INTEGER <--> DOUBLE */
+	TokenType ar_ops[] = {
+			TokenType::PLUS, TokenType::MINUS,
+			TokenType::ASTERISK, TokenType::SLASH,
+			TokenType::PERCENT
+	};
+	for (size_t i = 0; i < std::size(ar_ops); ++i)
+		binary_op(ar_ops[i], [=](auto lhs, auto rhs) {
+			return calculate(lhs, ar_ops[i], rhs);
+		});
+
+	prefix_op(TokenType::MINUS, [this](auto rhs) {
+		Value rval = eval(rhs);
+
+		if (rval.type == Type::INTEGER)
+		rval.value = -rval.as<int>();
+		else
+		rval.value = -rval.as<double>();
+
+		return rval;
+	});
+
+	/* Prefix & Postfix increment / decrement */
+	TokenType unary_ar_ops[] = { TokenType::INCREMENT, TokenType::DECREMENT };
+	for (size_t i = 0; i < std::size(unary_ar_ops); ++i) {
+		prefix_op(unary_ar_ops[i], [=](auto rhs) {
+			Value &val = get(IdentifierExpr::get_name(rhs));
+			apply_unary(val, unary_ar_ops[i]);
+			return val;
+		});
+
+		postfix_op(unary_ar_ops[i], [=](auto rhs) {
+			Value &val = get(IdentifierExpr::get_name(rhs));
+			Value tmp(val);
+			apply_unary(val, unary_ar_ops[i]);
+			return tmp;
+		});
+	}
+}
+
+void ExprEvaluator::init_io_oprs()
 {
 	/* Output Operator */
 	prefix_op(TokenType::OUT, [this](auto expr) {
@@ -27,73 +132,6 @@ ExprEvaluator::ExprEvaluator()
 		Value val = Value::from_string(input);
 		set(name, val);
 		return val;
-	});
-
-	/* Inline concatenation */
-	binary_op(TokenType::INLINE_CONCAT, [this](auto lhs, auto rhs) {
-		auto lexpr = eval(lhs), rexpr = eval(rhs);
-		return Value(lexpr.to_string() + rexpr.to_string());
-	});
-
-	/* Return operator */
-	postfix_op(TokenType::EXCLAMATION, [this](auto lhs) {
-		auto local = local_scope();
-		local->save_return(eval(lhs));
-		return local->get(Unit::RETURN_KEYWORD);
-	});
-
-	/* Arithmetic operators w\ implicit conversions INTEGER <--> DOUBLE */
-	TokenType ar_ops[] = {
-			TokenType::PLUS, TokenType::MINUS,
-			TokenType::ASTERISK, TokenType::SLASH,
-			TokenType::PERCENT
-	};
-	for (size_t i = 0; i < std::size(ar_ops); ++i)
-		binary_op(ar_ops[i], [=](auto lhs, auto rhs) {
-			return calculate(lhs, ar_ops[i], rhs);
-		});
-
-	prefix_op(TokenType::MINUS, [this](auto rhs) {
-		Value rval = eval(rhs);
-
-		if (rval.type == Type::INTEGER)
-			rval.value = -rval.as<int>();
-		else
-			rval.value = -rval.as<double>();
-
-		return rval;
-	});
-
-	/* Logical operators: BOOL (op) BOOL */
-	TokenType log_ops[] = {
-			TokenType::AND, TokenType::PIPE
-	};
-	for (size_t i = 0; i < std::size(log_ops); ++i)
-		binary_op(log_ops[i], [=](auto lhs, auto rhs) {
-			Value lexpr = eval(lhs), rexpr = eval(rhs);
-			return Value(eval_logical(lexpr.as<bool>(), log_ops[i], rexpr.as<bool>()));
-		});
-
-	/* Logical NOT operator */
-	prefix_op(TokenType::EXCLAMATION, [this](auto rhs) {
-		Value rval = eval(rhs);
-		return Value(!rval.as<bool>());
-	});
-
-	/* Logic-arithmetic operators: >, <, >=, <= */
-	TokenType log_ar_ops[] = {
-			TokenType::GREATER, TokenType::GREATER_OR_EQ,
-			TokenType::LESS, TokenType::LESS_OR_EQ
-	};
-	for (size_t i = 0; i < std::size(log_ar_ops); ++i)
-		binary_op(log_ar_ops[i], [=](auto lhs,
-				auto rhs) {
-					Value lval = eval(lhs), rval = eval(rhs);
-					return Value(eval_logic_arithmetic(lval.as<double>(), log_ar_ops[i], rval.as<double>()));
-				});
-
-	binary_op(TokenType::EQUALS, [this](auto lhs, auto rhs) {
-		return Value(eval(lhs) == eval(rhs));
 	});
 }
 
@@ -159,19 +197,34 @@ Value ExprEvaluator::apply_prefix(TokenType op, ExprPtr &rhs)
 
 void ExprEvaluator::set_main(Unit &main)
 {
-	if (!scope_queue.empty())
-		scope_queue.clear();
+	if (!exec_queue.empty())
+		exec_queue.clear();
 
-	scope_queue.push_back(&main.local());
+	exec_queue.push_back(&main);
 }
 
 Value ExprEvaluator::execute(Unit &unit)
 {
+	if constexpr (DEBUG)
+		std::cout << unit << " Exprs: " << unit.expressions().size() << std::endl;
+
 	enter_scope(unit);
-	for (auto expr : unit.expressions())
-		eval(expr);
+
+	if (!unit.execution_finished())
+		for (auto expr : unit.expressions()) {
+			exec(expr);
+			if (unit.execution_finished())
+				break;
+		}
+
 	Value returned_val = unit.result();
 	leave_scope();
+
+	/* Weak Units cause their parent units to return */
+	Unit *parent = current_unit();
+	if (&unit != parent && !returned_val.empty() && unit.is_weak())
+		parent->save_return(returned_val);
+
 	return returned_val;
 }
 
@@ -183,37 +236,52 @@ Value ExprEvaluator::invoke(Function &func, ValList args)
 
 void ExprEvaluator::enter_scope(Unit &unit)
 {
+	if constexpr (DEBUG)
+		std::cout << "Entering scope " << unit << std::endl;
+
 	auto local = &unit.local();
+	unit.begin();
 	if (global() != local)
-		scope_queue.push_back(local);
+		exec_queue.push_back(&unit);
 }
 
 void ExprEvaluator::leave_scope()
 {
-	if (scope_queue.size() > 1) {
-		scope_queue.back()->clear();
-		scope_queue.pop_back();
+	if (exec_queue.size() > 1) {
+		exec_queue.back()->local().clear();
+		exec_queue.pop_back();
+
+		if constexpr (DEBUG)
+			std::cout << "Left local scope // Cur visibility: " << exec_queue.size() << std::endl;
 	}
 }
 
 DataTable* ExprEvaluator::global()
 {
-	return scope_queue[0];
+	return &(exec_queue[0]->local());
 }
 
 DataTable* ExprEvaluator::local_scope()
 {
-	return scope_queue.back();
+	return &(exec_queue.back()->local());
+}
+
+Unit* ExprEvaluator::current_unit()
+{
+	return exec_queue.back();
 }
 
 /* Search for identifier in every possible scope, beginning from the most */
 DataTable* ExprEvaluator::scope_lookup(std::string &id)
 {
-	for (auto scope = std::prev(scope_queue.end());
-			scope != scope_queue.begin();
-			--scope) {
-		if ((*scope)->get(id) != NIL)
-			return *scope;
+	if constexpr (DEBUG)
+		std::cout << "Scope lookup for \"" << id << "\"" << std::endl;
+
+	for (auto scope = std::prev(exec_queue.end());
+			scope != exec_queue.begin(); --scope) {
+		DataTable *local = &((*scope)->local());
+		if (local->get(id) != NIL)
+			return local;
 	}
 
 	auto global_scope = global();
@@ -243,6 +311,11 @@ inline Value ExprEvaluator::eval(ExprPtr expr)
 	return eval(*expr);
 }
 
+inline void ExprEvaluator::exec(ExprPtr expr)
+{
+	return expr->execute(*this);
+}
+
 Value ExprEvaluator::evaluate(AssignExpr &expr)
 {
 	Value rhs = eval(expr.get_rhs());
@@ -257,6 +330,9 @@ Value ExprEvaluator::evaluate(IdentifierExpr &expr)
 	if (name == Token::reserved(Word::NEW_LINE))
 		return Value(std::string(1, '\n'));
 
+	if (name == Token::reserved(Word::NIL))
+		return local_scope()->nil();
+
 	return get(name);
 }
 
@@ -266,10 +342,33 @@ Value ExprEvaluator::evaluate(ConditionalExpr &expr)
 	return eval(result ? expr.get_then() : expr.get_else());
 }
 
+Value ExprEvaluator::evaluate(UnitExpr &expr)
+{
+	return eval(expr);
+}
+
+Value ExprEvaluator::evaluate(ListExpr &expr)
+{
+	Value list = eval(expr);
+	return list;
+}
+
+Value ExprEvaluator::evaluate(InvokeExpr &expr)
+{
+	Value &callable = get(expr.function_name());
+	if (callable.type == Type::UNIT) {
+		Unit unit = callable.as<Unit>();
+		Value ret = execute(unit);
+		return ret;
+	}
+
+	return Value();
+}
+
 /* Default evaluation */
 Value ExprEvaluator::evaluate(Expression &expr)
 {
-	std::cerr << "Unimplemented expression evaluation" << '\n';
+	std::cerr << "Unimplemented expression evaluation" << std::endl;
 	return NIL;
 }
 

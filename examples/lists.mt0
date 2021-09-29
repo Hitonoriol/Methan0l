@@ -1,0 +1,24 @@
+"Lists" :: newl
+
+/* List definition syntax */
+list = $(1, 2, 3, "abc", 0.5)
+view_lst = {%%("List: " :: list :: newl);}
+view_lst
+
+/* List syntax is also used when invoking Functions / Units */
+unit = {"I am a completely useless unit"!;}
+
+%%("Unit says: " :: (unit$()) :: newl) /* <-- Units don't accept arguments,
+						so an empty list must be passed in invokation expr */
+/* List append operator */
+list[] = "New element"
+view_lst
+
+/* List indexing operator */
+%%(list[2] :: newl)
+list[5] = -64
+view_lst
+
+/* Concat lists into one string */
+str = <<$("foo", 123, 456, 0.001, "bar")
+%%(str :: newl)

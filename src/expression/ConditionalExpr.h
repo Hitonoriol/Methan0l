@@ -2,6 +2,7 @@
 #define SRC_EXPRESSION_CONDITIONALEXPR_H_
 
 #include "Expression.h"
+#include "LiteralExpr.h"
 
 namespace mtl
 {
@@ -37,6 +38,12 @@ class ConditionalExpr: public Expression
 		Value evaluate(ExprEvaluator &eval) override
 		{
 			return eval.evaluate(*this);
+		}
+
+		void execute(ExprEvaluator &evaluator) override
+		{
+			Value val = evaluate(evaluator);
+			LiteralExpr::exec_literal(evaluator, val);
 		}
 };
 

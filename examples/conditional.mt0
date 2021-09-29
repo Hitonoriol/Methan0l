@@ -1,0 +1,23 @@
+"Conditional operators" :: newl
+
+/* Ternary operator */
+a = 10; b = a * 100
+foo = (b > a ? "b" : "a")
+%%("Ternary result: " :: foo :: newl)
+
+/* Can also be used as if-else operator using execution syntax combined with Unit definitions inside then and else arms */
+(a == nil ? {
+	"[then] unit has been executed" :: newl
+} : {
+	"[else] unit has been executed" :: newl
+})
+
+/* if-elseif using ternary operators */
+
+(non_existent_value > 0 ? {
+	"This unit won't be executed"
+} : {
+	((b % 3) >= 1) ? {
+		"Elseif arm // b mod 3 is >= 1!"
+	} : {}
+})

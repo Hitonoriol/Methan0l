@@ -29,15 +29,39 @@ class LiteralExpr: public Expression
 			else if (type == TokenType::STRING)
 				value = lrstrip(tokstr);
 
-			else value = 0;
+			else
+				value = 0;
 
 		}
 
-		LiteralExpr(ValueContainer value) : value(value) {};
+		LiteralExpr(ValueContainer value) : value(value)
+		{
+		}
 
 		Value evaluate(ExprEvaluator &eval) override
 		{
 			return Value(value);
+		}
+
+		void execute(ExprEvaluator &evaluator) override
+		{
+			Value evald = evaluate(evaluator);
+			exec_literal(evaluator, evald);
+		}
+
+		static void exec_literal(ExprEvaluator &evaluator, Value &val)
+		{
+			switch (val.type) {
+			case Type::UNIT: {
+				Unit unit = val.as<Unit>();
+				evaluator.execute(unit);
+				break;
+			}
+
+			default:
+				std::cout << val << std::endl;
+				break;
+			}
 		}
 };
 

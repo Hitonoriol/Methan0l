@@ -1,0 +1,42 @@
+"Units & Scopes" :: newl
+
+/* Unit is an expression block with it's own local visibility scope
+ * (in fact, this whole program is a Unit itself)
+ * Units can return values by using the postfix ! operator after the expr
+ */
+calls = 0
+unit = {
+	local_var = "Blah blah" /* Shouldn't be accesible from the global scope */
+	%%("Boom! A Unit has been called! [" :: (++calls) :: "] ")
+	%%("(my local var: " :: local_var :: ")")
+	%% newl
+	(calls * 10)!
+	"Some dead code" /* Execution won't reach this point */
+}
+
+/* Parent-less literals are printed out to the stdout followed by a new line */
+256
+0.111
+"String literal"
+true
+""
+
+/* Execute defined unit, this way the return is discarded */
+unit
+
+/* Local scope check */
+%%("* Unit's local var as seen from global scope (should be nil): " :: local_var :: newl)
+
+/* Capturing Unit's return value:
+ * Incorrect way:
+ *	foo = unit <-- this will just eval the unit into itself
+ *	and assign it to the foo, the execution won't happen
+ *
+ * Correct way:
+ */
+ret = unit$() /* Will capture the returned value of the unit */
+%%("Unit returned: " :: ret :: newl)
+
+nil! /* Return stops current Unit's execution */
+
+%%("This will never be printed")

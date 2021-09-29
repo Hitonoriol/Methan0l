@@ -27,6 +27,12 @@ class BinaryOperatorExpression: public Expression
 			return eval.evaluate(*this);
 		}
 
+		void execute(ExprEvaluator &evaluator) override
+		{
+			Value val = evaluate(evaluator);
+			LiteralExpr::exec_literal(evaluator, val);
+		}
+
 		TokenType get_operator()
 		{
 			return opr;

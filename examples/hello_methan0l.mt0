@@ -1,8 +1,8 @@
-/* Methan0l | Basic Syntax */
+"Methan0l | Basic Syntax" :: newl
 /* Semicolons can be omitted, but must be used to write more than 1 expr on one line */
 
 /* Output operator */
-%%("Methan0l | Test" :: newl :: newl)	/* "newl" is a reserved identifier for the new line character */
+%%("Test" :: newl :: newl)	/* "newl" is a reserved identifier for the new line character */
 
 /* Variable assignment, all possible types: */
 foo = 123			/* Integer */

@@ -10,7 +10,7 @@
 namespace mtl
 {
 
-enum class TokenType
+enum class TokenType : uint16_t
 {
 	/* Operators */
 	ASSIGN = '=',
@@ -55,6 +55,8 @@ enum class TokenType
 	BLOCK_COMMENT_R,	// */
 	GREATER_OR_EQ,		// >=
 	LESS_OR_EQ,			// <=
+	INCREMENT,			// ++
+	DECREMENT,			// --
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -65,10 +67,10 @@ enum class TokenType
 	IDENTIFIER,
 
 	NONE,
-	END
+	END = 0xFFFF
 };
 
-enum class Word
+enum class Word : uint8_t
 {
 	NIL,
 	TRUE,
@@ -93,7 +95,7 @@ class Token
 		static constexpr std::string_view bichar_ops[] = {
 				"<<", ">>", "->", "<-", "$(",
 				"@(", "==", "%%", "::", "/*",
-				"*/", ">=", "<="
+				"*/", ">=", "<=", "++", "--"
 		};
 
 		static TokenType deduce_type(std::string &tokstr);
@@ -119,6 +121,8 @@ class Token
 		static const int BICHAR_OP_START = static_cast<int>(TokenType::CONCAT);
 		static const std::string digits, double_digits;
 		static bool contains_all(std::string str, std::string substr);
+
+		friend std::ostream& operator <<(std::ostream &stream, const Token &val);
 };
 
 } /* namespace mtl */

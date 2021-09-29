@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include <deque>
 #include <unordered_map>
 #include <stdexcept>
 #include <memory>
@@ -23,11 +24,10 @@ class Parser
 		std::unordered_map<TokenType, std::shared_ptr<InfixParser>> infix_parsers;
 		std::unordered_map<TokenType, std::shared_ptr<PrefixParser>> prefix_parsers;
 
-		std::vector<Token> read_queue;
+		std::deque<Token> read_queue;
 		Unit root_unit;
 
 		int get_precedence();
-		Token look_ahead(size_t n = 0);
 
 	protected:
 		Lexer lexer;
@@ -44,6 +44,8 @@ class Parser
 		bool match(TokenType expected);
 		Token consume(TokenType expected);
 		Token consume();
+		Token look_ahead(size_t n = 0);
+		void emplace(Token &token);
 
 		Unit& result();
 		void clear();

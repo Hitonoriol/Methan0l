@@ -18,6 +18,12 @@ class Expression
 		Expression() = default;
 		virtual ~Expression() = default;
 		virtual Value evaluate(ExprEvaluator &evaluator) = 0;
+
+		/* called instead of evaluate() for parent-less exprs */
+		virtual void execute(ExprEvaluator &evaluator)
+		{
+			evaluate(evaluator);
+		}
 };
 
 } /* namespace mtl */

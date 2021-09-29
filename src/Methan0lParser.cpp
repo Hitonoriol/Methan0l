@@ -15,6 +15,8 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_parser(TokenType::QUESTION, new ConditionParser());// (a & b ? "yep" : "nah")
 	register_parser(TokenType::PAREN_L, new GroupParser());			// x * ((a + b) + c)
 	register_parser(TokenType::LIST_DEF_L, new InvokeParser());	// some_func $(arg1, arg2, arg3)
+	register_parser(TokenType::LIST_DEF_L, new ListParser());	// $(arg1, arg2, arg3)
+	register_parser(TokenType::BRACE_L, new UnitParser());	// {expr1; expr2; expr3}
 	register_prefix_opr(TokenType::CONCAT);								// <<$(a, b, c)
 	register_prefix_opr(TokenType::OUT);								// %%foo
 	register_prefix_opr(TokenType::INPUT);								// >>foo
@@ -23,6 +25,10 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_postfix_opr(TokenType::EXCLAMATION);						// return opr
 
 	register_prefix_opr(TokenType::MINUS);								// unary -
+	register_prefix_opr(TokenType::INCREMENT);								// ++x
+	register_postfix_opr(TokenType::INCREMENT);							// x++
+	register_prefix_opr(TokenType::DECREMENT);							// --x
+	register_postfix_opr(TokenType::DECREMENT);							// x--
 
 	register_infix_opr(TokenType::GREATER, Precedence::CONDITIONAL);
 	register_infix_opr(TokenType::GREATER_OR_EQ, Precedence::CONDITIONAL);

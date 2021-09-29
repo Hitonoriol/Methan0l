@@ -5,6 +5,7 @@
 
 #include "Expression.h"
 #include "IdentifierExpr.h"
+#include "ListExpr.h"
 
 namespace mtl
 {
@@ -12,12 +13,13 @@ namespace mtl
 class InvokeExpr: public Expression
 {
 	private:
-		IdentifierExpr& identifier;
-		ExprList args;
+		IdentifierExpr identifier;
+		ListExpr args;
 
 	public:
-		InvokeExpr(ExprPtr lhs, ExprList args) : identifier(
-				static_cast<IdentifierExpr&>(*lhs)), args(args)
+		InvokeExpr(ExprPtr lhs, ListExpr args) :
+				identifier(static_cast<IdentifierExpr&>(*lhs)),
+				args(std::move(args))
 		{
 		}
 
@@ -31,7 +33,7 @@ class InvokeExpr: public Expression
 			return identifier.get_name();
 		}
 
-		ExprList arg_list()
+		ListExpr arg_list()
 		{
 			return args;
 		}

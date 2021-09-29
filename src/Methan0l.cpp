@@ -20,7 +20,7 @@ void run_file(mtl::Interpreter &methan0l, char *filename)
 		methan0l.load_code(code);
 		mtl::Value ret = methan0l.run();
 
-		if (ret != mtl::NIL)
+		if (!ret.empty())
 			cout << "Main returned: " << ret << std::endl;
 	}
 	else {

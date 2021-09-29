@@ -1,6 +1,8 @@
 #ifndef SRC_EXPREVALUATOR_H_
 #define SRC_EXPREVALUATOR_H_
 
+#include <deque>
+
 #include "methan0l_type.h"
 #include "structure/Unit.h"
 #include "structure/Function.h"
@@ -14,6 +16,9 @@ class ConditionalExpr;
 class BinaryOperatorExpression;
 class PrefixExpr;
 class PostfixExpr;
+class UnitExpr;
+class ListExpr;
+class InvokeExpr;
 
 class ExprEvaluator
 {
@@ -22,12 +27,17 @@ class ExprEvaluator
 		BinaryOprMap binary_ops;
 		PostfixOprMap postfix_ops;
 
-		std::vector<DataTable*> scope_queue;
+		std::deque<Unit*> exec_queue;
 
 		Value eval(Expression &expr);
 		Value eval(ExprPtr expr);
+		void exec(ExprPtr expr);
 
+		DataTable* scope_lookup(std::string &id);
 		DataTable* global();
+		DataTable* local_scope();
+		Unit* current_unit();
+
 		void enter_scope(Unit &unit);
 		void leave_scope();
 
@@ -41,28 +51,55 @@ class ExprEvaluator
 
 		Value calculate(ExprPtr &l, TokenType op, ExprPtr &r);
 
+		void init_comparison_oprs();
+		void init_logical_oprs();
+		void init_arithmetic_oprs();
+		void init_io_oprs();
+
 	public:
 		ExprEvaluator();
 		ExprEvaluator(Unit &main);
 		void set_main(Unit &main);
 
-		DataTable* local_scope();
-		DataTable* scope_lookup(std::string &id);
+		Value execute(Unit &unit);
+		Value invoke(Function &func, ValList args);
+
 		Value& get(std::string id);
 		void set(std::string id, Value &val);
 
 		Value evaluate(BinaryOperatorExpression &opr);
 		Value evaluate(PostfixExpr &opr);
 		Value evaluate(PrefixExpr &opr);
-
 		Value evaluate(AssignExpr &expr);
 		Value evaluate(IdentifierExpr &expr);
 		Value evaluate(ConditionalExpr &expr);
+		Value evaluate(UnitExpr &expr);
+		Value evaluate(ListExpr &expr);
+		Value evaluate(InvokeExpr &expr);
 
 		Value evaluate(Expression &expr);
 
-		Value execute(Unit &unit);
-		Value invoke(Function &func, ValList args);
+		inline int unary_diff(TokenType op)
+		{
+			return op == TokenType::INCREMENT ? 1 : -1;
+		}
+
+		void apply_unary(Value &val, TokenType op)
+		{
+			const int d = unary_diff(op);
+			switch (val.type) {
+			case Type::INTEGER:
+				val.value = val.as<int>() + d;
+				break;
+
+			case Type::DOUBLE:
+				val.value = val.as<double>() + d;
+				break;
+
+			default:
+				break;
+			}
+		}
 
 		bool eval_logical(bool l, TokenType op, bool r)
 		{

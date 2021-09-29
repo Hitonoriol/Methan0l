@@ -1,6 +1,7 @@
 #ifndef EXPRESSION_PARSER_INVOKEPARSER_H_
 #define EXPRESSION_PARSER_INVOKEPARSER_H_
 
+#include "../ListExpr.h"
 #include "../InvokeExpr.h"
 #include "InfixParser.h"
 
@@ -12,15 +13,9 @@ class InvokeParser: public InfixParser
 	public:
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
 		{
-			ExprList arg_list;
-			if (!parser.match(TokenType::PAREN_L)) {
-				do {
-					arg_list.push_back(parser.parse());
-				} while (parser.match(TokenType::COMMA));
-				parser.consume(TokenType::PAREN_R);
-			}
-
-			return ptr(new InvokeExpr(lhs, arg_list));
+			parser.emplace(token);
+			ListExpr list_expr = static_cast<ListExpr&>(*parser.parse());
+			return ptr(new InvokeExpr(lhs, list_expr));
 		}
 
 		int precedence()

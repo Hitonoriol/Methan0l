@@ -12,11 +12,23 @@ class UnitExpr: public Expression
 		Unit unit;
 
 	public:
-		UnitExpr(ExprList unit) : unit(unit) {}
+		UnitExpr(ExprList unit, bool weak = false) : unit(unit, weak)
+		{
+		}
 
 		Unit get_unit()
 		{
 			return unit;
+		}
+
+		Value evaluate(ExprEvaluator &evaluator) override
+		{
+			return Value(unit);
+		}
+
+		void execute(ExprEvaluator &evaluator) override
+		{
+			evaluator.execute(unit);
 		}
 };
 

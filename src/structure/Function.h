@@ -1,7 +1,12 @@
 #ifndef SRC_STRUCTURE_FUNCTION_H_
 #define SRC_STRUCTURE_FUNCTION_H_
 
+#include <string>
+#include <vector>
+
+#include "../methan0l_type.h"
 #include "Unit.h"
+#include "Value.h"
 
 namespace mtl
 {

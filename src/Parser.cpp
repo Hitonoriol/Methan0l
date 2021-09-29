@@ -59,8 +59,8 @@ bool Parser::match(TokenType expected)
 Token Parser::consume()
 {
 	look_ahead();
-	Token ret = read_queue.back();
-	read_queue.erase(std::prev(read_queue.end()));
+	Token ret = read_queue.front();
+	read_queue.pop_front();
 	return ret;
 }
 
@@ -71,6 +71,12 @@ Token Parser::consume(TokenType expected)
 		throw std::runtime_error("Unexpected token: " + token.get_value());
 
 	return consume();
+}
+
+/* Put a token to the front of the read-ahead queue */
+void Parser::emplace(Token &token)
+{
+	read_queue.push_front(token);
 }
 
 Token Parser::look_ahead(size_t n)

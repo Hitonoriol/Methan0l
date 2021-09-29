@@ -1,5 +1,7 @@
 #include "Token.h"
 
+#include <iostream>
+
 namespace mtl
 {
 
@@ -104,5 +106,11 @@ bool Token::contains_all(std::string str, std::string substr)
 {
 	return str.find_first_not_of(substr) == std::string::npos;
 }
+
+std::ostream& operator <<(std::ostream &stream, const Token &val)
+{
+	return stream << "{\"" << val.value << "\":" << static_cast<int>(val.type) << "}";
+}
+
 }
 /* namespace mtl */
