@@ -24,10 +24,11 @@ class Lexer
 		std::queue<Token> tokens;
 
 		void clear();
+		void consume_and_deduce();
 		void consume();
-		void consume(char chr);
 		void save(char chr);
 		void deduce_reserved();
+		void deduce_word_op();
 		void push();
 		void push(char chr);
 		void next_char();
@@ -35,6 +36,12 @@ class Lexer
 		void begin(char chr);
 		char look_ahead(size_t n = 1);
 		bool try_save_bichar_op(char chr, char next);
+
+		bool match_cur(TokenType tok);
+		bool match_prev(TokenType tok);
+
+		bool unescaped(TokenType tok);
+		bool escaped(TokenType tok);
 
 	public:
 		Lexer();

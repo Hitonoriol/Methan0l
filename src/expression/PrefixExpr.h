@@ -25,15 +25,19 @@ class PrefixExpr: public Expression
 			return op;
 		}
 
-		ExprPtr& get_rhs()
+		ExprPtr get_rhs()
 		{
 			return rhs;
 		}
 
 		Value evaluate(ExprEvaluator &eval) override
 		{
-			PrefixOpr opr_applier;
 			return eval.evaluate(*this);
+		}
+
+		std::ostream& info(std::ostream &str) override
+		{
+			return str << "{Prefix Expression | opr = " << static_cast<int>(op) << "}";
 		}
 };
 

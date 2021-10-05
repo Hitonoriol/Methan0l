@@ -1,42 +1,69 @@
-#include <iostream>
+#include <deque>
 #include <fstream>
+#include <iostream>
+#include <string>
 
+#include "expression/Expression.h"
 #include "Interpreter.h"
+#include "methan0l_type.h"
+#include "structure/Unit.h"
+#include "structure/Value.h"
+#include "expression/IdentifierExpr.h"
+#include "util.h"
 
 using namespace std;
 
 void run_file(mtl::Interpreter &methan0l, char *filename)
 {
 	string src_name = string(filename);
-	ifstream src_file(src_name, ios::binary | ios::ate);
+	methan0l.load(methan0l.load_file(src_name));
+	mtl::Value ret = methan0l.run();
 
-	if (src_file.is_open()) {
-		auto src_len = src_file.tellg();
-		src_file.seekg(ios::beg);
-		string code(src_len, 0);
-		src_file.read(&code[0], src_len);
-		src_file.close();
+	if (!ret.empty())
+		cout << "Main returned: " << ret << std::endl;
+}
 
-		methan0l.load_code(code);
-		mtl::Value ret = methan0l.run();
+std::unordered_map<std::string, std::function<void(mtl::Interpreter&)>> intr_cmds {
+		{ "info",
+				[](auto &mtl)
+					{
+						mtl.print_info();
+					}
+		}
+};
 
-		if (!ret.empty())
-			cout << "Main returned: " << ret << std::endl;
+bool process_commands(mtl::Interpreter &methan0l)
+{
+	mtl::ExprPtr cmdexpr = methan0l.program().expressions().front();
+	if (!instanceof<mtl::IdentifierExpr>(cmdexpr.get()))
+		return false;
+
+	std::string cmd = mtl::IdentifierExpr::get_name(cmdexpr);
+	auto f_cmd = intr_cmds.find(cmd);
+	if (f_cmd != intr_cmds.end()) {
+		f_cmd->second(methan0l);
+		return true;
 	}
-	else {
-		cerr << "Failed to open " << src_name << '\n';
-	}
+
+	return false;
 }
 
 void interactive_mode(mtl::Interpreter &methan0l)
 {
+	methan0l.preserve_data(true);
 	string expr;
-	while (true) {
+	do {
 		cout << "[Methan0l] <-- ";
 		getline(std::cin, expr);
-		methan0l.load_code(expr + '\n');
+
+		if (!expr.empty()) {
+			methan0l.load(expr);
+			if (process_commands(methan0l))
+				continue;
+		}
+
 		methan0l.run();
-	}
+	} while (!methan0l.force_quit());
 }
 
 int main(int argc, char **argv)

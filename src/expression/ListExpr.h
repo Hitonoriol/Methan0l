@@ -30,6 +30,11 @@ class ListExpr: public Expression
 
 			return Value(list);
 		}
+
+		std::ostream& info(std::ostream &str) override
+		{
+			return str << "{List Expression // " << exprs.size() << " elements}";
+		}
 };
 
 } /* namespace mtl */

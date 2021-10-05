@@ -1,13 +1,11 @@
 #ifndef EXPRESSION_EXPRESSION_H_
 #define EXPRESSION_EXPRESSION_H_
 
-#include <any>
 #include <iostream>
 
 #include "../ExprEvaluator.h"
-#include "../Token.h"
 #include "../methan0l_type.h"
-#include "../util.h"
+#include "../structure/Value.h"
 
 namespace mtl
 {
@@ -24,6 +22,14 @@ class Expression
 		{
 			evaluate(evaluator);
 		}
+
+		virtual std::ostream& info(std::ostream &str)
+		{
+			return str << "{Expression}";
+		}
+
+		/* Create a "return" expression which returns the evaluated <expr> */
+		static ExprPtr return_self(ExprPtr expr);
 };
 
 } /* namespace mtl */

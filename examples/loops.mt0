@@ -1,0 +1,34 @@
+"Loops" :: newl
+
+"For Loop"
+do $(i = 1, i < 100, ++i) -> {
+	%%(i :: " ")
+	i % 10 == 0 ? {%% newl}
+}
+newl
+
+"Foreach loop (for lists only)"
+some_list = $("first element", 999, -0.123456, false, -1, false, true, "another element", 1337)
+"List: " :: some_list
+do $(elem, some_list) -> {
+	e_type = type(elem)
+	%% "* "
+	(e_type == type string) ? ->
+		{elem :: " (Length: " :: size(elem) :: ")"}
+	: (e_type == type int | e_type == type double) ? ->
+		{elem :: " is positive: " :: (elem > 0)}
+	: elem
+}
+
+/* Inline list definition works too */
+do $(val, $("a", "b", "c", "d", "e")) -> {
+	%%(val :: " ")
+}
+newl
+
+"While loop"
+foo = size(some_list) * 6.75
+do $(#foo > 50) -> {
+	%%("<While Loop> ")
+	--#foo
+}

@@ -4,18 +4,6 @@
 #include "Token.h"
 #include "Parser.h"
 
-#include "expression/parser/AssignParser.h"
-#include "expression/parser/IdentifierParser.h"
-#include "expression/parser/GroupParser.h"
-#include "expression/parser/InvokeParser.h"
-#include "expression/parser/PrefixOperatorParser.h"
-#include "expression/parser/ConditionParser.h"
-#include "expression/parser/BinaryOperatorParser.h"
-#include "expression/parser/LiteralParser.h"
-#include "expression/parser/PostfixExprParser.h"
-#include "expression/parser/ListParser.h"
-#include "expression/parser/UnitParser.h"
-
 namespace mtl
 {
 
@@ -28,7 +16,7 @@ class Methan0lParser: public Parser
 {
 	public:
 		Methan0lParser();
-		void load(std::string &code);
+		void load(const std::string &code);
 
 		void register_prefix_opr(TokenType token,
 				int precedence = static_cast<int>(Precedence::PREFIX));

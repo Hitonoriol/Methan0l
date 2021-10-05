@@ -15,13 +15,21 @@ class UnitParser: public PrefixParser
 		{
 			ExprList exprs;
 
+			if constexpr (DEBUG)
+				std::cout << "Parsing unit expr..." << std::endl;
+
 			if (!parser.match(TokenType::BRACE_R)) {
 				do {
 					exprs.push_back(parser.parse());
 				} while (!parser.match(TokenType::BRACE_R));
 			}
 
-			return ptr(new UnitExpr(exprs));
+			bool weak = token.get_type() == TokenType::WEAK_UNIT_DEF;
+
+			if constexpr (DEBUG)
+				std::cout << "Parsed a unit with " << exprs.size() << " exprs" << std::endl;
+
+			return ptr(new UnitExpr(exprs, weak));
 		}
 };
 

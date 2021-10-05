@@ -7,7 +7,7 @@
 #include <variant>
 #include <vector>
 
-#include "Unit.h"
+#include "Function.h"
 
 namespace mtl
 {
@@ -16,20 +16,23 @@ struct Value;
 
 using ValueContainer =
 std::variant<
+/* No value */
+std::monostate,
+
 /* Primitives */
 int, double, std::string, bool,
 
 /* Data Structures */
-ValList,
+ValList, ValMap,
 
 /* Expression blocks */
-Unit
+Unit, Function
 >;
 
 enum class Type : uint8_t
 {
 	NIL, INTEGER, DOUBLE, STRING, BOOLEAN,
-	LIST, UNIT
+	LIST, UNIT, MAP, FUNCTION
 };
 
 struct Value
@@ -42,14 +45,19 @@ struct Value
 		Value(ValueContainer value);
 		Value(const Value &val);
 		Value& operator =(const Value &rhs);
-
+		Value& operator=(ValueContainer rhs);
 		Value& set(ValueContainer value);
 		Value& set(Value &value);
 
 		void deduce_type();
 		static bool is_double_op(Value &lhs, Value &rhs);
 		std::string to_string();
-		bool empty();
+
+		bool empty() const;
+		bool nil() const;
+
+		void clear();
+		static void clear(ValueContainer &pure_val);
 
 		friend std::ostream& operator <<(std::ostream &stream, Value &val);
 		friend bool operator ==(const Value &lhs, const Value &rhs);
@@ -63,11 +71,16 @@ struct Value
 			return static_cast<int>(type);
 		}
 
+		template<typename T> T& get()
+		{
+			return std::get<T>(value);
+		}
+
 		/* A little bit clusterf-d getter with all possible type conversions */
 		template<typename T> T as()
 		{
 			if (std::holds_alternative<T>(value))
-				return std::get<T>(value);
+				return get<T>();
 
 			if constexpr (std::is_same<T, double>::value)
 				switch (type) {
@@ -113,7 +126,13 @@ struct Value
 		}
 };
 
+const Value NEW_LINE = Value(std::string(1, '\n'));
+
+/* Represents the empty value, can be used inside Methan0l programs */
 const Value NIL = Value(Type::NIL, 0);
+
+/* Internal interpreter constant to represent the absence of value */
+const Value NO_VALUE = Value(Type::NIL, std::monostate { });
 
 }
 

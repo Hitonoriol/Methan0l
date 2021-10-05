@@ -1,5 +1,7 @@
-#include "../methan0l_type.h"
 #include "Value.h"
+
+#include "../methan0l_type.h"
+#include "../util.h"
 
 namespace mtl
 {
@@ -35,9 +37,29 @@ Value& Value::set(Value &value)
 	return *this;
 }
 
-bool Value::empty()
+Value& Value::operator=(ValueContainer rhs)
+{
+	return set(rhs);
+}
+
+bool Value::empty() const
+{
+	return std::holds_alternative<std::monostate>(value);
+}
+
+bool Value::nil() const
 {
 	return type == Type::NIL;
+}
+
+void Value::clear()
+{
+	clear(value);
+}
+
+void Value::clear(ValueContainer &pure_val)
+{
+	pure_val = std::monostate();
 }
 
 void Value::deduce_type()
@@ -57,8 +79,14 @@ void Value::deduce_type()
 	else if (std::holds_alternative<Unit>(value))
 		type = Type::UNIT;
 
+	else if (std::holds_alternative<Function>(value))
+		type = Type::FUNCTION;
+
 	else if (std::holds_alternative<ValList>(value))
 		type = Type::LIST;
+
+	else if (std::holds_alternative<ValMap>(value))
+		type = Type::MAP;
 
 	else
 		type = Type::NIL;
@@ -84,16 +112,30 @@ std::string Value::to_string()
 				Token::reserved(as<bool>() ? Word::TRUE : Word::FALSE));
 
 	case Type::LIST: {
-		std::string list_str = "{ ";
-		ValList list = as<ValList>();
-
-		for (Value val : list)
-			list_str += val.to_string() + ", ";
-		list_str.erase(std::prev(list_str.end(), 2));
-
-		list_str += "}";
-		return list_str;
+		ValList &list = get<ValList>();
+		auto it = list.begin(), end = list.end();
+		return stringify([&]() {
+			if (it == end) return empty_string;
+			return (it++)->to_string();
+		});
 	}
+
+	case Type::MAP: {
+		ValMap &map = get<ValMap>();
+		auto it = map.begin(), end = map.end();
+		return stringify([&]() {
+			if (it == end) return empty_string;
+			std::string str = "{" + it->first + " : " + it->second.to_string() + "}";
+			it++;
+			return str;
+		});
+	}
+
+	case Type::UNIT:
+		return get<Unit>().to_string();
+
+	case Type::FUNCTION:
+		return get<Function>().to_string();
 
 	default:
 		return "";
@@ -164,7 +206,10 @@ Value& Value::operator =(const Value &rhs)
 
 bool operator ==(const Value &lhs, const Value &rhs)
 {
-	if (lhs.type == Type::NIL && rhs.type == Type::NIL)
+	if (lhs.empty() && rhs.empty())
+		return true;
+
+	if (lhs.nil() && rhs.nil())
 		return true;
 
 	if (lhs.type != rhs.type)

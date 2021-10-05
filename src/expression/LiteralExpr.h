@@ -2,6 +2,7 @@
 #define EXPRESSION_LITERALEXPR_H_
 
 #include "Expression.h"
+#include "../util.h"
 
 namespace mtl
 {
@@ -38,6 +39,15 @@ class LiteralExpr: public Expression
 		{
 		}
 
+		LiteralExpr() : value(std::monostate())
+		{
+		}
+
+		bool empty()
+		{
+			return std::holds_alternative<std::monostate>(value);
+		}
+
 		Value evaluate(ExprEvaluator &eval) override
 		{
 			return Value(value);
@@ -51,9 +61,13 @@ class LiteralExpr: public Expression
 
 		static void exec_literal(ExprEvaluator &evaluator, Value &val)
 		{
+			if (val.empty())
+				return;
+
 			switch (val.type) {
 			case Type::UNIT: {
-				Unit unit = val.as<Unit>();
+				Unit unit = val.get<Unit>();
+				unit.call();
 				evaluator.execute(unit);
 				break;
 			}
@@ -62,6 +76,11 @@ class LiteralExpr: public Expression
 				std::cout << val << std::endl;
 				break;
 			}
+		}
+
+		std::ostream& info(std::ostream &str) override
+		{
+			return str << "{Literal Expression}";
 		}
 };
 

@@ -1,0 +1,10 @@
+"Functions" :: newl
+
+sum = func def @(a, b, c => 123) {
+	c != 123 ? -> {"A non-default third arg has been provided!"!}
+	(a + b)!
+}
+
+"Sum #1: " :: sum$(5, 7)
+"Sum #2: " :: sum$(1337.7331, 7331.1337)
+"Sum #3: " :: sum$(999, 999, "foo")

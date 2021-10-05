@@ -47,6 +47,12 @@ class BinaryOperatorExpression: public Expression
 		{
 			return rhs;
 		}
+
+		std::ostream& info(std::ostream &str)
+		{
+			return str << "{Binary Opr Expression | opr = " << static_cast<int>(opr)
+					<< " (" << Token::chr(opr) << ")}";
+		}
 };
 
 } /* namespace mtl */

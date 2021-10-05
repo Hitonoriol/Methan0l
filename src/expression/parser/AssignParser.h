@@ -14,12 +14,10 @@ class AssignParser: public InfixParser
 		{
 			ExprPtr rhs = parser.parse(Precedence::ASSIGNMENT - 1);
 
-			if (!instanceof<IdentifierExpr>(lhs.get()))
-				throw std::runtime_error(
-						"LHS of assignment operator must be an identifier");
+			if constexpr (DEBUG)
+				rhs->info(std::cout << "Assignment RHS: ") << std::endl;
 
-			std::string identifier = IdentifierExpr::get_name(lhs);
-			return ptr(new AssignExpr(identifier, rhs));
+			return ptr(new AssignExpr(lhs, rhs));
 		}
 
 		int precedence() override

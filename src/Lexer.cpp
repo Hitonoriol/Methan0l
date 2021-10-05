@@ -22,9 +22,29 @@ void Lexer::save(char chr)
 void Lexer::deduce_reserved()
 {
 	Word reserved = Token::as_reserved(tokstr);
-	if (reserved == Word::TRUE || reserved == Word::FALSE)
-		toktype = TokenType::BOOLEAN;
+	int wrd_id = static_cast<int>(reserved);
+	if (reserved == Word::NONE)
+		return;
 
+	/* Value Type literal -- "evaluates" immediately to its index (Integer) */
+	const int type_start = static_cast<int>(Word::TYPE_ID_START);
+	if (wrd_id >= type_start) {
+		toktype = TokenType::INTEGER;
+		tokstr = std::to_string(wrd_id - type_start);
+	}
+
+	/* Boolean literal */
+	else if (reserved == Word::TRUE || reserved == Word::FALSE)
+		toktype = TokenType::BOOLEAN;
+}
+
+void Lexer::deduce_word_op()
+{
+	TokenType opr = Token::as_word_op(tokstr);
+	if (opr == TokenType::NONE)
+		return;
+
+	toktype = opr;
 }
 
 void Lexer::push()
@@ -32,8 +52,10 @@ void Lexer::push()
 	if (tokstr.empty())
 		return;
 
-	if (toktype == TokenType::IDENTIFIER)
+	if (toktype == TokenType::IDENTIFIER) {
 		deduce_reserved();
+		deduce_word_op();
+	}
 
 	if constexpr (DEBUG)
 		std::cout << "[" << tokstr << "] ";
@@ -44,7 +66,7 @@ void Lexer::push()
 
 void Lexer::push(char chr)
 {
-	if (chr != TokenType::SEMICOLON && chr != TokenType::NEWLINE) {
+	if (!Token::is_delimiter(chr)) {
 		tokens.push(Token(chr));
 		if constexpr (DEBUG)
 			std::cout << "[" << chr << "] ";
@@ -117,8 +139,10 @@ void Lexer::begin(char chr)
 }
 
 /* Continue consuming after the starting assumption */
-void Lexer::consume(char chr)
+void Lexer::consume()
 {
+	char chr = *cur_chr;
+
 	if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
 		save(chr);
 		toktype = TokenType::DOUBLE;
@@ -126,9 +150,12 @@ void Lexer::consume(char chr)
 	}
 
 	else if (toktype == TokenType::STRING) {
-		save(chr);
-		if (chr == TokenType::QUOTE)
+		if (chr != TokenType::BACKSLASH || escaped(TokenType::BACKSLASH))
+			save(chr);
+
+		if (unescaped(TokenType::QUOTE))
 			push();
+
 		return;
 	}
 
@@ -143,13 +170,13 @@ void Lexer::consume(char chr)
 
 }
 
-/* Consume all characters of the provided code */
-void Lexer::consume()
+/* Consume chrs one-by-one, accumulating them in a buffer & deducing the token type */
+void Lexer::consume_and_deduce()
 {
 	if (toktype == TokenType::NONE)
 		begin(*cur_chr);
 	else
-		consume(*cur_chr);
+		consume();
 
 	next_char();
 }
@@ -165,14 +192,42 @@ bool Lexer::has_next()
 	return cur_chr != input_end;
 }
 
+inline bool Lexer::match_cur(TokenType tok)
+{
+	return *cur_chr == Token::chr(tok);
+}
+
+inline bool Lexer::match_prev(TokenType tok)
+{
+	return *std::prev(cur_chr) == tok;
+}
+
+inline bool Lexer::unescaped(TokenType tok)
+{
+	return match_cur(tok) && !match_prev(TokenType::BACKSLASH);
+}
+
+inline bool Lexer::escaped(TokenType tok)
+{
+	return match_cur(tok) && match_prev(TokenType::BACKSLASH);
+}
+
 void Lexer::parse(std::string code)
 {
 	cur_chr = code.begin();
 	input_end = code.end();
 	std::queue<Token>().swap(tokens);
 
+	if constexpr (DEBUG)
+		std::cout << "Lexing the input..." << std::endl;
+
 	while (has_next())
-		consume();
+		consume_and_deduce();
+	push();
+
+	if constexpr (DEBUG)
+		std::cout << '\n' << "* Lexing complete. " << tokens.size() << " tokens parsed." << std::endl;
+
 	tokens.push(Token::EOF_TOKEN);
 }
 

@@ -2,6 +2,7 @@
 #define SRC_EXPRESSION_POSTFIXEXPR_H_
 
 #include "Expression.h"
+#include "LiteralExpr.h"
 
 namespace mtl
 {
@@ -30,6 +31,11 @@ class PostfixExpr: public Expression
 		TokenType get_operator()
 		{
 			return op;
+		}
+
+		std::ostream& info(std::ostream &str) override
+		{
+			return str << "{Postfix Expression | opr = " << static_cast<int>(op) << "}";
 		}
 };
 

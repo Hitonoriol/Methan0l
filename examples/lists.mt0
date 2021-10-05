@@ -2,23 +2,40 @@
 
 /* List definition syntax */
 list = $(1, 2, 3, "abc", 0.5)
-view_lst = {%%("List: " :: list :: newl);}
+list_str = {("List: " :: #list)!}
+view_lst = {%%(#list_str$() :: newl)}
+
 view_lst
 
-/* List syntax is also used when invoking Functions / Units */
-unit = {"I am a completely useless unit"!;}
-
-%%("Unit says: " :: (unit$()) :: newl) /* <-- Units don't accept arguments,
-						so an empty list must be passed in invokation expr */
-/* List append operator */
+/* List syntax is also used when invoking Units / Functions(TODO) */
+unit = {"I am a completely useless unit"!}
+%%("Unit says: " :: unit$() :: newl) /* <-- Units don't accept arguments (except for init blocks, see example below & in pseudo_func.mt0),
+						so an empty list must be passed in invocation expr */
+"Append new element"
 list[] = "New element"
 view_lst
 
+"Remove element"
+list[~2]
+view_lst
+
 /* List indexing operator */
-%%(list[2] :: newl)
+%%("Third element: " :: list[2] :: newl)
+list[0] = "The first element"
 list[5] = -64
 view_lst
 
-/* Concat lists into one string */
-str = <<$("foo", 123, 456, 0.001, "bar")
-%%(str :: newl)
+newl :: "Populating a list in a recursive \"loop\"..."
+list_populator = {
+	(++i) > max ? -> {"Done populating new list"; new_list!}
+	new_list[] = 1.0 / i
+	#list_populator$()!
+}
+
+/* Using pseudo-function syntax for initialization
+ * (basically just injecting values into the unit's local scope) (see pseudo_func.mt0) */
+ret = list_populator$({i = 0; max = 10; new_list = $()})
+"New " :: list_str$({list = #ret})
+
+/* size operator */
+%%("List size: " :: size(ret) :: newl)

@@ -4,23 +4,34 @@
 #include <string>
 #include <vector>
 
-#include "../methan0l_type.h"
 #include "Unit.h"
-#include "Value.h"
 
 namespace mtl
 {
+
+class Value;
+class ExprEvaluator;
 
 class Function: public Unit
 {
 	private:
 		size_t argc = 0;
+
+		/* Vector of pairs to preserve the declaration order */
 		ArgDefList arg_def;
 
 	public:
-		Function(std::vector<std::string> args, ExprList body);
-		Function(ArgDefList args, ExprList body);
-		void call(ValList &args);
+		Function(ExprMap args, Unit body);
+		Function();
+
+		void set(const Function &rhs);
+		Function(const Function &rhs);
+		Function& operator=(const Function &rhs);
+
+		void call(ExprEvaluator &eval, ExprList &args);
+
+		std::string to_string() override;
+		friend std::ostream& operator <<(std::ostream &stream, Function &func);
 };
 
 } /* namespace mtl */

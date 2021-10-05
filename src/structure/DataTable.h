@@ -20,13 +20,17 @@ class DataTable
 		DataTable(const DataTable &rhs);
 		DataTable& operator=(const DataTable &rhs);
 
-		void set(std::string id, Value &value);
+		bool exists(const std::string &id);
+		Value& set(std::string id, Value value);
 		Value& get(std::string id);
 		void del(std::string id);
+		const DataMap& managed_map();
 		Value& nil();
 		void clear();
 		size_t size();
 		bool empty();
+
+		friend std::ostream& operator <<(std::ostream &stream, DataTable &val);
 };
 
 }

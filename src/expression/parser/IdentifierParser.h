@@ -14,7 +14,11 @@ class IdentifierParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			return ptr(new IdentifierExpr(token.get_value()));
+			bool global = token.get_type() == TokenType::HASH;
+			if (global)
+				token = parser.consume(TokenType::IDENTIFIER);
+
+			return ptr(new IdentifierExpr(token.get_value(), global));
 		}
 };
 

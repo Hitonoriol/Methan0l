@@ -3,6 +3,7 @@
 
 #include "InfixParser.h"
 #include "../ConditionalExpr.h"
+#include "../LiteralExpr.h"
 
 namespace mtl
 {
@@ -13,8 +14,10 @@ class ConditionParser: public InfixParser
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
 		{
 			ExprPtr then_expr = parser.parse();
-			parser.consume(TokenType::COLON);
-			ExprPtr else_expr = parser.parse(Precedence::CONDITIONAL - 1);
+			ExprPtr else_expr =
+					parser.match(TokenType::COLON) ?
+							parser.parse(Precedence::CONDITIONAL - 1) :
+							ptr(new LiteralExpr());
 			return ptr(new ConditionalExpr(lhs, then_expr, else_expr));
 		}
 

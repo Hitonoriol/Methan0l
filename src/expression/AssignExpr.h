@@ -5,6 +5,7 @@
 
 #include "../methan0l_type.h"
 #include "Expression.h"
+#include "IdentifierExpr.h"
 
 namespace mtl
 {
@@ -12,12 +13,11 @@ namespace mtl
 class AssignExpr: public Expression
 {
 	private:
-		std::string identifier;
-		ExprPtr rhs;
+		ExprPtr lhs, rhs;
 
 	public:
-		AssignExpr(std::string identifier, ExprPtr rhs) :
-				identifier(identifier), rhs(rhs)
+		AssignExpr(ExprPtr lhs, ExprPtr rhs) :
+				lhs(lhs), rhs(rhs)
 		{
 		}
 
@@ -26,14 +26,19 @@ class AssignExpr: public Expression
 			return eval.evaluate(*this);
 		}
 
-		std::string get_identifier()
+		ExprPtr get_lhs()
 		{
-			return identifier;
+			return lhs;
 		}
 
 		ExprPtr get_rhs()
 		{
 			return rhs;
+		}
+
+		std::ostream& info(std::ostream &str) override
+		{
+			return str << "{Assign Expression}";
 		}
 
 };

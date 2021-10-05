@@ -6,18 +6,23 @@ foo = (b > a ? "b" : "a")
 %%("Ternary result: " :: foo :: newl)
 
 /* Can also be used as if-else operator using execution syntax combined with Unit definitions inside then and else arms */
-(a == nil ? {
+a == nil ? {
 	"[then] unit has been executed" :: newl
 } : {
 	"[else] unit has been executed" :: newl
-})
+}
 
 /* if-elseif using ternary operators */
 
-(non_existent_value > 0 ? {
+non_existent_value > 0 ? {
 	"This unit won't be executed"
-} : {
-	((b % 3) >= 1) ? {
+} : (b % 3) >= 1 ? {
 		"Elseif arm // b mod 3 is >= 1!"
-	} : {}
-})
+}
+
+/* If you want to be able to return from within the conditional opr,
+ * you have to use the Weak Unit syntax: */
+(a != "foo") ? -> {
+ 	false! /* Will stop this Unit's execution & will return this value from the parent Unit */
+ 	"This won't be executed"
+ }

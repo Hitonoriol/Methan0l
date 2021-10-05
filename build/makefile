@@ -10,6 +10,7 @@ RM := del
 -include sources.mk
 -include src/structure/subdir.mk
 -include src/expression/parser/subdir.mk
+-include src/expression/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk

@@ -45,7 +45,8 @@ class Parser
 		Token consume(TokenType expected);
 		Token consume();
 		Token look_ahead(size_t n = 0);
-		void emplace(Token &token);
+		void emplace(const Token &token);
+		void end_of_expression();
 
 		Unit& result();
 		void clear();

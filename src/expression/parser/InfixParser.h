@@ -30,6 +30,8 @@ enum class Precedence
 	INVOKE
 };
 
+int prcdc(Precedence prec);
+
 int operator -(const Precedence &lhs, int rhs);
 
 class InfixParser

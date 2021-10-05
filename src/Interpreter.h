@@ -21,15 +21,23 @@ class Interpreter: public ExprEvaluator
 		Methan0lParser parser;
 		Unit main;
 
+		Unit load_unit(std::istream &codestr);
+		Unit load_unit(const std::string &code);
+
 	public:
 		Interpreter(std::string code);
-		Interpreter() : ExprEvaluator()
-		{
-		}
+		Interpreter();
 		~Interpreter() = default;
 
-		void load_code(std::string code);
+		Unit load_file(std::string path);
+		void load(const Unit &main);
+		void load(std::istream &codestr);
+		void load(const std::string &code);
 		Value run();
+
+		void preserve_data(bool val);
+		Unit program();
+		void print_info();
 };
 
 } /* namespace mtl */

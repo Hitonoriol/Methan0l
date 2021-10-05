@@ -11,6 +11,10 @@ class GroupParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token)
 		{
+			/* Empty group */
+			if (parser.match(TokenType::PAREN_R))
+				return ptr(new LiteralExpr());
+
 			ExprPtr expr = parser.parse();
 			parser.consume(TokenType::PAREN_R);
 			return expr;

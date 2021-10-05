@@ -1,5 +1,7 @@
 #include "ExprEvaluator.h"
 
+#include <iostream>
+
 #include "expression/AssignExpr.h"
 #include "expression/ConditionalExpr.h"
 #include "expression/IdentifierExpr.h"
@@ -9,6 +11,8 @@
 #include "expression/UnitExpr.h"
 #include "expression/InvokeExpr.h"
 #include "expression/ListExpr.h"
+#include "expression/IndexExpr.h"
+#include "util.h"
 
 namespace mtl
 {
@@ -27,12 +31,78 @@ ExprEvaluator::ExprEvaluator()
 	});
 
 	/* Return operator */
-	postfix_op(TokenType::EXCLAMATION, [this](auto lhs) {
-		auto unit = current_unit();
-		unit->save_return(eval(lhs));
-		return local_scope()->get(Unit::RETURN_KEYWORD);
+	postfix_op(TokenType::EXCLAMATION, [this](
+			auto lhs) {
+				Unit *unit = current_unit();
+
+				if (instanceof<IdentifierExpr>(lhs.get()) && IdentifierExpr::get_name(lhs) == Token::reserved(Word::BREAK))
+				unit->stop();
+				else
+				unit->save_return(eval(lhs));
+
+				return unit->result();
+			});
+
+	/* Typeid operator */
+	prefix_op(TokenType::TYPE, [this](auto rhs) {
+		return Value(static_cast<int>(eval(rhs).type));
 	});
 
+	/* Size operator */
+	prefix_op(TokenType::SIZE, [this](auto rhs) {
+		Value val = eval(rhs);
+		int size = 0;
+
+		switch(val.type) {
+			case Type::STRING:
+			size = val.get<std::string>().size();
+			break;
+
+			case Type::LIST:
+			size = val.get<ValList>().size();
+			break;
+
+			default:
+			break;
+		}
+
+		return Value(size);
+	});
+
+	prefix_op(TokenType::DELETE, [this](auto rhs) {
+		scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
+		return NIL;
+	});
+
+	prefix_op(TokenType::EXIT, [this](auto rhs) {
+		stop();
+		return NO_VALUE;
+	});
+
+	prefix_op(TokenType::PERSISTENT, [this](auto rhs) {
+		Value rval = eval(rhs);
+
+		if (rval.type != Type::UNIT)
+		throw std::runtime_error("Persistence can only be applied to a Unit");
+
+		rval.get<Unit>().set_persisent(true);
+		return rval;
+	});
+
+	/* Reference an idfr from a unit */
+	binary_op(TokenType::DOT, [this](auto lhs,
+			auto rhs) {
+				Value lval = eval(lhs);
+
+				if (lval.type != Type::UNIT)
+					throw std::runtime_error("LHS of dot operator must evaluate to Unit");
+
+				Unit &unit = lval.get<Unit>();
+				enter_scope(unit);
+				Value result = eval(rhs);
+				leave_scope();
+				return result;
+			});
 }
 
 void ExprEvaluator::init_comparison_oprs()
@@ -79,7 +149,7 @@ void ExprEvaluator::init_arithmetic_oprs()
 	TokenType ar_ops[] = {
 			TokenType::PLUS, TokenType::MINUS,
 			TokenType::ASTERISK, TokenType::SLASH,
-			TokenType::PERCENT
+			TokenType::PERCENT, TokenType::POWER
 	};
 	for (size_t i = 0; i < std::size(ar_ops); ++i)
 		binary_op(ar_ops[i], [=](auto lhs, auto rhs) {
@@ -101,13 +171,13 @@ void ExprEvaluator::init_arithmetic_oprs()
 	TokenType unary_ar_ops[] = { TokenType::INCREMENT, TokenType::DECREMENT };
 	for (size_t i = 0; i < std::size(unary_ar_ops); ++i) {
 		prefix_op(unary_ar_ops[i], [=](auto rhs) {
-			Value &val = get(IdentifierExpr::get_name(rhs));
+			Value &val = referenced_value(rhs);
 			apply_unary(val, unary_ar_ops[i]);
 			return val;
 		});
 
-		postfix_op(unary_ar_ops[i], [=](auto rhs) {
-			Value &val = get(IdentifierExpr::get_name(rhs));
+		postfix_op(unary_ar_ops[i], [=](auto lhs) {
+			Value &val = referenced_value(lhs);
 			Value tmp(val);
 			apply_unary(val, unary_ar_ops[i]);
 			return tmp;
@@ -126,11 +196,12 @@ void ExprEvaluator::init_io_oprs()
 
 	/* Input Operator */
 	prefix_op(TokenType::INPUT, [this](auto idfr) {
-		std::string name = IdentifierExpr::get_name(idfr);
+		IdentifierExpr &idf = try_cast<IdentifierExpr>(idfr);
 		std::string input;
 		std::cin >> input;
 		Value val = Value::from_string(input);
-		set(name, val);
+		idf.create_if_nil(*this);
+		get(idf) = val;
 		return val;
 	});
 }
@@ -147,7 +218,7 @@ Value ExprEvaluator::calculate(ExprPtr &l, TokenType op, ExprPtr &r)
 
 ExprEvaluator::ExprEvaluator(Unit &main) : ExprEvaluator()
 {
-	set_main(main);
+	load_main(main);
 }
 
 void ExprEvaluator::prefix_op(TokenType tok, PrefixOpr opr)
@@ -190,150 +261,195 @@ Value ExprEvaluator::evaluate(PrefixExpr &opr)
 	return apply_prefix(opr.get_operator(), opr.get_rhs());
 }
 
-Value ExprEvaluator::apply_prefix(TokenType op, ExprPtr &rhs)
+Value ExprEvaluator::apply_prefix(TokenType op, ExprPtr rhs)
 {
 	return prefix_ops.find(op)->second(rhs);
 }
 
-void ExprEvaluator::set_main(Unit &main)
+void ExprEvaluator::load_main(Unit &main)
 {
-	if (!exec_queue.empty())
-		exec_queue.clear();
+	if (!exec_stack.empty())
+		exec_stack.clear();
 
-	exec_queue.push_back(&main);
+	exec_stack.push_back(&main);
 }
 
 Value ExprEvaluator::execute(Unit &unit)
 {
 	if constexpr (DEBUG)
-		std::cout << unit << " Exprs: " << unit.expressions().size() << std::endl;
+		std::cout << '\n' << "Executing " << unit << " Exprs: " << unit.expressions().size() << std::endl;
 
 	enter_scope(unit);
 
-	if (!unit.execution_finished())
-		for (auto expr : unit.expressions()) {
-			exec(expr);
-			if (unit.execution_finished())
-				break;
-		}
+	for (auto expr : unit.expressions()) {
+		if (unit.execution_finished())
+			break;
+
+		exec(expr);
+	}
 
 	Value returned_val = unit.result();
 	leave_scope();
 
+	if constexpr (DEBUG)
+		std::cout << "Finished executing " << unit << '\n' << std::endl;
+
+	if (force_quit())
+		return NO_VALUE;
+
 	/* Weak Units cause their parent units to return */
 	Unit *parent = current_unit();
-	if (&unit != parent && !returned_val.empty() && unit.is_weak())
+	if (&unit != parent && !returned_val.empty() && unit.is_weak()) {
+
+		if constexpr (DEBUG)
+			std::cout << "Carrying return from child weak unit to " << *parent << std::endl;
+
 		parent->save_return(returned_val);
+	}
 
 	return returned_val;
 }
 
-Value ExprEvaluator::invoke(Function &func, ValList args)
+Value ExprEvaluator::invoke(Function &func, ExprList &args)
 {
-	func.call(args);
+	func.call(*this, args);
 	return execute(func);
 }
 
 void ExprEvaluator::enter_scope(Unit &unit)
 {
-	if constexpr (DEBUG)
-		std::cout << "Entering scope " << unit << std::endl;
-
 	auto local = &unit.local();
 	unit.begin();
 	if (global() != local)
-		exec_queue.push_back(&unit);
+		exec_stack.push_back(&unit);
+
+	if constexpr (DEBUG)
+		std::cout << "Entered scope " << unit << " // depth: " << exec_stack.size() << std::endl;
 }
 
 void ExprEvaluator::leave_scope()
 {
-	if (exec_queue.size() > 1) {
-		exec_queue.back()->local().clear();
-		exec_queue.pop_back();
+	if constexpr (DEBUG)
+		dump_stack();
+
+	if (exec_stack.size() > 1) {
+		Unit *unit = current_unit();
+
+		if (!unit->is_persistent())
+			unit->local().clear();
+		else
+			unit->clear_result();
+
+		exec_stack.pop_back();
 
 		if constexpr (DEBUG)
-			std::cout << "Left local scope // Cur visibility: " << exec_queue.size() << std::endl;
+			std::cout << "Left scope // depth: " << exec_stack.size() << std::endl;
 	}
 }
 
 DataTable* ExprEvaluator::global()
 {
-	return &(exec_queue[0]->local());
+	return &(exec_stack[0]->local());
 }
 
 DataTable* ExprEvaluator::local_scope()
 {
-	return &(exec_queue.back()->local());
+	return &(current_unit()->local());
 }
 
 Unit* ExprEvaluator::current_unit()
 {
-	return exec_queue.back();
+	return exec_stack.back();
 }
 
-/* Search for identifier in every possible scope, beginning from the most */
-DataTable* ExprEvaluator::scope_lookup(std::string &id)
+/* Search for identifier in local scope(s)
+ * 	or in every possible above the current one if <global> is true */
+DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 {
 	if constexpr (DEBUG)
 		std::cout << "Scope lookup for \"" << id << "\"" << std::endl;
 
-	for (auto scope = std::prev(exec_queue.end());
-			scope != exec_queue.begin(); --scope) {
+	if (global && exec_stack.size() < 2)
+		global = false;
+
+	const bool weak = current_unit()->is_weak();
+	if (!global && !weak)
+		return local_scope();
+
+	/* Starting from the second last Unit, because the last is the one being executed */
+	auto start = std::prev(exec_stack.end(), 2);
+	for (auto scope = start; scope != exec_stack.begin(); --scope) {
 		DataTable *local = &((*scope)->local());
-		if (local->get(id) != NIL)
+		if (local->exists(id))
 			return local;
+
+		/* Weak Units can locally "see" any identifier above their scope up to the first Regular Unit's scope */
+		if (!global && weak && !(*scope)->is_weak())
+			return local_scope();
 	}
 
-	auto global_scope = global();
-	if (global_scope->get(id) == NIL)
+	auto global_scope = this->global();
+
+	/* For weak Units */
+	if (!global && !global_scope->exists(id))
 		return local_scope();
 
 	return global_scope;
 }
 
-Value& ExprEvaluator::get(std::string id)
+DataTable* ExprEvaluator::scope_lookup(IdentifierExpr &idfr)
 {
-	return scope_lookup(id)->get(id);
+	return scope_lookup(idfr.get_name(), idfr.is_global());
 }
 
-void ExprEvaluator::set(std::string id, Value &val)
+DataTable* ExprEvaluator::scope_lookup(ExprPtr idfr)
 {
-	scope_lookup(id)->set(id, val);
+	return scope_lookup(try_cast<IdentifierExpr>(idfr));
+}
+
+Value& ExprEvaluator::get(IdentifierExpr &idfr)
+{
+	return idfr.referenced_value(*this);
+}
+
+Value& ExprEvaluator::referenced_value(ExprPtr idfr)
+{
+	return get(try_cast<IdentifierExpr>(idfr));
+}
+
+Value& ExprEvaluator::get(std::string id, bool global)
+{
+	return scope_lookup(id, global)->get(id);
 }
 
 inline Value ExprEvaluator::eval(Expression &expr)
 {
+	if constexpr (DEBUG)
+		expr.info(std::cout << "[Eval] ") << std::endl;
+
 	return expr.evaluate(*this);
 }
 
-inline Value ExprEvaluator::eval(ExprPtr expr)
+Value ExprEvaluator::eval(ExprPtr expr)
 {
 	return eval(*expr);
 }
 
 inline void ExprEvaluator::exec(ExprPtr expr)
 {
+	if constexpr (DEBUG)
+		expr->info(std::cout << "[Exec] ") << std::endl;
+
 	return expr->execute(*this);
 }
 
 Value ExprEvaluator::evaluate(AssignExpr &expr)
 {
+	IdentifierExpr &lhs = try_cast<IdentifierExpr>(expr.get_lhs());
 	Value rhs = eval(expr.get_rhs());
-	set(expr.get_identifier(), rhs);
+	lhs.create_if_nil(*this);
+	get(lhs) = rhs;
 	return rhs;
-}
-
-Value ExprEvaluator::evaluate(IdentifierExpr &expr)
-{
-	std::string name = expr.get_name();
-
-	if (name == Token::reserved(Word::NEW_LINE))
-		return Value(std::string(1, '\n'));
-
-	if (name == Token::reserved(Word::NIL))
-		return local_scope()->nil();
-
-	return get(name);
 }
 
 Value ExprEvaluator::evaluate(ConditionalExpr &expr)
@@ -353,16 +469,57 @@ Value ExprEvaluator::evaluate(ListExpr &expr)
 	return list;
 }
 
-Value ExprEvaluator::evaluate(InvokeExpr &expr)
+Value ExprEvaluator::invoke_unit(InvokeExpr &expr, Unit &unit)
 {
-	Value &callable = get(expr.function_name());
-	if (callable.type == Type::UNIT) {
-		Unit unit = callable.as<Unit>();
-		Value ret = execute(unit);
-		return ret;
+	auto args_expr = expr.arg_list();
+	if (args_expr.raw_list().empty())
+		unit.call();
+
+	/* Pseudo-args syntax: pass a single Unit with local scope init as argument;
+	 * arg Unit will be executed and its data table will be shared with the one being invoked */
+	else {
+		Value &args = eval(args_expr).get<ValList>()[0];
+		Unit ps_args = args.as<Unit>();
+		ps_args.call();
+		unit.manage_table(ps_args);
+		ps_args.set_persisent(true);
+		execute(ps_args);
+		if constexpr (DEBUG)
+			std::cout << "Executed Unit Invocation init block " << std::endl;
+		ps_args.set_persisent(false);
 	}
 
-	return Value();
+	return execute(unit);
+}
+
+Value ExprEvaluator::evaluate(InvokeExpr &expr)
+{
+	Value callable = eval(expr.get_lhs());
+
+	if (callable.type == Type::UNIT)
+		return invoke_unit(expr, callable.get<Unit>());
+
+	else if (callable.type == Type::FUNCTION)
+		return invoke(callable.get<Function>(), expr.arg_list().raw_list());
+
+	return NIL;
+}
+
+void ExprEvaluator::apply_unary(Value &val, TokenType op)
+{
+	const int d = unary_diff(op);
+	switch (val.type) {
+	case Type::INTEGER:
+		val.value = val.as<int>() + d;
+		break;
+
+	case Type::DOUBLE:
+		val.value = val.as<double>() + d;
+		break;
+
+	default:
+		break;
+	}
 }
 
 /* Default evaluation */
@@ -370,6 +527,34 @@ Value ExprEvaluator::evaluate(Expression &expr)
 {
 	std::cerr << "Unimplemented expression evaluation" << std::endl;
 	return NIL;
+}
+
+void ExprEvaluator::stop()
+{
+	current_unit()->stop();
+	exec_stack.clear();
+}
+
+bool ExprEvaluator::force_quit()
+{
+	return exec_stack.empty();
+}
+
+void ExprEvaluator::dump_stack()
+{
+	size_t i = 0, depth = exec_stack.size();
+	std::cout << "[Execution Stack | Depth: " << depth << "]" << std::endl;
+
+	for (auto un = std::prev(exec_stack.end()); un != std::prev(exec_stack.begin());
+			--un) {
+		std::cout << ((i++ > 0) ? "  * " : "--> ") << **un;
+		if (i == depth)
+			std::cout << " (Main)";
+		std::cout << std::endl;
+		for (auto val : (*un)->local().managed_map())
+			std::cout << '\t' << val.first << " = " << val.second << std::endl;
+	}
+	std::cout << std::endl;
 }
 
 } /* namespace mtl */

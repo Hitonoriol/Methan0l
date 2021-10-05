@@ -45,6 +45,11 @@ class ConditionalExpr: public Expression
 			Value val = evaluate(evaluator);
 			LiteralExpr::exec_literal(evaluator, val);
 		}
+
+		std::ostream& info(std::ostream &str) override
+		{
+			return str << "{Conditional Expression}";
+		}
 };
 
 } /* namespace mtl */

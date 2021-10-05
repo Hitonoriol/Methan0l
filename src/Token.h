@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <vector>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <unordered_set>
@@ -10,11 +11,14 @@
 namespace mtl
 {
 
+class Expression;
+
 enum class TokenType : uint16_t
 {
 	/* Operators */
 	ASSIGN = '=',
 	PLUS = '+', MINUS = '-', SLASH = '/', ASTERISK = '*',
+	BACKSLASH = '\\',
 	POWER = '^',
 	EXCLAMATION = '!',
 	QUESTION = '?',
@@ -24,6 +28,7 @@ enum class TokenType : uint16_t
 	AND = '&',
 	UNDERSCORE = '_',
 	PERCENT = '%',
+	HASH = '#',
 
 	PAREN_L = '(',
 	PAREN_R = ')',
@@ -44,8 +49,8 @@ enum class TokenType : uint16_t
 	/* Double-char operators */
 	CONCAT = 0x7F,		// <<
 	INPUT,				// >>
-	FUNCTION_DEF_OP,	// ->
-	LOOP_DEF_OP,		// <-
+	WEAK_UNIT_DEF,		// ->
+	LOOP_DEF,			// <-
 	LIST_DEF_L,			// $(
 	MAP_DEF_L,			// @(
 	EQUALS,				// ==
@@ -57,6 +62,8 @@ enum class TokenType : uint16_t
 	LESS_OR_EQ,			// <=
 	INCREMENT,			// ++
 	DECREMENT,			// --
+	TYPE_ASSIGN,		// :=
+	KEYVAL,				// =>
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -66,17 +73,37 @@ enum class TokenType : uint16_t
 
 	IDENTIFIER,
 
-	NONE,
+	/* Word operators */
+	DO = 0x200,
+	SIZE,
+	TYPE,
+	DELETE,
+	EXIT,
+	LOAD,
+	PERSISTENT,
+	FUNC_DEF,
+	BOX,
+
+	NONE = 0x300,
+	EXPR_END,
 	END = 0xFFFF
 };
 
 enum class Word : uint8_t
 {
+	NONE,
 	NIL,
 	TRUE,
 	FALSE,
 	RETURNED,
-	NEW_LINE
+	NEW_LINE,
+	BREAK,
+
+	TYPE_ID_START,
+	T_NIL = TYPE_ID_START,
+	T_INT, T_DOUBLE, T_STRING,
+	T_BOOLEAN, T_LIST, T_UNIT,
+	T_MAP, T_FUNCTION
 };
 
 bool operator ==(const char, const TokenType&);
@@ -88,23 +115,37 @@ class Token
 		TokenType type;
 		std::string value;
 
-		static constexpr std::string_view reserved_words[] = {
-				"nil", "true", "false", "returned", "newl"
-		};
-		static constexpr char punctuators[] = "=+-/*^!?~()$@[]{}:%;.,\"'<>|&\n";
+		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'<>|&\n#";
+
 		static constexpr std::string_view bichar_ops[] = {
 				"<<", ">>", "->", "<-", "$(",
 				"@(", "==", "%%", "::", "/*",
-				"*/", ">=", "<=", "++", "--"
+				"*/", ">=", "<=", "++", "--",
+				":=", "=>"
+		};
+
+		static constexpr std::string_view word_ops[] = {
+				"do", "size", "type", "delete", "exit",
+				"load", "persistent", "funcdef", "box"
+		};
+
+		static constexpr std::string_view reserved_words[] = {
+				"", "nil", "true", "false", "returned",
+				"newl", "break",
+
+				/* Type idfrs (spaces are ignored by Lexer), evaluate to (int)Type enum  */
+				"typenil", "typeint", "typedouble", "typestring", "typeboolean",
+				"typelist", "typeunit", "typemap", "typefunc"
 		};
 
 		static TokenType deduce_type(std::string &tokstr);
 
 	public:
 		Token();
-		Token(TokenType type, std::string value);
+		Token(TokenType type, std::string value = "");
 		Token(char chr);
 		Token(std::string op);
+		Token& operator=(const Token &rhs);
 		TokenType get_type() const;
 		std::string& get_value();
 
@@ -112,16 +153,27 @@ class Token
 		bool operator !=(const Token &rhs);
 
 		static TokenType get_bichar_op_type(std::string &tokstr);
+		static bool is_delimiter(char chr);
 		static bool is_punctuator(char chr);
 		static std::string_view reserved(Word word);
 		static Word as_reserved(std::string &tokstr);
+		static bool is_reserved(std::string &tokstr);
 		static char chr(TokenType tok);
+		static TokenType as_word_op(std::string &tokstr);
+		static std::string_view word_op(TokenType tok);
+		static std::string_view bichar_op(TokenType tok);
+		static bool is_compatible(std::shared_ptr<Expression> expr, TokenType next);
 
+		static const Token END_OF_EXPR;
 		static const Token EOF_TOKEN;
+		static const int LITERAL_START = static_cast<int>(TokenType::INTEGER);
+		static const int WORD_OP_START = static_cast<int>(TokenType::DO);
 		static const int BICHAR_OP_START = static_cast<int>(TokenType::CONCAT);
+		static const int MISC_TOKENS_START = static_cast<int>(TokenType::NONE);
 		static const std::string digits, double_digits;
 		static bool contains_all(std::string str, std::string substr);
 
+		std::string to_string();
 		friend std::ostream& operator <<(std::ostream &stream, const Token &val);
 };
 

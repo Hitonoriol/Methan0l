@@ -13,12 +13,14 @@ class ListParser: public PrefixParser
 		ExprPtr parse(Parser &parser, Token token) override
 		{
 			ExprList raw_list;
+
 			if (!parser.match(TokenType::PAREN_R)) {
 				do {
 					raw_list.push_back(parser.parse());
 				} while (parser.match(TokenType::COMMA));
 				parser.consume(TokenType::PAREN_R);
 			}
+
 			return ptr(new ListExpr(raw_list));
 		}
 };

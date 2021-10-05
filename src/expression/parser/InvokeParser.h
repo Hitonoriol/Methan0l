@@ -14,13 +14,13 @@ class InvokeParser: public InfixParser
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
 		{
 			parser.emplace(token);
-			ListExpr list_expr = static_cast<ListExpr&>(*parser.parse());
+			ListExpr list_expr = static_cast<ListExpr&>(*parser.parse(precedence() - 1));
 			return ptr(new InvokeExpr(lhs, list_expr));
 		}
 
 		int precedence()
 		{
-			return static_cast<int>(Precedence::INVOKE);
+			return prcdc(Precedence::INVOKE);
 		}
 };
 

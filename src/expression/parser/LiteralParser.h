@@ -14,11 +14,24 @@ class LiteralParser: public PrefixParser
 	private:
 		Type type;
 
+		bool compatible(TokenType next)
+		{
+			return next != TokenType::INCREMENT && next != TokenType::DECREMENT;
+		}
+
 	public:
-		LiteralParser(Type type) : type(type) {}
+		LiteralParser(Type type) : type(type)
+		{
+		}
 
 		ExprPtr parse(Parser &parser, Token token) override
 		{
+			if (!compatible(parser.look_ahead().get_type())) {
+				if constexpr (DEBUG)
+					std::cout << "Incompatible token met after the literal -- end of expression" << std::endl;
+				parser.end_of_expression();
+			}
+
 			return ptr(new LiteralExpr(type, token));
 		}
 };

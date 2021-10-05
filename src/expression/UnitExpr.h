@@ -21,14 +21,27 @@ class UnitExpr: public Expression
 			return unit;
 		}
 
+		Unit& get_unit_ref()
+		{
+			return unit;
+		}
+
 		Value evaluate(ExprEvaluator &evaluator) override
 		{
+			if (unit.is_persistent() && unit.local().empty())
+				evaluator.execute(unit);
+
 			return Value(unit);
 		}
 
 		void execute(ExprEvaluator &evaluator) override
 		{
 			evaluator.execute(unit);
+		}
+
+		std::ostream& info(std::ostream &str) override
+		{
+			return str << "{Unit Expression, unit = " << unit << "}";
 		}
 };
 

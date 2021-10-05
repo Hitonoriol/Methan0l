@@ -13,13 +13,13 @@ namespace mtl
 class InvokeExpr: public Expression
 {
 	private:
-		IdentifierExpr identifier;
+		ExprPtr lhs;
 		ListExpr args;
 
 	public:
 		InvokeExpr(ExprPtr lhs, ListExpr args) :
-				identifier(static_cast<IdentifierExpr&>(*lhs)),
-				args(std::move(args))
+				lhs(lhs),
+				args(args)
 		{
 		}
 
@@ -28,14 +28,19 @@ class InvokeExpr: public Expression
 			return eval.evaluate(*this);
 		}
 
-		std::string function_name()
+		ExprPtr get_lhs()
 		{
-			return identifier.get_name();
+			return lhs;
 		}
 
 		ListExpr arg_list()
 		{
 			return args;
+		}
+
+		std::ostream& info(std::ostream &str) override
+		{
+			return str << "{Invoke Expression | args = " << args.raw_list().size() << "}";
 		}
 };
 

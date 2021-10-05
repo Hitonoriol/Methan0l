@@ -1,0 +1,33 @@
+"Weak Units" :: newl
+
+/* Weak Unit definition syntax: ->{expr; expr; ...} */
+
+/* Return from weak unit causes its parent Unit to also return  */
+unit = {
+	a = 1; b = 9
+
+	strong = {		/* Strong Unit --> return will have no effect on the parent */
+		(b * 11)!
+	}
+	
+	b = strong$()
+	
+	a < b ? -> {		/* Weak Unit --> will be executed during the ternary opr evaluation and will cause the parent to return its return value */
+		(a + b)!	 
+	}
+
+	"this won't be executed"
+}
+
+/* Should return 100 if everything works properly */
+%%("Result: " :: (unit$()) :: newl)
+
+/* You can also soft-return (without returning from the parent) from a weak unit (aka break) */
+weak = -> {
+	"Soft-returning from a weak Unit"
+	break!
+}
+
+weak
+
+"^^^ Still alive! ^^^"

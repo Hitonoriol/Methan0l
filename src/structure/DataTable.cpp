@@ -11,44 +11,59 @@ const std::string DataTable::NIL_IDF(Token::reserved(Word::NIL));
 DataTable::DataTable() : map(ptr(new DataMap()))
 {
 	if constexpr (DEBUG)
-		std::cout << "New data table has been alloc'd" << std::endl;
+		std::cout << "New data table: " << *this << std::endl;
 }
 
 DataTable::DataTable(const DataTable &rhs) : map(rhs.map)
 {
-	if constexpr (DEBUG)
-		std::cout << "Data table has been copied" << std::endl;
 }
 
 DataTable& DataTable::operator=(const DataTable &rhs)
 {
-	if constexpr (DEBUG)
-			std::cout << "Data table has been copy-assigned" << std::endl;
 	map = rhs.map;
 	return *this;
 }
 
-void DataTable::set(std::string id, Value &value)
+Value& DataTable::set(std::string id, Value value)
 {
-	if (!map->emplace(id, value).second)
-		map->at(id) = std::move(value);
+	auto result = map->emplace(id, value);
+	if (!result.second) {
+		Value &replaced = map->at(id);
+		replaced = std::move(value);
+		return replaced;
+	}
+
+	return result.first->second;
 }
 
 Value& DataTable::get(std::string id)
 {
 	if constexpr (DEBUG)
-		std::cout << "Accessing value \"" << id << "\"" << std::endl;
+		std::cout << "Accessing \"" << id << "\" in " << *this << std::endl;
 
 	auto val_it = map->find(id);
 	if (val_it != map->end())
 		return val_it->second;
 
+	if constexpr (DEBUG)
+		std::cout << "\t(No such identifier)" << std::endl;
+
 	return nil();
+}
+
+bool DataTable::exists(const std::string &id)
+{
+	return map->find(id) != map->end();
 }
 
 Value& DataTable::nil()
 {
 	return (*map)[NIL_IDF];
+}
+
+const DataMap& DataTable::managed_map()
+{
+	return *map;
 }
 
 void DataTable::del(std::string id)
@@ -58,6 +73,9 @@ void DataTable::del(std::string id)
 
 void DataTable::clear()
 {
+	if constexpr (DEBUG)
+		std::cout << "Clearing " << *this << std::endl;
+
 	map->clear();
 }
 
@@ -69,6 +87,11 @@ size_t DataTable::size()
 bool DataTable::empty()
 {
 	return map->empty();
+}
+
+std::ostream& operator <<(std::ostream &stream, DataTable &val)
+{
+	return stream << "{Managed map: " << static_cast<void*>(val.map.get()) << "}";
 }
 
 }
