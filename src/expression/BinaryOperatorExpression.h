@@ -30,7 +30,9 @@ class BinaryOperatorExpression: public Expression
 		void execute(ExprEvaluator &evaluator) override
 		{
 			Value val = evaluate(evaluator);
-			LiteralExpr::exec_literal(evaluator, val);
+
+			if (!Token::is_ref_opr(opr))
+				LiteralExpr::exec_literal(evaluator, val);
 		}
 
 		TokenType get_operator()

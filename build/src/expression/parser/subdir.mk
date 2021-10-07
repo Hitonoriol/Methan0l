@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/expression/parser/InfixParser.cpp 
+../src/expression/parser/InfixParser.cpp \
+../src/expression/parser/MapParser.cpp 
 
 OBJS += \
-./src/expression/parser/InfixParser.o 
+./src/expression/parser/InfixParser.o \
+./src/expression/parser/MapParser.o 
 
 CPP_DEPS += \
-./src/expression/parser/InfixParser.d 
+./src/expression/parser/InfixParser.d \
+./src/expression/parser/MapParser.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

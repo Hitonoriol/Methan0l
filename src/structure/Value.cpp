@@ -42,6 +42,11 @@ Value& Value::operator=(ValueContainer rhs)
 	return set(rhs);
 }
 
+bool Value::numeric()
+{
+	return type == Type::INTEGER || type == Type::DOUBLE;
+}
+
 bool Value::empty() const
 {
 	return std::holds_alternative<std::monostate>(value);
@@ -101,6 +106,9 @@ std::string Value::to_string()
 	case Type::STRING:
 		return as<std::string>();
 
+	case Type::CHAR:
+		return str(get<char>());
+
 	case Type::INTEGER:
 		return std::to_string(as<int>());
 
@@ -159,7 +167,7 @@ Value Value::convert(Type new_val_type)
 		return Value(to_string());
 
 	default:
-		return Value();
+		return NIL;
 	}
 }
 

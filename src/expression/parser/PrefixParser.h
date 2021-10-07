@@ -1,15 +1,12 @@
 #ifndef EXPRESSION_PARSER_PREFIXPARSER_H_
 #define EXPRESSION_PARSER_PREFIXPARSER_H_
 
-#include <memory>
-
-#include "../../Parser.h"
-#include "../../Token.h"
-#include "../Expression.h"
 #include "../../methan0l_type.h"
 
 namespace mtl
 {
+
+class Parser;
 
 class PrefixParser
 {

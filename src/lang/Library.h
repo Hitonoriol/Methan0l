@@ -1,0 +1,48 @@
+#ifndef SRC_LANG_LIBRARY_H_
+#define SRC_LANG_LIBRARY_H_
+
+#include <string>
+
+#include "../methan0l_type.h"
+
+namespace mtl
+{
+
+class ExprEvaluator;
+class Value;
+class IdentifierExpr;
+
+using Args = ExprList;
+
+class Library
+{
+	protected:
+		ExprEvaluator *eval = 0;
+
+		std::string str(Value);
+		std::string str(ExprList args, int idx = 0);
+		double dbl(Value);
+		double dbl(ExprList args, int idx = 0);
+		int num(Value);
+		int num(ExprList args, int idx = 0);
+
+		Value val(ExprPtr expr);
+		Value& ref(ExprPtr idfr);
+		Value& ref(IdentifierExpr &idfr);
+		Value arg(ExprList args, int idx = 0);
+
+		void function(std::string, InbuiltFunc);
+
+		void prefix_operator(TokenType, PrefixOpr);
+		void infix_operator(TokenType, BinaryOpr);
+		void postfix_operator(TokenType, PostfixOpr);
+
+	public:
+		Library(ExprEvaluator *eval);
+		virtual ~Library() {}
+		virtual void load() = 0;
+};
+
+} /* namespace mtl */
+
+#endif /* SRC_LANG_LIBRARY_H_ */

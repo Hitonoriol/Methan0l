@@ -64,6 +64,11 @@ enum class TokenType : uint16_t
 	DECREMENT,			// --
 	TYPE_ASSIGN,		// :=
 	KEYVAL,				// =>
+	NOT_EQUALS,			// !=
+	ADD,				// +=
+	SUB,				// -=
+	MUL,				// *=
+	DIV,				// /=
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -83,6 +88,7 @@ enum class TokenType : uint16_t
 	PERSISTENT,
 	FUNC_DEF,
 	BOX,
+	READ_LINE,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -103,7 +109,7 @@ enum class Word : uint8_t
 	T_NIL = TYPE_ID_START,
 	T_INT, T_DOUBLE, T_STRING,
 	T_BOOLEAN, T_LIST, T_UNIT,
-	T_MAP, T_FUNCTION
+	T_MAP, T_FUNCTION, T_CHAR, T_OBJECT
 };
 
 bool operator ==(const char, const TokenType&);
@@ -121,12 +127,14 @@ class Token
 				"<<", ">>", "->", "<-", "$(",
 				"@(", "==", "%%", "::", "/*",
 				"*/", ">=", "<=", "++", "--",
-				":=", "=>"
+				":=", "=>", "!=", "+=", "-=",
+				"*=", "/="
 		};
 
 		static constexpr std::string_view word_ops[] = {
 				"do", "size", "type", "delete", "exit",
-				"load", "persistent", "funcdef", "box"
+				"load", "persistent", "funcdef", "box",
+				"read_line"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
@@ -135,7 +143,8 @@ class Token
 
 				/* Type idfrs (spaces are ignored by Lexer), evaluate to (int)Type enum  */
 				"typenil", "typeint", "typedouble", "typestring", "typeboolean",
-				"typelist", "typeunit", "typemap", "typefunc"
+				"typelist", "typeunit", "typemap", "typefunc", "typechar",
+				"typeobject"
 		};
 
 		static TokenType deduce_type(std::string &tokstr);
@@ -163,6 +172,7 @@ class Token
 		static std::string_view word_op(TokenType tok);
 		static std::string_view bichar_op(TokenType tok);
 		static bool is_compatible(std::shared_ptr<Expression> expr, TokenType next);
+		static bool is_ref_opr(TokenType opr);
 
 		static const Token END_OF_EXPR;
 		static const Token EOF_TOKEN;

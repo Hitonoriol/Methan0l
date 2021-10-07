@@ -144,6 +144,12 @@ void Lexer::consume()
 	char chr = *cur_chr;
 
 	if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
+		if (!std::isdigit(*std::next(cur_chr))) {
+			push();
+			push(chr);
+			return;
+		}
+
 		save(chr);
 		toktype = TokenType::DOUBLE;
 		return;
@@ -200,6 +206,11 @@ inline bool Lexer::match_cur(TokenType tok)
 inline bool Lexer::match_prev(TokenType tok)
 {
 	return *std::prev(cur_chr) == tok;
+}
+
+inline bool Lexer::match_next(TokenType tok)
+{
+	return *std::next(cur_chr) == tok;
 }
 
 inline bool Lexer::unescaped(TokenType tok)

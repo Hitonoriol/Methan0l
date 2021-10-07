@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "structure/Function.h"
+#include "lang/Library.h"
 
 namespace mtl
 {
@@ -19,34 +20,39 @@ class UnitExpr;
 class ListExpr;
 class InvokeExpr;
 class IndexExpr;
+class Library;
 
 class ExprEvaluator
 {
 	private:
+		friend class Library;
+		friend class LibUnit;
+
+		std::vector<std::unique_ptr<Library>> libraries;
+
 		PrefixOprMap prefix_ops;
 		BinaryOprMap binary_ops;
 		PostfixOprMap postfix_ops;
+		InbuiltFuncMap inbuilt_funcs;
 
 		std::deque<Unit*> exec_stack;
 
 		void enter_scope(Unit &unit);
 		void leave_scope();
 
+		void load_library(std::unique_ptr<Library> library);
+
 		Value apply_prefix(TokenType op, ExprPtr rhs);
 		Value apply_binary(ExprPtr &lhs, TokenType op, ExprPtr &rhs);
 		Value apply_postfix(ExprPtr &lhs, TokenType op);
-
-		Value calculate(ExprPtr &l, TokenType op, ExprPtr &r);
-
-		void init_comparison_oprs();
-		void init_logical_oprs();
-		void init_arithmetic_oprs();
-		void init_io_oprs();
 
 	protected:
 		void prefix_op(TokenType tok, PrefixOpr opr);
 		void binary_op(TokenType tok, BinaryOpr opr);
 		void postfix_op(TokenType tok, PostfixOpr opr);
+
+		void inbuilt_func(std::string func_name, InbuiltFunc func);
+		Value invoke_inbuilt_func(std::string name, ExprList args);
 
 		Value eval(Expression &expr);
 		Value eval(ExprPtr expr);
@@ -54,6 +60,7 @@ class ExprEvaluator
 
 		void load_main(Unit &main);
 		void dump_stack();
+		InbuiltFuncMap& functions();
 
 	public:
 		ExprEvaluator();
@@ -86,74 +93,6 @@ class ExprEvaluator
 		Value evaluate(Expression &expr);
 		void stop();
 		bool force_quit();
-
-		inline int unary_diff(TokenType op)
-		{
-			return op == TokenType::INCREMENT ? 1 : -1;
-		}
-
-		void apply_unary(Value &val, TokenType op);
-
-		bool eval_logical(bool l, TokenType op, bool r)
-		{
-			switch (op) {
-			case TokenType::PIPE:
-				return l || r;
-
-			case TokenType::AND:
-				return l && r;
-
-			default:
-				return false;
-			}
-		}
-
-		bool eval_logic_arithmetic(double l, TokenType op, double r)
-		{
-			switch (op) {
-			case TokenType::GREATER:
-				return l > r;
-
-			case TokenType::LESS:
-				return l < r;
-
-			case TokenType::GREATER_OR_EQ:
-				return l >= r;
-
-			case TokenType::LESS_OR_EQ:
-				return l <= r;
-
-			default:
-				return false;
-			}
-		}
-
-		template<typename T>
-		T calculate(T l, TokenType op, T r)
-		{
-			switch (op) {
-			case TokenType::PLUS:
-				return l + r;
-
-			case TokenType::MINUS:
-				return l - r;
-
-			case TokenType::ASTERISK:
-				return l * r;
-
-			case TokenType::SLASH:
-				return l / r;
-
-			case TokenType::PERCENT:
-				return (int) l % (int) r;
-
-			case TokenType::POWER:
-				return pow(l, r);
-
-			default:
-				return 0;
-			}
-		}
 };
 
 } /* namespace mtl */

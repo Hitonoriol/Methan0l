@@ -1,0 +1,16 @@
+"Pseudo-method invocation syntax" :: newl
+
+/* Performs transformation:
+ * 	value.func$(arg1, arg2, ...) => func$(value, arg1, arg2, ...)
+ */
+
+qt = func def @(str) {
+	("\"" :: str :: "\"")!
+}
+
+str = "the quick brown fox jumps over the lazy dog"
+%%(str.qt$() :: newl)
+%%("Substring: " :: str.substr$(4, 11).qt$() :: newl) /* Nested pseudo-method call */
+
+/* Works on literals too */
+%%("sqrt of 1337: " :: 1337.sqrt$() :: newl)

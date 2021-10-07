@@ -4,3 +4,4 @@
 .settings
 build/methan0l.exe
 *.o
+/build/

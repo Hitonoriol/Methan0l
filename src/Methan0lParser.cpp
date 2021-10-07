@@ -69,6 +69,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_infix_opr(TokenType::LESS, Precedence::MULTIPLICATION);
 	register_infix_opr(TokenType::LESS_OR_EQ, Precedence::MULTIPLICATION);
 	register_infix_opr(TokenType::EQUALS, Precedence::MULTIPLICATION);
+	register_infix_opr(TokenType::NOT_EQUALS, Precedence::MULTIPLICATION);
 
 	/* Binary Arithmetic oprs */
 	register_infix_opr(TokenType::PLUS, Precedence::SUM);
@@ -77,6 +78,12 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_infix_opr(TokenType::PERCENT, Precedence::MULTIPLICATION);
 	register_infix_opr(TokenType::SLASH, Precedence::MULTIPLICATION);
 	register_infix_opr(TokenType::POWER, Precedence::EXPONENT, BinOprType::RIGHT_ASSOC);
+
+	/* +=, -=, /=, *= */
+	register_infix_opr(TokenType::ADD, Precedence::ASSIGNMENT);
+	register_infix_opr(TokenType::SUB, Precedence::ASSIGNMENT);
+	register_infix_opr(TokenType::MUL, Precedence::ASSIGNMENT);
+	register_infix_opr(TokenType::DIV, Precedence::ASSIGNMENT);
 
 	/* Unary Arithmetic oprs */
 	register_prefix_opr(TokenType::MINUS);								// unary -
@@ -93,6 +100,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_prefix_opr(TokenType::EXIT);
 	register_prefix_opr(TokenType::LOAD);
 	register_prefix_opr(TokenType::PERSISTENT);
+	register_prefix_opr(TokenType::READ_LINE);
 	register_infix_opr(TokenType::DOT, Precedence::EXPONENT);
 
 }

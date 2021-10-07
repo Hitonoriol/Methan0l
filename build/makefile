@@ -9,6 +9,7 @@ RM := del
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include src/structure/subdir.mk
+-include src/lang/subdir.mk
 -include src/expression/parser/subdir.mk
 -include src/expression/subdir.mk
 -include src/subdir.mk

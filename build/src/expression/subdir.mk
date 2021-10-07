@@ -5,14 +5,17 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/expression/Expression.cpp \
+../src/expression/IndexExpr.cpp \
 ../src/expression/LoopExpr.cpp 
 
 OBJS += \
 ./src/expression/Expression.o \
+./src/expression/IndexExpr.o \
 ./src/expression/LoopExpr.o 
 
 CPP_DEPS += \
 ./src/expression/Expression.d \
+./src/expression/IndexExpr.d \
 ./src/expression/LoopExpr.d 
 
 

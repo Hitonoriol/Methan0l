@@ -53,6 +53,11 @@ class LiteralExpr: public Expression
 			return Value(value);
 		}
 
+		ValueContainer raw_value()
+		{
+			return value;
+		}
+
 		void execute(ExprEvaluator &evaluator) override
 		{
 			Value evald = evaluate(evaluator);

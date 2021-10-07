@@ -26,5 +26,6 @@ SUBDIRS := \
 src \
 src/expression \
 src/expression/parser \
+src/lang \
 src/structure \
 

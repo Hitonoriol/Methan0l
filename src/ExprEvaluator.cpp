@@ -1,6 +1,7 @@
 #include "ExprEvaluator.h"
 
 #include <iostream>
+#include <memory>
 
 #include "expression/AssignExpr.h"
 #include "expression/ConditionalExpr.h"
@@ -14,211 +15,42 @@
 #include "expression/IndexExpr.h"
 #include "util.h"
 
+#include "lang/LibIO.h"
+#include "lang/LibArithmetic.h"
+#include "lang/LibLogical.h"
+#include "lang/LibMath.h"
+#include "lang/LibString.h"
+#include "lang/LibUnit.h"
+#include "lang/LibData.h"
+
 namespace mtl
 {
 
 ExprEvaluator::ExprEvaluator()
 {
-	init_io_oprs();
-	init_arithmetic_oprs();
-	init_logical_oprs();
-	init_comparison_oprs();
-
-	/* Inline concatenation */
-	binary_op(TokenType::INLINE_CONCAT, [this](auto lhs, auto rhs) {
-		auto lexpr = eval(lhs), rexpr = eval(rhs);
-		return Value(lexpr.to_string() + rexpr.to_string());
-	});
-
-	/* Return operator */
-	postfix_op(TokenType::EXCLAMATION, [this](
-			auto lhs) {
-				Unit *unit = current_unit();
-
-				if (instanceof<IdentifierExpr>(lhs.get()) && IdentifierExpr::get_name(lhs) == Token::reserved(Word::BREAK))
-				unit->stop();
-				else
-				unit->save_return(eval(lhs));
-
-				return unit->result();
-			});
-
-	/* Typeid operator */
-	prefix_op(TokenType::TYPE, [this](auto rhs) {
-		return Value(static_cast<int>(eval(rhs).type));
-	});
-
-	/* Size operator */
-	prefix_op(TokenType::SIZE, [this](auto rhs) {
-		Value val = eval(rhs);
-		int size = 0;
-
-		switch(val.type) {
-			case Type::STRING:
-			size = val.get<std::string>().size();
-			break;
-
-			case Type::LIST:
-			size = val.get<ValList>().size();
-			break;
-
-			default:
-			break;
-		}
-
-		return Value(size);
-	});
-
-	prefix_op(TokenType::DELETE, [this](auto rhs) {
-		scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
-		return NIL;
-	});
-
-	prefix_op(TokenType::EXIT, [this](auto rhs) {
-		stop();
-		return NO_VALUE;
-	});
-
-	prefix_op(TokenType::PERSISTENT, [this](auto rhs) {
-		Value rval = eval(rhs);
-
-		if (rval.type != Type::UNIT)
-		throw std::runtime_error("Persistence can only be applied to a Unit");
-
-		rval.get<Unit>().set_persisent(true);
-		return rval;
-	});
-
-	/* Reference an idfr from a unit */
-	binary_op(TokenType::DOT, [this](auto lhs,
-			auto rhs) {
-				Value lval = eval(lhs);
-
-				if (lval.type != Type::UNIT)
-					throw std::runtime_error("LHS of dot operator must evaluate to Unit");
-
-				Unit &unit = lval.get<Unit>();
-				enter_scope(unit);
-				Value result = eval(rhs);
-				leave_scope();
-				return result;
-			});
+	load_library(std::make_unique<LibArithmetic>(this));
+	load_library(std::make_unique<LibLogical>(this));
+	load_library(std::make_unique<LibUnit>(this));
+	load_library(std::make_unique<LibIO>(this));
+	load_library(std::make_unique<LibString>(this));
+	load_library(std::make_unique<LibMath>(this));
+	load_library(std::make_unique<LibData>(this));
 }
 
-void ExprEvaluator::init_comparison_oprs()
+void ExprEvaluator::load_library(std::unique_ptr<Library> library)
 {
-	/* Logic-arithmetic operators: >, <, >=, <= */
-	TokenType log_ar_ops[] = {
-			TokenType::GREATER, TokenType::GREATER_OR_EQ,
-			TokenType::LESS, TokenType::LESS_OR_EQ
-	};
-	for (size_t i = 0; i < std::size(log_ar_ops); ++i)
-		binary_op(log_ar_ops[i], [=](auto lhs,
-				auto rhs) {
-					Value lval = eval(lhs), rval = eval(rhs);
-					return Value(eval_logic_arithmetic(lval.as<double>(), log_ar_ops[i], rval.as<double>()));
-				});
-
-	binary_op(TokenType::EQUALS, [this](auto lhs, auto rhs) {
-		return Value(eval(lhs) == eval(rhs));
-	});
-}
-
-void ExprEvaluator::init_logical_oprs()
-{
-	/* Logical operators: BOOL (op) BOOL */
-	TokenType log_ops[] = {
-			TokenType::AND, TokenType::PIPE
-	};
-	for (size_t i = 0; i < std::size(log_ops); ++i)
-		binary_op(log_ops[i], [=](auto lhs, auto rhs) {
-			Value lexpr = eval(lhs), rexpr = eval(rhs);
-			return Value(eval_logical(lexpr.as<bool>(), log_ops[i], rexpr.as<bool>()));
-		});
-
-	/* Logical NOT operator */
-	prefix_op(TokenType::EXCLAMATION, [this](auto rhs) {
-		Value rval = eval(rhs);
-		return Value(!rval.as<bool>());
-	});
-}
-
-void ExprEvaluator::init_arithmetic_oprs()
-{
-	/* Arithmetic operators w\ implicit conversions INTEGER <--> DOUBLE */
-	TokenType ar_ops[] = {
-			TokenType::PLUS, TokenType::MINUS,
-			TokenType::ASTERISK, TokenType::SLASH,
-			TokenType::PERCENT, TokenType::POWER
-	};
-	for (size_t i = 0; i < std::size(ar_ops); ++i)
-		binary_op(ar_ops[i], [=](auto lhs, auto rhs) {
-			return calculate(lhs, ar_ops[i], rhs);
-		});
-
-	prefix_op(TokenType::MINUS, [this](auto rhs) {
-		Value rval = eval(rhs);
-
-		if (rval.type == Type::INTEGER)
-		rval.value = -rval.as<int>();
-		else
-		rval.value = -rval.as<double>();
-
-		return rval;
-	});
-
-	/* Prefix & Postfix increment / decrement */
-	TokenType unary_ar_ops[] = { TokenType::INCREMENT, TokenType::DECREMENT };
-	for (size_t i = 0; i < std::size(unary_ar_ops); ++i) {
-		prefix_op(unary_ar_ops[i], [=](auto rhs) {
-			Value &val = referenced_value(rhs);
-			apply_unary(val, unary_ar_ops[i]);
-			return val;
-		});
-
-		postfix_op(unary_ar_ops[i], [=](auto lhs) {
-			Value &val = referenced_value(lhs);
-			Value tmp(val);
-			apply_unary(val, unary_ar_ops[i]);
-			return tmp;
-		});
-	}
-}
-
-void ExprEvaluator::init_io_oprs()
-{
-	/* Output Operator */
-	prefix_op(TokenType::OUT, [this](auto expr) {
-		Value rhs = eval(expr);
-		std::cout << rhs.to_string();
-		return rhs;
-	});
-
-	/* Input Operator */
-	prefix_op(TokenType::INPUT, [this](auto idfr) {
-		IdentifierExpr &idf = try_cast<IdentifierExpr>(idfr);
-		std::string input;
-		std::cin >> input;
-		Value val = Value::from_string(input);
-		idf.create_if_nil(*this);
-		get(idf) = val;
-		return val;
-	});
-}
-
-Value ExprEvaluator::calculate(ExprPtr &l, TokenType op, ExprPtr &r)
-{
-	Value lexpr = eval(l), rexpr = eval(r);
-
-	if (Value::is_double_op(lexpr, rexpr))
-		return Value(calculate(lexpr.as<double>(), op, rexpr.as<double>()));
-
-	return Value(calculate(lexpr.as<int>(), op, rexpr.as<int>()));
+	library->load();
+	libraries.push_back(std::move(library));
 }
 
 ExprEvaluator::ExprEvaluator(Unit &main) : ExprEvaluator()
 {
 	load_main(main);
+}
+
+void ExprEvaluator::inbuilt_func(std::string func_name, InbuiltFunc func)
+{
+	inbuilt_funcs.emplace(func_name, func);
 }
 
 void ExprEvaluator::prefix_op(TokenType tok, PrefixOpr opr)
@@ -367,7 +199,7 @@ Unit* ExprEvaluator::current_unit()
 DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 {
 	if constexpr (DEBUG)
-		std::cout << "Scope lookup for \"" << id << "\"" << std::endl;
+		std::cout << " Scope lookup for \"" << id << "\"" << std::endl;
 
 	if (global && exec_stack.size() < 2)
 		global = false;
@@ -447,8 +279,7 @@ Value ExprEvaluator::evaluate(AssignExpr &expr)
 {
 	IdentifierExpr &lhs = try_cast<IdentifierExpr>(expr.get_lhs());
 	Value rhs = eval(expr.get_rhs());
-	lhs.create_if_nil(*this);
-	get(lhs) = rhs;
+	lhs.assign(*this, rhs);
 	return rhs;
 }
 
@@ -496,30 +327,32 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 {
 	Value callable = eval(expr.get_lhs());
 
+	if constexpr (DEBUG)
+		std::cout << "Invoking a callable..." << std::endl;
+
 	if (callable.type == Type::UNIT)
 		return invoke_unit(expr, callable.get<Unit>());
 
 	else if (callable.type == Type::FUNCTION)
 		return invoke(callable.get<Function>(), expr.arg_list().raw_list());
 
+	else if (instanceof<IdentifierExpr>(expr.get_lhs().get()) && callable.empty()) {
+		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list().raw_list());
+	}
+
 	return NIL;
 }
 
-void ExprEvaluator::apply_unary(Value &val, TokenType op)
+Value ExprEvaluator::invoke_inbuilt_func(std::string name, ExprList args)
 {
-	const int d = unary_diff(op);
-	switch (val.type) {
-	case Type::INTEGER:
-		val.value = val.as<int>() + d;
-		break;
+	auto entry = inbuilt_funcs.find(name);
+	if (entry == inbuilt_funcs.end())
+		return NO_VALUE;
 
-	case Type::DOUBLE:
-		val.value = val.as<double>() + d;
-		break;
+	if constexpr (DEBUG)
+		std::cout << "* Invoking inbuilt function \"" << name << "\"" << std::endl;
 
-	default:
-		break;
-	}
+	return entry->second(args);
 }
 
 /* Default evaluation */
@@ -538,6 +371,11 @@ void ExprEvaluator::stop()
 bool ExprEvaluator::force_quit()
 {
 	return exec_stack.empty();
+}
+
+InbuiltFuncMap& ExprEvaluator::functions()
+{
+	return inbuilt_funcs;
 }
 
 void ExprEvaluator::dump_stack()

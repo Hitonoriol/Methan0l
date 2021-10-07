@@ -100,6 +100,10 @@ Value Interpreter::run()
 void Interpreter::print_info()
 {
 	dump_stack();
+	std::cout << "Available inbuilt functions:" << std::endl;
+	for (auto func : functions())
+		std::cout << "* " << func.first << '\n';
+	std::cout << std::endl;
 }
 
 } /* namespace mtl */

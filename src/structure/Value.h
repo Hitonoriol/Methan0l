@@ -20,7 +20,7 @@ std::variant<
 std::monostate,
 
 /* Primitives */
-int, double, std::string, bool,
+int, double, std::string, bool, char,
 
 /* Data Structures */
 ValList, ValMap,
@@ -32,7 +32,10 @@ Unit, Function
 enum class Type : uint8_t
 {
 	NIL, INTEGER, DOUBLE, STRING, BOOLEAN,
-	LIST, UNIT, MAP, FUNCTION
+	LIST, UNIT, MAP, FUNCTION, CHAR,
+	OBJECT,
+
+	END
 };
 
 struct Value
@@ -50,8 +53,9 @@ struct Value
 		Value& set(Value &value);
 
 		void deduce_type();
-		static bool is_double_op(Value &lhs, Value &rhs);
 		std::string to_string();
+
+		bool numeric();
 
 		bool empty() const;
 		bool nil() const;
@@ -59,6 +63,7 @@ struct Value
 		void clear();
 		static void clear(ValueContainer &pure_val);
 
+		static bool is_double_op(Value &lhs, Value &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Value &val);
 		friend bool operator ==(const Value &lhs, const Value &rhs);
 		bool operator !=(const Value &rhs);
@@ -76,49 +81,72 @@ struct Value
 			return std::get<T>(value);
 		}
 
-		/* A little bit clusterf-d getter with all possible type conversions */
+		/* Get current value by copy or convert to the specified type */
 		template<typename T> T as()
 		{
 			if (std::holds_alternative<T>(value))
 				return get<T>();
 
+			if constexpr (std::is_same<T, std::string>::value)
+				return to_string();
+
+			/* <This Type> to Char */
+			if constexpr (std::is_same<T, char>::value) {
+				switch (type) {
+				case Type::STRING:
+					return get<std::string>().front();
+
+				default:
+					break;
+				}
+			}
+
+			/* <This Type> to Double */
 			if constexpr (std::is_same<T, double>::value)
 				switch (type) {
-				default:
-					break;
+				case Type::STRING:
+					return std::stod(get<std::string>());
 
 				case Type::INTEGER:
-					return (double) as<int>();
+					return (double) get<int>();
 
 				case Type::BOOLEAN:
-					return as<bool>() ? 1.0 : 0.0;
+					return get<bool>() ? 1.0 : 0.0;
+
+				default:
+					break;
 				}
 
+			/* <This Type> to Integer */
 			if constexpr (std::is_same<T, int>::value)
 				switch (type) {
-				default:
-					break;
-
-				case Type::LIST:
-					return as<ValList>().size();
-
 				case Type::DOUBLE:
-					return (int) as<double>();
+					return (int) get<double>();
+
+				case Type::STRING:
+					return std::stoi(get<std::string>());
 
 				case Type::BOOLEAN:
-					return as<bool>() ? 1 : 0;
-				}
+					return get<bool>() ? 1 : 0;
 
-			if constexpr (std::is_same<T, bool>::value)
-				switch (type) {
 				default:
 					break;
+				}
 
+			/* <This Type> to Boolean */
+			if constexpr (std::is_same<T, bool>::value)
+				switch (type) {
 				case Type::INTEGER:
-					return as<int>() == 1;
+					return get<int>() == 1;
+
+				case Type::STRING:
+					return get<std::string>() == Token::reserved(Word::TRUE);
 
 				case Type::DOUBLE:
-					return as<double>() == 1.0;
+					return get<double>() == 1.0;
+
+				default:
+					break;
 				}
 
 			T def_value { };

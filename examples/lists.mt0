@@ -39,3 +39,9 @@ ret = list_populator$({i = 0; max = 10; new_list = $()})
 
 /* size operator */
 %%("List size: " :: size(ret) :: newl)
+newl
+
+/* Foreach loop */
+do $(val, ret) -> {
+	"* " :: val
+}

@@ -15,7 +15,7 @@
 namespace mtl
 {
 
-constexpr bool DEBUG = false;
+constexpr bool DEBUG = true;
 
 struct Value;
 class Expression;
@@ -47,7 +47,8 @@ using PrefixOprMap = std::unordered_map<TokenType, PrefixOpr>;
 using BinaryOprMap = std::unordered_map<TokenType, BinaryOpr>;
 using PostfixOprMap = std::unordered_map<TokenType, PostfixOpr>;
 
-using InbuiltFunc = std::function<Value(ValList)>;
+using InbuiltFunc = std::function<Value(ExprList)>;
+using InbuiltFuncMap = std::unordered_map<std::string, InbuiltFunc>;
 
 }
 

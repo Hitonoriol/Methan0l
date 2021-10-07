@@ -33,7 +33,7 @@ class InvokeExpr: public Expression
 			return lhs;
 		}
 
-		ListExpr arg_list()
+		ListExpr &arg_list()
 		{
 			return args;
 		}

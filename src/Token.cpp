@@ -147,6 +147,20 @@ std::string_view Token::bichar_op(TokenType tok)
 	return bichar_ops[static_cast<int>(tok) - BICHAR_OP_START];
 }
 
+bool Token::is_ref_opr(TokenType opr)
+{
+	switch (opr) {
+	case TokenType::DIV:
+	case TokenType::MUL:
+	case TokenType::SUB:
+	case TokenType::ADD:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
 bool Token::is_compatible(ExprPtr expr, TokenType next)
 {
 	switch (next) {

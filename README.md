@@ -1,5 +1,6 @@
 
 
+
 # Methan0l
 
 ## How to use
@@ -37,16 +38,22 @@ Every parentless expression is **executed** by the interpreter while expressions
 ## Value Types
 
 **Primitives**:
+
 * Integer
 * Double
 * Boolean
 * String
+* Char
 
 **Data Structures**:
+
 * List
+* Map
 
 **Callables**:
+
 * Unit
+* Function
 
 ## Syntax
 
@@ -77,8 +84,11 @@ Operator exprs can be grouped using `(` `)`.
 
 If at least one operand of the expr is Double, the result is also Double (except for the case of `%` -- if applied on a Double value, it's first converted to Integer, then the `%` is applied, then the result is converted to Double). Otherwise Integer arithmetic is performed.  
 
-Binary: `+`, `-`, `*`, `/`, `%`, `^`  
-Unary: `++`, `--`, `-`  
+Binary:  
+`+`, `-`, `*`, `/`, `%`, `^`, `+=`, `-=`, `*=`, `/=`  
+\
+Unary:  
+`++`, `--`, `-`  
 
 #### String
 
@@ -87,14 +97,17 @@ Example: `result = "One " :: 2 :: " " :: 3.0`.
 
 #### Comparison
 
-`==`, `>`, `>=`, `<`, `<=`  
+`==`, `!=`, `>`, `>=`, `<`, `<=`  
 
 Equals operator `==` works for every type (including Units -- in their case expression lists are compared), while all others are implemented only for numeric types.  
 
 #### Logical
 
-Binary: `&`, `|`  
-Unary: `!`  
+Binary:  
+`&`, `|`  
+\
+Unary:  
+`!`  
 
 #### Ternary
 
@@ -144,12 +157,26 @@ Stops the execution of **Unit** and returns the result of the provided expr eval
 #### Data structure operators
 
 `delete(idfr)` -- delete idfr & the value associated with it  
+
 `size(expr)` -- get size of **string** / **list**  
-`type(expr)` -- get **typeid** of an evaluated expr. Can be compared to one of type literals: `type int`, `type double`, `type boolean`, `type string`, `type unit`, `type list`, `type function`, `type map`, `type nil`.  
+
+`type(expr)` -- get **typeid** of an evaluated expr.  
+Can be compared to one of type literals: `type int`, `type double`, `type boolean`, `type string`, `type unit`, `type list`, `type func`, `type map`, `type char`, `type nil`.  
+
 Example:  
 
 ```
 %%(type("foo") == type string) /* Prints "true" */
+```
+
+#### Data structure functions
+
+`convert$(expr, typeid)` -- get a copy of evaluated expr converted to specified type, example:  
+
+```
+bool = convert$("true", type boolean)
+str = convert$(1337, type string)
+dbl = convert$("-1.234", type double)
 ```
 
 #### Unit operators
@@ -172,6 +199,8 @@ Example:
 ### Input / Output
 
 **Input** operator: `>>idfr` -- get a value from stdin, deduce its type and assign it to the specified identifier in the nearest local scope.  
+
+**String input** operator: `read_line()` -- read string from stdin and return it. Usage: `foo = read_line()`.
 
 **Output** operator: `%%expr` -- evaluate the expression, convert it to string and print it out to the stdout.  
 
@@ -203,6 +232,19 @@ or using the **invocation syntax**:
 
 result = unit$() /* <-- unit's return will be captured, if exists */
 
+```
+
+### Pseudo-function invocation
+
+**Units** can also be invoked with a single argument that's also **Unit** (**Init Block**). **Init block** will be executed before the **Unit** being invoked and the  resulting **Data Table** (which stores all identifiers local to the **Unit**) will be shared between them. This syntax can be used to "inject" identifiers into a **Unit** when calling it, for example:  
+
+```
+ratio = {
+	b == 0 ? -> {"inf"!}
+	((a / b) * 100.0)!
+}
+
+"a is " :: ratio$({a = 9.125; b = 13}) :: "% of b" :: newl
 ```
 
 ### Weak Units
@@ -310,17 +352,46 @@ expr2
 expr3
 }
 ```  
+\
+Can be called using **invocation syntax**:  
 
-Can be called using **invocation syntax**: `result = foo$(expr1, expr2, ...)`  
+```
+result = foo$(expr1, expr2, ...)
+```
+
+\
+Functions can also be called by using **pseudo-method** syntax:  
+```
+value.func$(arg1, arg2, ...)
+```
+\
+The expression above is converted to `func$(value, arg1, arg2, ...)` under the hood and can be applied even to literals, for example:  
+
+```
+42.sqrt$()
+"foo bar".find$("bar")
+```
 
 ### Lists
 
-Definition syntax: `list = $(expr, expr, expr, ...)`  
+Definition:  
+`list = $(expr, expr, expr, ...)`  
+
 Append a new element: `list[] = "New element"`  
 Access an element: `list[expr]`  
 Remove element: `list[~expr]`  
+Get size: `size(list)`
 
-### Maps (wip)
+### Maps
 
-Currently can only be used as part of function definition.  
-Definition syntax: `map = @(key1 => val_expr1, key2 => val_expr2, ...)`  
+Definition:  
+`map = @(key1 => val_expr1, key2 => val_expr2, ...)`  
+
+Keys in map definition can be specified either with or without quotes: unquoted keys won't be evaluated as identifiers. If you want to use spaces / special characters in a key, you must declare it as a string literal.  
+
+Access existing / Add new element: `map["key"]`  
+When using `[]` operator, expressions inside it are evaluated and converted to string, so string literals must be used to access string keys, even if defined without quotes.  
+
+Remove element: `map[~"key"]`  
+
+Get size: `size(map)`

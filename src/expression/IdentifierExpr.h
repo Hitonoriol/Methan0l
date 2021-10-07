@@ -36,6 +36,12 @@ class IdentifierExpr: public Expression
 			return eval.get(name, global);
 		}
 
+		virtual void assign(ExprEvaluator &eval, Value val)
+		{
+			create_if_nil(eval);
+			referenced_value(eval) = val;
+		}
+
 		virtual void create_if_nil(ExprEvaluator &eval)
 		{
 			DataTable *scope = eval.scope_lookup(name, global);
