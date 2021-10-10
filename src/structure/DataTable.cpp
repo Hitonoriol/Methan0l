@@ -1,14 +1,20 @@
 #include "DataTable.h"
 
+#include <crtdefs.h>
+#include <algorithm>
+#include <iostream>
+#include <memory>
+#include <utility>
+
+#include "../Token.h"
 #include "Value.h"
-#include "../methan0l_type.h"
 
 namespace mtl
 {
 
 const std::string DataTable::NIL_IDF(Token::reserved(Word::NIL));
 
-DataTable::DataTable() : map(ptr(new DataMap()))
+DataTable::DataTable() : map(std::make_shared<DataMap>())
 {
 	if constexpr (DEBUG)
 		std::cout << "New data table: " << *this << std::endl;
@@ -24,7 +30,7 @@ DataTable& DataTable::operator=(const DataTable &rhs)
 	return *this;
 }
 
-Value& DataTable::set(std::string id, Value value)
+Value& DataTable::set(const std::string &id, Value value)
 {
 	auto result = map->emplace(id, value);
 	if (!result.second) {
@@ -36,7 +42,12 @@ Value& DataTable::set(std::string id, Value value)
 	return result.first->second;
 }
 
-Value& DataTable::get(std::string id)
+Value& DataTable::get_or_create(const std::string &id)
+{
+	return (*map)[id];
+}
+
+Value& DataTable::get(const std::string &id)
 {
 	if constexpr (DEBUG)
 		std::cout << "Accessing \"" << id << "\" in " << *this << std::endl;
@@ -61,7 +72,12 @@ Value& DataTable::nil()
 	return (*map)[NIL_IDF];
 }
 
-const DataMap& DataTable::managed_map()
+void DataTable::copy_managed_map()
+{
+	map = std::make_shared<DataMap>(*map);
+}
+
+const DataMap& DataTable::managed_map() const
 {
 	return *map;
 }

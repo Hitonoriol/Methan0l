@@ -1,7 +1,7 @@
 #ifndef SRC_STRUCTURE_UNIT_H_
 #define SRC_STRUCTURE_UNIT_H_
 
-#include "../methan0l_type.h"
+#include "../type.h"
 #include "DataTable.h"
 
 namespace mtl

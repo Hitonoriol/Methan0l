@@ -10,7 +10,8 @@ CPP_SRCS += \
 ../src/Methan0l.cpp \
 ../src/Methan0lParser.cpp \
 ../src/Parser.cpp \
-../src/Token.cpp 
+../src/Token.cpp \
+../src/type.cpp 
 
 OBJS += \
 ./src/ExprEvaluator.o \
@@ -19,7 +20,8 @@ OBJS += \
 ./src/Methan0l.o \
 ./src/Methan0lParser.o \
 ./src/Parser.o \
-./src/Token.o 
+./src/Token.o \
+./src/type.o 
 
 CPP_DEPS += \
 ./src/ExprEvaluator.d \
@@ -28,7 +30,8 @@ CPP_DEPS += \
 ./src/Methan0l.d \
 ./src/Methan0lParser.d \
 ./src/Parser.d \
-./src/Token.d 
+./src/Token.d \
+./src/type.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

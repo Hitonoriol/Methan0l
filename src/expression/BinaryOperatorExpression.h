@@ -31,7 +31,7 @@ class BinaryOperatorExpression: public Expression
 		{
 			Value val = evaluate(evaluator);
 
-			if (!Token::is_ref_opr(opr))
+			if (!Token::is_ref_opr(opr) && opr != TokenType::DOT)
 				LiteralExpr::exec_literal(evaluator, val);
 		}
 

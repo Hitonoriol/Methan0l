@@ -1,9 +1,12 @@
 #include "LibArithmetic.h"
 
+#include <crtdefs.h>
+#include <iterator>
 #include <variant>
 
-#include "../structure/Value.h"
-#include "../Token.h"
+#include "../../structure/Value.h"
+#include "../../type.h"
+#include "../../Token.h"
 
 namespace mtl
 {
@@ -14,9 +17,9 @@ void LibArithmetic::load()
 	TokenType ar_ops[] = {
 			TokenType::PLUS, TokenType::MINUS,
 			TokenType::ASTERISK, TokenType::SLASH,
-			TokenType::PERCENT, TokenType::POWER,
-			TokenType::ADD, TokenType::SUB,
-			TokenType::MUL, TokenType::DIV
+			TokenType::PERCENT, TokenType::ADD,
+			TokenType::SUB, TokenType::MUL,
+			TokenType::DIV
 	};
 	for (size_t i = 0; i < std::size(ar_ops); ++i)
 		infix_operator(ar_ops[i], [=](auto lhs, auto rhs) {
@@ -32,9 +35,9 @@ void LibArithmetic::load()
 		Value rval = val(rhs);
 
 		if (rval.type == Type::INTEGER)
-		rval.value = -rval.as<int>();
+			rval.value = -rval.as<int>();
 		else
-		rval.value = -rval.as<double>();
+			rval.value = -rval.as<double>();
 
 		return rval;
 	});

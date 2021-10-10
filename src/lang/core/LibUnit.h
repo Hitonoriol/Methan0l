@@ -1,7 +1,8 @@
 #ifndef SRC_LANG_LIBUNIT_H_
 #define SRC_LANG_LIBUNIT_H_
 
-#include "Library.h"
+#include "../../type.h"
+#include "../Library.h"
 
 namespace mtl
 {
@@ -13,7 +14,8 @@ class LibUnit: public Library
 		void load() override;
 
 	private:
-		Value invoke_method(ExprPtr obj, ExprPtr func);
+		Value object_dot_operator(Object &obj, ExprPtr rhs);
+		Value invoke_pseudo_method(ExprPtr obj, ExprPtr func);
 };
 
 } /* namespace mtl */

@@ -43,16 +43,16 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_parser(TokenType::BRACKET_L, new IndexParser());	// list[expr] or list[]
 	register_parser(TokenType::DO, new LoopParser());	// do $(i = 0, i < n, ++i) -> {}
 	register_parser(TokenType::FUNC_DEF, new FunctionParser());	// func def @(arg1, arg2: def_val, ...) {expr1, expr2, ...}
-	register_parser(TokenType::BOX, new BoxUnitParser());	// box_unit = box {expr1, expr2, ...}
+	register_parser(TokenType::BOX, new BoxUnitParser());// box_unit = box {expr1, expr2, ...}
 
 	/* Map definition */
 	register_parser(TokenType::MAP_DEF_L, new MapParser());
 	register_infix_opr(TokenType::KEYVAL, Precedence::SUM);
 
 	/* IO / String oprs */
-	register_prefix_opr(TokenType::CONCAT);								// <<$(a, b, c)
+	register_prefix_opr(TokenType::SHIFT_L);								// <<$(a, b, c)
 	register_prefix_opr(TokenType::OUT);								// %%foo
-	register_prefix_opr(TokenType::INPUT);								// >>foo
+	register_prefix_opr(TokenType::SHIFT_R);								// >>foo
 	register_infix_opr(TokenType::INLINE_CONCAT, Precedence::SUM);// expr1 :: expr2 :: expr3
 
 	/* Return opr */
@@ -60,8 +60,15 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 	/* Logical oprs */
 	register_prefix_opr(TokenType::EXCLAMATION);
+	register_infix_opr(TokenType::BIT_AND, Precedence::MULTIPLICATION);
+	register_infix_opr(TokenType::BIT_OR, Precedence::SUM);
+	register_infix_opr(TokenType::BIT_XOR, Precedence::EXPONENT, BinOprType::RIGHT_ASSOC);
 	register_infix_opr(TokenType::AND, Precedence::MULTIPLICATION);
-	register_infix_opr(TokenType::PIPE, Precedence::SUM);
+	register_infix_opr(TokenType::OR, Precedence::SUM);
+	register_infix_opr(TokenType::XOR, Precedence::SUM);
+	register_infix_opr(TokenType::SHIFT_L, Precedence::SUM);
+	register_infix_opr(TokenType::SHIFT_R, Precedence::SUM);
+	register_prefix_opr(TokenType::TILDE);
 
 	/* Comparison oprs */
 	register_infix_opr(TokenType::GREATER, Precedence::MULTIPLICATION);
@@ -77,7 +84,6 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_infix_opr(TokenType::ASTERISK, Precedence::MULTIPLICATION);
 	register_infix_opr(TokenType::PERCENT, Precedence::MULTIPLICATION);
 	register_infix_opr(TokenType::SLASH, Precedence::MULTIPLICATION);
-	register_infix_opr(TokenType::POWER, Precedence::EXPONENT, BinOprType::RIGHT_ASSOC);
 
 	/* +=, -=, /=, *= */
 	register_infix_opr(TokenType::ADD, Precedence::ASSIGNMENT);
@@ -93,14 +99,12 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_postfix_opr(TokenType::DECREMENT);							// x--
 
 	/* Word oprs */
-	register_prefix_opr(TokenType::SIZE);
 	register_prefix_opr(TokenType::TYPE);
 	register_prefix_opr(TokenType::DELETE);
 	register_prefix_opr(TokenType::DO);
 	register_prefix_opr(TokenType::EXIT);
 	register_prefix_opr(TokenType::LOAD);
 	register_prefix_opr(TokenType::PERSISTENT);
-	register_prefix_opr(TokenType::READ_LINE);
 	register_infix_opr(TokenType::DOT, Precedence::EXPONENT);
 
 }

@@ -35,6 +35,15 @@ class PrefixExpr: public Expression
 			return eval.evaluate(*this);
 		}
 
+		void execute(mtl::ExprEvaluator &evaluator) override
+		{
+			Value val = evaluate(evaluator);
+
+			/* Print out list concat operator result */
+			if (op == TokenType::SHIFT_L)
+				LiteralExpr::exec_literal(evaluator, val);
+		}
+
 		std::ostream& info(std::ostream &str) override
 		{
 			return str << "{Prefix Expression | opr = " << static_cast<int>(op) << "}";

@@ -8,12 +8,12 @@
 #include <stdexcept>
 #include <memory>
 
-#include "methan0l_type.h"
 #include "Token.h"
 #include "Lexer.h"
 #include "expression/Expression.h"
 #include "expression/parser/InfixParser.h"
 #include "expression/parser/PrefixParser.h"
+#include "type.h"
 
 namespace mtl
 {

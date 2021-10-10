@@ -27,5 +27,10 @@ src \
 src/expression \
 src/expression/parser \
 src/lang \
+src/lang/core \
+src/lang/lib \
+src/lang/structure \
 src/structure \
+src/structure/object \
+src/util \
 

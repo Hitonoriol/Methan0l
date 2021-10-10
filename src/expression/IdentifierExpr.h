@@ -4,7 +4,7 @@
 #include "Expression.h"
 #include "LiteralExpr.h"
 #include "../structure/Unit.h"
-#include "../util.h"
+#include "../util/util.h"
 
 namespace mtl
 {

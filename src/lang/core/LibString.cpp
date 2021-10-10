@@ -1,17 +1,34 @@
 #include "LibString.h"
 
 #include <deque>
+#include <stdexcept>
 #include <string>
 
-#include "../structure/Value.h"
-#include "../Token.h"
-#include "../util.h"
+#include "../../structure/Value.h"
+#include "../../type.h"
+#include "../../Token.h"
+#include "../../util/util.h"
 
 namespace mtl
 {
 
 void LibString::load()
 {
+	/* int_val.to_base$(base) */
+	function("to_base", [&](Args args) {
+		int base = num(args, 1);
+
+		if (base < 2)
+			throw std::runtime_error("Invalid base");
+
+		return Value(to_base((unsigned)num(args), base));
+	});
+
+	/* str.split$(delim_expr) */
+	function("split", [&](Args args) {
+		return Value(split(str(args), str(args, 1)));
+	});
+
 	/* str.insert$(pos, substr) */
 	function("insert", [&](Args args) {
 		Value &rval = ref(args[0]);
@@ -61,6 +78,18 @@ void LibString::load()
 
 void LibString::load_operators()
 {
+	/* Concat list to string */
+	prefix_operator(TokenType::SHIFT_L, [&](auto rhs) {
+		Value list_val =  val(rhs);
+		ValList &list = list_val.get<ValList>();
+		std::string str;
+
+		for (Value val : list)
+			str += val.to_string();
+
+		return Value(str);
+	});
+
 	/* Inline concatenation */
 	infix_operator(TokenType::INLINE_CONCAT, [this](auto lhs, auto rhs) {
 		auto lexpr = val(lhs), rexpr = val(rhs);

@@ -3,10 +3,10 @@
 #include <iostream>
 #include <string>
 
-#include "../expression/IdentifierExpr.h"
-#include "../ExprEvaluator.h"
-#include "../structure/Value.h"
-#include "../Token.h"
+#include "../../expression/IdentifierExpr.h"
+#include "../../ExprEvaluator.h"
+#include "../../structure/Value.h"
+#include "../../Token.h"
 
 namespace mtl
 {
@@ -21,7 +21,7 @@ void LibIO::load()
 	});
 
 	/* Input Operator with type deduction */
-	prefix_operator(TokenType::INPUT, [&](auto idfr) {
+	prefix_operator(TokenType::SHIFT_R, [&](auto idfr) {
 		IdentifierExpr &idf = try_cast<IdentifierExpr>(idfr);
 		std::string input;
 		std::cin >> input;
@@ -31,8 +31,8 @@ void LibIO::load()
 		return val;
 	});
 
-	/* String input operator: foo = read_line() */
-	prefix_operator(TokenType::READ_LINE, [&](auto rhs) {
+	/* String input function: foo = read_line$() */
+	function("read_line", [&](auto args) {
 		std::string str;
 		std::getline(std::cin, str);
 		return Value(str);

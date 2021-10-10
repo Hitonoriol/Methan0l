@@ -1,6 +1,4 @@
 
-
-
 # Methan0l
 
 ## How to use
@@ -8,7 +6,7 @@
 #### Build Methan0l
 
 `cd build && make`  
-(GCC 7+ is required)  
+(GCC 10+ is required)  
 
 #### Run Methan0l Programs
 
@@ -54,6 +52,10 @@ Every parentless expression is **executed** by the interpreter while expressions
 
 * Unit
 * Function
+
+**Custom types**:
+
+* Object
 
 ## Syntax
 
@@ -104,10 +106,18 @@ Equals operator `==` works for every type (including Units -- in their case expr
 #### Logical
 
 Binary:  
-`&`, `|`  
+`&&`, `||`, `^^`  
 \
 Unary:  
 `!`  
+  
+#### Bitwise
+
+Binary:  
+`&`, `|`, `^`  
+\
+Unary:  
+`~`  
 
 #### Ternary
 
@@ -158,8 +168,6 @@ Stops the execution of **Unit** and returns the result of the provided expr eval
 
 `delete(idfr)` -- delete idfr & the value associated with it  
 
-`size(expr)` -- get size of **string** / **list**  
-
 `type(expr)` -- get **typeid** of an evaluated expr.  
 Can be compared to one of type literals: `type int`, `type double`, `type boolean`, `type string`, `type unit`, `type list`, `type func`, `type map`, `type char`, `type nil`.  
 
@@ -171,6 +179,7 @@ Example:
 
 #### Data structure functions
 
+`expr.size$()` -- get size of **string** / **list** / **map**  
 `convert$(expr, typeid)` -- get a copy of evaluated expr converted to specified type, example:  
 
 ```
@@ -200,7 +209,7 @@ dbl = convert$("-1.234", type double)
 
 **Input** operator: `>>idfr` -- get a value from stdin, deduce its type and assign it to the specified identifier in the nearest local scope.  
 
-**String input** operator: `read_line()` -- read string from stdin and return it. Usage: `foo = read_line()`.
+**String input** function: `read_line$()` -- read string from stdin and return it. Usage: `foo = read_line$()`.
 
 **Output** operator: `%%expr` -- evaluate the expression, convert it to string and print it out to the stdout.  
 
@@ -347,9 +356,9 @@ Definition:
 
 ```
 foo = func def @(arg1, arg2, arg3 => def_value, ...) {
-expr1
-expr2
-expr3
+    expr1
+    expr2
+    expr3
 }
 ```  
 \
@@ -380,7 +389,16 @@ Definition:
 Append a new element: `list[] = "New element"`  
 Access an element: `list[expr]`  
 Remove element: `list[~expr]`  
-Get size: `size(list)`
+Get size: `size(list)`  
+Concat all elements to string: `<<list`  
+\
+Iterate over a list:  
+
+```
+do $(elem, list) -> {
+    ...
+}
+```
 
 ### Maps
 
@@ -395,3 +413,61 @@ When using `[]` operator, expressions inside it are evaluated and converted to s
 Remove element: `map[~"key"]`  
 
 Get size: `size(map)`
+
+Get key / value list: `map.list_of$(keys)` / `map.list_of$(values)`.  
+Here `keys` and `values` are reserved words, not identifiers.  
+\
+Iterate over a map:  
+
+```
+do $(key, map.list_of$(keys)) -> {
+	val = map[key]
+	...
+}
+```
+
+### Custom Types
+
+**Constructor** call syntax:  
+```
+obj = Type.new$(arg1, arg2, arg3)
+```
+\
+**Methods** or **fields** of an object can be accessed by using "dot operator" ( . ):  
+```
+foo = obj.field
+obj.some_method$(arg1, arg2, ...)
+```
+
+## Inbuilt Object Types
+
+### File
+
+**Constructor:**  
+
+```
+file = File.new$(path_str)
+```
+
+\
+**Methods:**  
+* `file.open$()` -- open file for reading / writing
+
+* `file.close$()` -- close file
+
+* `file.size$()` -- get file size in bytes
+
+* `file.absolute_path$()` -- get absolute path string
+
+* `file.is_dir$()` -- check whether this file is a directory
+
+* `file.exists$()` -- check whether the file exists or not
+
+* `file.read_line$()` -- read one line from file as **String**.
+Sets `file.eof` field to **true** if the end of file has been reached.
+
+* `file.write_line$(expr)` -- evaluate expr, convert it to string and write to file
+
+\
+**Accessible fields:**
+* `file.eof` -- **Boolean** **Value**. Set only after calling read operations. **True** if the end of file has been reached.

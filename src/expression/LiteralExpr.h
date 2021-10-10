@@ -2,7 +2,7 @@
 #define EXPRESSION_LITERALEXPR_H_
 
 #include "Expression.h"
-#include "../util.h"
+#include "../util/util.h"
 
 namespace mtl
 {
@@ -43,7 +43,7 @@ class LiteralExpr: public Expression
 		{
 		}
 
-		bool empty()
+		bool is_empty()
 		{
 			return std::holds_alternative<std::monostate>(value);
 		}
@@ -58,10 +58,20 @@ class LiteralExpr: public Expression
 			return value;
 		}
 
+		ValueContainer &raw_ref()
+		{
+			return value;
+		}
+
 		void execute(ExprEvaluator &evaluator) override
 		{
 			Value evald = evaluate(evaluator);
 			exec_literal(evaluator, evald);
+		}
+
+		static ExprPtr empty()
+		{
+			return std::make_shared<LiteralExpr>();
 		}
 
 		static void exec_literal(ExprEvaluator &evaluator, Value &val)

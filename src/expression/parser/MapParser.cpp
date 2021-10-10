@@ -7,11 +7,11 @@
 #include <unordered_map>
 #include <utility>
 
-#include "../../methan0l_type.h"
 #include "../../Parser.h"
 #include "../../structure/Value.h"
+#include "../../type.h"
 #include "../../Token.h"
-#include "../../util.h"
+#include "../../util/util.h"
 #include "../BinaryOperatorExpression.h"
 #include "../IdentifierExpr.h"
 #include "../LiteralExpr.h"
@@ -34,7 +34,7 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 			/* Key with no value specified */
 			if (instanceof<IdentifierExpr>(pair_expr.get())
 					|| instanceof<LiteralExpr>(pair_expr.get())) {
-				map.emplace(key_string(pair_expr), ptr(new LiteralExpr()));
+				map.emplace(key_string(pair_expr), LiteralExpr::empty());
 				continue;
 			}
 

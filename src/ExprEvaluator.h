@@ -6,6 +6,7 @@
 
 #include "structure/Function.h"
 #include "lang/Library.h"
+#include "structure/object/TypeManager.h"
 
 namespace mtl
 {
@@ -21,12 +22,14 @@ class ListExpr;
 class InvokeExpr;
 class IndexExpr;
 class Library;
+class TypeManager;
 
 class ExprEvaluator
 {
 	private:
 		friend class Library;
 		friend class LibUnit;
+		friend class TypeManager;
 
 		std::vector<std::unique_ptr<Library>> libraries;
 
@@ -34,6 +37,7 @@ class ExprEvaluator
 		BinaryOprMap binary_ops;
 		PostfixOprMap postfix_ops;
 		InbuiltFuncMap inbuilt_funcs;
+		TypeManager type_mgr { *this };
 
 		std::deque<Unit*> exec_stack;
 
@@ -91,6 +95,9 @@ class ExprEvaluator
 		Value evaluate(InvokeExpr &expr);
 
 		Value evaluate(Expression &expr);
+
+		TypeManager& get_type_mgr();
+
 		void stop();
 		bool force_quit();
 };

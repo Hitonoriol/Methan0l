@@ -2,6 +2,7 @@
 
 #include "../ExprEvaluator.h"
 #include "../structure/Value.h"
+#include "../type.h"
 
 namespace mtl
 {
@@ -10,34 +11,19 @@ Library::Library(ExprEvaluator *eval) : eval(eval)
 {
 }
 
-std::string Library::str(Value val)
-{
-	return val.as<std::string>();
-}
-
 std::string Library::str(ExprList args, int idx)
 {
-	return str(arg(args, idx));
-}
-
-double Library::dbl(Value val)
-{
-	return val.as<double>();
+	return mtl::str(arg(args, idx));
 }
 
 double Library::dbl(ExprList args, int idx)
 {
-	return dbl(arg(args, idx));
+	return mtl::dbl(arg(args, idx));
 }
 
 int Library::num(ExprList args, int idx)
 {
-	return num(arg(args, idx));
-}
-
-int Library::num(Value val)
-{
-	return val.as<int>();
+	return mtl::num(arg(args, idx));
 }
 
 Value Library::val(ExprPtr expr)

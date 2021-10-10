@@ -7,10 +7,9 @@
 
 #include "Lexer.h"
 #include "Methan0lParser.h"
-#include "methan0l_type.h"
-
 #include "ExprEvaluator.h"
 #include "expression/AssignExpr.h"
+#include "type.h"
 
 namespace mtl
 {

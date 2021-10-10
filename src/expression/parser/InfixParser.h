@@ -4,10 +4,10 @@
 #include <stdexcept>
 #include <memory>
 
-#include "../../util.h"
+#include "../../type.h"
+#include "../../util/util.h"
 #include "../../Token.h"
 #include "../IdentifierExpr.h"
-#include "../../methan0l_type.h"
 
 namespace mtl
 {

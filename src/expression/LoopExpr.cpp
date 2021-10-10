@@ -5,11 +5,11 @@
 #include <string>
 
 #include "../ExprEvaluator.h"
-#include "../methan0l_type.h"
 #include "../structure/DataTable.h"
 #include "../structure/Unit.h"
 #include "../structure/Value.h"
-#include "../util.h"
+#include "../type.h"
+#include "../util/util.h"
 #include "IdentifierExpr.h"
 #include "UnitExpr.h"
 

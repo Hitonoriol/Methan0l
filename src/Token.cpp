@@ -4,8 +4,8 @@
 #include <sstream>
 
 #include "expression/IdentifierExpr.h"
-#include "methan0l_type.h"
-#include "util.h"
+#include "type.h"
+#include "util/util.h"
 
 namespace mtl
 {

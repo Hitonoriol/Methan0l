@@ -15,9 +15,11 @@ class ExprEvaluator;
 class Function: public Unit
 {
 	private:
+		friend class ObjectType;
+
 		size_t argc = 0;
 
-		/* Vector of pairs to preserve the declaration order */
+		/* Deque of pairs to preserve the declaration order */
 		ArgDefList arg_def;
 
 	public:

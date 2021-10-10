@@ -1,7 +1,7 @@
 #ifndef SRC_LANG_LIBLOGICAL_H_
 #define SRC_LANG_LIBLOGICAL_H_
 
-#include "Library.h"
+#include "../Library.h"
 
 namespace mtl
 {
@@ -13,6 +13,7 @@ class LibLogical: public Library
 		void load() override;
 
 	private:
+		int eval_bitwise(int l, TokenType op, int r);
 		bool eval_logical(bool l, TokenType op, bool r);
 		bool eval_logic_arithmetic(double l, TokenType op, double r);
 };

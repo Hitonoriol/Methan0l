@@ -7,11 +7,11 @@
 
 #include "../expression/Expression.h"
 #include "../expression/LiteralExpr.h"
-#include "../methan0l_type.h"
 #include "DataTable.h"
 #include "Value.h"
 #include "../ExprEvaluator.h"
-#include "../util.h"
+#include "../type.h"
+#include "../util/util.h"
 
 namespace mtl
 {
@@ -25,7 +25,7 @@ Function::Function(ExprMap args, Unit body) : Unit(body)
 	argc = 0;
 	for (auto entry : args) {
 		if (instanceof<LiteralExpr>(entry.second.get())
-				&& try_cast<LiteralExpr>(entry.second).empty())
+				&& try_cast<LiteralExpr>(entry.second).is_empty())
 			++argc;
 
 		arg_def.push_back(entry);

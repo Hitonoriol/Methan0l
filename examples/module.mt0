@@ -26,7 +26,7 @@ for_each = {
 		}
 		
 		repeater
-	} $({i = 0; end = size(#list)})
+	} $({i = 0; end = size$(#list)})
 }
 
 mean = func def @(num_list) {
@@ -34,7 +34,7 @@ mean = func def @(num_list) {
 	do $(n, num_list) -> {
 		sum = sum + n
 	}
-	(sum / size(num_list))!
+	(sum / size$(num_list))!
 }
 
 /* Weak Unit syntax is used to omit the # prefix before module-local idfrs */

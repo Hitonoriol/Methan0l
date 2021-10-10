@@ -1,10 +1,18 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#include <iostream>
+#include <deque>
+#include <functional>
+#include <iterator>
+#include <memory>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
-#include <functional>
+
+namespace mtl
+{
+
+class Value;
 
 template<typename Base, typename T>
 inline bool instanceof(const T *ptr)
@@ -33,34 +41,26 @@ inline std::string& lrstrip(std::string &str)
 	return str;
 }
 
-inline void replace_all(std::string &str, const std::string &from, const std::string &to,
-		int limit = -1)
-{
-	if (from.empty())
-		return;
-	size_t start_pos = 0;
-	while (limit != 0 && (start_pos = str.find(from, start_pos)) != std::string::npos) {
-		str.replace(start_pos, from.length(), to);
-		start_pos += to.length();
-		if (limit > 0)
-			--limit;
-	}
-}
+void replace_all(std::string &str, const std::string &from, const std::string &to, int limit = -1);
+std::deque<Value> split(const std::string &s, const std::string &delimiter);
+std::string to_base(unsigned int value, int base);
 
 /* Create a "string list" representation of strings provided by <str_supplier> while its return is not empty */
 inline std::string stringify(std::function<std::string(void)> str_supplier)
 {
-	std::string list_str = "{ ";
+	std::string list_str = "{";
 
 	std::string elem;
 	while (!(elem = str_supplier()).empty())
 		list_str += elem + ", ";
 
-	if (list_str.size() > 2)
-		list_str.erase(std::prev(list_str.end(), 2));
+	if (list_str.size() > 1)
+		list_str.erase(list_str.size() - 2);
 
 	list_str += "}";
 	return list_str;
+}
+
 }
 
 #endif /* UTIL_H_ */

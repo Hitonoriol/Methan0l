@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../methan0l_type.h"
+#include "../type.h"
 
 namespace mtl
 {
@@ -19,11 +19,8 @@ class Library
 	protected:
 		ExprEvaluator *eval = 0;
 
-		std::string str(Value);
 		std::string str(ExprList args, int idx = 0);
-		double dbl(Value);
 		double dbl(ExprList args, int idx = 0);
-		int num(Value);
 		int num(ExprList args, int idx = 0);
 
 		Value val(ExprPtr expr);

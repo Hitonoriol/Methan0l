@@ -13,6 +13,7 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 					try_cast<IndexExpr>(lhs).indexed_element(evaluator) :
 					try_cast<IdentifierExpr>(lhs).referenced_value(evaluator);
 
+	lhs_val_type = val.type;
 	switch (val.type) {
 	case Type::LIST:
 		return indexed_element(evaluator, val.get<ValList>());
@@ -20,8 +21,8 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 	case Type::MAP:
 		return indexed_element(evaluator, val.get<ValMap>());
 
-	/* Process char deletion
-	 * 		& return the & to the string itself -- indexed char must be extracted manually (if required) */
+		/* Process char deletion
+		 * 		& return the & to the string itself -- indexed char must be extracted manually (if required) */
 	case Type::STRING:
 		if (remove)
 			val.get<std::string>().erase(idx->evaluate(evaluator).as<int>(), 1);
@@ -79,7 +80,8 @@ void IndexExpr::assign(ExprEvaluator &eval, Value val)
 
 	Value &ref = referenced_value(eval);
 
-	if (ref.type == Type::STRING) {
+	/* Assigning a char of string / Appending to a string */
+	if (lhs_val_type == Type::STRING) {
 		std::string &lhs = ref.get<std::string>();
 		if (append())
 			lhs += val.to_string();
@@ -93,16 +95,12 @@ void IndexExpr::assign(ExprEvaluator &eval, Value val)
 Value IndexExpr::evaluate(ExprEvaluator &evaluator)
 {
 	Value &val = referenced_value(evaluator);
-	if (val.type == Type::STRING && !append() && !remove)
+
+	/* Indexing a char from a string */
+	if (!append() && !remove && lhs_val_type == Type::STRING)
 		return Value(val.get<std::string>()[idx->evaluate(evaluator).as<int>()]);
 
 	return val;
-}
-
-void IndexExpr::execute(ExprEvaluator &evaluator)
-{
-	Value evald = evaluate(evaluator);
-	LiteralExpr::exec_literal(evaluator, evald);
 }
 
 std::ostream& IndexExpr::info(std::ostream &str)

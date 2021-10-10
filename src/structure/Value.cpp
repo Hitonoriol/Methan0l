@@ -1,7 +1,7 @@
 #include "Value.h"
 
-#include "../methan0l_type.h"
-#include "../util.h"
+#include "../type.h"
+#include "../util/util.h"
 
 namespace mtl
 {
@@ -42,6 +42,11 @@ Value& Value::operator=(ValueContainer rhs)
 	return set(rhs);
 }
 
+bool Value::object()
+{
+	return type == Type::OBJECT;
+}
+
 bool Value::numeric()
 {
 	return type == Type::INTEGER || type == Type::DOUBLE;
@@ -71,6 +76,9 @@ void Value::deduce_type()
 {
 	if (std::holds_alternative<int>(value))
 		type = Type::INTEGER;
+
+	else if (std::holds_alternative<Object>(value))
+		type = Type::OBJECT;
 
 	else if (std::holds_alternative<double>(value))
 		type = Type::DOUBLE;
@@ -104,20 +112,20 @@ std::string Value::to_string()
 		return std::string(Token::reserved(Word::NIL));
 
 	case Type::STRING:
-		return as<std::string>();
+		return get<std::string>();
 
 	case Type::CHAR:
 		return str(get<char>());
 
 	case Type::INTEGER:
-		return std::to_string(as<int>());
+		return std::to_string(get<int>());
 
 	case Type::DOUBLE:
-		return std::to_string(as<double>());
+		return std::to_string(get<double>());
 
 	case Type::BOOLEAN:
 		return std::string(
-				Token::reserved(as<bool>() ? Word::TRUE : Word::FALSE));
+				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE));
 
 	case Type::LIST: {
 		ValList &list = get<ValList>();
@@ -133,7 +141,7 @@ std::string Value::to_string()
 		auto it = map.begin(), end = map.end();
 		return stringify([&]() {
 			if (it == end) return empty_string;
-			std::string str = "{" + it->first + " : " + it->second.to_string() + "}";
+			std::string str = "{" + it->first + ": " + it->second.to_string() + "}";
 			it++;
 			return str;
 		});
@@ -144,6 +152,9 @@ std::string Value::to_string()
 
 	case Type::FUNCTION:
 		return get<Function>().to_string();
+
+	case Type::OBJECT:
+		return get<Object>().to_string();
 
 	default:
 		return "";

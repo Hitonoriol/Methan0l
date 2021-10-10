@@ -1,5 +1,5 @@
-#ifndef SRC_METHAN0L_TYPE_H_
-#define SRC_METHAN0L_TYPE_H_
+#ifndef SRC_TYPE_H_
+#define SRC_TYPE_H_
 
 #include <functional>
 #include <memory>
@@ -15,14 +15,23 @@
 namespace mtl
 {
 
-constexpr bool DEBUG = true;
+constexpr bool DEBUG = false;
+
+using dec = int64_t;
 
 struct Value;
+std::string str(Value);
+double dbl(Value);
+int num(Value);
+bool bln(Value);
+
 class Expression;
+class Object;
 
 const std::string empty_string;
 
 using ExprPtr = std::shared_ptr<Expression>;
+using ObjectPtr = std::shared_ptr<Object>;
 
 using ExprMap = std::unordered_map<std::string, ExprPtr>;
 using DataMap = std::unordered_map<std::string, Value>;
@@ -37,7 +46,7 @@ template<typename T> inline std::shared_ptr<T> ptr(T *obj)
 }
 
 using ArgDef = std::pair<std::string, ExprPtr>;
-using ArgDefList = std::vector<ArgDef>;
+using ArgDefList = std::deque<ArgDef>;
 
 using PrefixOpr = std::function<Value(ExprPtr&)>;
 using BinaryOpr = std::function<Value(ExprPtr&, ExprPtr&)>;
@@ -52,4 +61,4 @@ using InbuiltFuncMap = std::unordered_map<std::string, InbuiltFunc>;
 
 }
 
-#endif /* SRC_METHAN0L_TYPE_H_ */
+#endif /* SRC_TYPE_H_ */

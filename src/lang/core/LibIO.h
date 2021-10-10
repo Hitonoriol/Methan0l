@@ -1,7 +1,7 @@
 #ifndef SRC_LANG_LIBIO_H_
 #define SRC_LANG_LIBIO_H_
 
-#include "Library.h"
+#include "../Library.h"
 
 namespace mtl
 {

@@ -17,9 +17,9 @@ unt :: " is unit: " :: (type(unt) == type unit)
 some_flag :: "is boolean: " :: (type(some_flag) == type boolean)
 newl
 
-/* size operator; valid for Lists & Strings only */
-lst :: " --> Size: " :: size(lst)
-str :: " --> Size: " :: size(str)
+/* size function; valid for Lists & Strings only */
+lst :: " --> Size: " :: size$(lst)
+str :: " --> Size: " :: size$(str)
 newl
 
 /* delete operator */

@@ -14,6 +14,7 @@ class IndexExpr: public IdentifierExpr
 {
 	private:
 		ExprPtr lhs, idx;
+		Type lhs_val_type = Type::NIL;
 		bool remove;
 
 		inline bool append()
@@ -32,7 +33,6 @@ class IndexExpr: public IdentifierExpr
 		}
 
 		Value evaluate(ExprEvaluator &evaluator) override;
-		void execute(ExprEvaluator &evaluator) override;
 
 		void assign(ExprEvaluator &eval, Value val) override;
 		Value& referenced_value(ExprEvaluator &eval) override;

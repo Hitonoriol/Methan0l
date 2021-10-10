@@ -8,7 +8,9 @@ map = @(key1 => 123,
 	"string key" => 0.5,
 	1337 => "numeric key", 	/* Numeric keys are converted to string */
 	some_list => $(1, 3, 5, 7),
-	"another map" => @(foo => "bar"))
+	"another map" => @(foo => "bar"),
+	bar => "baz",
+	blah => false)
 
 "Map: " :: map :: newl
 
@@ -23,4 +25,12 @@ map[~1337]
 
 "Nested element access: "
 	:: map["some_list"][2] :: " | "
-	:: map["another_map"]["foo"]
+	:: map["another map"]["foo"]
+newl
+
+"Iterate over a map"
+do $(key, map.list_of$(keys)) -> {
+	"Key: " :: key :: ", Value: " :: map[key]
+}
+
+/* Extract key / value lists from maps: Map.list_of$(keys) & Map.list_of$(values) */

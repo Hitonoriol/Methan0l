@@ -19,13 +19,13 @@ enum class TokenType : uint16_t
 	ASSIGN = '=',
 	PLUS = '+', MINUS = '-', SLASH = '/', ASTERISK = '*',
 	BACKSLASH = '\\',
-	POWER = '^',
+	BIT_XOR = '^',
 	EXCLAMATION = '!',
 	QUESTION = '?',
 	TILDE = '~',
 	GREATER = '>', LESS = '<',
-	PIPE = '|',
-	AND = '&',
+	BIT_OR = '|',
+	BIT_AND = '&',
 	UNDERSCORE = '_',
 	PERCENT = '%',
 	HASH = '#',
@@ -47,8 +47,8 @@ enum class TokenType : uint16_t
 	NEWLINE = '\n',
 
 	/* Double-char operators */
-	CONCAT = 0x7F,		// <<
-	INPUT,				// >>
+	SHIFT_L = 0x7F,		// <<
+	SHIFT_R,			// >>
 	WEAK_UNIT_DEF,		// ->
 	LOOP_DEF,			// <-
 	LIST_DEF_L,			// $(
@@ -69,6 +69,9 @@ enum class TokenType : uint16_t
 	SUB,				// -=
 	MUL,				// *=
 	DIV,				// /=
+	AND,				// &&
+	OR,					// ||
+	XOR,				// ^^
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -80,7 +83,6 @@ enum class TokenType : uint16_t
 
 	/* Word operators */
 	DO = 0x200,
-	SIZE,
 	TYPE,
 	DELETE,
 	EXIT,
@@ -88,7 +90,6 @@ enum class TokenType : uint16_t
 	PERSISTENT,
 	FUNC_DEF,
 	BOX,
-	READ_LINE,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -128,13 +129,12 @@ class Token
 				"@(", "==", "%%", "::", "/*",
 				"*/", ">=", "<=", "++", "--",
 				":=", "=>", "!=", "+=", "-=",
-				"*=", "/="
+				"*=", "/=", "&&", "||", "^^"
 		};
 
 		static constexpr std::string_view word_ops[] = {
-				"do", "size", "type", "delete", "exit",
-				"load", "persistent", "funcdef", "box",
-				"read_line"
+				"do", "type", "delete", "exit",
+				"load", "persistent", "funcdef", "box"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
@@ -178,7 +178,7 @@ class Token
 		static const Token EOF_TOKEN;
 		static const int LITERAL_START = static_cast<int>(TokenType::INTEGER);
 		static const int WORD_OP_START = static_cast<int>(TokenType::DO);
-		static const int BICHAR_OP_START = static_cast<int>(TokenType::CONCAT);
+		static const int BICHAR_OP_START = static_cast<int>(TokenType::SHIFT_L);
 		static const int MISC_TOKENS_START = static_cast<int>(TokenType::NONE);
 		static const std::string digits, double_digits;
 		static bool contains_all(std::string str, std::string substr);

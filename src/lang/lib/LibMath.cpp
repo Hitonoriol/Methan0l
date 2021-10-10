@@ -3,8 +3,9 @@
 #include <cmath>
 #include <functional>
 
-#include "../ExprEvaluator.h"
-#include "../structure/Value.h"
+#include "../../ExprEvaluator.h"
+#include "../../structure/Value.h"
+#include "../../type.h"
 
 namespace mtl
 {
@@ -25,7 +26,18 @@ void LibMath::load()
 	function("abs", [&](Args args) {
 		Value n = arg(args);
 		return n.type == Type::DOUBLE
-				? Value(fabs(dbl(n))) : Value(abs(num(n)));
+				? Value(fabs(mtl::dbl(n))) : Value(abs(mtl::num(n)));
+	});
+
+	function("pow", [this](Args args) {
+		Value n = arg(args), powr = arg(args, 1);
+		double res = pow(mtl::dbl(n), mtl::dbl(powr));
+		if (Value::is_double_op(n, powr))
+			n.set((int)res);
+		else
+			n.set(res);
+
+		return n;
 	});
 
 	function("sqrt", [&](Args args) {return Value(sqrt(dbl(args)));});

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "Function.h"
+#include "object/Object.h"
 
 namespace mtl
 {
@@ -26,7 +27,10 @@ int, double, std::string, bool, char,
 ValList, ValMap,
 
 /* Expression blocks */
-Unit, Function
+Unit, Function,
+
+/* Custom type objects */
+Object
 >;
 
 enum class Type : uint8_t
@@ -55,6 +59,7 @@ struct Value
 		void deduce_type();
 		std::string to_string();
 
+		bool object();
 		bool numeric();
 
 		bool empty() const;
@@ -90,11 +95,18 @@ struct Value
 			if constexpr (std::is_same<T, std::string>::value)
 				return to_string();
 
-			/* <This Type> to Char */
-			if constexpr (std::is_same<T, char>::value) {
+			/* <This Type> to Integer */
+			if constexpr (std::is_same<T, int>::value) {
+				std::cout << "Converting type" << static_cast<int>(type) << " to int (" << to_string() << ")" << std::endl;
 				switch (type) {
+				case Type::DOUBLE:
+					return (int) get<double>();
+
 				case Type::STRING:
-					return get<std::string>().front();
+					return std::stoi(get<std::string>());
+
+				case Type::BOOLEAN:
+					return get<bool>() ? 1 : 0;
 
 				default:
 					break;
@@ -117,22 +129,6 @@ struct Value
 					break;
 				}
 
-			/* <This Type> to Integer */
-			if constexpr (std::is_same<T, int>::value)
-				switch (type) {
-				case Type::DOUBLE:
-					return (int) get<double>();
-
-				case Type::STRING:
-					return std::stoi(get<std::string>());
-
-				case Type::BOOLEAN:
-					return get<bool>() ? 1 : 0;
-
-				default:
-					break;
-				}
-
 			/* <This Type> to Boolean */
 			if constexpr (std::is_same<T, bool>::value)
 				switch (type) {
@@ -146,8 +142,19 @@ struct Value
 					return get<double>() == 1.0;
 
 				default:
+					return !nil();
+				}
+
+			/* <This Type> to Char */
+			if constexpr (std::is_same<T, char>::value) {
+				switch (type) {
+				case Type::STRING:
+					return get<std::string>().front();
+
+				default:
 					break;
 				}
+			}
 
 			T def_value { };
 			return def_value;

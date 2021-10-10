@@ -1,9 +1,7 @@
 #ifndef SRC_LANG_LIBARITHMETIC_H_
 #define SRC_LANG_LIBARITHMETIC_H_
 
-#include "Library.h"
-
-#include <cmath>
+#include "../Library.h"
 
 namespace mtl
 {
@@ -41,9 +39,6 @@ class LibArithmetic: public Library
 
 			case TokenType::PERCENT:
 				return (int) l % (int) r;
-
-			case TokenType::POWER:
-				return pow(l, r);
 
 			default:
 				return 0;

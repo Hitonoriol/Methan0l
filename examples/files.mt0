@@ -1,0 +1,17 @@
+"Files" :: newl
+
+file = File.new$("examples/file.txt")
+"Info about \"" :: file.absolute_path$() :: "\":"
+"Exists: " :: file.exists$()
+"Is directory: " :: file.is_dir$()
+"Size: " :: file.size$() :: "B"
+
+newl :: "* Reading file..."
+
+file.open$()
+i = 1
+do $(!(#file.eof)) -> {
+	"Line #" :: (i++) :: ": " :: file.read_line$()
+}
+"* End of file"
+file.close$()

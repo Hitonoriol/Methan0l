@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "../methan0l_type.h"
+#include "../type.h"
 
 namespace mtl
 {
@@ -21,10 +21,14 @@ class DataTable
 		DataTable& operator=(const DataTable &rhs);
 
 		bool exists(const std::string &id);
-		Value& set(std::string id, Value value);
-		Value& get(std::string id);
+		Value& set(const std::string &id, Value value);
+		Value& get(const std::string &id);
+		Value& get_or_create(const std::string &id);
 		void del(std::string id);
-		const DataMap& managed_map();
+
+		void copy_managed_map();
+		const DataMap& managed_map() const;
+
 		Value& nil();
 		void clear();
 		size_t size();

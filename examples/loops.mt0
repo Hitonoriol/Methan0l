@@ -14,8 +14,8 @@ do $(elem, some_list) -> {
 	e_type = type(elem)
 	%% "* "
 	(e_type == type string) ? ->
-		{elem :: " (Length: " :: size(elem) :: ")"}
-	: (e_type == type int | e_type == type double) ? ->
+		{elem :: " (Length: " :: size$(elem) :: ")"}
+	: (e_type == type int || e_type == type double) ? ->
 		{elem :: " is positive: " :: (elem > 0)}
 	: elem
 }
@@ -27,7 +27,7 @@ do $(val, $("a", "b", "c", "d", "e")) -> {
 newl
 
 "While loop"
-foo = size(some_list) * 6.75
+foo = size$(some_list) * 6.75
 do $(#foo > 50) -> {
 	%%("<While Loop> ")
 	--#foo

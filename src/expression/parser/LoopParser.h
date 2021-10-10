@@ -5,10 +5,10 @@
 #include <stdexcept>
 #include <vector>
 
-#include "../../methan0l_type.h"
 #include "../../Parser.h"
+#include "../../type.h"
 #include "../../Token.h"
-#include "../../util.h"
+#include "../../util/util.h"
 #include "../ListExpr.h"
 #include "../LoopExpr.h"
 #include "PrefixParser.h"

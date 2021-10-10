@@ -4,8 +4,8 @@
 #include <iostream>
 
 #include "../ExprEvaluator.h"
-#include "../methan0l_type.h"
 #include "../structure/Value.h"
+#include "../type.h"
 
 namespace mtl
 {

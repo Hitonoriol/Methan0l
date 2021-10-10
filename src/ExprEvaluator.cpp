@@ -13,15 +13,17 @@
 #include "expression/InvokeExpr.h"
 #include "expression/ListExpr.h"
 #include "expression/IndexExpr.h"
-#include "util.h"
+#include "util/util.h"
 
-#include "lang/LibIO.h"
-#include "lang/LibArithmetic.h"
-#include "lang/LibLogical.h"
-#include "lang/LibMath.h"
-#include "lang/LibString.h"
-#include "lang/LibUnit.h"
-#include "lang/LibData.h"
+#include "lang/core/LibIO.h"
+#include "lang/core/LibArithmetic.h"
+#include "lang/core/LibLogical.h"
+#include "lang/core/LibUnit.h"
+#include "lang/core/LibData.h"
+#include "lang/core/LibString.h"
+
+#include "lang/lib/LibMath.h"
+#include "lang/structure/File.h"
 
 namespace mtl
 {
@@ -35,6 +37,8 @@ ExprEvaluator::ExprEvaluator()
 	load_library(std::make_unique<LibString>(this));
 	load_library(std::make_unique<LibMath>(this));
 	load_library(std::make_unique<LibData>(this));
+
+	type_mgr.register_type(std::make_unique<File>(*this));
 }
 
 void ExprEvaluator::load_library(std::unique_ptr<Library> library)
@@ -360,6 +364,11 @@ Value ExprEvaluator::evaluate(Expression &expr)
 {
 	std::cerr << "Unimplemented expression evaluation" << std::endl;
 	return NIL;
+}
+
+TypeManager& ExprEvaluator::get_type_mgr()
+{
+	return type_mgr;
 }
 
 void ExprEvaluator::stop()

@@ -13,7 +13,7 @@ my_box = box {
 	
 	reverse_list = func def @(list) {
 		rev = $()
-		do @(i = size(list) - 1, i >= 0, --i) -> {
+		do $(i = size$(list) - 1, i >= 0, --i) -> {
 			rev[] = list[i]
 		}
 		rev!

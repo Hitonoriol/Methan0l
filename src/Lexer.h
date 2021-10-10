@@ -8,8 +8,8 @@
 #include <iostream>
 #include <iterator>
 
+#include "type.h"
 #include "Token.h"
-#include "methan0l_type.h"
 
 namespace mtl
 {

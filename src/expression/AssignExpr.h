@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../methan0l_type.h"
+#include "../type.h"
 #include "Expression.h"
 #include "IdentifierExpr.h"
 

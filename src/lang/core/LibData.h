@@ -1,12 +1,14 @@
 #ifndef SRC_LANG_LIBDATA_H_
 #define SRC_LANG_LIBDATA_H_
 
-#include "Library.h"
+#include <string_view>
+
+#include "../Library.h"
 
 namespace mtl
 {
 
-/* Data structure operators & functions */
+/* Common data structure operators & functions */
 class LibData: public Library
 {
 	public:
@@ -14,6 +16,7 @@ class LibData: public Library
 		void load() override;
 
 	private:
+		static constexpr std::string_view KEY_LIST = "keys", VAL_LIST = "values";
 		void load_operators();
 };
 

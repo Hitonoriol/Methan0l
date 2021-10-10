@@ -37,8 +37,8 @@ list_populator = {
 ret = list_populator$({i = 0; max = 10; new_list = $()})
 "New " :: list_str$({list = #ret})
 
-/* size operator */
-%%("List size: " :: size(ret) :: newl)
+/* size function */
+%%("List size: " :: size$(ret) :: newl)
 newl
 
 /* Foreach loop */
