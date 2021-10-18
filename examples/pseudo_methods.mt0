@@ -4,7 +4,7 @@
  * 	value.func$(arg1, arg2, ...) => func$(value, arg1, arg2, ...)
  */
 
-qt = func def @(str) {
+qt = func @(str) {
 	("\"" :: str :: "\"")!
 }
 

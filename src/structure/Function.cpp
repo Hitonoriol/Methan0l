@@ -64,6 +64,9 @@ void Function::call(ExprEvaluator &eval, ExprList &args)
 				+ std::to_string(argc) + " non-default arguments received, "
 				+ std::to_string(this->argc) + " expected");
 
+	if constexpr (DEBUG)
+		std::cout << "Preparing to call a function...";
+
 	new_table();
 
 	auto table = local();
@@ -73,6 +76,10 @@ void Function::call(ExprEvaluator &eval, ExprList &args)
 		Value arg_val = non_default ?
 										args[i]->evaluate(eval) :
 										arg_def[i].second->evaluate(eval);
+
+		if constexpr (DEBUG)
+			std::cout << "* func arg \"" << arg_name << "\" = " << arg_val << std::endl;
+
 		table.set(arg_name, arg_val);
 	}
 }
@@ -86,9 +93,13 @@ std::string Function::to_string()
 
 std::ostream& operator <<(std::ostream &stream, Function &func)
 {
-	return stream << "{"
-			<< "Function // " << func.argc << " non-default args"
-			<< "}";
+	stream << "{"
+			<< "Function // " << func.arg_def.size() << " args: {";
+
+	for (auto &entry : func.arg_def)
+		entry.second->info(stream << "\"" << entry.first << "\" -> ") << "; ";
+
+	return stream << "}}";
 }
 
 } /* namespace mtl */

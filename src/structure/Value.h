@@ -7,6 +7,7 @@
 #include <variant>
 #include <vector>
 
+#include "ValueRef.h"
 #include "Function.h"
 #include "object/Object.h"
 
@@ -20,8 +21,11 @@ std::variant<
 /* No value */
 std::monostate,
 
+/* Reference to another Value */
+ValueRef,
+
 /* Primitives */
-int, double, std::string, bool, char,
+dec, double, std::string, bool, char,
 
 /* Data Structures */
 ValList, ValMap,
@@ -37,9 +41,16 @@ enum class Type : uint8_t
 {
 	NIL, INTEGER, DOUBLE, STRING, BOOLEAN,
 	LIST, UNIT, MAP, FUNCTION, CHAR,
-	OBJECT,
+	OBJECT, REFERENCE,
 
 	END
+};
+
+struct conversion_exception: public std::runtime_error
+{
+		conversion_exception(const std::string_view &from, const std::string_view &to = "unknown") :
+			runtime_error("Invalid type conversion: "
+					+ std::string(from) + " -> " + std::string(to)) {}
 };
 
 struct Value
@@ -53,12 +64,13 @@ struct Value
 		Value(const Value &val);
 		Value& operator =(const Value &rhs);
 		Value& operator=(ValueContainer rhs);
-		Value& set(ValueContainer value);
+		Value& set(const ValueContainer &value);
 		Value& set(Value &value);
+		Value& get();
 
 		void deduce_type();
-		std::string to_string();
 
+		bool container();
 		bool object();
 		bool numeric();
 
@@ -67,6 +79,8 @@ struct Value
 
 		void clear();
 		static void clear(ValueContainer &pure_val);
+
+		static std::string_view type_name(Type type);
 
 		static bool is_double_op(Value &lhs, Value &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Value &val);
@@ -86,7 +100,15 @@ struct Value
 			return std::get<T>(value);
 		}
 
-		/* Get current value by copy or convert to the specified type */
+		std::string to_string(ExprEvaluator *eval = nullptr);
+		dec to_dec();
+		double to_double();
+		bool to_bool();
+		char to_char();
+
+		static Value ref(Value &val);
+
+		/* Get current value by copy or convert to specified type */
 		template<typename T> T as()
 		{
 			if (std::holds_alternative<T>(value))
@@ -95,69 +117,19 @@ struct Value
 			if constexpr (std::is_same<T, std::string>::value)
 				return to_string();
 
-			/* <This Type> to Integer */
-			if constexpr (std::is_same<T, int>::value) {
-				std::cout << "Converting type" << static_cast<int>(type) << " to int (" << to_string() << ")" << std::endl;
-				switch (type) {
-				case Type::DOUBLE:
-					return (int) get<double>();
+			if constexpr (std::is_same<T, dec>::value)
+				return to_dec();
 
-				case Type::STRING:
-					return std::stoi(get<std::string>());
-
-				case Type::BOOLEAN:
-					return get<bool>() ? 1 : 0;
-
-				default:
-					break;
-				}
-			}
-
-			/* <This Type> to Double */
 			if constexpr (std::is_same<T, double>::value)
-				switch (type) {
-				case Type::STRING:
-					return std::stod(get<std::string>());
+				return to_double();
 
-				case Type::INTEGER:
-					return (double) get<int>();
-
-				case Type::BOOLEAN:
-					return get<bool>() ? 1.0 : 0.0;
-
-				default:
-					break;
-				}
-
-			/* <This Type> to Boolean */
 			if constexpr (std::is_same<T, bool>::value)
-				switch (type) {
-				case Type::INTEGER:
-					return get<int>() == 1;
+				return to_bool();
 
-				case Type::STRING:
-					return get<std::string>() == Token::reserved(Word::TRUE);
+			if constexpr (std::is_same<T, char>::value)
+				return to_char();
 
-				case Type::DOUBLE:
-					return get<double>() == 1.0;
-
-				default:
-					return !nil();
-				}
-
-			/* <This Type> to Char */
-			if constexpr (std::is_same<T, char>::value) {
-				switch (type) {
-				case Type::STRING:
-					return get<std::string>().front();
-
-				default:
-					break;
-				}
-			}
-
-			T def_value { };
-			return def_value;
+			throw conversion_exception(type_name(type));
 		}
 };
 

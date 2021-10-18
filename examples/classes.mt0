@@ -1,0 +1,47 @@
+class: Point = @(
+	/* Fields declared here won't be accessible outside of class methods */
+	private => $(x, y),
+	
+	/* Called automatically on Point.new$(...) invocation. */
+	construct => func @(x => 0, y => 0) {
+		this.set$(x, y)
+	},
+	
+	set => func @(x, y) {
+		this.x = x
+		this.y = y
+	},
+
+	get_x => func @() {
+		(this.x)!
+	},
+
+	get_y => func @() {
+		(this.y)!
+	},
+	
+	add => func @(rhs) {
+		this.x += rhs.x
+		this.y += rhs.y
+	},
+	
+	/* Called automatically when using %% and :: operators */
+	to_string => func @() {
+		("(" :: x :: ", " :: y :: ")")!
+	},
+	
+	some_static_method => func @(x) {
+		%%("Static method arg: " :: x :: newl)
+	}
+)
+
+foo = Point.new$(123, 456)
+bar = Point.new$(12.75, 99)
+empty = Point.new$()
+foo.add$(bar)
+
+Point@some_static_method$(123)
+
+%%(foo :: newl)
+%%(bar :: newl)
+%%(empty :: newl)

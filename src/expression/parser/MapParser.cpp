@@ -12,7 +12,7 @@
 #include "../../type.h"
 #include "../../Token.h"
 #include "../../util/util.h"
-#include "../BinaryOperatorExpression.h"
+#include "../BinaryOperatorExpr.h"
 #include "../IdentifierExpr.h"
 #include "../LiteralExpr.h"
 #include "../MapExpr.h"
@@ -38,7 +38,7 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 				continue;
 			}
 
-			BinaryOperatorExpression &pair = try_cast<BinaryOperatorExpression>(pair_expr);
+			BinaryOperatorExpr &pair = try_cast<BinaryOperatorExpr>(pair_expr);
 			if (pair.get_operator() != TokenType::KEYVAL)
 				throw std::runtime_error("Unexpected opr in map declaration");
 

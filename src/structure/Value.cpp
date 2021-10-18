@@ -1,5 +1,6 @@
 #include "Value.h"
 
+#include "ValueRef.h"
 #include "../type.h"
 #include "../util/util.h"
 
@@ -23,7 +24,7 @@ Value::Value(ValueContainer value) : value(value)
 	deduce_type();
 }
 
-Value& Value::set(ValueContainer value)
+Value& Value::set(const ValueContainer &value)
 {
 	this->value = value;
 	deduce_type();
@@ -37,9 +38,21 @@ Value& Value::set(Value &value)
 	return *this;
 }
 
+Value& Value::get()
+{
+	if (type == Type::REFERENCE)
+		return get<ValueRef>().value();
+	return *this;
+}
+
 Value& Value::operator=(ValueContainer rhs)
 {
 	return set(rhs);
+}
+
+bool Value::container()
+{
+	return type == Type::LIST || type == Type::MAP;
 }
 
 bool Value::object()
@@ -74,8 +87,11 @@ void Value::clear(ValueContainer &pure_val)
 
 void Value::deduce_type()
 {
-	if (std::holds_alternative<int>(value))
+	if (std::holds_alternative<dec>(value))
 		type = Type::INTEGER;
+
+	else if (std::holds_alternative<ValueRef>(value))
+		type = Type::REFERENCE;
 
 	else if (std::holds_alternative<Object>(value))
 		type = Type::OBJECT;
@@ -105,11 +121,14 @@ void Value::deduce_type()
 		type = Type::NIL;
 }
 
-std::string Value::to_string()
+std::string Value::to_string(ExprEvaluator *eval)
 {
 	switch (type) {
 	case Type::NIL:
 		return std::string(Token::reserved(Word::NIL));
+
+	case Type::REFERENCE:
+		return get().to_string(eval);
 
 	case Type::STRING:
 		return get<std::string>();
@@ -118,7 +137,7 @@ std::string Value::to_string()
 		return str(get<char>());
 
 	case Type::INTEGER:
-		return std::to_string(get<int>());
+		return std::to_string(get<dec>());
 
 	case Type::DOUBLE:
 		return std::to_string(get<double>());
@@ -153,11 +172,75 @@ std::string Value::to_string()
 	case Type::FUNCTION:
 		return get<Function>().to_string();
 
-	case Type::OBJECT:
-		return get<Object>().to_string();
+	case Type::OBJECT: {
+		Object &obj = get<Object>();
+		return eval == nullptr ? obj.to_string() : obj.to_string(*eval);
+	}
 
 	default:
 		return "";
+	}
+}
+
+dec Value::to_dec()
+{
+	switch (type) {
+	case Type::DOUBLE:
+		return (dec) get<double>();
+
+	case Type::STRING:
+		return std::stol(get<std::string>());
+
+	case Type::BOOLEAN:
+		return get<bool>() ? 1 : 0;
+
+	default:
+		throw conversion_exception(type_name(type), type_name(Type::INTEGER));
+	}
+}
+
+double Value::to_double()
+{
+	switch (type) {
+	case Type::STRING:
+		return std::stod(get<std::string>());
+
+	case Type::INTEGER:
+		return (double) get<dec>();
+
+	case Type::BOOLEAN:
+		return get<bool>() ? 1.0 : 0.0;
+
+	default:
+		throw conversion_exception(type_name(type), type_name(Type::DOUBLE));
+	}
+}
+
+bool Value::to_bool()
+{
+	switch (type) {
+	case Type::INTEGER:
+		return get<dec>() == 1;
+
+	case Type::STRING:
+		return get<std::string>() == Token::reserved(Word::TRUE);
+
+	case Type::DOUBLE:
+		return get<double>() == 1.0;
+
+	default:
+		return !nil();
+	}
+}
+
+char Value::to_char()
+{
+	switch (type) {
+	case Type::STRING:
+		return get<std::string>().front();
+
+	default:
+		throw conversion_exception(type_name(type), type_name(Type::CHAR));
 	}
 }
 
@@ -169,7 +252,7 @@ Value Value::convert(Type new_val_type)
 		return Value(as<bool>());
 
 	case Type::INTEGER:
-		return Value(as<int>());
+		return Value(as<dec>());
 
 	case Type::DOUBLE:
 		return Value(as<double>());
@@ -180,6 +263,11 @@ Value Value::convert(Type new_val_type)
 	default:
 		return NIL;
 	}
+}
+
+Value Value::ref(Value &val)
+{
+	return Value(ValueRef(val));
 }
 
 Value Value::from_string(std::string str)
@@ -193,7 +281,7 @@ Value Value::from_string(std::string str)
 		if (is_dbl)
 			value = std::stod(str);
 		else
-			value = std::stoi(str);
+			value = std::stol(str);
 	}
 
 	else if (str == Token::reserved(Word::TRUE)
@@ -214,6 +302,13 @@ Value Value::from_string(std::string str)
 bool Value::is_double_op(Value &lhs, Value &rhs)
 {
 	return lhs.type == Type::DOUBLE || rhs.type == Type::DOUBLE;
+}
+
+std::string_view Value::type_name(Type type)
+{
+	int type_id = static_cast<int>(type);
+	Word typew = static_cast<Word>(Token::TYPENAMES_BEG_IDX + type_id);
+	return Token::reserved(typew);
 }
 
 Value& Value::operator =(const Value &rhs)

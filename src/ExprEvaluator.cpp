@@ -4,9 +4,9 @@
 #include <memory>
 
 #include "expression/AssignExpr.h"
+#include "expression/BinaryOperatorExpr.h"
 #include "expression/ConditionalExpr.h"
 #include "expression/IdentifierExpr.h"
-#include "expression/BinaryOperatorExpression.h"
 #include "expression/PrefixExpr.h"
 #include "expression/PostfixExpr.h"
 #include "expression/UnitExpr.h"
@@ -24,6 +24,7 @@
 
 #include "lang/lib/LibMath.h"
 #include "lang/structure/File.h"
+#include "lang/structure/Random.h"
 
 namespace mtl
 {
@@ -39,6 +40,7 @@ ExprEvaluator::ExprEvaluator()
 	load_library(std::make_unique<LibData>(this));
 
 	type_mgr.register_type(std::make_unique<File>(*this));
+	type_mgr.register_type(std::make_unique<Random>(*this));
 }
 
 void ExprEvaluator::load_library(std::unique_ptr<Library> library)
@@ -72,7 +74,7 @@ void ExprEvaluator::postfix_op(TokenType tok, PostfixOpr opr)
 	postfix_ops.emplace(tok, opr);
 }
 
-Value ExprEvaluator::evaluate(BinaryOperatorExpression &opr)
+Value ExprEvaluator::evaluate(BinaryOperatorExpr &opr)
 {
 	return apply_binary(opr.get_lhs(), opr.get_operator(), opr.get_rhs());
 }
@@ -113,7 +115,7 @@ void ExprEvaluator::load_main(Unit &main)
 Value ExprEvaluator::execute(Unit &unit)
 {
 	if constexpr (DEBUG)
-		std::cout << '\n' << "Executing " << unit << " Exprs: " << unit.expressions().size() << std::endl;
+		std::cout << '\n' << "Executing " << unit << std::endl;
 
 	enter_scope(unit);
 
@@ -159,8 +161,10 @@ void ExprEvaluator::enter_scope(Unit &unit)
 	if (global() != local)
 		exec_stack.push_back(&unit);
 
-	if constexpr (DEBUG)
+	if constexpr (DEBUG) {
 		std::cout << "Entered scope " << unit << " // depth: " << exec_stack.size() << std::endl;
+		dump_stack();
+	}
 }
 
 void ExprEvaluator::leave_scope()
@@ -248,14 +252,44 @@ Value& ExprEvaluator::get(IdentifierExpr &idfr)
 	return idfr.referenced_value(*this);
 }
 
-Value& ExprEvaluator::referenced_value(ExprPtr idfr)
+Value& ExprEvaluator::referenced_value(ExprPtr expr)
 {
-	return get(try_cast<IdentifierExpr>(idfr));
+	if (instanceof<IdentifierExpr>(expr.get()))
+		return get(try_cast<IdentifierExpr>(expr));
+
+	auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
+	if (dot_expr.get_operator() != TokenType::DOT)
+		throw std::runtime_error("Can't get a reference to a non-dot binary opr");
+
+	ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
+	return instanceof<BinaryOperatorExpr>(lhs.get()) ?
+														referenced_value(lhs) :
+														dot_operator_reference(lhs, rhs);
 }
 
-Value& ExprEvaluator::get(std::string id, bool global)
+Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 {
-	return scope_lookup(id, global)->get(id);
+	Value &lref = get(try_cast<IdentifierExpr>(lhs));
+	if (lref.object() && instanceof<IdentifierExpr>(rhs.get())) {
+		Object &obj = lref.get<Object>();
+		std::string idfr = IdentifierExpr::get_name(rhs);
+
+		if (!obj.has_prv_access() && type_mgr.get_type(obj.type_id()).is_private(idfr))
+			throw std::runtime_error(
+					"Trying to access a private identifier (" + idfr + ")");
+
+		return obj.field(idfr);
+	}
+
+	if (lref.type == Type::UNIT)
+		return lref.get<Unit>().local().get(IdentifierExpr::get_name(rhs));
+
+	throw std::runtime_error("Invalid use of dot operator");
+}
+
+Value& ExprEvaluator::get(const std::string &id, bool global)
+{
+	return scope_lookup(id, global)->get(id).get();
 }
 
 inline Value ExprEvaluator::eval(Expression &expr)
@@ -281,9 +315,14 @@ inline void ExprEvaluator::exec(ExprPtr expr)
 
 Value ExprEvaluator::evaluate(AssignExpr &expr)
 {
-	IdentifierExpr &lhs = try_cast<IdentifierExpr>(expr.get_lhs());
+	ExprPtr lexpr = expr.get_lhs();
 	Value rhs = eval(expr.get_rhs());
-	lhs.assign(*this, rhs);
+	if (instanceof<IdentifierExpr>(lexpr.get())) {
+		IdentifierExpr &lhs = try_cast<IdentifierExpr>(lexpr);
+		lhs.assign(*this, rhs);
+	}
+	else
+		referenced_value(lexpr) = rhs;
 	return rhs;
 }
 
@@ -340,11 +379,10 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 	else if (callable.type == Type::FUNCTION)
 		return invoke(callable.get<Function>(), expr.arg_list().raw_list());
 
-	else if (instanceof<IdentifierExpr>(expr.get_lhs().get()) && callable.empty()) {
+	else if (instanceof<IdentifierExpr>(expr.get_lhs().get()) && callable.empty())
 		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list().raw_list());
-	}
 
-	return NIL;
+	throw std::runtime_error("Attempting to call a non-existent function");
 }
 
 Value ExprEvaluator::invoke_inbuilt_func(std::string name, ExprList args)
@@ -399,9 +437,10 @@ void ExprEvaluator::dump_stack()
 			std::cout << " (Main)";
 		std::cout << std::endl;
 		for (auto val : (*un)->local().managed_map())
-			std::cout << '\t' << val.first << " = " << val.second << std::endl;
+			std::cout << '\t'
+					<< "[" << Value::type_name(val.second.type) << "] "
+					<< val.first << " = " << val.second << std::endl;
 	}
-	std::cout << std::endl;
 }
 
 } /* namespace mtl */

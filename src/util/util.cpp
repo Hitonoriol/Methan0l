@@ -1,13 +1,16 @@
 #include "util.h"
 
-#include <deque>
-#include <cstdlib>
+#include <iostream>
+#include <algorithm>
+#include <fstream>
 
 #include "../structure/Value.h"
 #include "../type.h"
 
 namespace mtl
 {
+
+const std::ostream &out = std::cout;
 
 ValList split(const std::string &s, const std::string &delimiter)
 {
@@ -52,6 +55,23 @@ std::string to_base(unsigned int value, int base)
 	}
 	std::reverse(result.begin(), result.end());
 	return result;
+}
+
+std::string read_file(std::istream &file)
+{
+	auto src_len = file.tellg();
+	file.seekg(std::ios::beg);
+	std::string contents(src_len, 0);
+	file.read(&contents[0], src_len);
+	return contents;
+}
+
+std::string read_file(const std::string &name)
+{
+	std::ifstream file(name);
+	std::string contents = read_file(file);
+	file.close();
+	return contents;
 }
 
 }

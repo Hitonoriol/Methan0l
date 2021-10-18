@@ -1,6 +1,5 @@
 #include "LibLogical.h"
 
-#include <crtdefs.h>
 #include <iterator>
 
 #include "../../structure/Value.h"
@@ -35,7 +34,7 @@ void LibLogical::load()
 	for (size_t i = 0; i < std::size(bit_ops); ++i)
 		infix_operator(bit_ops[i], [=](auto lhs, auto rhs) {
 			Value lexpr = val(lhs), rexpr = val(rhs);
-			return Value(eval_bitwise(lexpr.as<int>(), bit_ops[i], rexpr.as<int>()));
+			return Value(eval_bitwise(lexpr.as<dec>(), bit_ops[i], rexpr.as<dec>()));
 		});
 
 	/* Bitwise NOT */
@@ -65,7 +64,7 @@ void LibLogical::load()
 	});
 }
 
-int LibLogical::eval_bitwise(int l, TokenType op, int r)
+dec LibLogical::eval_bitwise(dec l, TokenType op, dec r)
 {
 	switch (op) {
 	case TokenType::BIT_OR:

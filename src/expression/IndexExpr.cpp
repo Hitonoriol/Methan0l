@@ -25,7 +25,7 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 		 * 		& return the & to the string itself -- indexed char must be extracted manually (if required) */
 	case Type::STRING:
 		if (remove)
-			val.get<std::string>().erase(idx->evaluate(evaluator).as<int>(), 1);
+			val.get<std::string>().erase(idx->evaluate(evaluator).as<dec>(), 1);
 		return val;
 
 	default:
@@ -40,10 +40,10 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValList &list)
 		return list.back();
 	}
 
-	int elem_idx = idx->evaluate(evaluator).as<int>();
+	dec elem_idx = idx->evaluate(evaluator).as<dec>();
 
-	if (list.size() < (size_t) elem_idx)
-		list.resize(elem_idx);
+	if (list.size() <= (size_t) elem_idx)
+		list.resize(elem_idx + 1);
 
 	Value &elem = list.at(elem_idx);
 
@@ -86,7 +86,7 @@ void IndexExpr::assign(ExprEvaluator &eval, Value val)
 		if (append())
 			lhs += val.to_string();
 		else
-			lhs[idx->evaluate(eval).as<int>()] = val.as<char>();
+			lhs[idx->evaluate(eval).as<dec>()] = val.as<char>();
 	}
 	else
 		ref = val;
@@ -98,7 +98,7 @@ Value IndexExpr::evaluate(ExprEvaluator &evaluator)
 
 	/* Indexing a char from a string */
 	if (!append() && !remove && lhs_val_type == Type::STRING)
-		return Value(val.get<std::string>()[idx->evaluate(evaluator).as<int>()]);
+		return Value(val.get<std::string>()[idx->evaluate(evaluator).as<dec>()]);
 
 	return val;
 }

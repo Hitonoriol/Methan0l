@@ -1,5 +1,6 @@
 #include "Token.h"
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 
@@ -14,6 +15,9 @@ const Token Token::END_OF_EXPR(TokenType::EXPR_END);
 const Token Token::EOF_TOKEN(TokenType::END, "end of program");
 const std::string Token::digits = "1234567890";
 const std::string Token::double_digits = digits + '.';
+const int Token::TYPENAMES_BEG_IDX =
+		std::distance(std::begin(reserved_words),
+				std::find(std::begin(reserved_words), std::end(reserved_words), Token::reserved(Word::T_NIL)));
 
 Token::Token(TokenType type, std::string value) : type(type), value(value)
 {
@@ -151,9 +155,9 @@ bool Token::is_ref_opr(TokenType opr)
 {
 	switch (opr) {
 	case TokenType::DIV:
-	case TokenType::MUL:
-	case TokenType::SUB:
-	case TokenType::ADD:
+		case TokenType::MUL:
+		case TokenType::SUB:
+		case TokenType::ADD:
 		return true;
 
 	default:
@@ -194,26 +198,29 @@ std::string Token::to_string()
 	return ss.str();
 }
 
-std::ostream& operator <<(std::ostream &stream, const Token &val)
+std::string Token::to_string(TokenType tok)
 {
-	stream << "{\"" << val.value << "\" : ";
-	const int type = static_cast<int>(val.type);
+	const int type = static_cast<int>(tok);
 
 	if (type < 0x7F)
-		stream << static_cast<char>(val.type);
+		return str(static_cast<char>(tok));
 
 	else if (type < Token::LITERAL_START)
-		stream << Token::bichar_op(val.type);
+		return std::string(Token::bichar_op(tok));
 
 	else if (type < Token::WORD_OP_START)
-		stream << "Literal Value / Identifier";
+		return "[Literal Value / Identifier]";
 
 	else if (type < Token::MISC_TOKENS_START)
-		stream << Token::word_op(val.type);
+		return std::string(Token::word_op(tok));
 
 	else
-		stream << "[Internal Interpreter Token]";
+		return "[Internal Interpreter Token]";
+}
 
+std::ostream& operator <<(std::ostream &stream, const Token &val)
+{
+	stream << "{\"" << val.value << "\" : " << Token::to_string(val.type);
 	return stream << "}";
 }
 

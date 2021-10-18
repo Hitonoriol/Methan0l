@@ -17,6 +17,7 @@
 #include "expression/parser/MapParser.h"
 #include "expression/parser/FunctionParser.h"
 #include "expression/parser/BoxUnitParser.h"
+#include "expression/parser/ClassParser.h"
 
 namespace mtl
 {
@@ -44,6 +45,10 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_parser(TokenType::DO, new LoopParser());	// do $(i = 0, i < n, ++i) -> {}
 	register_parser(TokenType::FUNC_DEF, new FunctionParser());	// func def @(arg1, arg2: def_val, ...) {expr1, expr2, ...}
 	register_parser(TokenType::BOX, new BoxUnitParser());// box_unit = box {expr1, expr2, ...}
+	register_parser(TokenType::CLASS, new ClassParser()); // class: ClassName = @(private => $(), ...)
+
+	/* Reference operator */
+	register_prefix_opr(TokenType::REF); // ref = **idfr
 
 	/* Map definition */
 	register_parser(TokenType::MAP_DEF_L, new MapParser());
@@ -103,8 +108,11 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_prefix_opr(TokenType::DELETE);
 	register_prefix_opr(TokenType::DO);
 	register_prefix_opr(TokenType::EXIT);
-	register_prefix_opr(TokenType::LOAD);
 	register_prefix_opr(TokenType::PERSISTENT);
+	register_prefix_opr(TokenType::CLASS_ID);
+
+	/* Class / Box field / method access operators */
+	register_infix_opr(TokenType::AT, Precedence::EXPONENT);
 	register_infix_opr(TokenType::DOT, Precedence::EXPONENT);
 
 }

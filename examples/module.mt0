@@ -1,23 +1,23 @@
-/* Load this file using "load" operator;
+/* Load this file using "load" function;
  * 	you can also wrap it in persistent() operator to load as a Box Unit to be able to call funcs from it:
  *
- * module = persistent(load("./examples/module.mt0"))
- * module
+ * module = persistent(load$("./examples/module.mt0"))
  * module.test
  *
  */
 
 field = "Some text"
 
-/* Loop shortcut, pass <action> and <times> in init block */
+/* Recursive loop shortcut, pass <action> and <times> in init block */
 repeat = {
 	action
 	(--times) <= 0 ? -> {nil!}
-	#repeat
+	#repeat$({action = #action; times = #times})
 }
 
 /* Loop-less foreach for lists. Pass <list> and <action> in init block */
 for_each = {
+	/* Isolate the recursive scope inside another "virtual" scope to avoid copying <list>, <i> and <end> */
 	{
 		repeater = {
 			#action$({element = #list[#i]})
@@ -29,10 +29,10 @@ for_each = {
 	} $({i = 0; end = size$(#list)})
 }
 
-mean = func def @(num_list) {
+mean = func @(num_list) {
 	sum = 0.0
 	do $(n, num_list) -> {
-		sum = sum + n
+		sum += n
 	}
 	(sum / size$(num_list))!
 }

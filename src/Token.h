@@ -29,6 +29,7 @@ enum class TokenType : uint16_t
 	UNDERSCORE = '_',
 	PERCENT = '%',
 	HASH = '#',
+	AT = '@',
 
 	PAREN_L = '(',
 	PAREN_R = ')',
@@ -72,6 +73,7 @@ enum class TokenType : uint16_t
 	AND,				// &&
 	OR,					// ||
 	XOR,				// ^^
+	REF,				// **
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -86,10 +88,11 @@ enum class TokenType : uint16_t
 	TYPE,
 	DELETE,
 	EXIT,
-	LOAD,
 	PERSISTENT,
 	FUNC_DEF,
 	BOX,
+	CLASS,
+	CLASS_ID,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -110,7 +113,7 @@ enum class Word : uint8_t
 	T_NIL = TYPE_ID_START,
 	T_INT, T_DOUBLE, T_STRING,
 	T_BOOLEAN, T_LIST, T_UNIT,
-	T_MAP, T_FUNCTION, T_CHAR, T_OBJECT
+	T_MAP, T_FUNCTION, T_CHAR, T_OBJECT, T_REFERENCE
 };
 
 bool operator ==(const char, const TokenType&);
@@ -129,12 +132,13 @@ class Token
 				"@(", "==", "%%", "::", "/*",
 				"*/", ">=", "<=", "++", "--",
 				":=", "=>", "!=", "+=", "-=",
-				"*=", "/=", "&&", "||", "^^"
+				"*=", "/=", "&&", "||", "^^",
+				"**"
 		};
 
 		static constexpr std::string_view word_ops[] = {
-				"do", "type", "delete", "exit",
-				"load", "persistent", "funcdef", "box"
+				"do", "type", "delete", "exit", "persistent",
+				"func", "box", "class", "classid"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
@@ -144,7 +148,7 @@ class Token
 				/* Type idfrs (spaces are ignored by Lexer), evaluate to (int)Type enum  */
 				"typenil", "typeint", "typedouble", "typestring", "typeboolean",
 				"typelist", "typeunit", "typemap", "typefunc", "typechar",
-				"typeobject"
+				"typeobject", "typereference"
 		};
 
 		static TokenType deduce_type(std::string &tokstr);
@@ -176,6 +180,7 @@ class Token
 
 		static const Token END_OF_EXPR;
 		static const Token EOF_TOKEN;
+		static const int TYPENAMES_BEG_IDX;
 		static const int LITERAL_START = static_cast<int>(TokenType::INTEGER);
 		static const int WORD_OP_START = static_cast<int>(TokenType::DO);
 		static const int BICHAR_OP_START = static_cast<int>(TokenType::SHIFT_L);
@@ -184,6 +189,7 @@ class Token
 		static bool contains_all(std::string str, std::string substr);
 
 		std::string to_string();
+		static std::string to_string(TokenType type);
 		friend std::ostream& operator <<(std::ostream &stream, const Token &val);
 };
 

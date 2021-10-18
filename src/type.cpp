@@ -15,9 +15,9 @@ double dbl(Value val)
 	return val.as<double>();
 }
 
-int num(Value val)
+dec num(Value val)
 {
-	return val.as<int>();
+	return val.as<dec>();
 }
 
 bool bln(Value val)

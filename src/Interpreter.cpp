@@ -7,8 +7,8 @@ namespace mtl
 
 Interpreter::Interpreter() : ExprEvaluator()
 {
-	prefix_op(TokenType::LOAD, [&](ExprPtr fname) {
-		return Value(load_file(eval(fname).as<std::string>()));
+	inbuilt_func("load", [&](Args args) {
+		return Value(load_file(eval(args[0]).as<std::string>()));
 	});
 }
 
@@ -36,16 +36,17 @@ Unit Interpreter::load_file(std::string path)
 
 Unit Interpreter::load_unit(std::istream &codestr)
 {
-	auto src_len = codestr.tellg();
-	codestr.seekg(std::ios::beg);
-	std::string code(src_len, 0);
-	codestr.read(&code[0], src_len);
-	return load_unit(code);
+	return load_unit(mtl::read_file(codestr));
 }
 
 Unit Interpreter::load_unit(const std::string &code)
 {
-	parser.load(code);
+	try {
+		parser.load(code);
+	} catch (std::exception &e) {
+		std::cerr << "[Parsing error] " << e.what() << std::endl;
+		return Unit();
+	}
 	Unit unit = parser.result();
 	parser.clear();
 	return unit;
@@ -63,12 +64,7 @@ void Interpreter::load(const std::string &code)
 
 void Interpreter::load(const Unit &main)
 {
-	try {
-		load_main(this->main = main);
-	} catch (std::runtime_error &e) {
-		std::cerr
-		<< "Runtime error during expression parsing: " << e.what() << std::endl;
-	}
+	load_main(this->main = main);
 }
 
 Unit Interpreter::program()
@@ -90,7 +86,7 @@ Value Interpreter::run()
 	try {
 		ret = execute(main);
 	} catch (std::runtime_error &e) {
-		std::cerr << "Runtime error: " << e.what() << std::endl;
+		std::cerr << "[Runtime error] " << e.what() << std::endl;
 		dump_stack();
 	}
 

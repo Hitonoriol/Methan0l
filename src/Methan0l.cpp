@@ -11,16 +11,6 @@
 #include "type.h"
 #include "util/util.h"
 
-void run_file(mtl::Interpreter &methan0l, char *filename)
-{
-	std::string src_name = std::string(filename);
-	methan0l.load(methan0l.load_file(src_name));
-	mtl::Value ret = methan0l.run();
-
-	if (!ret.empty())
-		std::cout << "Main returned: " << ret << std::endl;
-}
-
 std::unordered_map<std::string, std::function<void(mtl::Interpreter&)>> intr_cmds {
 		{ "info",
 				[](auto &mtl)
@@ -62,6 +52,16 @@ void interactive_mode(mtl::Interpreter &methan0l)
 
 		methan0l.run();
 	} while (!methan0l.force_quit());
+}
+
+void run_file(mtl::Interpreter &methan0l, char *filename)
+{
+	std::string src_name = std::string(filename);
+	methan0l.load(methan0l.load_file(src_name));
+	mtl::Value ret = methan0l.run();
+
+	if (!ret.empty())
+		std::cout << "Main returned: " << ret << std::endl;
 }
 
 int main(int argc, char **argv)

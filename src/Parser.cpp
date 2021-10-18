@@ -62,7 +62,7 @@ void Parser::parse_all()
 
 bool Parser::match(TokenType expected)
 {
-	Token token = look_ahead();
+	Token &token = look_ahead();
 	if (token.get_type() != expected)
 		return false;
 
@@ -73,16 +73,17 @@ bool Parser::match(TokenType expected)
 Token Parser::consume()
 {
 	look_ahead();
-	Token ret = read_queue.front();
+	Token &ret = read_queue.front();
 	read_queue.pop_front();
 	return ret;
 }
 
 Token Parser::consume(TokenType expected)
 {
-	Token token = look_ahead();
+	Token &token = look_ahead();
 	if (token.get_type() != expected)
-		throw std::runtime_error("Unexpected token: " + token.to_string());
+		throw std::runtime_error("Unexpected token: " + token.to_string()
+				+ " (expected: " + Token::to_string(expected) + ")");
 
 	return consume();
 }
@@ -98,11 +99,10 @@ void Parser::emplace(const Token &token)
 	read_queue.push_front(token);
 }
 
-Token Parser::look_ahead(size_t n)
+Token& Parser::look_ahead(size_t n)
 {
-	while (n >= read_queue.size()) {
+	while (n >= read_queue.size())
 		read_queue.push_back(lexer.next());
-	}
 
 	return read_queue[n];
 }

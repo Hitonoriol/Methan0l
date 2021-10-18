@@ -32,5 +32,8 @@ newl
 do $(key, map.list_of$(keys)) -> {
 	"Key: " :: key :: ", Value: " :: map[key]
 }
-
+""
 /* Extract key / value lists from maps: Map.list_of$(keys) & Map.list_of$(values) */
+
+"Map Functional for_each"
+map.for_each$(func @(key, val) { %%("{" :: key :: ": " :: val :: "} ") })

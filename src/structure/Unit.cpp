@@ -126,6 +126,11 @@ void Unit::set_persisent(bool val)
 	persistent = val;
 }
 
+void Unit::set_weak(bool val)
+{
+	weak = val;
+}
+
 bool Unit::has_returned()
 {
 	return local_data.exists(RETURN_KEYWORD);
@@ -177,7 +182,9 @@ std::string Unit::to_string()
 std::ostream& operator <<(std::ostream &stream, Unit &val)
 {
 	return stream << "{" << (val.weak ? "Weak" : "Regular")
-			<< " Unit (" << static_cast<void*>(&val) << ") " << val.local_data << " ("
+			<< " Unit (" << static_cast<void*>(&val) << ") "
+			<< "[" << val.expressions().size() << " exprs] "
+			<< val.local_data << " ("
 			<< (val.persistent ? "Persistent" : "Non-persistent")
 			<< ")}";
 }

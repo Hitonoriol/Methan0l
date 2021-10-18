@@ -19,11 +19,14 @@ namespace mtl
 class LoopParser: public PrefixParser
 {
 	private:
-		static const size_t FOR_ARGS = 3,FOREACH_ARGS = 2, WHILE_ARGS = 1;
+		static const size_t FOR_ARGS = 3, FOREACH_ARGS = 2, WHILE_ARGS = 1;
 
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
+			if constexpr (DEBUG)
+				std::cout << "Parsing Loop Expression..." << std::endl;
+
 			ExprList loop_params = try_cast<ListExpr>(parser.parse()).raw_list();
 			ExprPtr body = parser.parse();
 			size_t size = loop_params.size();

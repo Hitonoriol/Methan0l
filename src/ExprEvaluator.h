@@ -14,7 +14,7 @@ namespace mtl
 class AssignExpr;
 class IdentifierExpr;
 class ConditionalExpr;
-class BinaryOperatorExpression;
+class BinaryOperatorExpr;
 class PrefixExpr;
 class PostfixExpr;
 class UnitExpr;
@@ -81,11 +81,12 @@ class ExprEvaluator
 		DataTable* global();
 		DataTable* local_scope();
 
+		Value& dot_operator_reference(ExprPtr lhs, ExprPtr rhs);
 		Value& referenced_value(ExprPtr idfr);
 		Value& get(IdentifierExpr &idfr);
-		Value& get(std::string id, bool global);
+		Value& get(const std::string &id, bool global);
 
-		Value evaluate(BinaryOperatorExpression &opr);
+		Value evaluate(BinaryOperatorExpr &opr);
 		Value evaluate(PostfixExpr &opr);
 		Value evaluate(PrefixExpr &opr);
 		Value evaluate(AssignExpr &expr);

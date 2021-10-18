@@ -3,9 +3,12 @@
 
 #include "Expression.h"
 #include "../util/util.h"
+#include "../structure/Value.h"
 
 namespace mtl
 {
+
+struct Value;
 
 class LiteralExpr: public Expression
 {
@@ -19,7 +22,7 @@ class LiteralExpr: public Expression
 			auto type = token.get_type();
 
 			if (val_type == Type::INTEGER)
-				value = std::stoi(tokstr);
+				value = std::stol(tokstr);
 
 			else if (val_type == Type::DOUBLE)
 				value = std::stod(tokstr);
@@ -69,7 +72,7 @@ class LiteralExpr: public Expression
 			exec_literal(evaluator, evald);
 		}
 
-		static ExprPtr empty()
+		static std::shared_ptr<LiteralExpr> empty()
 		{
 			return std::make_shared<LiteralExpr>();
 		}

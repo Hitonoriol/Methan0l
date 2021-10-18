@@ -1,6 +1,6 @@
 "Functions" :: newl
 
-sum = func def @(a, b, c => 123) {
+sum = func @(a, b, c => 123) {
 	c != 123 ? -> {"A non-default third arg has been provided!"!}
 	(a + b)!
 }

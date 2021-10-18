@@ -1,8 +1,8 @@
 #ifndef SRC_EXPRESSION_PARSER_BINARYOPERATORPARSER_H_
 #define SRC_EXPRESSION_PARSER_BINARYOPERATORPARSER_H_
 
+#include "../BinaryOperatorExpr.h"
 #include "InfixParser.h"
-#include "../BinaryOperatorExpression.h"
 
 namespace mtl
 {
@@ -21,7 +21,7 @@ class BinaryOperatorParser: public InfixParser
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
 		{
 			ExprPtr rhs = parser.parse(opr_precedence - (right_assoc ? 1 : 0));
-			return ptr(new BinaryOperatorExpression(lhs, token.get_type(), rhs));
+			return ptr(new BinaryOperatorExpr(lhs, token.get_type(), rhs));
 		}
 
 		int precedence() override

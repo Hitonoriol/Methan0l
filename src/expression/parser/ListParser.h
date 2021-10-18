@@ -12,6 +12,9 @@ class ListParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
+			if constexpr (DEBUG)
+				std::cout << "Parsing List Expression..." << std::endl;
+
 			ExprList raw_list;
 
 			if (!parser.match(TokenType::PAREN_R)) {

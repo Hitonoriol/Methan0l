@@ -5,6 +5,7 @@
 
 #include "../../expression/IdentifierExpr.h"
 #include "../../ExprEvaluator.h"
+#include "../../structure/object/Object.h"
 #include "../../structure/Value.h"
 #include "../../Token.h"
 
@@ -16,7 +17,7 @@ void LibIO::load()
 	/* Output Operator */
 	prefix_operator(TokenType::OUT, [&](auto expr) {
 		Value rhs = val(expr);
-		std::cout << rhs.to_string();
+		std::cout << rhs.to_string(eval);
 		return rhs;
 	});
 

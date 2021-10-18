@@ -26,10 +26,13 @@ list[5] = -64
 view_lst
 
 newl :: "Populating a list in a recursive \"loop\"..."
+/* This can be done in a more sane way, but I wanted to demonstrate how recursive calls work in Methan0l */
 list_populator = {
 	(++i) > max ? -> {"Done populating new list"; new_list!}
 	new_list[] = 1.0 / i
-	#list_populator$()!
+	(#list_populator$({i = #i; max = #max; new_list = #new_list}))!
+	/* # means global scope lookup, this ^^^ effectively copies the variables
+	 * from our current recursive call's scope to the next one's */
 }
 
 /* Using pseudo-function syntax for initialization
@@ -41,7 +44,17 @@ ret = list_populator$({i = 0; max = 10; new_list = $()})
 %%("List size: " :: size$(ret) :: newl)
 newl
 
-/* Foreach loop */
+"Foreach loop"
 do $(val, ret) -> {
 	"* " :: val
 }
+""
+
+"Functional foreach"
+ret.for_each$(func @(x) { %%(x :: "--") })
+""
+
+"Range function -- returns a list w/ Integer elements in specified range:"
+%% ("[0; 9] --> " :: range$(10) :: newl)
+%% ("[-10; 9] --> " :: range$(-10, 10) :: newl)
+%% ("{-25; -20; ...; 25} --> " :: range$(-25, 30, 5) :: newl)

@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <crtdefs.h>
 #include <algorithm>
 #include <memory>
 #include <stdexcept>
@@ -11,15 +10,19 @@
 #include <utility>
 #include <filesystem>
 
+#include "../../expression/LiteralExpr.h"
 #include "../../expression/Expression.h"
 #include "../../ExprEvaluator.h"
 #include "../../structure/Function.h"
 #include "../../structure/object/Object.h"
 #include "../../structure/Value.h"
 #include "../../type.h"
+#include "../../util/util.h"
 
 namespace mtl
 {
+
+namespace fs = std::filesystem;
 
 File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 {
@@ -27,6 +30,17 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	register_method(std::string(CONSTRUCT), [&](auto args) {
 		Object &obj = Object::get_this(args);
 		obj.field(FNAME) = str(args[1]->evaluate(eval));
+		return NO_VALUE;
+	});
+
+	/* Called automatically when converting to string */
+	register_method(std::string(TO_STRING), [&](auto args) {
+		return Object::get_this(args).field(FNAME);
+	});
+
+	/* file.set$(path) */
+	register_method("set", [&](auto args) {
+		Object::get_this(args).field(FNAME) = str(args[1]->evaluate(eval));
 		return NO_VALUE;
 	});
 
@@ -40,24 +54,79 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 		return Value(close(Object::get_this(args)));
 	});
 
+	/* file.for_each$(action) */
+	register_method("for_each", [&](auto args) {
+		std::string root_path = path(args);
+		Value func = args[1]->evaluate(eval);
+		Function &action = func.get<Function>();
+
+		if (!fs::is_directory(root_path))
+			throw std::runtime_error("File.for_each can only be performed on a directory");
+
+		auto path = std::make_shared<LiteralExpr>();
+		ExprList action_args {path};
+		for(auto& entry: fs::recursive_directory_iterator(root_path)) {
+			path->raw_ref() = entry.path().string();
+			eval.invoke(action, action_args);
+		}
+
+		return NO_VALUE;
+	});
+
+	/* file.extension$() */
+	register_method("extension", [&](auto args) {
+		return Value(fs::path(path(args)).extension().string());
+	});
+
 	/* file.size$() */
 	register_method("size", [&](auto args) {
-		return Value((int)std::filesystem::file_size(str(Object::get_this(args).field(FNAME))));
+		return Value((dec)fs::file_size(path(args)));
 	});
 
 	/* file.absolute_path$() */
 	register_method("absolute_path", [&](auto args) {
-		return Value(std::filesystem::absolute(str(Object::get_this(args).field(FNAME))).string());
+		return Value(fs::absolute(path(args)).string());
 	});
 
 	/* file.is_dir$() */
 	register_method("is_dir", [&](auto args) {
-		return Value(std::filesystem::is_directory(str(Object::get_this(args).field(FNAME))));
+		return Value(fs::is_directory(path(args)));
 	});
 
 	/* file.exists$() */
 	register_method("exists", [&](auto args) {
-		return Value(std::filesystem::exists(str(Object::get_this(args).field(FNAME))));
+		return Value(fs::exists(path(args)));
+	});
+
+	/* file.mkdirs$() */
+	register_method("mkdirs", [&](auto args) {
+		return Value(fs::create_directories(path(args)));
+	});
+
+	/* file.cd$() */
+	register_method("cd", [&](auto args) {
+		fs::current_path(path(args));
+		return NO_VALUE;
+	});
+
+	/* file.equivalent$(path) */
+	register_method("equivalent", [&](auto args) {
+		std::string file = path(args);
+		std::string rhs = str(args[1]->evaluate(eval));
+		return Value(fs::equivalent(file, rhs));
+	});
+
+	/* file.copy_to$(dest_path) */
+	register_method("copy_to", [&](auto args) {
+		std::string from = path(args);
+		std::string to = str(args[1]->evaluate(eval));
+		fs::copy(from, to);
+		return NO_VALUE;
+	});
+
+	/* file.read_contents$() */
+	register_method("read_contents", [&](auto args) {
+		return Value(read_file(managed_file(Object::get_this(args))));
 	});
 
 	/* file.read_line$() */
@@ -68,7 +137,7 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	/* file.write_line$(expr) */
 	register_method("write_line", [&](auto args) {
 		write_line(Object::get_this(args), str(args[1]->evaluate(eval)));
-		return NIL;
+		return NO_VALUE;
 	});
 }
 
@@ -84,6 +153,11 @@ std::string File::read_line(Object &obj)
 void File::write_line(Object &obj, const std::string &line)
 {
 	managed_file(obj) << line << std::endl;
+}
+
+std::string File::path(ExprList &args)
+{
+	return str(Object::get_this(args).field(FNAME));
 }
 
 bool File::open(Object &obj)

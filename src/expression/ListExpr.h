@@ -21,15 +21,7 @@ class ListExpr: public Expression
 			return exprs;
 		}
 
-		Value evaluate(ExprEvaluator &evaluator) override
-		{
-			ValList list;
-
-			for (auto expr : exprs)
-				list.push_back(expr->evaluate(evaluator));
-
-			return Value(list);
-		}
+		Value evaluate(ExprEvaluator &evaluator) override;
 
 		std::ostream& info(std::ostream &str) override
 		{

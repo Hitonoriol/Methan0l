@@ -44,7 +44,7 @@ class Parser
 		bool match(TokenType expected);
 		Token consume(TokenType expected);
 		Token consume();
-		Token look_ahead(size_t n = 0);
+		Token& look_ahead(size_t n = 0);
 		void emplace(const Token &token);
 		void end_of_expression();
 

@@ -4,11 +4,13 @@
 #include <iostream>
 
 #include "../ExprEvaluator.h"
-#include "../structure/Value.h"
 #include "../type.h"
+#include "../structure/Value.h"
 
 namespace mtl
 {
+
+struct Value;
 
 class Expression
 {
@@ -18,10 +20,7 @@ class Expression
 		virtual Value evaluate(ExprEvaluator &evaluator) = 0;
 
 		/* called instead of evaluate() for parent-less exprs */
-		virtual void execute(ExprEvaluator &evaluator)
-		{
-			evaluate(evaluator);
-		}
+		virtual void execute(ExprEvaluator &evaluator);
 
 		virtual std::ostream& info(std::ostream &str)
 		{

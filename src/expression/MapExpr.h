@@ -16,25 +16,17 @@ class MapExpr: public Expression
 		{
 		}
 
-		Value evaluate(ExprEvaluator &evaluator) override
-		{
-			ValMap map;
-
-			for (auto entry : exprs)
-				map.emplace(entry.first, entry.second->evaluate(evaluator));
-
-			return Value(map);
-		}
+		Value evaluate(ExprEvaluator &evaluator) override;
 
 		/* Map execution works as a local idfr init list */
-		void execute(ExprEvaluator &evaluator) override
-		{
-			ValMap map = evaluate(evaluator).get<ValMap>();
-			for (auto entry : map)
-				evaluator.scope_lookup(entry.first, false)->set(entry.first, entry.second);
-		}
+		void execute(ExprEvaluator &evaluator) override;
 
 		ExprMap raw_map()
+		{
+			return exprs;
+		}
+
+		ExprMap& raw_ref()
 		{
 			return exprs;
 		}

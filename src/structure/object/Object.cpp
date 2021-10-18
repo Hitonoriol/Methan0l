@@ -12,6 +12,7 @@
 #include "../../type.h"
 #include "../../util/util.h"
 #include "TypeManager.h"
+#include "../../ExprEvaluator.h"
 
 namespace mtl
 {
@@ -24,14 +25,27 @@ Object::Object(size_t type_hash) : type_hash(type_hash)
 {
 }
 
-Object::Object(const Object &rhs) : type_hash(rhs.type_hash), data(rhs.data)
+Object::Object(size_t type_hash, const DataTable &proto_data) :
+		type_hash(type_hash),
+		data(proto_data)
+{
+	this_instance = std::make_shared<LiteralExpr>(*this);
+	std::get<Object>(this_instance->raw_ref()).prv_access = true;
+}
+
+Object::Object(const Object &rhs) :
+		type_hash(rhs.type_hash),
+		this_instance(rhs.this_instance),
+		data(rhs.data)
 {
 }
 
 Object& Object::operator=(const Object &rhs)
 {
 	type_hash = rhs.type_hash;
+	prv_access = rhs.prv_access;
 	data = rhs.data;
+	this_instance = rhs.this_instance;
 	return *this;
 }
 
@@ -58,13 +72,18 @@ Value Object::invoke_method(TypeManager &mgr, const std::string_view &name,
 
 void Object::inject_this(Args &args)
 {
-	args.push_front(std::make_shared<LiteralExpr>(*this));
+	args.push_front(this_instance);
 }
 
 Object& Object::get_this(ExprList &args)
 {
 	LiteralExpr &this_expr = try_cast<LiteralExpr>(args.front());
 	return std::get<Object>(this_expr.raw_ref());
+}
+
+bool Object::has_prv_access()
+{
+	return prv_access;
 }
 
 DataTable& Object::get_data()
@@ -89,6 +108,12 @@ std::string Object::to_string()
 	return ss.str();
 }
 
+std::string Object::to_string(ExprEvaluator &eval)
+{
+	ExprList noargs;
+	return str(invoke_method(eval.get_type_mgr(), ObjectType::TO_STRING, noargs));
+}
+
 void Object::deep_copy()
 {
 	data.copy_managed_map();
@@ -102,7 +127,8 @@ bool operator ==(const Object &lhs, const Object &rhs)
 std::ostream& operator <<(std::ostream &stream, Object &obj)
 {
 	return stream << "{Object 0x" << std::hex << obj.id()
-			<< " of Type 0x" << std::hex << obj.type_id() << "}";
+			<< " of Type 0x" << std::hex << obj.type_id()
+			<< std::dec << "}";
 }
 
 Object Object::copy(const Object &obj)

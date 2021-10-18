@@ -1,6 +1,5 @@
 #include "DataTable.h"
 
-#include <crtdefs.h>
 #include <algorithm>
 #include <iostream>
 #include <memory>
@@ -18,6 +17,10 @@ DataTable::DataTable() : map(std::make_shared<DataMap>())
 {
 	if constexpr (DEBUG)
 		std::cout << "New data table: " << *this << std::endl;
+}
+
+DataTable::DataTable(const DataMap &managed_map) : map(std::make_shared<DataMap>(managed_map))
+{
 }
 
 DataTable::DataTable(const DataTable &rhs) : map(rhs.map)

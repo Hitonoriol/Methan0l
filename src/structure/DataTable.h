@@ -17,6 +17,7 @@ class DataTable
 
 	public:
 		DataTable();
+		DataTable(const DataMap &managed_map);
 		DataTable(const DataTable &rhs);
 		DataTable& operator=(const DataTable &rhs);
 

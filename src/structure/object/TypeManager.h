@@ -1,7 +1,6 @@
 #ifndef SRC_STRUCTURE_OBJECT_TYPEMANAGER_H_
 #define SRC_STRUCTURE_OBJECT_TYPEMANAGER_H_
 
-#include <crtdefs.h>
 #include <string>
 #include <unordered_map>
 

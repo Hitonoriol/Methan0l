@@ -15,14 +15,14 @@
 namespace mtl
 {
 
-constexpr bool DEBUG = false;
+constexpr bool DEBUG = true;
 
 using dec = int64_t;
 
 struct Value;
 std::string str(Value);
 double dbl(Value);
-int num(Value);
+dec num(Value);
 bool bln(Value);
 
 class Expression;

@@ -1,6 +1,5 @@
 #include "LibArithmetic.h"
 
-#include <crtdefs.h>
 #include <iterator>
 #include <variant>
 
@@ -35,7 +34,7 @@ void LibArithmetic::load()
 		Value rval = val(rhs);
 
 		if (rval.type == Type::INTEGER)
-			rval.value = -rval.as<int>();
+			rval.value = -rval.as<dec>();
 		else
 			rval.value = -rval.as<double>();
 
@@ -67,7 +66,7 @@ Value LibArithmetic::calculate(ExprPtr &l, TokenType op, ExprPtr &r)
 	if (Value::is_double_op(lexpr, rexpr))
 		return Value(calculate(lexpr.as<double>(), op, rexpr.as<double>()));
 
-	return Value(calculate(lexpr.as<int>(), op, rexpr.as<int>()));
+	return Value(calculate(lexpr.as<dec>(), op, rexpr.as<dec>()));
 }
 
 void LibArithmetic::apply_unary(Value &val, TokenType op)
@@ -75,7 +74,7 @@ void LibArithmetic::apply_unary(Value &val, TokenType op)
 	const int d = unary_diff(op);
 	switch (val.type) {
 	case Type::INTEGER:
-		val.value = val.as<int>() + d;
+		val.value = val.as<dec>() + d;
 		break;
 
 	case Type::DOUBLE:

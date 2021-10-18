@@ -1,12 +1,12 @@
-#ifndef SRC_EXPRESSION_BINARYOPERATOREXPRESSION_H_
-#define SRC_EXPRESSION_BINARYOPERATOREXPRESSION_H_
+#ifndef SRC_EXPRESSION_BINARYOPERATOREXPR_H_
+#define SRC_EXPRESSION_BINARYOPERATOREXPR_H_
 
 #include "Expression.h"
 
 namespace mtl
 {
 
-class BinaryOperatorExpression: public Expression
+class BinaryOperatorExpr: public Expression
 {
 	private:
 		ExprPtr lhs;
@@ -15,7 +15,7 @@ class BinaryOperatorExpression: public Expression
 
 	public:
 
-		BinaryOperatorExpression(ExprPtr lhs,
+		BinaryOperatorExpr(ExprPtr lhs,
 				TokenType opr,
 				ExprPtr rhs) :
 				lhs(lhs), opr(opr), rhs(rhs)
@@ -59,4 +59,4 @@ class BinaryOperatorExpression: public Expression
 
 } /* namespace mtl */
 
-#endif /* SRC_EXPRESSION_BINARYOPERATOREXPRESSION_H_ */
+#endif /* SRC_EXPRESSION_BINARYOPERATOREXPR_H_ */

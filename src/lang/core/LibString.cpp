@@ -47,6 +47,11 @@ void LibString::load()
 		return NIL;
 	});
 
+	/* str.contains$(substr) */
+	function("contains", [&](Args args) {
+		return Value(str(args).find(str(args, 1)) != std::string::npos);
+	});
+
 	/* str.find$(substr, [start_pos]) */
 	function("find", [&](Args args) {
 		std::string s = str(args);
@@ -85,7 +90,7 @@ void LibString::load_operators()
 		std::string str;
 
 		for (Value val : list)
-			str += val.to_string();
+			str += val.to_string(eval);
 
 		return Value(str);
 	});
@@ -93,7 +98,7 @@ void LibString::load_operators()
 	/* Inline concatenation */
 	infix_operator(TokenType::INLINE_CONCAT, [this](auto lhs, auto rhs) {
 		auto lexpr = val(lhs), rexpr = val(rhs);
-		return Value(lexpr.to_string() + rexpr.to_string());
+		return Value(lexpr.to_string(eval) + rexpr.to_string(eval));
 	});
 }
 

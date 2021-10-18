@@ -27,6 +27,7 @@ class File: public InbuiltType
 
 		std::fstream &managed_file(Object &obj);
 
+		std::string path(ExprList &args);
 		bool open(Object &obj);
 		bool close(Object &obj);
 

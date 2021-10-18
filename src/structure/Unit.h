@@ -48,6 +48,7 @@ class Unit
 		bool is_weak();
 		bool is_persistent();
 		void set_persisent(bool val);
+		void set_weak(bool val);
 
 		void clear();
 		void prepend(ExprPtr expr);
