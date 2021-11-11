@@ -1,7 +1,10 @@
 #include "LibUnit.h"
 
+#include <chrono>
 #include <deque>
 #include <stdexcept>
+#include <chrono>
+#include <thread>
 
 #include "../../expression/IdentifierExpr.h"
 #include "../../expression/InvokeExpr.h"
@@ -18,41 +21,107 @@ namespace mtl
 
 void LibUnit::load()
 {
+	/* measure_time$(expr) */
+	function("measure_time", [&](Args args) {
+		auto start = std::chrono::high_resolution_clock::now();
+		args.front()->execute(*eval);
+		auto end = std::chrono::high_resolution_clock::now();
+		return Value(std::chrono::duration<double, std::milli>(end - start).count());
+	});
+
+	/* pause$(ms) */
+	function("pause", [&](Args args) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(num(args)));
+		return Value::NO_VALUE;
+	});
+
 	/* err$(err_msg) */
 	function("err", [&](Args args) {
 		std::cerr << str(args) << std::endl;
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
 	/* die$(err_msg) */
 	function("die", [&](Args args) {
 		std::string err_msg = !args.empty() ? str(args) : "Stopping program execution";
 		throw std::runtime_error(err_msg);
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
-	/* Return operator */
-	postfix_operator(TokenType::EXCLAMATION, [this](auto lhs) {
-		Unit *unit = eval->current_unit();
-		if (instanceof<IdentifierExpr>(lhs.get()) && IdentifierExpr::get_name(lhs) == Token::reserved(Word::BREAK))
-			unit->stop();
-		else
-			unit->save_return(val(lhs));
-		return unit->result();
+	/* unit.import$() */
+	function("import", [&](Args args) {
+		Value &module_val = ref(args[0]);
+		module_val.assert_type(Type::UNIT, "import$() can only be applied on a Unit");
+
+		Unit &module = module_val.get<Unit>();
+		eval->execute(module.expressions());
+		return Value::NO_VALUE;
 	});
 
-	/* Persistence operator */
-	prefix_operator(TokenType::PERSISTENT, [this](auto rhs) {
-		Value rval = val(rhs);
+	/* unit.make_box$() */
+	function("make_box", [this](Args args) {
+		/* If received Unit is referenceable (aka is "behind" an IdfrExpr/IndexExpr) -- modify it
+		 * 			& return Methan0l reference to it */
+		if (instanceof<IdentifierExpr>(args[0].get())) {
+			Value &val = ref(args[0]);
+			make_box(val);
+			return Value::ref(val);
+		}
+		/* If Unit is non-referenceable, get its copy, modify it & return by copy */
+		else {
+			Value val = arg(args);
+			make_box(val);
+			return val;
+		}
+	});
 
-		if (rval.type != Type::UNIT)
-			throw std::runtime_error("Persistence can only be applied to a Unit");
+	/* unit.local$(action_to_exec) <-- execute Unit <action_to_exec> inside the <unit>'s local scope */
+	function("local", [&](Args args) {
+		args[0]->assert_type<IdentifierExpr>(args[0]->info() + " is not an Identifier");
+		Value &uv = ref(args[0]);
+		Value av = arg(args, 1);
+		Unit unit = uv.get<Unit>();
+		Unit &action = av.get<Unit>();
+		action.manage_table(unit);
+		action.set_persisent(true);
 
-		Unit &unit = rval.get<Unit>();
-		unit.set_persisent(true);
-		eval->execute(unit);
+		/* If this Unit is not persistent, execute it, save its state and only then execute <action_to_exec> */
+		if (!unit.is_persistent()) {
+			unit.set_persisent(true);
+			eval->execute(unit);
+			unit.set_persisent(false);
+		}
 
-		return rval;
+		return eval->execute(action);
+	});
+
+	/* Stop program execution */
+	function("exit", [&](Args args) {
+		eval->stop();
+		return Value::NO_VALUE;
+	});
+
+	load_operators();
+}
+
+void LibUnit::load_operators()
+{
+	/* Prefix return operator */
+	prefix_operator(TokenType::RETURN, [&](auto lhs) {
+		save_return(lhs);
+		return Value::NO_VALUE;
+	});
+
+	/* Postfix return operator */
+	postfix_operator(TokenType::EXCLAMATION, [&](auto lhs) {
+		save_return(lhs);
+		return Value::NO_VALUE;
+	});
+
+	/* Postfix return by reference */
+	postfix_operator(TokenType::DOUBLE_EXCL, [&](auto lhs) {
+		save_return(lhs, true);
+		return Value::NO_VALUE;
 	});
 
 	/* Static method invocation: Type@method$(arg1, arg2, ...) */
@@ -63,37 +132,62 @@ void LibUnit::load()
 		return type.invoke_static(name, method_expr.arg_list().raw_list());
 	});
 
-	/* Reference an idfr from a persistent unit / call a (pseudo) method of type */
-	infix_operator(TokenType::DOT, [this](auto lhs, auto rhs) {
+	/* Access operator */
+	infix_operator(TokenType::DOT, [&](auto lhs, auto rhs) -> Value {
 		Value lval = val(lhs);
-
+		/* Object field access / method invocation */
 		if (lval.object()) {
 			return object_dot_operator(lval.get<Object>(), rhs);
 		}
-		else if (lval.type != Type::UNIT) {
-			if (instanceof<InvokeExpr>(rhs.get())) {
+		/* Pseudo-method / Box function invocation */
+		else if (instanceof<InvokeExpr>(rhs)) {
+			if (lval.type() == Type::UNIT && lval.get<Unit>().is_persistent()
+					&& lval.get<Unit>().local().exists(Expression::get_name(rhs))) {
+				//return eval->invoke(lval.get<Unit>().local().get(Expression::get_name(rhs)), try_cast<InvokeExpr>(rhs));
+				eval->enter_scope(lval.get<Unit>());
+				Value ret = eval->evaluate(try_cast<InvokeExpr>(rhs));
+				eval->leave_scope();
+				return ret;
+			} else {
 				return invoke_pseudo_method(lhs, rhs);
 			}
-			else {
-				throw std::runtime_error("LHS of dot operator must evaluate to Unit");
-			}
 		}
+		/* Box Unit idfr access */
+		else {
+			lval.assert_type(Type::UNIT, "Invalid dot-operator expression");
+			Unit &unit = lval.get<Unit>();
+			if (!unit.is_persistent())
+				throw std::runtime_error("Trying to access an idfr in a non-persistent Unit");
 
-		Unit &unit = lval.get<Unit>();
-		if (!unit.is_persistent())
-			throw std::runtime_error("Trying to access an idfr in a non-persistent Unit");
-
-		eval->enter_scope(unit);
-		Value result = val(rhs);
-		eval->leave_scope();
-		return result;
+			return Value::ref(box_value(unit, rhs));
+		}
 	});
+}
 
-	/* Stop program execution */
-	prefix_operator(TokenType::EXIT, [this](auto rhs) {
-		eval->stop();
-		return NO_VALUE;
-	});
+Value& LibUnit::box_value(Unit &box, ExprPtr expr)
+{
+	eval->enter_scope(box);
+	Value &result = eval->referenced_value(expr);
+	eval->leave_scope();
+	return result;
+}
+
+void LibUnit::save_return(ExprPtr ret, bool by_ref)
+{
+	Unit *unit = eval->current_unit();
+	if (instanceof<IdentifierExpr>(ret)
+			&& IdentifierExpr::get_name(ret) == Token::reserved(Word::BREAK))
+		unit->stop();
+	else
+		unit->save_return(by_ref ? Value::ref(eval->referenced_value(ret)) : val(ret));
+}
+
+void LibUnit::make_box(Value &unit_val)
+{
+	unit_val.assert_type(Type::UNIT, "make_box$() can only be applied on a Unit");
+	Unit &unit = unit_val.get<Unit>();
+	unit.set_persisent(true);
+	eval->execute(unit);
 }
 
 Value LibUnit::object_dot_operator(Object &obj, ExprPtr rhs)
@@ -103,7 +197,7 @@ Value LibUnit::object_dot_operator(Object &obj, ExprPtr rhs)
 
 	if (instanceof<InvokeExpr>(rhs.get())) {
 		InvokeExpr &method = try_cast<InvokeExpr>(rhs);
-		std::string method_name = try_cast<IdentifierExpr>(method.get_lhs()).get_name();
+		auto &method_name = try_cast<IdentifierExpr>(method.get_lhs()).get_name();
 		return obj.invoke_method(eval->type_mgr, method_name, method.arg_list().raw_list());
 	}
 	else
@@ -115,6 +209,9 @@ Value LibUnit::object_dot_operator(Object &obj, ExprPtr rhs)
  */
 Value LibUnit::invoke_pseudo_method(ExprPtr obj, ExprPtr func)
 {
+	if constexpr (DEBUG)
+		out << "Pseudo-method [" << obj->info() << "] . [" << func->info() << "]" << std::endl;
+
 	InvokeExpr method = try_cast<InvokeExpr>(func);
 	method.arg_list().raw_list().push_front(obj);
 	return eval->evaluate(method);

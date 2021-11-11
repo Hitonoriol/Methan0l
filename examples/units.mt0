@@ -4,8 +4,8 @@
  * (in fact, this whole program is a Unit itself)
  
 Visibility Scopes:
- * By default, Regular Units can only access its own local identifiers (defined within its scope, everuthing else is "global"),
- 	while Weak Units can access their own idfrs & any idfr above their scope up to the first Regular Unit,
+ * By default, Regular Unit can only access its own local identifiers (defined within its scope, everything else is "global"),
+ 	while Weak Unit can access its own idfrs & any idfr above its scope up to the first Regular Unit,
  	everything else is considered "global scope".
  * To access a variable from the global scope, use # prefix before the identifier
 
@@ -18,7 +18,7 @@ Return:
  		and cause their parent unit to also stop execution and "carry" the child return value.
  		Nested Weak Units cause each other to stop execution & carry return value until execution reaches a Regular Unit.
  	
- 	Possible use cases for type (1) are functions(Not yet implemented), lambdas, ...
+ 	Possible use cases for type (1) are functions
  		and type (2) Units can be used in conditional operator bodies & loops
  */
 calls = 0

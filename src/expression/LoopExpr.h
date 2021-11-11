@@ -38,10 +38,7 @@ class LoopExpr: public Expression
 		{
 		}
 
-		Value evaluate(ExprEvaluator &evaluator) override
-		{
-			return NIL;
-		}
+		Value evaluate(ExprEvaluator &evaluator) override;
 
 		bool is_foreach()
 		{
@@ -52,9 +49,9 @@ class LoopExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{"
+			return Expression::info(str << "{"
 					<< (is_foreach() ? "For-Each" : (init != nullptr ? "For" : "While"))
-					<< " Loop Expression}";
+					<< " Loop Expression}");
 		}
 };
 

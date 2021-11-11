@@ -50,7 +50,7 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 	if constexpr (DEBUG)
 		std::cout << "Parsed a map with " << map.size() << " entries" << std::endl;
 
-	return ptr(new MapExpr(map));
+	return make_expr<MapExpr>(line(token), map);
 }
 
 std::string MapParser::key_string(ExprPtr expr)

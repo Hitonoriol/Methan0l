@@ -1,19 +1,22 @@
 "Loading & Running all examples"
 line_sep = "******************************"
 this = "test_all.mt0"
-root = File.new$("./examples")
-!root.exists$() || !root.is_dir$() ? -> {
+root = File.new$("examples")
+<%("Absolute path: " :: root.absolute_path$())
+<%("Exists: " :: !root.exists$())
+if (!root.exists$() || !root.is_dir$()) ? -> {
 	die$("Failed to open examples directory")
 }
 
 tmp = File.new$("")
 root.for_each(func @(file) {
 	#tmp.set$(file)
-	#tmp.extension$() != ".mt0" || file.contains$(#this) ? -> {
+	if (#tmp.extension$() != ".mt0" || file.contains$(#this)) ? -> {
 		break!
 	}
 	newl :: file :: line_sep :: newl
-	example = load$(file)
-	example
+	/*
+	load$(file)$()
 	line_sep
+	*/
 })

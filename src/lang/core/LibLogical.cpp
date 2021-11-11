@@ -15,9 +15,8 @@ void LibLogical::load()
 			TokenType::AND, TokenType::OR, TokenType::XOR
 	};
 	for (size_t i = 0; i < std::size(log_ops); ++i)
-		infix_operator(log_ops[i], [=](auto lhs, auto rhs) {
-			Value lexpr = val(lhs), rexpr = val(rhs);
-			return Value(eval_logical(lexpr.as<bool>(), log_ops[i], rexpr.as<bool>()));
+		infix_operator(log_ops[i], [&, opr = log_ops[i]](auto lhs, auto rhs) {
+			return Value(eval_logical(lhs, opr, rhs));
 		});
 
 	/* Logical NOT operator */
@@ -32,9 +31,9 @@ void LibLogical::load()
 			TokenType::SHIFT_L, TokenType::SHIFT_R
 	};
 	for (size_t i = 0; i < std::size(bit_ops); ++i)
-		infix_operator(bit_ops[i], [=](auto lhs, auto rhs) {
+		infix_operator(bit_ops[i], [&, opr = bit_ops[i]](auto lhs, auto rhs) {
 			Value lexpr = val(lhs), rexpr = val(rhs);
-			return Value(eval_bitwise(lexpr.as<dec>(), bit_ops[i], rexpr.as<dec>()));
+			return Value(eval_bitwise(lexpr.as<dec>(), opr, rexpr.as<dec>()));
 		});
 
 	/* Bitwise NOT */
@@ -43,15 +42,14 @@ void LibLogical::load()
 	});
 
 	/* Comparison operators: >, <, >=, <= */
-	TokenType log_ar_ops[] = {
+	TokenType cmp_ops[] = {
 			TokenType::GREATER, TokenType::GREATER_OR_EQ,
 			TokenType::LESS, TokenType::LESS_OR_EQ
 	};
-	for (size_t i = 0; i < std::size(log_ar_ops); ++i)
-		infix_operator(log_ar_ops[i], [=](auto lhs,
-				auto rhs) {
+	for (size_t i = 0; i < std::size(cmp_ops); ++i)
+		infix_operator(cmp_ops[i], [&, opr = cmp_ops[i]](auto lhs, auto rhs) {
 					Value lval = val(lhs), rval = val(rhs);
-					return Value(eval_logic_arithmetic(lval.as<double>(), log_ar_ops[i], rval.as<double>()));
+					return Value(eval_arithmetic_comparison(lval.as<double>(), opr, rval.as<double>()));
 				});
 
 	/* Equals operator */
@@ -87,24 +85,33 @@ dec LibLogical::eval_bitwise(dec l, TokenType op, dec r)
 	}
 }
 
-bool LibLogical::eval_logical(bool l, TokenType op, bool r)
+bool LibLogical::eval_logical(const ExprPtr &l, TokenType op, const ExprPtr &r)
 {
+	bool lval = bln(val(l));
 	switch (op) {
-	case TokenType::OR:
-		return l || r;
+	case TokenType::OR: {
+		if (lval)
+			return true;
 
-	case TokenType::AND:
-		return l && r;
+		return lval || bln(val(r));
+	}
+
+	case TokenType::AND: {
+		if (!lval)
+			return false;
+
+		return lval && bln(val(r));
+	}
 
 	case TokenType::XOR:
-		return l != r;
+		return lval != bln(val(r));
 
 	default:
 		return false;
 	}
 }
 
-bool LibLogical::eval_logic_arithmetic(double l, TokenType op, double r)
+bool LibLogical::eval_arithmetic_comparison(double l, TokenType op, double r)
 {
 	switch (op) {
 	case TokenType::GREATER:

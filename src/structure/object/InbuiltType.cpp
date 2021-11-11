@@ -15,7 +15,7 @@ namespace mtl
 InbuiltType::InbuiltType(ExprEvaluator &eval, const std::string &name) : ObjectType(eval, name)
 {
 	register_method(std::string(CONSTRUCT), [&](auto args) {
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
 	register_method(std::string(TO_STRING), [&](auto args) {

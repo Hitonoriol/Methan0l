@@ -14,10 +14,11 @@ class AssignExpr: public Expression
 {
 	private:
 		ExprPtr lhs, rhs;
+		bool move;
 
 	public:
-		AssignExpr(ExprPtr lhs, ExprPtr rhs) :
-				lhs(lhs), rhs(rhs)
+		AssignExpr(ExprPtr lhs, ExprPtr rhs, bool move = false) :
+				lhs(lhs), rhs(rhs), move(move)
 		{
 		}
 
@@ -36,9 +37,21 @@ class AssignExpr: public Expression
 			return rhs;
 		}
 
+		bool is_move_assignment()
+		{
+			return move;
+		}
+
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Assign Expression}";
+			return Expression::info(str
+					<< "{"
+							<< (move ? "Move" : "Copy")
+							<< " Assignment Expression // \n\t"
+							<< "[" << lhs->info() << "]"
+							<< " = "
+							<< "[" << rhs->info() << "]"
+							<< "}");
 		}
 
 };

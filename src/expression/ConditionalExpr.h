@@ -48,7 +48,7 @@ class ConditionalExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Conditional Expression}";
+			return Expression::info(str << "{Conditional Expression}");
 		}
 };
 

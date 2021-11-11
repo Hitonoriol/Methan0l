@@ -35,7 +35,7 @@ void ClassExpr::execute(ExprEvaluator &eval)
 		}
 
 		Value rval = entry.second->evaluate(eval);
-		switch (rval.type) {
+		switch (rval.type()) {
 		case Type::FUNCTION:
 			type->register_method(name, rval.get<Function>());
 			continue;

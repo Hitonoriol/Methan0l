@@ -33,14 +33,14 @@ class InvokeExpr: public Expression
 			return lhs;
 		}
 
-		ListExpr &arg_list()
+		ListExpr& arg_list()
 		{
 			return args;
 		}
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Invoke Expression | args = " << args.raw_list().size() << "}";
+			return Expression::info(str << "{Invoke Expression | args = " << args.raw_list().size() << "}");
 		}
 };
 

@@ -20,6 +20,11 @@ dec num(Value val)
 	return val.as<dec>();
 }
 
+udec unum(Value val)
+{
+	return val.as<udec>();
+}
+
 bool bln(Value val)
 {
 	return val.as<bool>();

@@ -10,7 +10,8 @@
 namespace mtl
 {
 
-const std::ostream &out = std::cout;
+std::ostream &out = std::cout;
+std::ostream &log = std::clog;
 
 ValList split(const std::string &s, const std::string &delimiter)
 {

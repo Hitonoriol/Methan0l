@@ -13,6 +13,7 @@
 #include "expression/InvokeExpr.h"
 #include "expression/ListExpr.h"
 #include "expression/IndexExpr.h"
+#include "expression/FunctionExpr.h"
 #include "util/util.h"
 
 #include "lang/core/LibIO.h"
@@ -112,6 +113,11 @@ void ExprEvaluator::load_main(Unit &main)
 	exec_stack.push_back(&main);
 }
 
+Unit& ExprEvaluator::get_main()
+{
+	return *exec_stack.front();
+}
+
 Value ExprEvaluator::execute(Unit &unit)
 {
 	if constexpr (DEBUG)
@@ -119,7 +125,8 @@ Value ExprEvaluator::execute(Unit &unit)
 
 	enter_scope(unit);
 
-	for (auto expr : unit.expressions()) {
+	for (auto &expr : unit.expressions()) {
+		current_expr = expr.get();
 		if (unit.execution_finished())
 			break;
 
@@ -133,11 +140,11 @@ Value ExprEvaluator::execute(Unit &unit)
 		std::cout << "Finished executing " << unit << '\n' << std::endl;
 
 	if (force_quit())
-		return NO_VALUE;
+		return Value::NO_VALUE;
 
-	/* Weak Units cause their parent units to return */
+	/* Weak Non-Persistent Units cause their parent units to return */
 	Unit *parent = current_unit();
-	if (&unit != parent && !returned_val.empty() && unit.is_weak()) {
+	if (unit.carries_return() && &unit != parent && !returned_val.empty()) {
 
 		if constexpr (DEBUG)
 			std::cout << "Carrying return from child weak unit to " << *parent << std::endl;
@@ -148,8 +155,37 @@ Value ExprEvaluator::execute(Unit &unit)
 	return returned_val;
 }
 
+/* Execute list of Expressions inside the current scope
+ * 	This operation is uninterruptible
+ * 	(returns or exit$() inside <exprs> will lead to UB)
+ */
+void ExprEvaluator::execute(ExprList &exprs)
+{
+	for (auto &expr : exprs) {
+		current_expr = expr.get();
+		exec(expr);
+	}
+}
+
+Value ExprEvaluator::invoke(Value callable, InvokeExpr &expr)
+{
+	switch (callable.type()) {
+	case Type::FUNCTION:
+		return invoke(callable.get<Function>(), expr.arg_list().raw_list());
+
+	case Type::UNIT:
+		return invoke_unit(expr, callable.get<Unit>());
+
+	default:
+		throw std::runtime_error("Trying to invoke a non-callable Value");
+	}
+}
+
 Value ExprEvaluator::invoke(Function &func, ExprList &args)
 {
+	if constexpr (DEBUG)
+		dump_stack();
+
 	func.call(*this, args);
 	return execute(func);
 }
@@ -162,7 +198,7 @@ void ExprEvaluator::enter_scope(Unit &unit)
 		exec_stack.push_back(&unit);
 
 	if constexpr (DEBUG) {
-		std::cout << "Entered scope " << unit << " // depth: " << exec_stack.size() << std::endl;
+		std::cout << ">> Entered scope " << unit << " // depth: " << exec_stack.size() << std::endl;
 		dump_stack();
 	}
 }
@@ -183,7 +219,7 @@ void ExprEvaluator::leave_scope()
 		exec_stack.pop_back();
 
 		if constexpr (DEBUG)
-			std::cout << "Left scope // depth: " << exec_stack.size() << std::endl;
+			std::cout << "<< Left scope // depth: " << exec_stack.size() << std::endl;
 	}
 }
 
@@ -207,7 +243,8 @@ Unit* ExprEvaluator::current_unit()
 DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 {
 	if constexpr (DEBUG)
-		std::cout << " Scope lookup for \"" << id << "\"" << std::endl;
+		std::cout << (global ? "Global" : "Local")
+				<< " scope lookup for \"" << id << "\"" << std::endl;
 
 	if (global && exec_stack.size() < 2)
 		global = false;
@@ -216,9 +253,17 @@ DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 	if (!global && !weak)
 		return local_scope();
 
-	/* Starting from the second last Unit, because the last is the one being executed */
+	if constexpr (DEBUG)
+		if (weak)
+			out << "* Weak Unit lookup" << std::endl;
+
+	/* Starting from the second last Unit, because the last one is the one being executed */
 	auto start = std::prev(exec_stack.end(), 2);
 	for (auto scope = start; scope != exec_stack.begin(); --scope) {
+		/* We shouldn't be able to access Function-local idfrs from outer scopes */
+		if (!weak && global && instanceof<Function>(*scope))
+			continue;
+
 		DataTable *local = &((*scope)->local());
 		if (local->exists(id))
 			return local;
@@ -230,14 +275,15 @@ DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 
 	auto global_scope = this->global();
 
-	/* For weak Units */
+	/* For weak Units -- if the uppermost scope lookup failed,
+	 * 		return the innermost local scope */
 	if (!global && !global_scope->exists(id))
 		return local_scope();
 
 	return global_scope;
 }
 
-DataTable* ExprEvaluator::scope_lookup(IdentifierExpr &idfr)
+DataTable* ExprEvaluator::scope_lookup(const IdentifierExpr &idfr)
 {
 	return scope_lookup(idfr.get_name(), idfr.is_global());
 }
@@ -247,15 +293,46 @@ DataTable* ExprEvaluator::scope_lookup(ExprPtr idfr)
 	return scope_lookup(try_cast<IdentifierExpr>(idfr));
 }
 
-Value& ExprEvaluator::get(IdentifierExpr &idfr)
+void ExprEvaluator::del(ExprPtr idfr)
 {
-	return idfr.referenced_value(*this);
+	if (instanceof<IdentifierExpr>(idfr))
+		del(try_cast<IdentifierExpr>(idfr));
+	else {
+		idfr->assert_type<BinaryOperatorExpr>("Trying to delete an invalid Expression");
+		auto dot_expr = try_cast<BinaryOperatorExpr>(idfr);
+		if (dot_expr.get_operator() != TokenType::DOT)
+			throw std::runtime_error("Can't delete a non-dot operator Expression");
+		Value &scope = referenced_value(dot_expr.get_lhs());
+		ExprPtr rhs = dot_expr.get_rhs();
+		switch (scope.type()) {
+		case Type::UNIT:
+			scope.get<Unit>().local().del(rhs);
+			return;
+
+		case Type::OBJECT:
+			scope.get<Object>().get_data().del(rhs);
+			return;
+
+		default:
+			return;
+		}
+	}
 }
 
-Value& ExprEvaluator::referenced_value(ExprPtr expr)
+void ExprEvaluator::del(const IdentifierExpr &idfr)
+{
+	scope_lookup(idfr)->del(idfr.get_name());
+}
+
+Value& ExprEvaluator::get(IdentifierExpr &idfr, bool follow_refs)
+{
+	return idfr.referenced_value(*this, follow_refs);
+}
+
+Value& ExprEvaluator::referenced_value(ExprPtr expr, bool follow_refs)
 {
 	if (instanceof<IdentifierExpr>(expr.get()))
-		return get(try_cast<IdentifierExpr>(expr));
+		return get(try_cast<IdentifierExpr>(expr), follow_refs);
 
 	auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
 	if (dot_expr.get_operator() != TokenType::DOT)
@@ -278,18 +355,22 @@ Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 			throw std::runtime_error(
 					"Trying to access a private identifier (" + idfr + ")");
 
+		if constexpr (DEBUG)
+			out << "Accessing object field " << idfr << std::endl;
+
 		return obj.field(idfr);
 	}
 
-	if (lref.type == Type::UNIT)
+	if (lref.type() == Type::UNIT)
 		return lref.get<Unit>().local().get(IdentifierExpr::get_name(rhs));
 
 	throw std::runtime_error("Invalid use of dot operator");
 }
 
-Value& ExprEvaluator::get(const std::string &id, bool global)
+Value& ExprEvaluator::get(const std::string &id, bool global, bool follow_refs)
 {
-	return scope_lookup(id, global)->get(id).get();
+	Value &val = scope_lookup(id, global)->get(id);
+	return follow_refs ? val.get() : val;
 }
 
 inline Value ExprEvaluator::eval(Expression &expr)
@@ -316,14 +397,23 @@ inline void ExprEvaluator::exec(ExprPtr expr)
 Value ExprEvaluator::evaluate(AssignExpr &expr)
 {
 	ExprPtr lexpr = expr.get_lhs();
-	Value rhs = eval(expr.get_rhs());
+	ExprPtr rexpr = expr.get_rhs();
+
+	/* Move Value from LHS to RHS idfr */
+	if (expr.is_move_assignment()) {
+		Value lval = eval(lexpr);
+		del(lexpr);
+		return Value::ref(referenced_value(rexpr) = lval);
+	}
+
+	/* Copy assignment */
+	Value rhs = eval(rexpr).copy();
 	if (instanceof<IdentifierExpr>(lexpr.get())) {
 		IdentifierExpr &lhs = try_cast<IdentifierExpr>(lexpr);
-		lhs.assign(*this, rhs);
+		return Value::ref(lhs.assign(*this, rhs));
 	}
 	else
-		referenced_value(lexpr) = rhs;
-	return rhs;
+		return Value::ref(referenced_value(lexpr) = rhs);
 }
 
 Value ExprEvaluator::evaluate(ConditionalExpr &expr)
@@ -349,18 +439,17 @@ Value ExprEvaluator::invoke_unit(InvokeExpr &expr, Unit &unit)
 	if (args_expr.raw_list().empty())
 		unit.call();
 
-	/* Pseudo-args syntax: pass a single Unit with local scope init as argument;
-	 * arg Unit will be executed and its data table will be shared with the one being invoked */
+	/* Unit invocation w/ init-block */
 	else {
-		Value &args = eval(args_expr).get<ValList>()[0];
-		Unit ps_args = args.as<Unit>();
-		ps_args.call();
-		unit.manage_table(ps_args);
-		ps_args.set_persisent(true);
-		execute(ps_args);
+		Value initv = eval(args_expr).get<ValList>()[0];
+		Unit &init_block = initv.get<Unit>();
+		unit.call();
+		init_block.manage_table(unit);
+		init_block.set_persisent(true);
+		execute(init_block);
 		if constexpr (DEBUG)
 			std::cout << "Executed Unit Invocation init block " << std::endl;
-		ps_args.set_persisent(false);
+		init_block.set_persisent(false);
 	}
 
 	return execute(unit);
@@ -369,27 +458,37 @@ Value ExprEvaluator::invoke_unit(InvokeExpr &expr, Unit &unit)
 Value ExprEvaluator::evaluate(InvokeExpr &expr)
 {
 	Value callable = eval(expr.get_lhs());
+	Type ctype = callable.type();
 
 	if constexpr (DEBUG)
 		std::cout << "Invoking a callable..." << std::endl;
 
-	if (callable.type == Type::UNIT)
-		return invoke_unit(expr, callable.get<Unit>());
+	if (ctype == Type::UNIT) {
+		Unit unit = callable.get<Unit>();
+		return invoke_unit(expr, unit);
+	}
 
-	else if (callable.type == Type::FUNCTION)
-		return invoke(callable.get<Function>(), expr.arg_list().raw_list());
+	else if (ctype == Type::FUNCTION) {
+		Function func = callable.get<Function>();
+		return invoke(func, expr.arg_list().raw_list());
+	}
 
-	else if (instanceof<IdentifierExpr>(expr.get_lhs().get()) && callable.empty())
+	else if (instanceof<IdentifierExpr>(expr.get_lhs().get()) && callable.nil())
 		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list().raw_list());
 
-	throw std::runtime_error("Attempting to call a non-existent function");
+	throw std::runtime_error("Invalid invocation expression");
+}
+
+bool ExprEvaluator::func_exists(const std::string &name)
+{
+	return inbuilt_funcs.find(name) != inbuilt_funcs.end();
 }
 
 Value ExprEvaluator::invoke_inbuilt_func(std::string name, ExprList args)
 {
 	auto entry = inbuilt_funcs.find(name);
 	if (entry == inbuilt_funcs.end())
-		return NO_VALUE;
+		return Value::NO_VALUE;
 
 	if constexpr (DEBUG)
 		std::cout << "* Invoking inbuilt function \"" << name << "\"" << std::endl;
@@ -401,7 +500,7 @@ Value ExprEvaluator::invoke_inbuilt_func(std::string name, ExprList args)
 Value ExprEvaluator::evaluate(Expression &expr)
 {
 	std::cerr << "Unimplemented expression evaluation" << std::endl;
-	return NIL;
+	return Value::NIL;
 }
 
 TypeManager& ExprEvaluator::get_type_mgr()
@@ -425,21 +524,38 @@ InbuiltFuncMap& ExprEvaluator::functions()
 	return inbuilt_funcs;
 }
 
+Expression* ExprEvaluator::get_current_expr()
+{
+	return current_expr;
+}
+
 void ExprEvaluator::dump_stack()
 {
 	size_t i = 0, depth = exec_stack.size();
 	std::cout << "[Execution Stack | Depth: " << depth << "]" << std::endl;
 
-	for (auto un = std::prev(exec_stack.end()); un != std::prev(exec_stack.begin());
-			--un) {
-		std::cout << ((i++ > 0) ? "  * " : "--> ") << **un;
+	auto top = std::prev(exec_stack.begin());
+	for (auto un = std::prev(exec_stack.end()); un != top; --un) {
+		std::cout << ((i++ > 0) ? "  * " : "--> ");
+		std::cout << **un;
+		if (!(*un)->empty())
+			std::cout << " @ line " << (*un)->expressions().front()->get_line();
 		if (i == depth)
 			std::cout << " (Main)";
 		std::cout << std::endl;
-		for (auto val : (*un)->local().managed_map())
+		for (auto &val : *(*un)->local().map_ptr()) {
+			Value &v = val.second;
+			Type type = val.second.type();
+			const char quote = (type == Type::STRING || type == Type::CHAR ? '"' : '\0');
 			std::cout << '\t'
-					<< "[" << Value::type_name(val.second.type) << "] "
-					<< val.first << " = " << val.second << std::endl;
+					<< "(" << v.use_count() << ") "
+					<< "["
+					<< Value::type_name(type)
+					<< " | " << (v.heap_type() ? "heap" : "non-heap")
+					<< "] "
+					<< val.first << " = "
+					<< quote << v << quote << std::endl;
+		}
 	}
 }
 

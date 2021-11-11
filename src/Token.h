@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
+#include <map>
 
 namespace mtl
 {
@@ -15,7 +16,7 @@ class Expression;
 
 enum class TokenType : uint16_t
 {
-	/* Operators */
+	/* Printable characters */
 	ASSIGN = '=',
 	PLUS = '+', MINUS = '-', SLASH = '/', ASTERISK = '*',
 	BACKSLASH = '\\',
@@ -31,13 +32,10 @@ enum class TokenType : uint16_t
 	HASH = '#',
 	AT = '@',
 
-	PAREN_L = '(',
-	PAREN_R = ')',
+	PAREN_L = '(', PAREN_R = ')',
 	LIST = '$',
-	BRACKET_L = '[',
-	BRACKET_R = ']',
-	BRACE_L = '{',
-	BRACE_R = '}',
+	BRACKET_L = '[', BRACKET_R = ']',
+	BRACE_L = '{', BRACE_R = '}',
 	COLON = ':',
 	SEMICOLON = ';',
 	DOT = '.',
@@ -50,13 +48,13 @@ enum class TokenType : uint16_t
 	/* Double-char operators */
 	SHIFT_L = 0x7F,		// <<
 	SHIFT_R,			// >>
-	WEAK_UNIT_DEF,		// ->
-	LOOP_DEF,			// <-
+	ARROW_R,			// ->
+	ARROW_L,			// <-
 	LIST_DEF_L,			// $(
 	MAP_DEF_L,			// @(
 	EQUALS,				// ==
 	OUT,				// %%
-	INLINE_CONCAT,		// ::
+	STRING_CONCAT,		// ::
 	BLOCK_COMMENT_L,	// /*
 	BLOCK_COMMENT_R,	// */
 	GREATER_OR_EQ,		// >=
@@ -74,25 +72,29 @@ enum class TokenType : uint16_t
 	OR,					// ||
 	XOR,				// ^^
 	REF,				// **
+	DOUBLE_EXCL,		// !!
+	IN,					// %>
+	OUT_NL,				// <%
 
 	/* Literals */
 	INTEGER = 0x100,
 	DOUBLE,
 	STRING,
 	BOOLEAN,
+	CHAR,
 
 	IDENTIFIER,
 
 	/* Word operators */
 	DO = 0x200,
-	TYPE,
+	TYPE_ID,
 	DELETE,
-	EXIT,
-	PERSISTENT,
 	FUNC_DEF,
 	BOX,
 	CLASS,
-	CLASS_ID,
+	IF,
+	ELSE,
+	RETURN,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -123,6 +125,7 @@ class Token
 {
 	private:
 		TokenType type;
+		uint32_t line;
 		std::string value;
 
 		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'<>|&\n#";
@@ -133,16 +136,16 @@ class Token
 				"*/", ">=", "<=", "++", "--",
 				":=", "=>", "!=", "+=", "-=",
 				"*=", "/=", "&&", "||", "^^",
-				"**"
+				"**", "!!", "%>", "<%"
 		};
 
 		static constexpr std::string_view word_ops[] = {
-				"do", "type", "delete", "exit", "persistent",
-				"func", "box", "class", "classid"
+				"do", "typeid", "delete", "func", "box",
+				"class", "if", "else", "return"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
-				"", "nil", "true", "false", "returned",
+				"", "nil", "true", "false", ".returned",
 				"newl", "break",
 
 				/* Type idfrs (spaces are ignored by Lexer), evaluate to (int)Type enum  */
@@ -150,6 +153,21 @@ class Token
 				"typelist", "typeunit", "typemap", "typefunc", "typechar",
 				"typeobject", "typereference"
 		};
+
+		/* Purely visual tokens that are removed during lexing */
+		static constexpr TokenType semantic_tokens[] = {
+				TokenType::IF, TokenType::ELSE
+		};
+
+		static constexpr TokenType block_begin_tokens[] = {
+				TokenType::PAREN_L, TokenType::BRACKET_L, TokenType::BRACE_L
+		};
+
+		static constexpr TokenType block_end_tokens[] = {
+				TokenType::PAREN_R, TokenType::BRACKET_R, TokenType::BRACE_R
+		};
+
+		static const std::unordered_map<std::string_view, char> escape_seqs;
 
 		static TokenType deduce_type(std::string &tokstr);
 
@@ -161,21 +179,32 @@ class Token
 		Token& operator=(const Token &rhs);
 		TokenType get_type() const;
 		std::string& get_value();
+		Token& set_line(uint32_t);
+		uint32_t get_line() const;
 
 		bool operator ==(const Token &rhs);
 		bool operator !=(const Token &rhs);
 
 		static TokenType get_bichar_op_type(std::string &tokstr);
+		static char escape_seq(std::string_view seq);
+
 		static bool is_delimiter(char chr);
 		static bool is_punctuator(char chr);
-		static std::string_view reserved(Word word);
+		static bool is_semantic(const TokenType &tok);
+		static bool is_block_begin(char c);
+		static bool is_block_end(char c);
+
+		static char chr(TokenType tok);
+		static TokenType tok(char chr);
+
+		static std::string_view reserved(const Word &word);
 		static Word as_reserved(std::string &tokstr);
 		static bool is_reserved(std::string &tokstr);
-		static char chr(TokenType tok);
 		static TokenType as_word_op(std::string &tokstr);
 		static std::string_view word_op(TokenType tok);
 		static std::string_view bichar_op(TokenType tok);
-		static bool is_compatible(std::shared_ptr<Expression> expr, TokenType next);
+		static bool is_infix_compatible(const std::shared_ptr<Expression> &lhs,
+				TokenType next);
 		static bool is_ref_opr(TokenType opr);
 
 		static const Token END_OF_EXPR;

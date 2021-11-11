@@ -22,15 +22,17 @@ Value IdentifierExpr::evaluate(ExprEvaluator &eval)
 	return referenced_value(eval);
 }
 
-Value& IdentifierExpr::referenced_value(ExprEvaluator &eval)
+Value& IdentifierExpr::referenced_value(ExprEvaluator &eval, bool follow_refs)
 {
-	return eval.get(name, global);
+	return eval.get(name, global, follow_refs);
 }
 
-void IdentifierExpr::assign(ExprEvaluator &eval, Value val)
+Value& IdentifierExpr::assign(ExprEvaluator &eval, Value val)
 {
 	create_if_nil(eval);
-	referenced_value(eval) = val;
+	Value &ref = referenced_value(eval);
+	ref = val;
+	return ref;
 }
 
 void IdentifierExpr::create_if_nil(ExprEvaluator &eval)
@@ -52,17 +54,17 @@ Value IdentifierExpr::eval_reserved(std::string &name)
 		return NEW_LINE;
 
 	if (name == Token::reserved(Word::NIL))
-		return NIL;
+		return Value::NIL;
 
-	return NO_VALUE;
+	return Value::NO_VALUE;
 }
 
-bool IdentifierExpr::is_global()
+bool IdentifierExpr::is_global() const
 {
 	return global;
 }
 
-std::string& IdentifierExpr::get_name()
+const std::string& IdentifierExpr::get_name() const
 {
 	return name;
 }
@@ -74,7 +76,7 @@ std::string IdentifierExpr::get_name(ExprPtr expr)
 
 std::ostream& IdentifierExpr::info(std::ostream &str)
 {
-	return str << "{Identifier Expression name = " << name << "}";
+	return Expression::info(str << "{Identifier Expression name = \"" << name << "\"}");
 }
 
 }

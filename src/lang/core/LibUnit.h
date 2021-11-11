@@ -7,6 +7,8 @@
 namespace mtl
 {
 
+class Unit;
+
 class LibUnit: public Library
 {
 	public:
@@ -14,8 +16,13 @@ class LibUnit: public Library
 		void load() override;
 
 	private:
+		void load_operators();
+
 		Value object_dot_operator(Object &obj, ExprPtr rhs);
 		Value invoke_pseudo_method(ExprPtr obj, ExprPtr func);
+		void make_box(Value &unit_val);
+		void save_return(ExprPtr ret, bool by_ref = false);
+		Value& box_value(Unit &box, ExprPtr expr);
 };
 
 } /* namespace mtl */

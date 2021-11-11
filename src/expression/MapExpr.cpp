@@ -25,8 +25,9 @@ Value MapExpr::evaluate(ExprEvaluator &evaluator)
 void MapExpr::execute(ExprEvaluator &evaluator)
 {
 	ValMap map = evaluate(evaluator).get<ValMap>();
+	DataTable &scope = evaluator.current_unit()->local();
 	for (auto entry : map)
-		evaluator.scope_lookup(entry.first, false)->set(entry.first, entry.second);
+		scope.set(entry.first, entry.second);
 }
 
 }

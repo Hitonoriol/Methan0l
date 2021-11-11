@@ -1,8 +1,13 @@
 /* Load this file using "load" function;
- * 	you can also wrap it in persistent() operator to load as a Box Unit to be able to call funcs from it:
+ * 	you can also wrap it in make_box$() function to load as a Box Unit to be able to call funcs from it:
  *
- * module = persistent(load$("./examples/module.mt0"))
+ * module = load$("./examples/module.mt0").make_box$()
  * module.test
+ *
+ * Or, if you want to import all the idfrs into current scope, use import$ function:
+ *
+ * load$("./examples/module.mt0").import$()
+ * test
  *
  */
 
@@ -17,7 +22,8 @@ repeat = {
 
 /* Loop-less foreach for lists. Pass <list> and <action> in init block */
 for_each = {
-	/* Isolate the recursive scope inside another "virtual" scope to avoid copying <list>, <i> and <end> */
+	/* Isolate the recursive scope inside another "virtual" scope
+	 *	to avoid copying <list>, <i> and <end> into each recursive call */
 	{
 		repeater = {
 			#action$({element = #list[#i]})

@@ -24,7 +24,7 @@ class ListParser: public PrefixParser
 				parser.consume(TokenType::PAREN_R);
 			}
 
-			return ptr(new ListExpr(raw_list));
+			return make_expr<ListExpr>(line(token), raw_list);
 		}
 };
 

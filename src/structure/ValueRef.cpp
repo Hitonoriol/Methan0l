@@ -37,7 +37,7 @@ Value& ValueRef::value()
 
 void ValueRef::reset(Value &val)
 {
-	val = &val;
+	this->val = &val;
 }
 
 bool ValueRef::empty() const

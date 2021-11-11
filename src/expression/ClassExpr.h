@@ -25,12 +25,12 @@ class ClassExpr: public Expression
 
 		Value evaluate(ExprEvaluator &evaluator) override
 		{
-			return NO_VALUE;
+			return Value::NO_VALUE;
 		}
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Class Definition Expression // " << name << "}";
+			return Expression::info(str << "{Class Definition Expression // " << name << "}");
 		}
 };
 

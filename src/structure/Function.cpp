@@ -32,6 +32,10 @@ Function::Function(ExprMap args, Unit body) : Unit(body)
 	}
 }
 
+Function::Function(Unit body) : Function(ExprMap(), body)
+{
+}
+
 Function::Function(const Function &rhs) : Unit(rhs)
 {
 	set(rhs);
@@ -69,10 +73,14 @@ void Function::call(ExprEvaluator &eval, ExprList &args)
 
 	new_table();
 
-	auto table = local();
+	if constexpr (DEBUG)
+		eval.dump_stack();
+
+	auto &table = local();
 	for (size_t i = 0; i < arg_def.size(); ++i) {
 		const bool non_default = argc > i;
 		std::string arg_name = arg_def[i].first;
+
 		Value arg_val = non_default ?
 										args[i]->evaluate(eval) :
 										arg_def[i].second->evaluate(eval);
@@ -82,6 +90,11 @@ void Function::call(ExprEvaluator &eval, ExprList &args)
 
 		table.set(arg_name, arg_val);
 	}
+}
+
+Function Function::create(ExprList body, ExprMap args)
+{
+	return Function(args, body);
 }
 
 std::string Function::to_string()

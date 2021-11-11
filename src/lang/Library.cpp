@@ -21,9 +21,14 @@ double Library::dbl(ExprList args, int idx)
 	return mtl::dbl(arg(args, idx));
 }
 
-int Library::num(ExprList args, int idx)
+dec Library::num(ExprList args, int idx)
 {
 	return mtl::num(arg(args, idx));
+}
+
+udec Library::unum(ExprList args, int idx)
+{
+	return mtl::unum(arg(args, idx));
 }
 
 Value Library::val(ExprPtr expr)

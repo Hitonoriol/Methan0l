@@ -4,8 +4,8 @@
 /* Output operator */
 %%("Test" :: newl :: newl)	/* "newl" is a reserved identifier for the new line character */
 
-/* Variable assignment, all possible types: */
-foo = 123			/* Integer */
+/* Variable assignment */
+foo = 123			/* Integer (signed 64-bit) */
 bar = 456.5			/* Double */
 baz = true			/* Boolean */
 str = "Hello, Methan0l!"	/* String */
@@ -17,7 +17,7 @@ calc = ((foo + bar) * (foo / 25.375)) / 10
 /* String concatenation with automatic type conversion */
 %%("Concatenation test: " :: str :: " " :: foo :: " " :: bar :: " " :: baz :: newl)
 
-/* Logical operators */
+"Logical operators"
 %%("Equivalent string literals: " :: ("equality test" == "equality test") :: newl)
 a = 42; b = 42
 %%(a :: " == " :: b :: " : " :: (a == b) :: newl)
@@ -27,10 +27,15 @@ c = -100
 %%(c :: " <= " :: a :: " <= " :: b :: " : " :: ((c <= a) & (a <= b)) :: newl)
 %%("!false = " :: !false :: newl)
 
-/* Input operator */
-%%(newl :: "* Enter something: ")
->>test
-%%("Your input: " :: test :: newl)
+"Input operator"
+%%("* Enter something: ")
+%>test
+<%("Your input: \"" :: test :: "\"") /* `<%` prints with a trailing newline */
 
-/* Return operator; Any Unit can return a value. */
+"Bulk local variable definition"
+@(x => "some value", y, z => 0.5)
+%%("x = " :: x :: ", y = " :: y :: ", z = " :: z :: newl)
+
+/* Return operator; Any Unit can return a value
+ * 	(though Main Unit must return an Integer or Integer-convertible Value). */
 foo!

@@ -16,38 +16,14 @@ class PrefixExpr: public Expression
 		ExprPtr rhs;
 
 	public:
-		PrefixExpr(TokenType op, ExprPtr rhs) : op(op), rhs(rhs)
-		{
-		}
+		PrefixExpr(TokenType op, ExprPtr rhs);
 
-		TokenType get_operator()
-		{
-			return op;
-		}
+		TokenType get_operator();
+		ExprPtr get_rhs();
 
-		ExprPtr get_rhs()
-		{
-			return rhs;
-		}
+		Value evaluate(ExprEvaluator &eval) override;
 
-		Value evaluate(ExprEvaluator &eval) override
-		{
-			return eval.evaluate(*this);
-		}
-
-		void execute(mtl::ExprEvaluator &evaluator) override
-		{
-			Value val = evaluate(evaluator);
-
-			/* Print out list concat operator result */
-			if (op == TokenType::SHIFT_L)
-				LiteralExpr::exec_literal(evaluator, val);
-		}
-
-		std::ostream& info(std::ostream &str) override
-		{
-			return str << "{Prefix Expression | opr = " << static_cast<int>(op) << "}";
-		}
+		std::ostream& info(std::ostream &str) override;
 };
 
 } /* namespace mtl */

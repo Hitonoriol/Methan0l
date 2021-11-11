@@ -66,7 +66,7 @@ Value Unit::result()
 	if (has_returned())
 		return local_data.get(RETURN_KEYWORD);
 
-	return NO_VALUE;
+	return Value::NO_VALUE;
 }
 
 void Unit::clear_result()
@@ -129,6 +129,11 @@ void Unit::set_persisent(bool val)
 void Unit::set_weak(bool val)
 {
 	weak = val;
+}
+
+bool Unit::carries_return()
+{
+	return weak && !persistent;
 }
 
 bool Unit::has_returned()

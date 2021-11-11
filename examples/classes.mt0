@@ -13,11 +13,11 @@ class: Point = @(
 	},
 
 	get_x => func @() {
-		(this.x)!
+		this.x!
 	},
 
 	get_y => func @() {
-		(this.y)!
+		this.y!
 	},
 	
 	add => func @(rhs) {
@@ -25,13 +25,13 @@ class: Point = @(
 		this.y += rhs.y
 	},
 	
-	/* Called automatically when using %% and :: operators */
+	/* Called automatically when using String-converting operators */
 	to_string => func @() {
-		("(" :: x :: ", " :: y :: ")")!
+		"(" :: this.x :: ", " :: this.y :: ")"!
 	},
 	
 	some_static_method => func @(x) {
-		%%("Static method arg: " :: x :: newl)
+		%% "Static method arg: " :: x :: newl
 	}
 )
 
@@ -40,8 +40,10 @@ bar = Point.new$(12.75, 99)
 empty = Point.new$()
 foo.add$(bar)
 
+"Point foo: " :: foo
+"Point bar: " :: bar
+"Empty point: " :: empty
+
 Point@some_static_method$(123)
 
-%%(foo :: newl)
-%%(bar :: newl)
-%%(empty :: newl)
+"[class_id test] " :: (foo.class_id$() == Point@class_id$())

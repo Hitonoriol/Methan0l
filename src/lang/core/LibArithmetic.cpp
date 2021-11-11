@@ -33,10 +33,10 @@ void LibArithmetic::load()
 	prefix_operator(TokenType::MINUS, [this](auto rhs) {
 		Value rval = val(rhs);
 
-		if (rval.type == Type::INTEGER)
-			rval.value = -rval.as<dec>();
+		if (rval.type() == Type::INTEGER)
+			rval = -rval.as<dec>();
 		else
-			rval.value = -rval.as<double>();
+			rval = -rval.as<double>();
 
 		return rval;
 	});
@@ -72,13 +72,13 @@ Value LibArithmetic::calculate(ExprPtr &l, TokenType op, ExprPtr &r)
 void LibArithmetic::apply_unary(Value &val, TokenType op)
 {
 	const int d = unary_diff(op);
-	switch (val.type) {
+	switch (val.type()) {
 	case Type::INTEGER:
-		val.value = val.as<dec>() + d;
+		val = val.as<dec>() + d;
 		break;
 
 	case Type::DOUBLE:
-		val.value = val.as<double>() + d;
+		val = val.as<double>() + d;
 		break;
 
 	default:

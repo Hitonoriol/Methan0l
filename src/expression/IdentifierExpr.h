@@ -22,14 +22,14 @@ class IdentifierExpr: public Expression
 
 		Value evaluate(ExprEvaluator &eval) override;
 
-		virtual Value& referenced_value(ExprEvaluator &eval);
-		virtual void assign(ExprEvaluator &eval, Value val);
+		virtual Value& referenced_value(ExprEvaluator &eval, bool follow_refs = true);
+		virtual Value& assign(ExprEvaluator &eval, Value val);
 		virtual void create_if_nil(ExprEvaluator &eval);
 
 		void execute(mtl::ExprEvaluator &evaluator) override;
 
-		bool is_global();
-		std::string& get_name();
+		bool is_global() const;
+		const std::string& get_name() const;
 
 		static Value eval_reserved(std::string &name);
 		static std::string get_name(ExprPtr expr);

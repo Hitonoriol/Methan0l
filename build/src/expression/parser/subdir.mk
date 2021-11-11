@@ -6,24 +6,27 @@
 CPP_SRCS += \
 ../src/expression/parser/ClassParser.cpp \
 ../src/expression/parser/InfixParser.cpp \
-../src/expression/parser/MapParser.cpp 
+../src/expression/parser/MapParser.cpp \
+../src/expression/parser/WordOperatorParser.cpp 
 
 OBJS += \
 ./src/expression/parser/ClassParser.o \
 ./src/expression/parser/InfixParser.o \
-./src/expression/parser/MapParser.o 
+./src/expression/parser/MapParser.o \
+./src/expression/parser/WordOperatorParser.o 
 
 CPP_DEPS += \
 ./src/expression/parser/ClassParser.d \
 ./src/expression/parser/InfixParser.d \
-./src/expression/parser/MapParser.d 
+./src/expression/parser/MapParser.d \
+./src/expression/parser/WordOperatorParser.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-src/expression/parser/%.o: ../src/expression/parser/%.cpp
+src/expression/parser/%.o: ../src/expression/parser/%.cpp src/expression/parser/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++17 -O3 -Wall -c -fmessage-length=0 -m64 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	g++ -std=c++17 -O3 -Wall -c -fmessage-length=0 -m64 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

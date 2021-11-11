@@ -33,7 +33,7 @@ class MapExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Map Expression // " << exprs.size() << " elements}";
+			return Expression::info(str << "{Map Expression // " << exprs.size() << " elements}");
 		}
 };
 

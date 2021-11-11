@@ -9,33 +9,27 @@
 
 #include "ValueRef.h"
 #include "Function.h"
+#include "../except/except.h"
 #include "object/Object.h"
 
 namespace mtl
 {
 
-struct Value;
+class Value;
 
-using ValueContainer =
-std::variant<
-/* No value */
-std::monostate,
+using VString = std::shared_ptr<std::string>;
+using VList = std::shared_ptr<ValList>;
+using VMap = std::shared_ptr<ValMap>;
+using VUnit = std::shared_ptr<Unit>;
+using VFunction = std::shared_ptr<Function>;
+using VObject = std::shared_ptr<Object>;
 
-/* Reference to another Value */
-ValueRef,
-
-/* Primitives */
-dec, double, std::string, bool, char,
-
-/* Data Structures */
-ValList, ValMap,
-
-/* Expression blocks */
-Unit, Function,
-
-/* Custom type objects */
-Object
->;
+struct Nil: public std::monostate
+{
+};
+struct NoValue: public std::monostate
+{
+};
 
 enum class Type : uint8_t
 {
@@ -46,30 +40,112 @@ enum class Type : uint8_t
 	END
 };
 
-struct conversion_exception: public std::runtime_error
+template<typename T, typename VARIANT_T> struct allowed_type;
+
+template<typename T, typename ... ALL_T>
+struct allowed_type<T, std::variant<ALL_T...>> :
+		public std::disjunction<std::is_same<T, ALL_T>...>
 {
-		conversion_exception(const std::string_view &from, const std::string_view &to = "unknown") :
-			runtime_error("Invalid type conversion: "
-					+ std::string(from) + " -> " + std::string(to)) {}
 };
 
-struct Value
+template<typename T> struct is_shared_ptr: std::false_type
 {
-		Type type = Type::NIL;
+};
+template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type
+{
+};
+
+class Value
+{
+	private:
+		static constexpr int MAX_SIZE = 8;
+
+		using ValueContainer =
+		std::variant<
+		/* Value Placeholders */
+		NoValue, Nil,
+
+		/* Reference to another Value */
+		ValueRef,
+
+		/* Primitives */
+		dec, double, bool, char,
+
+		/* Heap-stored types: */
+
+		/* Strings */
+		VString,
+
+		/* Data Structures */
+		VList, VMap,
+
+		/* Expression blocks */
+		VUnit, VFunction,
+
+		/* Custom type objects */
+		VObject
+		>;
+
 		ValueContainer value;
 
+		template<typename T>
+		static constexpr bool is_heap_type()
+		{
+			return sizeof(T) > MAX_SIZE;
+		}
+
+		template<typename T>
+		void set(const T &val)
+		{
+			if constexpr (is_heap_type<T>()) {
+				/* Don't reallocate if this value is already of heap storable type T */
+				if (is<std::shared_ptr<T>>())
+					get<T>() = val;
+				else
+					value = std::make_shared<T>(val);
+			}
+			else {
+				/* Cast integral types to one internal type <dec> */
+				if constexpr (!std::is_same<T, char>::value
+						&& !std::is_same<T, bool>::value
+						&& std::is_integral<T>())
+					value = (dec) val;
+				else
+					value = val;
+			}
+		}
+
+	public:
+		/* Represents the empty value, can be used inside Methan0l programs */
+		static const Value NIL;
+
+		/* Internal interpreter constant to represent the absence of value */
+		static const Value NO_VALUE;
+
 		Value();
-		Value(Type type, ValueContainer value);
-		Value(ValueContainer value);
+
+		template<typename T>
+		Value(const T &val)
+		{
+			set(val);
+		}
+
+		template<typename T>
+		Value& operator=(const T &rhs)
+		{
+			set(rhs);
+			return *this;
+		}
+
 		Value(const Value &val);
 		Value& operator =(const Value &rhs);
-		Value& operator=(ValueContainer rhs);
-		Value& set(const ValueContainer &value);
-		Value& set(Value &value);
+
 		Value& get();
+		Type type() const;
+		Value copy();
 
-		void deduce_type();
-
+		dec use_count();
+		bool heap_type();
 		bool container();
 		bool object();
 		bool numeric();
@@ -81,6 +157,7 @@ struct Value
 		static void clear(ValueContainer &pure_val);
 
 		static std::string_view type_name(Type type);
+		std::string_view type_name();
 
 		static bool is_double_op(Value &lhs, Value &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Value &val);
@@ -92,12 +169,15 @@ struct Value
 
 		inline int type_id()
 		{
-			return static_cast<int>(type);
+			return static_cast<int>(type());
 		}
 
 		template<typename T> T& get()
 		{
-			return std::get<T>(value);
+			if constexpr (is_heap_type<T>())
+				return *std::get<std::shared_ptr<T>>(value);
+			else
+				return std::get<T>(value);
 		}
 
 		std::string to_string(ExprEvaluator *eval = nullptr);
@@ -111,35 +191,45 @@ struct Value
 		/* Get current value by copy or convert to specified type */
 		template<typename T> T as()
 		{
-			if (std::holds_alternative<T>(value))
-				return get<T>();
+			if constexpr (!allowed_type<T, ValueContainer>::value) {
+				if constexpr (std::is_same<T, udec>::value)
+					return (udec) as<dec>();
+				else
+					return get<T>();
+			}
+			else {
+				if (std::holds_alternative<T>(value))
+					return get<T>();
 
-			if constexpr (std::is_same<T, std::string>::value)
-				return to_string();
+				if constexpr (std::is_same<T, std::string>::value)
+					return to_string();
 
-			if constexpr (std::is_same<T, dec>::value)
-				return to_dec();
+				if constexpr (std::is_same<T, dec>::value)
+					return to_dec();
 
-			if constexpr (std::is_same<T, double>::value)
-				return to_double();
+				if constexpr (std::is_same<T, double>::value)
+					return to_double();
 
-			if constexpr (std::is_same<T, bool>::value)
-				return to_bool();
+				if constexpr (std::is_same<T, bool>::value)
+					return to_bool();
 
-			if constexpr (std::is_same<T, char>::value)
-				return to_char();
+				if constexpr (std::is_same<T, char>::value)
+					return to_char();
+			}
 
-			throw conversion_exception(type_name(type));
+			throw InvalidTypeException(type());
 		}
+
+		template<typename T> bool is() const
+		{
+			return std::holds_alternative<T>(value);
+		}
+
+		void assert_type(Type expected,
+				const std::string &msg = "Invalid type conversion");
 };
 
 const Value NEW_LINE = Value(std::string(1, '\n'));
-
-/* Represents the empty value, can be used inside Methan0l programs */
-const Value NIL = Value(Type::NIL, 0);
-
-/* Internal interpreter constant to represent the absence of value */
-const Value NO_VALUE = Value(Type::NIL, std::monostate { });
 
 }
 

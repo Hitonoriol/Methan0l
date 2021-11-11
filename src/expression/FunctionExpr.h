@@ -12,29 +12,16 @@ class FunctionExpr: public Expression
 		Function func;
 
 	public:
-		FunctionExpr(ExprMap argdef, UnitExpr body) : func(argdef, body.get_unit())
-		{
-		}
+		FunctionExpr(ExprMap argdef, UnitExpr body);
 
-		Value evaluate(ExprEvaluator &evaluator) override
-		{
-			return Value(func);
-		}
+		Value evaluate(ExprEvaluator &evaluator) override;
+		void execute(ExprEvaluator &evaluator) override;
 
-		void execute(ExprEvaluator &evaluator) override
-		{
-			ExprList args { };
-			evaluator.invoke(func, args);
-		}
-
-		Function get_function()
-		{
-			return func;
-		}
+		Function get_function();
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Function Expression}";
+			return Expression::info(str << "{Function Definition}");
 		}
 };
 

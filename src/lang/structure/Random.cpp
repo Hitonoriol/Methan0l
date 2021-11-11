@@ -33,13 +33,13 @@ Random::Random(ExprEvaluator &eval) : InbuiltType(eval, "Random")
 		Object &obj = Object::get_this(args);
 		managed_rngs.emplace(obj.id(), std::mt19937_64());
 		managed_rng(obj).seed(extract_seed(args));
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
 	/* rnd.reseed$(seed) */
 	register_method("reseed", [&](auto args) {
 		managed_rng(Object::get_this(args)).seed(extract_seed(args));
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
 	/* rnd.get_seed$() */
@@ -73,15 +73,15 @@ Random::Random(ExprEvaluator &eval) : InbuiltType(eval, "Random")
 
 dec Random::extract_seed(ExprList &args)
 {
-	Value seed = args.size() > 1 ? args[1]->evaluate(eval) : NIL;
+	Value seed_val = args.size() > 1 ? args[1]->evaluate(eval) : Value::NIL;
 	Object &this_obj = Object::get_this(args);
+	dec seed = seed_val.nil() ? rand_dev() : seed_val.as<dec>();
 
 	if constexpr (DEBUG)
 		std::cout << "Seeding Random: " << seed << std::endl;
 
 	this_obj.field(SEED) = seed;
-	return seed.nil() ? rand_dev() : seed.as<dec>();
-
+	return seed;
 }
 
 bool Random::next_bool(ExprList &args)

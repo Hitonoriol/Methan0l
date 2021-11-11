@@ -14,12 +14,21 @@ namespace mtl
 
 void LibString::load()
 {
+	/* str.repeat$(times) */
+	function("repeat", [&](Args args) {
+		std::string str = arg(args).to_string(eval);
+		dec times = arg(args, 1).get<dec>();
+		std::ostringstream ss;
+		std::fill_n(std::ostream_iterator<std::string>(ss), times, str);
+		return Value(ss.str());
+	});
+
 	/* int_val.to_base$(base) */
 	function("to_base", [&](Args args) {
 		int base = num(args, 1);
 
 		if (base < 2)
-			throw std::runtime_error("Invalid base");
+		throw std::runtime_error("Invalid base");
 
 		return Value(to_base((unsigned)num(args), base));
 	});
@@ -35,7 +44,7 @@ void LibString::load()
 		int pos = num(args, 1);
 		std::string sub = str(args, 2);
 		rval.get<std::string>().insert(pos, sub);
-		return NIL;
+		return Value::NIL;
 	});
 
 	/* str.replace$(from_str, to_str, [limit]) */
@@ -44,7 +53,7 @@ void LibString::load()
 		std::string from = str(args, 1), to = str(args, 2);
 		int limit = args.size() > 3 ? num(args, 3) : -1;
 		replace_all(rval.get<std::string>(), from, to, limit);
-		return NIL;
+		return Value::NIL;
 	});
 
 	/* str.contains$(substr) */
@@ -67,7 +76,7 @@ void LibString::load()
 		int start = num(args, 1);
 		int len = args.size() > 2 ? num(args, 2) : str.size() - start;
 		str.erase(start, len);
-		return NIL;
+		return Value::NIL;
 	});
 
 	/* str.substr$(start, [length]) */
@@ -78,25 +87,26 @@ void LibString::load()
 		return Value(str.substr(start, len));
 	});
 
+	/* list.join$() */
+	function("join", [&](Args rhs) {
+		Value list_val = arg(rhs);
+		list_val.assert_type(Type::LIST);
+		ValList &list = list_val.get<ValList>();
+		std::string str;
+
+		for (Value val : list)
+		str += val.to_string(eval);
+
+		return Value(str);
+	});
+
 	load_operators();
 }
 
 void LibString::load_operators()
 {
-	/* Concat list to string */
-	prefix_operator(TokenType::SHIFT_L, [&](auto rhs) {
-		Value list_val =  val(rhs);
-		ValList &list = list_val.get<ValList>();
-		std::string str;
-
-		for (Value val : list)
-			str += val.to_string(eval);
-
-		return Value(str);
-	});
-
 	/* Inline concatenation */
-	infix_operator(TokenType::INLINE_CONCAT, [this](auto lhs, auto rhs) {
+	infix_operator(TokenType::STRING_CONCAT, [this](auto lhs, auto rhs) {
 		auto lexpr = val(lhs), rexpr = val(rhs);
 		return Value(lexpr.to_string(eval) + rexpr.to_string(eval));
 	});

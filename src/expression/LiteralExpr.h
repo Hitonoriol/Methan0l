@@ -13,7 +13,7 @@ struct Value;
 class LiteralExpr: public Expression
 {
 	private:
-		ValueContainer value;
+		Value value;
 
 	public:
 		LiteralExpr(Type val_type, Token token)
@@ -31,24 +31,28 @@ class LiteralExpr: public Expression
 				value = tokstr == Token::reserved(Word::TRUE);
 
 			else if (type == TokenType::STRING)
-				value = lrstrip(tokstr);
+				value = strip_quotes(tokstr);
 
-			else
-				value = 0;
-
+			else if (val_type == Type::CHAR)
+				value = strip_quotes(tokstr)[0];
 		}
 
-		LiteralExpr(ValueContainer value) : value(value)
+		template<typename T>
+		LiteralExpr(T value) : value(value)
 		{
 		}
 
-		LiteralExpr() : value(std::monostate())
+		LiteralExpr(const Value &val) : value(val)
+		{
+		}
+
+		LiteralExpr() : value(NoValue())
 		{
 		}
 
 		bool is_empty()
 		{
-			return std::holds_alternative<std::monostate>(value);
+			return value.empty();
 		}
 
 		Value evaluate(ExprEvaluator &eval) override
@@ -56,12 +60,12 @@ class LiteralExpr: public Expression
 			return Value(value);
 		}
 
-		ValueContainer raw_value()
+		Value raw_value()
 		{
 			return value;
 		}
 
-		ValueContainer &raw_ref()
+		Value& raw_ref()
 		{
 			return value;
 		}
@@ -77,12 +81,18 @@ class LiteralExpr: public Expression
 			return std::make_shared<LiteralExpr>();
 		}
 
+		template<typename T>
+		static std::shared_ptr<LiteralExpr> create(T val)
+		{
+			return std::make_shared<LiteralExpr>(val);
+		}
+
 		static void exec_literal(ExprEvaluator &evaluator, Value &val)
 		{
 			if (val.empty())
 				return;
 
-			switch (val.type) {
+			switch (val.type()) {
 			case Type::UNIT: {
 				Unit unit = val.get<Unit>();
 				unit.call();
@@ -98,7 +108,7 @@ class LiteralExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Literal Expression}";
+			return Expression::info(str << "{Literal Expression}");
 		}
 };
 

@@ -21,7 +21,8 @@ class Library
 
 		std::string str(ExprList args, int idx = 0);
 		double dbl(ExprList args, int idx = 0);
-		int num(ExprList args, int idx = 0);
+		dec num(ExprList args, int idx = 0);
+		udec unum(ExprList args, int idx = 0);
 
 		Value val(ExprPtr expr);
 		Value& ref(ExprPtr idfr);

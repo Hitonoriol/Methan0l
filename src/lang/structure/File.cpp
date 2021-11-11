@@ -29,8 +29,11 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	/* file = File.new$("path/to/file.ext") */
 	register_method(std::string(CONSTRUCT), [&](auto args) {
 		Object &obj = Object::get_this(args);
+		if constexpr (DEBUG)
+		out << "File data: " << obj.get_data() << std::endl;
+
 		obj.field(FNAME) = str(args[1]->evaluate(eval));
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
 	/* Called automatically when converting to string */
@@ -41,7 +44,7 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	/* file.set$(path) */
 	register_method("set", [&](auto args) {
 		Object::get_this(args).field(FNAME) = str(args[1]->evaluate(eval));
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
 	/* file.open$() */
@@ -61,7 +64,7 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 		Function &action = func.get<Function>();
 
 		if (!fs::is_directory(root_path))
-			throw std::runtime_error("File.for_each can only be performed on a directory");
+		throw std::runtime_error("File.for_each can only be performed on a directory");
 
 		auto path = std::make_shared<LiteralExpr>();
 		ExprList action_args {path};
@@ -70,7 +73,7 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 			eval.invoke(action, action_args);
 		}
 
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
 	/* file.extension$() */
@@ -106,7 +109,7 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	/* file.cd$() */
 	register_method("cd", [&](auto args) {
 		fs::current_path(path(args));
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
 
 	/* file.equivalent$(path) */
@@ -121,12 +124,38 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 		std::string from = path(args);
 		std::string to = str(args[1]->evaluate(eval));
 		fs::copy(from, to);
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
+
+	/* file.rename$(new_path) */
+	register_method("rename", [&](auto args) {
+		fs::rename(path(args), str(args[1]->evaluate(eval)));
+		return Value::NO_VALUE;
+	});
+
+	/* file.remove$() */
+	register_method("remove", [&](auto args) {
+		return Value(fs::remove_all(path(args)));
+	});
+
+	/* ***** Read/Write Operations ***** */
 
 	/* file.read_contents$() */
 	register_method("read_contents", [&](auto args) {
-		return Value(read_file(managed_file(Object::get_this(args))));
+		auto fname = path(args);
+		std::ifstream file(fname);
+		Value contents(read_file(file));
+		file.close();
+		return contents;
+	});
+
+	/* file.write_contents$(str) */
+	register_method("write_contents", [&](auto args) {
+		auto fname = path(args);
+		std::ofstream file(fname, std::ios::trunc);
+		file << str(args[1]->evaluate(eval));
+		file.close();
+		return Value::NO_VALUE;
 	});
 
 	/* file.read_line$() */
@@ -137,8 +166,26 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	/* file.write_line$(expr) */
 	register_method("write_line", [&](auto args) {
 		write_line(Object::get_this(args), str(args[1]->evaluate(eval)));
-		return NO_VALUE;
+		return Value::NO_VALUE;
 	});
+
+	register_method("reset", [&](auto args) {
+		reset(managed_file(Object::get_this(args)));
+		return Value::NO_VALUE;
+	});
+
+	/* ***** Static methods ***** */
+
+	/* File@cwd$() */
+	register_method("cwd", [&](auto args) {
+		return Value(fs::current_path().string());
+	});
+}
+
+void File::reset(std::fstream &file)
+{
+	file.clear();
+	file.seekg(0, std::ios::beg);
 }
 
 std::string File::read_line(Object &obj)
@@ -180,6 +227,7 @@ bool File::close(Object &obj)
 
 	file->second->close();
 	managed_files.erase(id);
+	obj.field(IS_OPEN) = false;
 	return true;
 }
 

@@ -1,5 +1,10 @@
 #include "Value.h"
 
+#include <iostream>
+#include <sstream>
+#include <type_traits>
+#include <memory>
+
 #include "ValueRef.h"
 #include "../type.h"
 #include "../util/util.h"
@@ -7,72 +12,79 @@
 namespace mtl
 {
 
-Value::Value()
+const Value Value::NIL(Nil { });
+const Value Value::NO_VALUE(NoValue { });
+
+Value::Value() : Value(NIL)
 {
 }
 
-Value::Value(const Value &val) : Value(val.type, val.value)
+Value::Value(const Value &val) : value(val.value)
 {
-}
-
-Value::Value(Type type, ValueContainer value) : type(type), value(value)
-{
-}
-
-Value::Value(ValueContainer value) : value(value)
-{
-	deduce_type();
-}
-
-Value& Value::set(const ValueContainer &value)
-{
-	this->value = value;
-	deduce_type();
-	return *this;
-}
-
-Value& Value::set(Value &value)
-{
-	this->value = value.value;
-	this->type = value.type;
-	return *this;
 }
 
 Value& Value::get()
 {
-	if (type == Type::REFERENCE)
+	if (type() == Type::REFERENCE)
 		return get<ValueRef>().value();
 	return *this;
 }
 
-Value& Value::operator=(ValueContainer rhs)
+/* To provide an appropriate Methan0l `=` operator behavior:
+ * 		Value should always be copied, even if heap-stored. */
+Value Value::copy()
 {
-	return set(rhs);
+	std::visit([&](auto v) {
+		if constexpr (is_heap_type<decltype(v)>())
+				value = std::make_shared<typename std::remove_reference<decltype(*v)>::type>(*v);
+	}, value);
+	return *this;
+}
+
+bool Value::heap_type()
+{
+	bool is_heap = false;
+	std::visit([&](auto v) {
+		is_heap = is_shared_ptr<decltype(v)>::value;
+	}, value);
+	return is_heap;
+}
+
+dec Value::use_count()
+{
+	dec count = -1;
+	std::visit([&](auto &v) {
+		if constexpr (is_heap_type<typename std::remove_reference<decltype(v)>::type>())
+				count = v.use_count();
+	}, value);
+	return count;
 }
 
 bool Value::container()
 {
-	return type == Type::LIST || type == Type::MAP;
+	Type t = type();
+	return t == Type::LIST || t == Type::MAP;
 }
 
 bool Value::object()
 {
-	return type == Type::OBJECT;
+	return type() == Type::OBJECT;
 }
 
 bool Value::numeric()
 {
-	return type == Type::INTEGER || type == Type::DOUBLE;
+	Type t = type();
+	return t == Type::INTEGER || t == Type::DOUBLE;
 }
 
 bool Value::empty() const
 {
-	return std::holds_alternative<std::monostate>(value);
+	return std::holds_alternative<NoValue>(value);
 }
 
 bool Value::nil() const
 {
-	return type == Type::NIL;
+	return std::holds_alternative<Nil>(value);
 }
 
 void Value::clear()
@@ -82,48 +94,54 @@ void Value::clear()
 
 void Value::clear(ValueContainer &pure_val)
 {
-	pure_val = std::monostate();
+	pure_val = NoValue();
 }
 
-void Value::deduce_type()
+Type Value::type() const
 {
-	if (std::holds_alternative<dec>(value))
-		type = Type::INTEGER;
+	/* Primitive types */
+	if (is<dec>())
+		return Type::INTEGER;
 
-	else if (std::holds_alternative<ValueRef>(value))
-		type = Type::REFERENCE;
+	else if (is<double>())
+		return Type::DOUBLE;
 
-	else if (std::holds_alternative<Object>(value))
-		type = Type::OBJECT;
+	else if (is<char>())
+		return Type::CHAR;
 
-	else if (std::holds_alternative<double>(value))
-		type = Type::DOUBLE;
+	else if (is<bool>())
+		return Type::BOOLEAN;
 
-	else if (std::holds_alternative<bool>(value))
-		type = Type::BOOLEAN;
+	else if (is<ValueRef>())
+		return Type::REFERENCE;
 
-	else if (std::holds_alternative<std::string>(value))
-		type = Type::STRING;
+	/* Heap-stored types */
+	else if (is<VString>())
+		return Type::STRING;
 
-	else if (std::holds_alternative<Unit>(value))
-		type = Type::UNIT;
+	else if (is<VObject>())
+		return Type::OBJECT;
 
-	else if (std::holds_alternative<Function>(value))
-		type = Type::FUNCTION;
+	else if (is<VUnit>())
+		return Type::UNIT;
 
-	else if (std::holds_alternative<ValList>(value))
-		type = Type::LIST;
+	else if (is<VFunction>())
+		return Type::FUNCTION;
 
-	else if (std::holds_alternative<ValMap>(value))
-		type = Type::MAP;
+	else if (is<VList>())
+		return Type::LIST;
 
+	else if (is<VMap>())
+		return Type::MAP;
+
+	/* No value / Unknown type */
 	else
-		type = Type::NIL;
+		return Type::NIL;
 }
 
 std::string Value::to_string(ExprEvaluator *eval)
 {
-	switch (type) {
+	switch (type()) {
 	case Type::NIL:
 		return std::string(Token::reserved(Word::NIL));
 
@@ -174,7 +192,16 @@ std::string Value::to_string(ExprEvaluator *eval)
 
 	case Type::OBJECT: {
 		Object &obj = get<Object>();
-		return eval == nullptr ? obj.to_string() : obj.to_string(*eval);
+		std::stringstream ss;
+		ss << (eval == nullptr ? obj.to_string() : obj.to_string(*eval));
+
+		if (DEBUG && eval == nullptr) {
+			ss << "\n\t\t" << "Object data " << obj.get_data() << std::endl;
+			for (auto &entry : *obj.get_data().map_ptr())
+				ss << "\t\t\t" << entry.first << " = " << entry.second << std::endl;
+		}
+
+		return ss.str();
 	}
 
 	default:
@@ -184,7 +211,8 @@ std::string Value::to_string(ExprEvaluator *eval)
 
 dec Value::to_dec()
 {
-	switch (type) {
+	Type t = type();
+	switch (t) {
 	case Type::DOUBLE:
 		return (dec) get<double>();
 
@@ -194,14 +222,18 @@ dec Value::to_dec()
 	case Type::BOOLEAN:
 		return get<bool>() ? 1 : 0;
 
+	case Type::CHAR:
+		return (dec) get<char>();
+
 	default:
-		throw conversion_exception(type_name(type), type_name(Type::INTEGER));
+		throw InvalidTypeException(t, Type::INTEGER);
 	}
 }
 
 double Value::to_double()
 {
-	switch (type) {
+	Type t = type();
+	switch (t) {
 	case Type::STRING:
 		return std::stod(get<std::string>());
 
@@ -212,13 +244,14 @@ double Value::to_double()
 		return get<bool>() ? 1.0 : 0.0;
 
 	default:
-		throw conversion_exception(type_name(type), type_name(Type::DOUBLE));
+		throw InvalidTypeException(t, Type::DOUBLE);
 	}
 }
 
 bool Value::to_bool()
 {
-	switch (type) {
+	Type t = type();
+	switch (t) {
 	case Type::INTEGER:
 		return get<dec>() == 1;
 
@@ -229,18 +262,22 @@ bool Value::to_bool()
 		return get<double>() == 1.0;
 
 	default:
-		return !nil();
+		throw InvalidTypeException(t, Type::BOOLEAN);
 	}
 }
 
 char Value::to_char()
 {
-	switch (type) {
+	Type t = type();
+	switch (t) {
 	case Type::STRING:
 		return get<std::string>().front();
 
+	case Type::INTEGER:
+		return (char) get<dec>();
+
 	default:
-		throw conversion_exception(type_name(type), type_name(Type::CHAR));
+		throw InvalidTypeException(t, Type::CHAR);
 	}
 }
 
@@ -253,6 +290,9 @@ Value Value::convert(Type new_val_type)
 
 	case Type::INTEGER:
 		return Value(as<dec>());
+
+	case Type::CHAR:
+		return Value(as<char>());
 
 	case Type::DOUBLE:
 		return Value(as<double>());
@@ -270,38 +310,40 @@ Value Value::ref(Value &val)
 	return Value(ValueRef(val));
 }
 
+void Value::assert_type(Type expected, const std::string &msg)
+{
+	Type this_type = type();
+	if (this_type != expected)
+		throw InvalidTypeException(this_type, expected, msg);
+}
+
 Value Value::from_string(std::string str)
 {
-	ValueContainer value;
-	Type type;
-
+	Value value;
 	if (std::isdigit(str[0])) {
 		bool is_dbl = str.find(Token::chr(TokenType::DOT)) != std::string::npos;
-		type = is_dbl ? Type::DOUBLE : Type::INTEGER;
 		if (is_dbl)
 			value = std::stod(str);
 		else
-			value = std::stol(str);
+			value = (dec) std::stol(str);
 	}
 
 	else if (str == Token::reserved(Word::TRUE)
 			|| str == Token::reserved(Word::FALSE)) {
-		type = Type::BOOLEAN;
 		value = str == Token::reserved(Word::TRUE);
 	}
 
 	else {
-		type = Type::STRING;
 		value = str;
 	}
 
-	return Value(type, value);
+	return value;
 }
 
 /* If at least one of the operands is of type DOUBLE, operation result should also be DOUBLE */
 bool Value::is_double_op(Value &lhs, Value &rhs)
 {
-	return lhs.type == Type::DOUBLE || rhs.type == Type::DOUBLE;
+	return lhs.type() == Type::DOUBLE || rhs.type() == Type::DOUBLE;
 }
 
 std::string_view Value::type_name(Type type)
@@ -311,10 +353,14 @@ std::string_view Value::type_name(Type type)
 	return Token::reserved(typew);
 }
 
+std::string_view Value::type_name()
+{
+	return type_name(type());
+}
+
 Value& Value::operator =(const Value &rhs)
 {
 	value = rhs.value;
-	type = rhs.type;
 	return *this;
 }
 
@@ -326,7 +372,7 @@ bool operator ==(const Value &lhs, const Value &rhs)
 	if (lhs.nil() && rhs.nil())
 		return true;
 
-	if (lhs.type != rhs.type)
+	if (lhs.type() != rhs.type())
 		return false;
 
 	return lhs.value == rhs.value;

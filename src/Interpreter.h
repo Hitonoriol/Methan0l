@@ -21,22 +21,27 @@ class Interpreter: public ExprEvaluator
 		Unit main;
 
 		Unit load_unit(std::istream &codestr);
-		Unit load_unit(const std::string &code);
+		Unit load_unit(std::string &code);
 
 	public:
 		Interpreter(std::string code);
 		Interpreter();
 		~Interpreter() = default;
 
+		void lex(std::string &code);
+		void load();
+
 		Unit load_file(std::string path);
 		void load(const Unit &main);
 		void load(std::istream &codestr);
-		void load(const std::string &code);
+		void load(std::string &code);
 		Value run();
 
 		void preserve_data(bool val);
-		Unit program();
+		Unit& program();
+
 		void print_info();
+		void size_info();
 };
 
 } /* namespace mtl */

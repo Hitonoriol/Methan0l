@@ -14,8 +14,8 @@ class InvokeParser: public InfixParser
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
 		{
 			parser.emplace(token);
-			ListExpr list_expr = static_cast<ListExpr&>(*parser.parse(precedence() - 1));
-			return ptr(new InvokeExpr(lhs, list_expr));
+			ListExpr list_expr = try_cast<ListExpr>(parser.parse(precedence() - 1));
+			return make_expr<InvokeExpr>(line(token), lhs, list_expr);
 		}
 
 		int precedence()

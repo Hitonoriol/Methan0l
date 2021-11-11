@@ -1,0 +1,14 @@
+"References" :: newl
+
+var = 1337
+var2 = "Some text"
+ref = **var
+
+"Initial value: " :: var
+
+ref *= 2
+"Modified through reference: " :: ref
+
+/* Reset the Value reference is pointing at */
+ref.reset$(var2)
+"* ref now points at: " :: ref

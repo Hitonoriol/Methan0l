@@ -17,7 +17,7 @@ class AssignParser: public InfixParser
 			if constexpr (DEBUG)
 				rhs->info(std::cout << "Assignment RHS: ") << std::endl;
 
-			return ptr(new AssignExpr(lhs, rhs));
+			return make_expr<AssignExpr>(line(token), lhs, rhs, token.get_type() == TokenType::ARROW_R);
 		}
 
 		int precedence() override

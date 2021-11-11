@@ -34,6 +34,8 @@ class File: public InbuiltType
 		std::string read_line(Object &obj);
 		void write_line(Object &obj, const std::string &line);
 
+		void reset(std::fstream &file);
+
 	public:
 		File(ExprEvaluator &eval);
 		~File() = default;

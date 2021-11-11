@@ -16,13 +16,17 @@ void LibIO::load()
 {
 	/* Output Operator */
 	prefix_operator(TokenType::OUT, [&](auto expr) {
-		Value rhs = val(expr);
-		std::cout << rhs.to_string(eval);
-		return rhs;
+		std::cout << val(expr).to_string(eval);
+		return Value::NO_VALUE;
+	});
+
+	prefix_operator(TokenType::OUT_NL, [&](auto expr) {
+		std::cout << val(expr).to_string(eval) << std::endl;
+		return Value::NO_VALUE;
 	});
 
 	/* Input Operator with type deduction */
-	prefix_operator(TokenType::SHIFT_R, [&](auto idfr) {
+	prefix_operator(TokenType::IN, [&](auto idfr) {
 		IdentifierExpr &idf = try_cast<IdentifierExpr>(idfr);
 		std::string input;
 		std::cin >> input;

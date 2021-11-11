@@ -18,7 +18,7 @@ class IdentifierParser: public PrefixParser
 			if (global)
 				token = parser.consume(TokenType::IDENTIFIER);
 
-			return ptr(new IdentifierExpr(token.get_value(), global));
+			return make_expr<IdentifierExpr>(line(token), token.get_value(), global);
 		}
 };
 

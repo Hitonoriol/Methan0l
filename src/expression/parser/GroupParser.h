@@ -13,7 +13,7 @@ class GroupParser: public PrefixParser
 		{
 			/* Empty group */
 			if (parser.match(TokenType::PAREN_R))
-				return ptr(new LiteralExpr());
+				return std::make_shared<LiteralExpr>();
 
 			ExprPtr expr = parser.parse();
 			parser.consume(TokenType::PAREN_R);

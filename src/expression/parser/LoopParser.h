@@ -30,15 +30,16 @@ class LoopParser: public PrefixParser
 			ExprList loop_params = try_cast<ListExpr>(parser.parse()).raw_list();
 			ExprPtr body = parser.parse();
 			size_t size = loop_params.size();
+			uint32_t line = mtl::line(token);
 
 			if (size == FOR_ARGS)
-				return ptr(new LoopExpr(loop_params, body));
+				return make_expr<LoopExpr>(line, loop_params, body);
 
 			else if (size == FOREACH_ARGS)
-				return ptr(new LoopExpr(loop_params.front(), loop_params[1], body));
+				return make_expr<LoopExpr>(line, loop_params.front(), loop_params[1], body);
 
 			else if (size == WHILE_ARGS)
-				return ptr(new LoopExpr(loop_params.back(), body));
+				return make_expr<LoopExpr>(line, loop_params.back(), body);
 
 			throw std::runtime_error("Invalid Loop parameter list expression quantity");
 		}

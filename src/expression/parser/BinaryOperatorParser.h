@@ -21,7 +21,7 @@ class BinaryOperatorParser: public InfixParser
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
 		{
 			ExprPtr rhs = parser.parse(opr_precedence - (right_assoc ? 1 : 0));
-			return ptr(new BinaryOperatorExpr(lhs, token.get_type(), rhs));
+			return make_expr<BinaryOperatorExpr>(line(token), lhs, token.get_type(), rhs);
 		}
 
 		int precedence() override

@@ -5,13 +5,17 @@ file = File.new$("examples/file.txt")
 "Exists: " :: file.exists$()
 "Is directory: " :: file.is_dir$()
 "Size: " :: file.size$() :: "B"
+"Extension: " :: file.extension$()
 
 newl :: "* Reading file..."
 
 file.open$()
 i = 1
-do $(!(#file.eof)) -> {
+do $(!(file.eof)) -> {
 	"Line #" :: (i++) :: ": " :: file.read_line$()
 }
 "* End of file"
 file.close$()
+
+newl :: "Full contents:"
+%%(file.read_contents$() :: newl)

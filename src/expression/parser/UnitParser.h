@@ -24,12 +24,12 @@ class UnitParser: public PrefixParser
 				} while (!parser.match(TokenType::BRACE_R));
 			}
 
-			bool weak = token.get_type() == TokenType::WEAK_UNIT_DEF;
+			bool weak = token.get_type() == TokenType::ARROW_R;
 
 			if constexpr (DEBUG)
 				std::cout << "Parsed a unit with " << exprs.size() << " exprs" << std::endl;
 
-			return ptr(new UnitExpr(exprs, weak));
+			return make_expr<UnitExpr>(line(token), exprs, weak);
 		}
 };
 

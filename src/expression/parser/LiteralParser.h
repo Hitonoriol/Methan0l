@@ -32,7 +32,7 @@ class LiteralParser: public PrefixParser
 				parser.end_of_expression();
 			}
 
-			return ptr(new LiteralExpr(type, token));
+			return make_expr<LiteralExpr>(line(token), type, token);
 		}
 };
 

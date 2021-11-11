@@ -1,25 +1,55 @@
 my_box = box {
+	sqrt = func @(n) {n.pow$(0.5)!}
+
 	factorial = func @(n) {
-		(n >= 1) ? -> {
-			(n * #factorial$(n - 1))!
-		} : -> {
+		if (n >= 1) ? -> {
+			n * #factorial$(n - 1)!
+		} else: -> {
 			1!
 		}
 	}
 	
-	sqrt = func @(n) {
-		(n.pow$(0.5))!
-	}
-	
-	reverse_list = func @(list) {
-		rev = $()
-		do $(i = size$(list) - 1, i >= 0, --i) -> {
-			rev[] = list[i]
+	reverse = func @(iterable) {
+		@(rev, type => typeid: iterable)
+		
+		if (type == type list) ? -> {
+			rev = $()
 		}
-		rev!
+		else: if (type == type string) ? -> {
+			rev = ""
+		}
+		else: {
+			die$("Unsupported type")
+		}
+		
+		do $(i = size$(iterable) - 1, i >= 0, --i) -> {
+			rev[] = iterable[i]
+		}
+		return: rev
 	}
 }
 
-my_box.sqrt$(2)
-my_box.factorial$(6)
-my_box.reverse_list$($(1, 2, 3, 4, 5, 6))
+"Using a Box Unit w/o importing" :: newl
+{
+	my_box = #my_box
+
+	/* When invoking functions from Box Units w/o importing them,
+	 *	Interpreter enters the Boxes scope,
+	 * 	so local idfrs must be passed as global. */
+	num = 9
+	<% "Sqrt"
+	<% '\t' :: "Of literal: " :: my_box.sqrt$(9)
+	<% '\t' :: "Of identifier: " :: my_box.sqrt$(#num)
+
+	<% "Factorial: " :: my_box.factorial$(6)
+	<% "Reverse list: " :: my_box.reverse$($(1, 2, 3, 4, 5, 6))
+	<% "Reverse string: " :: my_box.reverse$("foo bar baz")
+}
+""
+
+"Importing a Box Unit" :: newl
+{
+	#my_box.import$()
+	<% "Factorial: " :: factorial$(10)
+	<% "Reverse string: " :: reverse$("methan0l")
+}

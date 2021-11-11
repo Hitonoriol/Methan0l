@@ -41,7 +41,7 @@ class UnitExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Unit Expression, unit = " << unit << "}";
+			return Expression::info(str << "{Unit Expression, unit = " << unit << "}");
 		}
 };
 

@@ -8,6 +8,7 @@
 #include "../../util/util.h"
 #include "../../Token.h"
 #include "../IdentifierExpr.h"
+#include "precedence.h"
 
 namespace mtl
 {
@@ -17,22 +18,6 @@ class Parser;
 
 namespace mtl
 {
-
-enum class Precedence
-{
-	ASSIGNMENT = 1,
-	CONDITIONAL,
-	SUM,
-	MULTIPLICATION,
-	EXPONENT,
-	PREFIX,
-	POSTFIX,
-	INVOKE
-};
-
-int prcdc(Precedence prec);
-
-int operator -(const Precedence &lhs, int rhs);
 
 class InfixParser
 {

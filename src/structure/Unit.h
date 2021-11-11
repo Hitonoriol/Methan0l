@@ -50,6 +50,8 @@ class Unit
 		void set_persisent(bool val);
 		void set_weak(bool val);
 
+		bool carries_return();
+
 		void clear();
 		void prepend(ExprPtr expr);
 		void append(ExprPtr expr);

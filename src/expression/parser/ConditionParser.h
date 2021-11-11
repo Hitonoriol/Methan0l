@@ -17,8 +17,8 @@ class ConditionParser: public InfixParser
 			ExprPtr else_expr =
 					parser.match(TokenType::COLON) ?
 							parser.parse(Precedence::CONDITIONAL - 1) :
-							ptr(new LiteralExpr());
-			return ptr(new ConditionalExpr(lhs, then_expr, else_expr));
+							std::make_shared<LiteralExpr>();
+			return make_expr<ConditionalExpr>(line(token), lhs, then_expr, else_expr);
 		}
 
 		int precedence() override

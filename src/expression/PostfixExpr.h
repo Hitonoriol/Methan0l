@@ -35,7 +35,7 @@ class PostfixExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{Postfix Expression | opr = " << static_cast<int>(op) << "}";
+			return Expression::info(str << "{Postfix Expression | " << Token::to_string(op) << "}");
 		}
 };
 

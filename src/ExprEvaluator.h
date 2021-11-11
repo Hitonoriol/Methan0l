@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <cmath>
+#include <utility>
 
 #include "structure/Function.h"
 #include "lang/Library.h"
@@ -40,6 +41,7 @@ class ExprEvaluator
 		TypeManager type_mgr { *this };
 
 		std::deque<Unit*> exec_stack;
+		Expression *current_expr;
 
 		void enter_scope(Unit &unit);
 		void leave_scope();
@@ -63,28 +65,35 @@ class ExprEvaluator
 		void exec(ExprPtr expr);
 
 		void load_main(Unit &main);
-		void dump_stack();
+
+		Expression* get_current_expr();
 		InbuiltFuncMap& functions();
 
 	public:
 		ExprEvaluator();
 		ExprEvaluator(Unit &main);
 		Unit* current_unit();
+		Unit& get_main();
 
 		Value execute(Unit &unit);
+		void execute(ExprList &exprs);
+		Value invoke(Value callable, InvokeExpr& expr);
 		Value invoke_unit(InvokeExpr &expr, Unit &unit);
 		Value invoke(Function &func, ExprList &args);
 
 		DataTable* scope_lookup(const std::string &id, bool global);
-		DataTable* scope_lookup(IdentifierExpr &idfr);
+		DataTable* scope_lookup(const IdentifierExpr &idfr);
 		DataTable* scope_lookup(ExprPtr idfr);
 		DataTable* global();
 		DataTable* local_scope();
 
 		Value& dot_operator_reference(ExprPtr lhs, ExprPtr rhs);
-		Value& referenced_value(ExprPtr idfr);
-		Value& get(IdentifierExpr &idfr);
-		Value& get(const std::string &id, bool global);
+		Value& referenced_value(ExprPtr idfr, bool follow_refs = true);
+		Value& get(IdentifierExpr &idfr, bool follow_refs = true);
+		Value& get(const std::string &id, bool global, bool follow_refs = true);
+
+		void del(ExprPtr idfr);
+		void del(const IdentifierExpr &idfr);
 
 		Value evaluate(BinaryOperatorExpr &opr);
 		Value evaluate(PostfixExpr &opr);
@@ -97,10 +106,14 @@ class ExprEvaluator
 
 		Value evaluate(Expression &expr);
 
+		bool func_exists(const std::string &name);
+
 		TypeManager& get_type_mgr();
 
 		void stop();
 		bool force_quit();
+
+		void dump_stack();
 };
 
 } /* namespace mtl */

@@ -20,6 +20,8 @@ class Lexer
 		std::string::iterator cur_chr, input_end;
 		std::string tokstr;
 		TokenType toktype = TokenType::NONE;
+		uint32_t line;
+		dec open_blocks;
 
 		std::queue<Token> tokens;
 
@@ -47,8 +49,9 @@ class Lexer
 	public:
 		Lexer();
 		~Lexer() = default;
-		void parse(std::string code);
-		Token next();
+		void parse(std::string &code, bool preserve_state = false);
+		Token next(bool peek = false);
+		bool has_unclosed_blocks();
 		bool empty();
 		size_t size();
 };

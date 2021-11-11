@@ -15,6 +15,11 @@ namespace mtl
 
 void TypeManager::register_type(std::unique_ptr<ObjectType> type)
 {
+	if constexpr (DEBUG)
+		out << "! Registering type ["
+				<< std::hex << type->get_id() << "] " << std::dec
+				<< type->get_class_data() << std::endl;
+
 	types.emplace(type->get_id(), std::move(type));
 }
 

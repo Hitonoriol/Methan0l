@@ -1,5 +1,10 @@
 #include "Parser.h"
 
+#include <iostream>
+#include <string>
+
+#include "except/except.h"
+
 namespace mtl
 {
 
@@ -18,9 +23,23 @@ void Parser::register_parser(TokenType token, PrefixParser *parser)
 	prefix_parsers.emplace(token, std::shared_ptr<PrefixParser>(parser));
 }
 
+void Parser::alias_infix(TokenType registered_tok, TokenType alias)
+{
+	infix_parsers.emplace(alias, infix_parsers.at(registered_tok));
+}
+
+void Parser::alias_prefix(TokenType registered_tok, TokenType alias)
+{
+	prefix_parsers.emplace(alias, prefix_parsers.at(registered_tok));
+}
+
 ExprPtr Parser::parse(int precedence)
 {
 	Token token = consume();
+
+	if constexpr (DEBUG)
+		out << "(" << precedence << ") [prefix consume] " << token << std::endl;
+
 	auto prefix_it = prefix_parsers.find(token.get_type());
 	if (prefix_it == prefix_parsers.end())
 		throw std::runtime_error("Unknown token: " + token.to_string());
@@ -31,12 +50,16 @@ ExprPtr Parser::parse(int precedence)
 	if (match(TokenType::EXPR_END))
 		return lhs;
 
-	while (Token::is_compatible(lhs, look_ahead().get_type())
-			&& precedence < get_precedence()) {
+	bool infixc;
+	while ((infixc = Token::is_infix_compatible(lhs, look_ahead().get_type())) && precedence < get_precedence()) {
 		token = consume();
-		auto infix = infix_parsers.at(token.get_type());
+		auto &infix = infix_parsers.at(token.get_type());
 		lhs = infix->parse(*this, lhs, token);
 	}
+
+	if constexpr (DEBUG)
+		if (!infixc)
+			out << look_ahead().to_string() << "is infix-incompatible with " << lhs->info() << std::endl;
 
 	return lhs;
 }
@@ -83,7 +106,7 @@ Token Parser::consume(TokenType expected)
 	Token &token = look_ahead();
 	if (token.get_type() != expected)
 		throw std::runtime_error("Unexpected token: " + token.to_string()
-				+ " (expected: " + Token::to_string(expected) + ")");
+				+ " | Expected: \"" + Token::to_string(expected) + "\"");
 
 	return consume();
 }
@@ -110,10 +133,12 @@ Token& Parser::look_ahead(size_t n)
 int Parser::get_precedence()
 {
 	auto infix_it = infix_parsers.find(look_ahead().get_type());
-	if (infix_it == infix_parsers.end())
-		return 0;
+	int prec = infix_it == infix_parsers.end() ? 0 : infix_it->second->precedence();
 
-	return infix_it->second->precedence();
+	if constexpr (DEBUG)
+		out << "  Lookahead precedence: " << prec << std::endl;
+
+	return prec;
 }
 
 Unit& Parser::result()
@@ -125,6 +150,11 @@ void Parser::clear()
 {
 	root_unit.clear();
 	read_queue.clear();
+}
+
+Lexer& Parser::get_lexer()
+{
+	return lexer;
 }
 
 } /* namespace mtl */

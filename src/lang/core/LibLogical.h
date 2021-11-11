@@ -14,8 +14,8 @@ class LibLogical: public Library
 
 	private:
 		dec eval_bitwise(dec l, TokenType op, dec r);
-		bool eval_logical(bool l, TokenType op, bool r);
-		bool eval_logic_arithmetic(double l, TokenType op, double r);
+		bool eval_logical(const ExprPtr &l, TokenType op, const ExprPtr &r);
+		bool eval_arithmetic_comparison(double l, TokenType op, double r);
 };
 
 } /* namespace mtl */

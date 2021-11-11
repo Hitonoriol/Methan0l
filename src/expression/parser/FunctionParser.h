@@ -21,7 +21,7 @@ class FunctionParser: public PrefixParser
 			if constexpr (DEBUG)
 				std::cout << "Function parser // Args: " << arg_expr.raw_map().size() << std::endl;
 
-			return ptr(new FunctionExpr(arg_expr.raw_map(), body_expr));
+			return make_expr<FunctionExpr>(line(token), arg_expr.raw_map(), body_expr);
 		}
 };
 

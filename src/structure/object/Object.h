@@ -54,6 +54,7 @@ class Object
 		friend bool operator ==(const Object &lhs, const Object &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Object &obj);
 
+		static void init_self(std::shared_ptr<LiteralExpr> &this_instance);
 		static Object copy(const Object &obj);
 };
 

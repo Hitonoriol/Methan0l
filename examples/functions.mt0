@@ -1,10 +1,24 @@
 "Functions" :: newl
 
+/* Postfix return operator:
+ * 	expr!
+ */
 sum = func @(a, b, c => 123) {
-	c != 123 ? -> {"A non-default third arg has been provided!"!}
-	(a + b)!
+	if (c != 123) ? -> {
+		"A non-default third arg has been provided!"!
+	}
+
+	a + b!
 }
 
-"Sum #1: " :: sum$(5, 7)
-"Sum #2: " :: sum$(1337.7331, 7331.1337)
-"Sum #3: " :: sum$(999, 999, "foo")
+/* Prefix return operator:
+ * 	return: expr
+ */
+f = func @(x) {
+	return: x ^ (x >> 1)
+}
+
+<% "Sum #1: " :: sum$(5, 7)
+<% "Sum #2: " :: sum$(1337.7331, 7331.1337)
+<% "Sum #3: " :: sum$(999, 999, "foo")
+<% "f$(123) = "  :: f$(123)

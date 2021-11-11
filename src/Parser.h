@@ -32,12 +32,14 @@ class Parser
 	protected:
 		Lexer lexer;
 
+		void register_parser(TokenType token, InfixParser *parser);
+		void register_parser(TokenType token, PrefixParser *parser);
+		void alias_infix(TokenType registered_tok, TokenType alias);
+		void alias_prefix(TokenType registered_tok, TokenType alias);
+
 	public:
 		Parser(const Lexer &lexer);
 		~Parser() = default;
-
-		void register_parser(TokenType token, InfixParser *parser);
-		void register_parser(TokenType token, PrefixParser *parser);
 
 		void parse_all();
 		ExprPtr parse(int precedence = 0);
@@ -50,6 +52,8 @@ class Parser
 
 		Unit& result();
 		void clear();
+
+		Lexer& get_lexer();
 };
 
 } /* namespace mtl */

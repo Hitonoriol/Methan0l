@@ -29,12 +29,13 @@ Object::Object(size_t type_hash, const DataTable &proto_data) :
 		type_hash(type_hash),
 		data(proto_data)
 {
-	this_instance = std::make_shared<LiteralExpr>(*this);
-	std::get<Object>(this_instance->raw_ref()).prv_access = true;
+	data.copy_managed_map();
+	init_self(this_instance = std::make_shared<LiteralExpr>(*this));
 }
 
 Object::Object(const Object &rhs) :
 		type_hash(rhs.type_hash),
+		prv_access(rhs.prv_access),
 		this_instance(rhs.this_instance),
 		data(rhs.data)
 {
@@ -78,7 +79,7 @@ void Object::inject_this(Args &args)
 Object& Object::get_this(ExprList &args)
 {
 	LiteralExpr &this_expr = try_cast<LiteralExpr>(args.front());
-	return std::get<Object>(this_expr.raw_ref());
+	return this_expr.raw_ref().get<Object>();
 }
 
 bool Object::has_prv_access()
@@ -129,6 +130,13 @@ std::ostream& operator <<(std::ostream &stream, Object &obj)
 	return stream << "{Object 0x" << std::hex << obj.id()
 			<< " of Type 0x" << std::hex << obj.type_id()
 			<< std::dec << "}";
+}
+
+void Object::init_self(std::shared_ptr<LiteralExpr> &this_instance)
+{
+	Object &ths = this_instance->raw_ref().get<Object>();
+	ths.this_instance = this_instance;
+	ths.prv_access = true;
 }
 
 Object Object::copy(const Object &obj)

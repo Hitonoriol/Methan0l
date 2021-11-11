@@ -5,6 +5,7 @@
 #include <memory>
 #include <utility>
 
+#include "../expression/IdentifierExpr.h"
 #include "../Token.h"
 #include "Value.h"
 
@@ -13,10 +14,14 @@ namespace mtl
 
 const std::string DataTable::NIL_IDF(Token::reserved(Word::NIL));
 
+/* Unused for now */
+DataTable DataTable::predefined( {
+		{ NIL_IDF, Value::NIL },
+		{ str(Token::reserved(Word::NEW_LINE)), Value(NEW_LINE) }
+});
+
 DataTable::DataTable() : map(std::make_shared<DataMap>())
 {
-	if constexpr (DEBUG)
-		std::cout << "New data table: " << *this << std::endl;
 }
 
 DataTable::DataTable(const DataMap &managed_map) : map(std::make_shared<DataMap>(managed_map))
@@ -85,15 +90,25 @@ const DataMap& DataTable::managed_map() const
 	return *map;
 }
 
-void DataTable::del(std::string id)
+std::shared_ptr<DataMap> DataTable::map_ptr()
+{
+	return map;
+}
+
+void DataTable::del(const std::string &id)
 {
 	map->erase(id);
+}
+
+void DataTable::del(ExprPtr idfr)
+{
+	del(IdentifierExpr::get_name(idfr));
 }
 
 void DataTable::clear()
 {
 	if constexpr (DEBUG)
-		std::cout << "Clearing " << *this << std::endl;
+		std::cout << "[clear] " << *this << std::endl;
 
 	map->clear();
 }

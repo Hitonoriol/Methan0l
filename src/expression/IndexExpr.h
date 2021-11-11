@@ -34,8 +34,8 @@ class IndexExpr: public IdentifierExpr
 
 		Value evaluate(ExprEvaluator &evaluator) override;
 
-		void assign(ExprEvaluator &eval, Value val) override;
-		Value& referenced_value(ExprEvaluator &eval) override;
+		Value& assign(ExprEvaluator &eval, Value val) override;
+		Value& referenced_value(ExprEvaluator &eval, bool follow_refs = true) override;
 
 		void create_if_nil(ExprEvaluator &eval) override
 		{

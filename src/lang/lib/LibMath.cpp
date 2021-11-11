@@ -25,7 +25,7 @@ void LibMath::load()
 
 	function("abs", [&](Args args) {
 		Value n = arg(args);
-		return n.type == Type::DOUBLE
+		return n.type() == Type::DOUBLE
 				? Value(fabs(mtl::dbl(n))) : Value(abs(mtl::num(n)));
 	});
 
@@ -33,9 +33,9 @@ void LibMath::load()
 		Value n = arg(args), powr = arg(args, 1);
 		double res = pow(mtl::dbl(n), mtl::dbl(powr));
 		if (!Value::is_double_op(n, powr))
-			n.set((dec)res);
+			n = (dec)res;
 		else
-			n.set(res);
+			n = res;
 		return n;
 	});
 

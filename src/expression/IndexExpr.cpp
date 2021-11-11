@@ -13,8 +13,8 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 					try_cast<IndexExpr>(lhs).indexed_element(evaluator) :
 					try_cast<IdentifierExpr>(lhs).referenced_value(evaluator);
 
-	lhs_val_type = val.type;
-	switch (val.type) {
+	lhs_val_type = val.type();
+	switch (lhs_val_type) {
 	case Type::LIST:
 		return indexed_element(evaluator, val.get<ValList>());
 
@@ -67,13 +67,16 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValMap &map)
 	return elem;
 }
 
-Value& IndexExpr::referenced_value(ExprEvaluator &eval)
+Value& IndexExpr::referenced_value(ExprEvaluator &eval, bool follow_refs)
 {
+	if (!follow_refs)
+		throw std::runtime_error("follow_refs = false in IndexExpression is pointless");
+
 	return indexed_element(eval);
 }
 
 /* Process assignment to the indexed element -- in case of strings has to be done manually */
-void IndexExpr::assign(ExprEvaluator &eval, Value val)
+Value& IndexExpr::assign(ExprEvaluator &eval, Value val)
 {
 	if (remove)
 		throw std::runtime_error("Index remove expr can't be used in assignment");
@@ -90,6 +93,8 @@ void IndexExpr::assign(ExprEvaluator &eval, Value val)
 	}
 	else
 		ref = val;
+
+	return ref;
 }
 
 Value IndexExpr::evaluate(ExprEvaluator &evaluator)
@@ -105,9 +110,9 @@ Value IndexExpr::evaluate(ExprEvaluator &evaluator)
 
 std::ostream& IndexExpr::info(std::ostream &str)
 {
-	return str << "{Index "
+	return Expression::info(str << "{Index "
 			<< (remove ? "Remove" : "Access") << " Expression"
-			<< (idx == nullptr ? " (Append)}" : "}");
+			<< (idx == nullptr ? " (Append)}" : "}"));
 }
 
 }

@@ -20,11 +20,8 @@ ExprPtr ClassParser::parse(Parser &parser, mtl::Token token)
 	std::string name = parser.consume(TokenType::IDENTIFIER).get_value();
 	parser.consume(TokenType::ASSIGN);
 	ExprPtr body = parser.parse();
-
-	if (!instanceof<MapExpr>(body.get()))
-		throw std::runtime_error("Class definition body must be a Map Expression");
-
-	return std::make_shared<ClassExpr>(name, body);
+	body->assert_type<MapExpr>("Class definition body must be a Map Expression");
+	return make_expr<ClassExpr>(line(token),name, body);
 }
 
 } /* namespace mtl */

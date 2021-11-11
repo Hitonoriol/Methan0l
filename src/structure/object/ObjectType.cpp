@@ -20,11 +20,24 @@
 namespace mtl
 {
 
+const std::hash<std::string> ObjectType::str_hash { };
+
 ObjectType::ObjectType(ExprEvaluator &eval, const std::string &name) :
 		id(get_id(name)),
 		eval(eval)
 {
-	static_instance = std::make_shared<LiteralExpr>(Object(id));
+	Object::init_self(static_instance = std::make_shared<LiteralExpr>(Object(id)));
+
+	/*
+	 * Can be called as a static method:
+	 * 		Class@class_id$()
+	 *
+	 * 	As well as a method of an Object:
+	 * 		obj.class_id$()
+	 */
+	register_method("class_id", Function::create( {
+			Expression::return_val((dec) id)
+	}));
 }
 
 void ObjectType::register_method(const std::string &name, Function method)
@@ -39,18 +52,19 @@ Value ObjectType::invoke_method(Object &obj, const std::string &name, ExprList &
 	Value &field = data.get(name);
 
 	if (field.nil())
-		return NO_VALUE;
+		return Value::NO_VALUE;
 
-	if (field.type != Type::FUNCTION)
-		throw std::runtime_error("Trying to invoke a non-function");
+	field.assert_type(Type::FUNCTION, "Trying to invoke a non-function");
 
-	Function &method = field.get<Function>();
+	Function method = field.get<Function>();
 	return eval.invoke(method, args);
 }
 
 Value ObjectType::invoke_static(const std::string &name, ExprList &args)
 {
-	return invoke_method(std::get<Object>(static_instance->raw_ref()), name, args);
+	auto arg_copy = args;
+	arg_copy.push_front(static_instance);
+	return invoke_method(static_instance->raw_ref().get<Object>(), name, arg_copy);
 }
 
 void ObjectType::register_private(std::string name)
@@ -87,7 +101,7 @@ Object ObjectType::create(Args &args)
 
 size_t ObjectType::get_id(const std::string &type_name)
 {
-	return std::hash<std::string> { }(type_name);
+	return str_hash(type_name);
 }
 
 std::ostream& operator <<(std::ostream &stream, ObjectType &type)

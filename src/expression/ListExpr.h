@@ -25,7 +25,7 @@ class ListExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return str << "{List Expression // " << exprs.size() << " elements}";
+			return Expression::info(str << "{List Expression // " << exprs.size() << " elements}");
 		}
 };
 

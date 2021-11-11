@@ -15,6 +15,8 @@ class DataTable
 		std::shared_ptr<DataMap> map;
 		static const std::string NIL_IDF;
 
+		static DataTable predefined;
+
 	public:
 		DataTable();
 		DataTable(const DataMap &managed_map);
@@ -25,10 +27,13 @@ class DataTable
 		Value& set(const std::string &id, Value value);
 		Value& get(const std::string &id);
 		Value& get_or_create(const std::string &id);
-		void del(std::string id);
+
+		void del(const std::string &id);
+		void del(ExprPtr idfr);
 
 		void copy_managed_map();
 		const DataMap& managed_map() const;
+		std::shared_ptr<DataMap> map_ptr();
 
 		Value& nil();
 		void clear();

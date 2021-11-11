@@ -4,9 +4,15 @@
 #include <iostream>
 #include <sstream>
 
-#include "expression/IdentifierExpr.h"
 #include "type.h"
 #include "util/util.h"
+#include "util/array.h"
+
+#include "expression/BinaryOperatorExpr.h"
+#include "expression/IdentifierExpr.h"
+#include "expression/UnitExpr.h"
+#include "expression/FunctionExpr.h"
+#include "expression/InvokeExpr.h"
 
 namespace mtl
 {
@@ -18,6 +24,17 @@ const std::string Token::double_digits = digits + '.';
 const int Token::TYPENAMES_BEG_IDX =
 		std::distance(std::begin(reserved_words),
 				std::find(std::begin(reserved_words), std::end(reserved_words), Token::reserved(Word::T_NIL)));
+
+const std::unordered_map<std::string_view, char> Token::escape_seqs = {
+		{ "\\a", '\a' },
+		{ "\\b", '\b' },
+		{ "\\f", '\f' },
+		{ "\\r", '\r' },
+		{ "\\n", '\n' },
+		{ "\\v", '\v' },
+		{ "\\t", '\t' },
+		{ "\\0", '\0' },
+};
 
 Token::Token(TokenType type, std::string value) : type(type), value(value)
 {
@@ -45,7 +62,7 @@ Token& Token::operator=(const Token &rhs)
 	return *this;
 }
 
-std::string_view Token::reserved(Word word)
+std::string_view Token::reserved(const Word &word)
 {
 	return reserved_words[static_cast<int>(word)];
 }
@@ -80,6 +97,17 @@ std::string& Token::get_value()
 	return value;
 }
 
+Token& Token::set_line(uint32_t line)
+{
+	this->line = line;
+	return *this;
+}
+
+uint32_t Token::get_line() const
+{
+	return line;
+}
+
 TokenType Token::get_bichar_op_type(std::string &tokstr)
 {
 	for (size_t i = 0; i < std::size(bichar_ops); ++i)
@@ -96,6 +124,11 @@ TokenType Token::deduce_type(std::string &tokstr)
 		return get_bichar_op_type(tokstr);
 
 	return TokenType::NONE;
+}
+
+char Token::escape_seq(std::string_view seq)
+{
+	return escape_seqs.at(seq);
 }
 
 bool Token::is_delimiter(char chr)
@@ -126,10 +159,24 @@ Word Token::as_reserved(std::string &tokstr)
 	return Word::NIL;
 }
 
+bool Token::is_block_begin(char c)
+{
+	return contains(block_begin_tokens, tok(c));
+}
+
+bool Token::is_block_end(char c)
+{
+	return contains(block_end_tokens, tok(c));
+}
+
+bool Token::is_semantic(const TokenType &tok)
+{
+	return contains(semantic_tokens, tok);
+}
+
 bool Token::is_reserved(std::string &tokstr)
 {
-	auto end = std::end(reserved_words);
-	return std::find(std::begin(reserved_words), end, tokstr) != end;
+	return contains(reserved_words, tokstr);
 }
 
 TokenType Token::as_word_op(std::string &tokstr)
@@ -165,13 +212,21 @@ bool Token::is_ref_opr(TokenType opr)
 	}
 }
 
-bool Token::is_compatible(ExprPtr expr, TokenType next)
+/* Used to resolve parsing collisions for tokens that can be used both as prefix & infix(postfix) operators */
+bool Token::is_infix_compatible(const ExprPtr &lhs, TokenType next)
 {
 	switch (next) {
-	/* Because ++ and -- are both prefix & postfix, additional check is needed to avoid syntax "collisions" */
 	case TokenType::INCREMENT:
 		case TokenType::DECREMENT:
-		return instanceof<IdentifierExpr>(expr.get());
+		case TokenType::ARROW_R:	// Move assignment
+		return instanceof<IdentifierExpr>(lhs);
+
+	case TokenType::LIST_DEF_L:	// Invocation
+		return instanceof<IdentifierExpr>(lhs)
+				|| instanceof<BinaryOperatorExpr>(lhs)
+				|| instanceof<UnitExpr>(lhs)
+				|| instanceof<FunctionExpr>(lhs)
+				|| instanceof<InvokeExpr>(lhs);
 
 	default:
 		return true;
@@ -184,6 +239,14 @@ char Token::chr(TokenType tok)
 		return static_cast<char>(tok);
 
 	return '\0';
+}
+
+TokenType Token::tok(char chr)
+{
+	if ((int) chr < BICHAR_OP_START)
+		return static_cast<TokenType>(chr);
+
+	return TokenType::NONE;
 }
 
 bool Token::contains_all(std::string str, std::string substr)
@@ -220,7 +283,9 @@ std::string Token::to_string(TokenType tok)
 
 std::ostream& operator <<(std::ostream &stream, const Token &val)
 {
-	stream << "{\"" << val.value << "\" : " << Token::to_string(val.type);
+	stream << "{"
+			<< "@" << val.line
+			<< " \"" << val.value << "\" : " << Token::to_string(val.type);
 	return stream << "}";
 }
 

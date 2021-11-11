@@ -11,12 +11,14 @@ newl
 some_list = $("first element", 999, -0.123456, false, -1, false, true, "another element", 1337)
 "List: " :: some_list
 do $(elem, some_list) -> {
-	e_type = type(elem)
+	e_type = typeid(elem)
 	%% "* "
-	(e_type == type string) ? ->
-		{elem :: " (Length: " :: size$(elem) :: ")"}
-	: (e_type == type int || e_type == type double) ? ->
-		{elem :: " is positive: " :: (elem > 0)}
+	(e_type == type string) ? -> {
+		elem :: " (Length: " :: size$(elem) :: ")"
+	}
+	: (e_type == type int || e_type == type double) ? -> {
+		elem :: " is positive: " :: (elem > 0)
+	}
 	: elem
 }
 
@@ -30,5 +32,15 @@ newl
 foo = size$(some_list) * 6.75
 do $(#foo > 50) -> {
 	%%("<While Loop> ")
-	--#foo
+	--foo
 }
+newl
+
+"Loop benchmark"
+it = 1 000
+elapsed = measure_time$({
+	/* Copy from the scope above to avoid looking it up each iteration */
+	it = #it
+	do $(i = 0, i < it, ++i) -> {}
+})
+%%(it :: " iterations performed in " :: elapsed :: " ms" :: newl)

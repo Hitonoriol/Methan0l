@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <chrono>
+#include <thread>
 
 #include "../../expression/IdentifierExpr.h"
 #include "../../expression/parser/MapParser.h"
@@ -12,6 +14,7 @@
 #include "../../structure/Value.h"
 #include "../../type.h"
 #include "../../Token.h"
+#include "../../version.h"
 
 namespace mtl
 {
@@ -27,14 +30,47 @@ void LibData::load()
 
 	/* ref.reset$(new_idfr) */
 	function("reset", [&](Args args) {
-		/* This is a copy of the reference.
-		 * TODO: a way to get the reference itself w/o following it */
-		Value ref_val = arg(args);
-		if (ref_val.type != Type::REFERENCE)
-			throw std::runtime_error("reset$() can only be applied on a reference");
+		Value &ref_val = eval->referenced_value(args[0], false);
 
-		ref_val.get<ValueRef>().reset(ref(args[1]));
-		return ref_val;
+		ref_val.assert_type(Type::REFERENCE, "reset$() can only be applied on a reference");
+		args[1]->assert_type<IdentifierExpr>("Can't make a reference to the temp Value of " + args[1]->info());
+
+		Value &new_val = ref(args[1]);
+		ref_val.get<ValueRef>().reset(new_val);
+		return Value::NO_VALUE;
+	});
+
+	function("get_version_code", [&](Args args) {
+		return Value(VERSION_CODE);
+	});
+
+	function("get_minor_version", [&](Args args) {
+		return Value(MINOR_VERSION);
+	});
+
+	function("get_release_version", [&](Args args) {
+		return Value(RELEASE_VERSION);
+	});
+
+	function("get_major_version", [&](Args args) {
+		return Value(MAJOR_VERSION);
+	});
+
+	function("get_version", [&](Args args) {
+		return Value(VERSION_STR);
+	});
+
+	function("get_os_name", [&](Args args) {
+		return Value(mtl::str(get_os()));
+	});
+
+	/* unit.identifier$("idfr_name")
+	 * identifier$("idfr_name") -- get idfr's Value from Main Unit */
+	function("identifier", [&](Args args) {
+		Unit &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : eval->get_main();
+		std::string idfr_name = mtl::str(val(args.back()));
+		Value &val = unit.local().get(idfr_name);
+		return Value::ref(val);
 	});
 
 	/* range$(n)				<-- Returns a list w\ Values in range [0; n - 1]
@@ -65,33 +101,96 @@ void LibData::load()
 		Function action = arg(args, 1).get<Function>();
 		action.set_weak(true);
 		ExprList action_args;
+		ValueRef elem_ref;
 
-		if (ctr.type == Type::LIST) {
-			if constexpr(DEBUG)
-				std::cout << "Beginning List for_each..." << std::endl;
+		if constexpr(DEBUG)
+				std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
+
+		Type valtype = ctr.type();
+
+		if (valtype == Type::LIST) {
 			auto &list = ctr.get<ValList>();
 			auto elem_expr = LiteralExpr::empty();
 			action_args.push_front(elem_expr);
-			for(auto &elem : list) {
+			for(Value &elem : list) {
 				if constexpr(DEBUG)
-					std::cout << "* for_each iteration" << std::endl;
-				elem_expr->raw_ref() = elem.value;
+						std::cout << "* List for_each iteration" << std::endl;
+
+				elem_ref.reset(elem);
+				elem_expr->raw_ref() = elem_ref;
 				eval->invoke(action, action_args);
 			}
 		}
 
-		else if (ctr.type == Type::MAP) {
+		else if (valtype == Type::MAP) {
 			auto &map = ctr.get<ValMap>();
 			auto key = LiteralExpr::empty(), val = LiteralExpr::empty();
 			action_args = {key, val};
 			for (auto &entry : map) {
+				if constexpr(DEBUG)
+						std::cout << "* Map for_each iteration" << std::endl;
+
 				key->raw_ref() = entry.first;
-				val->raw_ref() = entry.second.value;
+				elem_ref.reset(entry.second);
+				val->raw_ref() = elem_ref;
 				eval->invoke(action, action_args);
 			}
 		}
 
-		return NO_VALUE;
+		return Value::NO_VALUE;
+	});
+
+	/* <List>.resize$(new_size) */
+	function("resize", [&](Args args) {
+		Value &list_val = ref(args[0]);
+		list_val.assert_type(Type::LIST, "resize$() can only be applied on a List");
+		list_val.get<ValList>().resize(unum(args, 1));
+		return Value::ref(list_val);
+	});
+
+	/* <Map | List>.clear$() */
+	function("clear", [&](Args args) {
+		Value &cnt = ref(args[0]);
+
+		switch(cnt.type()) {
+		case Type::LIST:
+			cnt.get<ValList>().clear();
+			break;
+
+		case Type::MAP:
+			cnt.get<ValMap>().clear();
+			break;
+
+		default:
+			break;
+		}
+
+		return Value::NO_VALUE;
+	});
+
+	/* <Map | List>.size$() */
+	function("size", [this](auto args) {
+		Value val = this->arg(args);
+		int size = 0;
+
+		switch(val.type()) {
+			case Type::STRING:
+				size = val.get<std::string>().size();
+				break;
+
+			case Type::LIST:
+				size = val.get<ValList>().size();
+				break;
+
+			case Type::MAP:
+				size = val.get<ValMap>().size();
+				break;
+
+			default:
+				break;
+		}
+
+		return Value(size);
 	});
 
 	/* map.list_of$(keys) or map.list_of$(values) */
@@ -109,6 +208,11 @@ void LibData::load()
 		return Value(list);
 	});
 
+	function("purge", [&](Args args) {
+		eval->current_unit()->local().clear();
+		return Value::NO_VALUE;
+	});
+
 	/* val.convert$(typeid) -- does not modify <val>, returns a copy of type typeid (if possible)*/
 	function("convert", [&](Args args) {
 		Value val = arg(args);
@@ -120,50 +224,33 @@ void LibData::load()
 		return val.convert(static_cast<Type>(type_id));
 	});
 
+	/* ms = now$() */
+	function("now", [&](Args args) {
+		return Value(std::chrono::duration_cast<std::chrono::milliseconds>(
+						std::chrono::system_clock::now().time_since_epoch())
+				.count());
+	});
+
 	load_operators();
 }
 
 void LibData::load_operators()
 {
 	/* Reference operator */
-	prefix_operator(TokenType::REF, [&](auto rhs) {
+	prefix_operator(TokenType::REF, [&](ExprPtr rhs) {
+		rhs->assert_type<IdentifierExpr>("Cannot reference a temporary Value");
 		return Value::ref(eval->referenced_value(rhs));
 	});
 
-	/* Typeid operator */
-	prefix_operator(TokenType::TYPE, [this](auto rhs) {
-		return Value(static_cast<int>(val(rhs).type));
+	/* typeid(val) */
+	prefix_operator(TokenType::TYPE_ID, [this](ExprPtr rhs) {
+		return Value(static_cast<int>(val(rhs).type()));
 	});
 
 	/* Delete idfr & the Value associated with it */
-	prefix_operator(TokenType::DELETE, [this](auto rhs) {
+	prefix_operator(TokenType::DELETE, [this](ExprPtr rhs) {
 		eval->scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
-		return NIL;
-	});
-
-	/* expr.size$() */
-	function("size", [this](auto args) {
-		Value val = this->arg(args);
-		int size = 0;
-
-		switch(val.type) {
-			case Type::STRING:
-			size = val.get<std::string>().size();
-			break;
-
-			case Type::LIST:
-			size = val.get<ValList>().size();
-			break;
-
-			case Type::MAP:
-			size = val.get<ValMap>().size();
-			break;
-
-			default:
-			break;
-		}
-
-		return Value(size);
+		return Value::NIL;
 	});
 }
 

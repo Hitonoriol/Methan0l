@@ -27,7 +27,7 @@ class IndexParser: public InfixParser
 				parser.consume(TokenType::BRACKET_R);
 			}
 
-			ExprPtr expr = ptr(new IndexExpr(lhs, idx, remove));
+			ExprPtr expr = make_expr<IndexExpr>(line(token), lhs, idx, remove);
 
 			if (parser.match(TokenType::BRACKET_L))
 				expr = parse(parser, expr, token);
@@ -37,7 +37,7 @@ class IndexParser: public InfixParser
 
 		int precedence() override
 		{
-			return static_cast<int>(Precedence::INVOKE);
+			return static_cast<int>(Precedence::INDEX);
 		}
 };
 

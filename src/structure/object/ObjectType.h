@@ -35,6 +35,8 @@ class ObjectType
 
 		std::shared_ptr<LiteralExpr> static_instance;
 
+		static const std::hash<std::string> str_hash;
+
 	protected:
 		ExprEvaluator &eval;
 
