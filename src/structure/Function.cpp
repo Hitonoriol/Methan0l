@@ -20,19 +20,17 @@ Function::Function()
 {
 }
 
-Function::Function(ExprMap args, Unit body) : Unit(body)
+Function::Function(ArgDefList args, Unit body) : Unit(body), arg_def(args)
 {
 	argc = 0;
 	for (auto entry : args) {
 		if (instanceof<LiteralExpr>(entry.second.get())
 				&& try_cast<LiteralExpr>(entry.second).is_empty())
 			++argc;
-
-		arg_def.push_back(entry);
 	}
 }
 
-Function::Function(Unit body) : Function(ExprMap(), body)
+Function::Function(Unit body) : Function(ArgDefList(), body)
 {
 }
 
@@ -92,7 +90,7 @@ void Function::call(ExprEvaluator &eval, ExprList &args)
 	}
 }
 
-Function Function::create(ExprList body, ExprMap args)
+Function Function::create(ExprList body, ArgDefList args)
 {
 	return Function(args, body);
 }

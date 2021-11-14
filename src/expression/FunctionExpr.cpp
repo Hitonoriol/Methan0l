@@ -6,7 +6,7 @@
 namespace mtl
 {
 
-FunctionExpr::FunctionExpr(ExprMap argdef, UnitExpr body) : func(argdef, body.get_unit())
+FunctionExpr::FunctionExpr(ArgDefList argdef, UnitExpr body) : func(argdef, body.get_unit())
 {
 }
 

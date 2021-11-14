@@ -27,6 +27,17 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 	if constexpr (DEBUG)
 		std::cout << "Parsing map expr..." << std::endl;
 
+	parse_map_def(parser, [&](std::string key, ExprPtr val) {map.emplace(key, val);});
+
+	if constexpr (DEBUG)
+		std::cout << "Parsed a map with " << map.size() << " entries" << std::endl;
+
+	return make_expr<MapExpr>(line(token), map);
+}
+
+void MapParser::parse_map_def(Parser &parser,
+		std::function<void(std::string, ExprPtr)> collector)
+{
 	if (!parser.match(TokenType::PAREN_R)) {
 		do {
 			ExprPtr pair_expr = parser.parse();
@@ -34,7 +45,7 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 			/* Key with no value specified */
 			if (instanceof<IdentifierExpr>(pair_expr.get())
 					|| instanceof<LiteralExpr>(pair_expr.get())) {
-				map.emplace(key_string(pair_expr), LiteralExpr::empty());
+				collector(key_string(pair_expr), LiteralExpr::empty());
 				continue;
 			}
 
@@ -42,15 +53,10 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 			if (pair.get_operator() != TokenType::KEYVAL)
 				throw std::runtime_error("Unexpected opr in map declaration");
 
-			map.emplace(key_string(pair.get_lhs()), pair.get_rhs());
+			collector(key_string(pair.get_lhs()), pair.get_rhs());
 		} while (parser.match(TokenType::COMMA));
 		parser.consume(TokenType::PAREN_R);
 	}
-
-	if constexpr (DEBUG)
-		std::cout << "Parsed a map with " << map.size() << " entries" << std::endl;
-
-	return make_expr<MapExpr>(line(token), map);
 }
 
 std::string MapParser::key_string(ExprPtr expr)

@@ -11,7 +11,8 @@
 namespace mtl
 {
 
-template<typename E, typename ...Args> std::shared_ptr<E> make_expr(uint32_t line, Args &&...args)
+template<typename E, typename ...Args> std::shared_ptr<E> make_expr(uint32_t line,
+		Args &&...args)
 {
 	auto expr_ptr = std::make_shared<E>(std::forward<Args>(args)...);
 	expr_ptr->set_line(line);
@@ -58,6 +59,14 @@ class Expression
 		static ExprPtr return_expr(ExprPtr expr);
 		static ExprPtr return_val(Value val);
 };
+
+inline RawExprList as_raw_list(ExprList &list)
+{
+	RawExprList raw_lst;
+	for (ExprPtr &ptr : list)
+		raw_lst.push_back(ptr.get());
+	return raw_lst;
+}
 
 } /* namespace mtl */
 

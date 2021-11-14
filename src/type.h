@@ -40,6 +40,7 @@ using DataMap = std::unordered_map<std::string, Value>;
 using ValMap = std::map<std::string, Value>;
 
 using ExprList = std::deque<ExprPtr>;
+using RawExprList = std::deque<Expression*>;
 using ValList = std::deque<Value>;
 
 using ArgDef = std::pair<std::string, ExprPtr>;

@@ -15,13 +15,18 @@ class FunctionParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			MapExpr arg_expr = try_cast<MapExpr>(parser.parse());
+			ArgDefList args;
+			parser.consume(TokenType::MAP_DEF_L);
+			MapParser::parse_map_def(parser, [&](auto key, auto val) {
+				args.push_back(std::make_pair(key, val));
+			});
+
 			UnitExpr body_expr = try_cast<UnitExpr>(parser.parse());
 
 			if constexpr (DEBUG)
-				std::cout << "Function parser // Args: " << arg_expr.raw_map().size() << std::endl;
+				std::cout << "Function parser // Args: " << args.size() << std::endl;
 
-			return make_expr<FunctionExpr>(line(token), arg_expr.raw_map(), body_expr);
+			return make_expr<FunctionExpr>(line(token), args, body_expr);
 		}
 };
 

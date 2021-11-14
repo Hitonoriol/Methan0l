@@ -49,9 +49,9 @@ constexpr auto type_name()
 }
 
 template<typename To, typename From>
-inline To& try_cast(std::shared_ptr<From> ptr)
+inline To& try_cast(From *ptr)
 {
-	if (instanceof<To>(ptr.get()))
+	if (instanceof<To>(ptr))
 		return static_cast<To&>(*ptr);
 
 	std::stringstream err_ss;
@@ -62,6 +62,12 @@ inline To& try_cast(std::shared_ptr<From> ptr)
 	}
 
 	throw std::runtime_error(err_ss.str());
+}
+
+template<typename To, typename From>
+inline To& try_cast(std::shared_ptr<From> ptr)
+{
+	return try_cast<To>(ptr.get());
 }
 
 inline std::string str(char chr)

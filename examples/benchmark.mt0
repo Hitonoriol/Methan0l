@@ -1,0 +1,51 @@
+<% "Methan0l benchmarks" :: newl
+
+start = now$()
+
+<% "Unit execution overhead: " ::
+	{
+		rep = 100 000
+		msec = 0.0
+		do $(i, range$(rep)) -> {msec += measure_time$({})}
+		return: msec / rep
+	}$()
+:: "ms"
+
+execution_time = func @(action, times) {
+	tlist = $()
+	do $(i, range$(times)) -> {
+		tlist[] = measure_time$(action$())
+	}
+	mean = 0.0
+	do $(n, tlist) -> {mean += n}
+	return: mean / tlist.size$()
+}
+
+benchmark = func @(bench_name, action, times => 10) {
+	time = #execution_time$(action, times)
+	<% "* " :: bench_name :: "[x" :: times :: "]: "
+		:: time :: "ms"
+}
+
+class: Test @(
+	foo => func @(n) {
+		this.n = n
+	}
+)
+
+obj = Test.new$()
+
+benchmark$("For loop, 1m iters",
+	{do $(i = 0, i < 1 000 000, ++i) {}})
+
+benchmark$("For-each loop, 1m iters",
+	{do $(i, range$(1 000 000)) {}})
+
+benchmark$("Pseudo-method call",
+	{123.sqrt$()}, 1 000 000)
+	
+benchmark$("Class method call",
+	{#obj.foo$(42)}, 1 000 000)
+
+time_total = (now$() - start) / 1000
+<% newl :: "All benchmarks finished. [" :: time_total :: " secs spent]"

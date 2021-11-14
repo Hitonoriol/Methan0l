@@ -12,7 +12,7 @@ class FunctionExpr: public Expression
 		Function func;
 
 	public:
-		FunctionExpr(ExprMap argdef, UnitExpr body);
+		FunctionExpr(ArgDefList argdef, UnitExpr body);
 
 		Value evaluate(ExprEvaluator &evaluator) override;
 		void execute(ExprEvaluator &evaluator) override;

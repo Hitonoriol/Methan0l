@@ -24,7 +24,7 @@ class Function: public Unit
 
 	public:
 		Function(Unit body);
-		Function(ExprMap args, Unit body);
+		Function(ArgDefList args, Unit body);
 		Function();
 
 		void set(const Function &rhs);
@@ -33,7 +33,7 @@ class Function: public Unit
 
 		void call(ExprEvaluator &eval, ExprList &args);
 
-		static Function create(ExprList body, ExprMap args = ExprMap());
+		static Function create(ExprList body, ArgDefList args = ArgDefList());
 
 		std::string to_string() override;
 		friend std::ostream& operator <<(std::ostream &stream, Function &func);
