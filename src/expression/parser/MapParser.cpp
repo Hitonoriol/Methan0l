@@ -27,7 +27,7 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 	if constexpr (DEBUG)
 		std::cout << "Parsing map expr..." << std::endl;
 
-	parse_map_def(parser, [&](std::string key, ExprPtr val) {map.emplace(key, val);});
+	parse(parser, [&](std::string key, ExprPtr val) {map.emplace(key, val);});
 
 	if constexpr (DEBUG)
 		std::cout << "Parsed a map with " << map.size() << " entries" << std::endl;
@@ -35,7 +35,8 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 	return make_expr<MapExpr>(line(token), map);
 }
 
-void MapParser::parse_map_def(Parser &parser,
+/* Assumes that the `@(` token is already consumed */
+void MapParser::parse(Parser &parser,
 		std::function<void(std::string, ExprPtr)> collector)
 {
 	if (!parser.match(TokenType::PAREN_R)) {

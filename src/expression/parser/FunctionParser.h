@@ -17,7 +17,7 @@ class FunctionParser: public PrefixParser
 		{
 			ArgDefList args;
 			parser.consume(TokenType::MAP_DEF_L);
-			MapParser::parse_map_def(parser, [&](auto key, auto val) {
+			MapParser::parse(parser, [&](auto key, auto val) {
 				args.push_back(std::make_pair(key, val));
 			});
 

@@ -171,7 +171,7 @@ Value ExprEvaluator::invoke(Value callable, InvokeExpr &expr)
 {
 	switch (callable.type()) {
 	case Type::FUNCTION:
-		return invoke(callable.get<Function>(), expr.arg_list().raw_list());
+		return invoke(callable.get<Function>(), expr.arg_list());
 
 	case Type::UNIT:
 		return invoke_unit(expr, callable.get<Unit>());
@@ -386,7 +386,7 @@ Value ExprEvaluator::eval(ExprPtr expr)
 	return eval(*expr);
 }
 
-inline void ExprEvaluator::exec(ExprPtr expr)
+inline void ExprEvaluator::exec(ExprPtr &expr)
 {
 	if constexpr (DEBUG)
 		expr->info(std::cout << "[Exec] ") << std::endl;
@@ -435,13 +435,13 @@ Value ExprEvaluator::evaluate(ListExpr &expr)
 
 Value ExprEvaluator::invoke_unit(InvokeExpr &expr, Unit &unit)
 {
-	auto args_expr = expr.arg_list();
-	if (args_expr.raw_list().empty())
+	auto args = expr.arg_list();
+	if (args.empty())
 		unit.call();
 
 	/* Unit invocation w/ init-block */
 	else {
-		Value initv = eval(args_expr).get<ValList>()[0];
+		Value initv = eval(args[0]);
 		Unit &init_block = initv.get<Unit>();
 		unit.call();
 		init_block.manage_table(unit);
@@ -470,11 +470,11 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 
 	else if (ctype == Type::FUNCTION) {
 		Function func = callable.get<Function>();
-		return invoke(func, expr.arg_list().raw_list());
+		return invoke(func, expr.arg_list());
 	}
 
 	else if (instanceof<IdentifierExpr>(expr.get_lhs().get()) && callable.nil())
-		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list().raw_list());
+		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list());
 
 	throw std::runtime_error("Invalid invocation expression");
 }

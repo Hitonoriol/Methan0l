@@ -14,10 +14,10 @@ class InvokeExpr: public Expression
 {
 	private:
 		ExprPtr lhs;
-		ListExpr args;
+		ExprList args;
 
 	public:
-		InvokeExpr(ExprPtr lhs, ListExpr args) :
+		InvokeExpr(ExprPtr lhs, ExprList args) :
 				lhs(lhs),
 				args(args)
 		{
@@ -33,14 +33,14 @@ class InvokeExpr: public Expression
 			return lhs;
 		}
 
-		ListExpr& arg_list()
+		ExprList& arg_list()
 		{
 			return args;
 		}
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return Expression::info(str << "{Invoke Expression | args = " << args.raw_list().size() << "}");
+			return Expression::info(str << "{Invoke Expression | args = " << args.size() << "}");
 		}
 };
 

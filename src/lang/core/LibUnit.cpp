@@ -129,7 +129,7 @@ void LibUnit::load_operators()
 		ObjectType &type = eval->get_type_mgr().get_type(ObjectType::get_id(MapParser::key_string(lhs)));
 		InvokeExpr &method_expr = try_cast<InvokeExpr>(rhs);
 		std::string name = MapParser::key_string(method_expr.get_lhs());
-		return type.invoke_static(name, method_expr.arg_list().raw_list());
+		return type.invoke_static(name, method_expr.arg_list());
 	});
 
 	/* Access operator */
@@ -198,7 +198,7 @@ Value LibUnit::object_dot_operator(Object &obj, ExprPtr rhs)
 	if (instanceof<InvokeExpr>(rhs.get())) {
 		InvokeExpr &method = try_cast<InvokeExpr>(rhs);
 		auto &method_name = try_cast<IdentifierExpr>(method.get_lhs()).get_name();
-		return obj.invoke_method(eval->type_mgr, method_name, method.arg_list().raw_list());
+		return obj.invoke_method(eval->type_mgr, method_name, method.arg_list());
 	}
 	else
 		return obj.field(IdentifierExpr::get_name(rhs));
@@ -213,7 +213,7 @@ Value LibUnit::invoke_pseudo_method(ExprPtr obj, ExprPtr func)
 		out << "Pseudo-method [" << obj->info() << "] . [" << func->info() << "]" << std::endl;
 
 	InvokeExpr method = try_cast<InvokeExpr>(func);
-	method.arg_list().raw_list().push_front(obj);
+	method.arg_list().push_front(obj);
 	return eval->evaluate(method);
 }
 

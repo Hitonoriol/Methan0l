@@ -62,7 +62,7 @@ class ExprEvaluator
 
 		Value eval(Expression &expr);
 		Value eval(ExprPtr expr);
-		void exec(ExprPtr expr);
+		void exec(ExprPtr &expr);
 
 		void load_main(Unit &main);
 
@@ -77,7 +77,7 @@ class ExprEvaluator
 
 		Value execute(Unit &unit);
 		void execute(ExprList &exprs);
-		Value invoke(Value callable, InvokeExpr& expr);
+		Value invoke(Value callable, InvokeExpr &expr);
 		Value invoke_unit(InvokeExpr &expr, Unit &unit);
 		Value invoke(Function &func, ExprList &args);
 

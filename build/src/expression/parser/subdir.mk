@@ -6,18 +6,21 @@
 CPP_SRCS += \
 ../src/expression/parser/ClassParser.cpp \
 ../src/expression/parser/InfixParser.cpp \
+../src/expression/parser/ListParser.cpp \
 ../src/expression/parser/MapParser.cpp \
 ../src/expression/parser/WordOperatorParser.cpp 
 
 OBJS += \
 ./src/expression/parser/ClassParser.o \
 ./src/expression/parser/InfixParser.o \
+./src/expression/parser/ListParser.o \
 ./src/expression/parser/MapParser.o \
 ./src/expression/parser/WordOperatorParser.o 
 
 CPP_DEPS += \
 ./src/expression/parser/ClassParser.d \
 ./src/expression/parser/InfixParser.d \
+./src/expression/parser/ListParser.d \
 ./src/expression/parser/MapParser.d \
 ./src/expression/parser/WordOperatorParser.d 
 

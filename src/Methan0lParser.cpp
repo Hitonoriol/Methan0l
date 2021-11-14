@@ -40,7 +40,14 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	alias_infix(TokenType::ASSIGN, TokenType::ARROW_R);
 	register_parser(TokenType::QUESTION, new ConditionParser());// (a && b ? "yep" : "nah")
 	register_parser(TokenType::PAREN_L, new GroupParser());			// (a + b)
-	register_parser(TokenType::LIST_DEF_L, new InvokeParser());	// some_func$(arg1, arg2, arg3)
+
+	/* Function invocation
+	 * foo$(arg1, arg2, ...)
+	 * 		or
+	 * foo(arg1, arg2, ...)	*/
+	register_parser(TokenType::LIST_DEF_L, new InvokeParser());
+	alias_infix(TokenType::LIST_DEF_L, TokenType::PAREN_L);
+
 	register_parser(TokenType::LIST_DEF_L, new ListParser());	// $(arg1, arg2, arg3)
 	register_parser(TokenType::BRACE_L, new UnitParser());	// {expr1; expr2; expr3}
 	register_parser(TokenType::ARROW_R, new WeakUnitParser());	// ->{expr1; expr2; expr3}
