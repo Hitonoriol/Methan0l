@@ -29,13 +29,11 @@ Object::Object(size_t type_hash, const DataTable &proto_data) :
 		type_hash(type_hash),
 		data(proto_data)
 {
-	data.copy_managed_map();
-	init_self(this_instance = std::make_shared<LiteralExpr>(*this));
+	deep_copy();
 }
 
 Object::Object(const Object &rhs) :
 		type_hash(rhs.type_hash),
-		prv_access(rhs.prv_access),
 		this_instance(rhs.this_instance),
 		data(rhs.data)
 {
@@ -44,7 +42,6 @@ Object::Object(const Object &rhs) :
 Object& Object::operator=(const Object &rhs)
 {
 	type_hash = rhs.type_hash;
-	prv_access = rhs.prv_access;
 	data = rhs.data;
 	this_instance = rhs.this_instance;
 	return *this;
@@ -52,7 +49,7 @@ Object& Object::operator=(const Object &rhs)
 
 Value& Object::field(const std::string &name)
 {
-	return data.get_or_create(name);
+	return prv_access ? data.get_or_create(name) : data.get(name, true);
 }
 
 Value& Object::field(const std::string_view &name)
@@ -118,6 +115,7 @@ std::string Object::to_string(ExprEvaluator &eval)
 void Object::deep_copy()
 {
 	data.copy_managed_map();
+	init_self(this_instance = std::make_shared<LiteralExpr>(*this));
 }
 
 bool operator ==(const Object &lhs, const Object &rhs)

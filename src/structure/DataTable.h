@@ -25,7 +25,7 @@ class DataTable
 
 		bool exists(const std::string &id);
 		Value& set(const std::string &id, Value value);
-		Value& get(const std::string &id);
+		Value& get(const std::string &id, bool fail_on_nil = false);
 		Value& get_or_create(const std::string &id);
 
 		void del(const std::string &id);

@@ -55,7 +55,7 @@ Value& DataTable::get_or_create(const std::string &id)
 	return (*map)[id];
 }
 
-Value& DataTable::get(const std::string &id)
+Value& DataTable::get(const std::string &id, bool fail_on_nil)
 {
 	if constexpr (DEBUG)
 		std::cout << "Accessing \"" << id << "\" in " << *this << std::endl;
@@ -66,6 +66,9 @@ Value& DataTable::get(const std::string &id)
 
 	if constexpr (DEBUG)
 		std::cout << "\t(No such identifier)" << std::endl;
+
+	if (fail_on_nil)
+		throw std::runtime_error("\"" + id + "\" is not defined");
 
 	return nil();
 }

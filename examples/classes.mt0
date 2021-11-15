@@ -1,5 +1,5 @@
-class: Point = @(
-	/* Fields declared here won't be accessible outside of class methods */
+<% "Classes" :: newl
+class: Point @(
 	private => $(x, y),
 	
 	/* Called automatically on Point.new$(...) invocation. */
@@ -10,19 +10,16 @@ class: Point = @(
 	set => func @(x, y) {
 		this.x = x
 		this.y = y
+		return: this
 	},
 
-	get_x => func @() {
-		this.x!
-	},
-
-	get_y => func @() {
-		this.y!
-	},
+	get_x => func @() {	this.x! },
+	get_y => func @() {	this.y! },
 	
 	add => func @(rhs) {
 		this.x += rhs.x
 		this.y += rhs.y
+		return: this
 	},
 	
 	/* Called automatically when using String-converting operators */
@@ -30,20 +27,23 @@ class: Point = @(
 		"(" :: this.x :: ", " :: this.y :: ")"!
 	},
 	
-	some_static_method => func @(x) {
-		%% "Static method arg: " :: x :: newl
+	static_method => func @(x) {
+		<% "Static method arg: " :: x
 	}
 )
 
-foo = Point.new$(123, 456)
-bar = Point.new$(12.75, 99)
-empty = Point.new$()
-foo.add$(bar)
+foo = Point.new(1, 2)
+bar = Point.new(0.5, 0.25)
+empty = Point.new()
+foo_plus_bar = (objcopy: foo).add(bar)
 
-"Point foo: " :: foo
-"Point bar: " :: bar
-"Empty point: " :: empty
+<% "* Point foo: " :: foo
+<% "* Point bar: " :: bar
+<% "* foo + bar: " :: foo_plus_bar
+<% "* Empty point: " :: empty
 
-Point@some_static_method$(123)
+id = foo.class_id()
+<% "? Is foo an instance of Point: " :: id == Point@class_id()
+<% "? Is foo an instance of File: " :: id == File@class_id()
 
-"[class_id test] " :: (foo.class_id$() == Point@class_id$())
+Point@static_method(123)

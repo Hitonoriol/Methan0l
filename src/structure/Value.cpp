@@ -19,6 +19,43 @@ Value::Value() : Value(NIL)
 {
 }
 
+Value::Value(Type type)
+{
+	switch (type) {
+	case Type::BOOLEAN:
+		set(bool());
+		break;
+
+	case Type::CHAR:
+		set(char());
+		break;
+
+	case Type::DOUBLE:
+		set(double());
+		break;
+
+	case Type::INTEGER:
+		set(dec());
+		break;
+
+	case Type::LIST:
+		set(ValList());
+		break;
+
+	case Type::MAP:
+		set(ValMap());
+		break;
+
+	case Type::STRING:
+		set(std::string());
+		break;
+
+	default:
+		throw std::runtime_error("Can't define default value of type: "
+				+ str(type_name(type)));
+	}
+}
+
 Value::Value(const Value &val) : value(val.value)
 {
 }
@@ -36,7 +73,7 @@ Value Value::copy()
 {
 	std::visit([&](auto v) {
 		if constexpr (is_heap_type<decltype(v)>())
-				value = std::make_shared<typename std::remove_reference<decltype(*v)>::type>(*v);
+		value = std::make_shared<typename std::remove_reference<decltype(*v)>::type>(*v);
 	}, value);
 	return *this;
 }
@@ -55,7 +92,7 @@ dec Value::use_count()
 	dec count = -1;
 	std::visit([&](auto &v) {
 		if constexpr (is_heap_type<typename std::remove_reference<decltype(v)>::type>())
-				count = v.use_count();
+		count = v.use_count();
 	}, value);
 	return count;
 }

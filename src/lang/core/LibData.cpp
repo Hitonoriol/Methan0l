@@ -236,6 +236,15 @@ void LibData::load()
 
 void LibData::load_operators()
 {
+	prefix_operator(TokenType::OBJECT_COPY, [&](ExprPtr rhs) {
+		Value rval = val(rhs);
+		return Value(Object::copy(rval.get<Object>()));
+	});
+
+	prefix_operator(TokenType::DEFINE_VALUE, [&](ExprPtr rhs) {
+		return Value(static_cast<Type>(mtl::num(val(rhs))));
+	});
+
 	/* Reference operator */
 	prefix_operator(TokenType::REF, [&](ExprPtr rhs) {
 		rhs->assert_type<IdentifierExpr>("Cannot reference a temporary Value");

@@ -118,6 +118,8 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	/* Word oprs */
 	register_word(TokenType::TYPE_ID);
 	register_word(TokenType::DELETE);
+	register_word(TokenType::DEFINE_VALUE);
+	register_word(TokenType::OBJECT_COPY);
 
 	/* Class / Box field / method access operators */
 	register_infix_opr(TokenType::AT, Precedence::DOT);

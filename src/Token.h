@@ -95,6 +95,8 @@ enum class TokenType : uint16_t
 	IF,
 	ELSE,
 	RETURN,
+	DEFINE_VALUE,
+	OBJECT_COPY,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -141,7 +143,8 @@ class Token
 
 		static constexpr std::string_view word_ops[] = {
 				"do", "typeid", "delete", "func", "box",
-				"class", "if", "else", "return"
+				"class", "if", "else", "return", "defval",
+				"objcopy"
 		};
 
 		static constexpr std::string_view reserved_words[] = {

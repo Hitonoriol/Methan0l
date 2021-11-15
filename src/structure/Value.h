@@ -123,6 +123,7 @@ class Value
 		static const Value NO_VALUE;
 
 		Value();
+		Value(Type type);
 
 		template<typename T>
 		Value(const T &val)
