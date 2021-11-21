@@ -19,6 +19,7 @@
 #include "expression/parser/BoxUnitParser.h"
 #include "expression/parser/ClassParser.h"
 #include "expression/parser/WordOperatorParser.h"
+#include "expression/parser/InfixWordOperatorParser.h"
 
 namespace mtl
 {
@@ -36,10 +37,15 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	/* Core syntax constructs */
 	register_parser(TokenType::HASH, new IdentifierParser()); // #foo -- global scope lookup
 	register_parser(TokenType::IDENTIFIER, new IdentifierParser());	// foo -- local scope
-	register_parser(TokenType::ASSIGN, new AssignParser());				// lhs = rhs
-	alias_infix(TokenType::ASSIGN, TokenType::ARROW_R);
 	register_parser(TokenType::QUESTION, new ConditionParser());// (a && b ? "yep" : "nah")
+
+	/* Assignment */
+	register_parser(TokenType::ASSIGN, new AssignParser());				// lhs = rhs
+	alias_infix(TokenType::ASSIGN, TokenType::ARROW_R);					// lhs -> rhs
+
+	/* Group */
 	register_parser(TokenType::PAREN_L, new GroupParser());			// (a + b)
+	alias_prefix(TokenType::PAREN_L, TokenType::INFIX_WORD_LHS_L);
 
 	/* Function invocation
 	 * foo$(arg1, arg2, ...)
@@ -54,6 +60,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_parser(TokenType::BRACKET_L, new IndexParser());	// list[expr] or list[]
 	register_parser(TokenType::DO, new LoopParser());// do $(init_expr, condition_expr, step_expr) -> {}
 	register_parser(TokenType::FUNC_DEF, new FunctionParser());	// func @(arg1, arg2: def_val, ...) {expr1, expr2, ...}
+	alias_prefix(TokenType::FUNC_DEF, TokenType::FUNC_DEF_SHORT);
 	register_parser(TokenType::BOX, new BoxUnitParser());// box_unit = box {expr1, expr2, ...}
 	register_parser(TokenType::CLASS, new ClassParser()); // class: ClassName = @(private => $(), ...)
 
@@ -121,6 +128,10 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_word(TokenType::DEFINE_VALUE);
 	register_word(TokenType::OBJECT_COPY);
 
+	/* Infix word oprs */
+	register_infix_word(TokenType::TYPE_SAFE, Precedence::IO);
+	register_infix_word(TokenType::KEEP_TYPE, Precedence::IO);
+
 	/* Class / Box field / method access operators */
 	register_infix_opr(TokenType::AT, Precedence::DOT);
 	register_infix_opr(TokenType::DOT, Precedence::DOT);
@@ -130,6 +141,11 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 void Methan0lParser::register_word(TokenType wordop, Precedence prec)
 {
 	register_parser(wordop, new WordOperatorParser(prcdc(prec)));
+}
+
+void Methan0lParser::register_infix_word(TokenType wordop, Precedence prec, BinOprType type)
+{
+	register_parser(wordop, new InfixWordOperatorParser(prcdc(prec), type == BinOprType::RIGHT_ASSOC));
 }
 
 void Methan0lParser::register_literal_parser(TokenType token, Type val_type)
@@ -151,8 +167,7 @@ void Methan0lParser::register_infix_opr(TokenType token, Precedence precedence,
 		BinOprType type)
 {
 	register_parser(token,
-			new BinaryOperatorParser(static_cast<int>(precedence),
-					type == BinOprType::RIGHT_ASSOC));
+			new BinaryOperatorParser(prcdc(precedence), type == BinOprType::RIGHT_ASSOC));
 }
 
 void Methan0lParser::load(std::string &code)

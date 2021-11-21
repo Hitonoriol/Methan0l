@@ -35,17 +35,31 @@ class: Test @(
 
 obj = Test.new$()
 
-benchmark$("For loop, 1m iters",
+rec = func @(n) {
+	if (n < 1) ? break!
+	#rec(n - 1)
+}
+benchmark("Recursion, 1000 calls deep",
+	{#rec(1000)}
+)
+
+benchmark("For loop, 1m iters",
 	{do $(i = 0, i < 1 000 000, ++i) {}})
 
-benchmark$("For-each loop, 1m iters",
-	{do $(i, range$(1 000 000)) {}})
+benchmark("For-each loop, 1m iters",
+	{do $(i, range(1 000 000)) {}})
 
-benchmark$("Pseudo-method call",
-	{123.sqrt$()}, 1 000 000)
+benchmark("Functional for-each, 1m iters",
+	{range(1 000 000).for_each(func @(it) {})})
+
+benchmark("List mapping, 1m elements",
+	{range(1 000 000).map(func @(n){n + 1!})})
+
+benchmark("Pseudo-method call",
+	{123.sqrt()}, 1 000 000)
 	
-benchmark$("Class method call",
-	{#obj.foo$(42)}, 1 000 000)
+benchmark("Class method call",
+	{#obj.foo(42)}, 1 000 000)
 
-time_total = (now$() - start) / 1000
+time_total = (now() - start) / 1000
 <% newl :: "All benchmarks finished. [" :: time_total :: " secs spent]"

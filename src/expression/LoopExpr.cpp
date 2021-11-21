@@ -33,19 +33,16 @@ Value LoopExpr::evaluate(ExprEvaluator &evaluator)
 void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 {
 	Unit loop_proxy;
-	Unit condition_unit( { Expression::return_expr(condition) }, loop_proxy.local());
 	Unit body_unit =
 			instanceof<UnitExpr>(body.get()) ?
 					try_cast<UnitExpr>(body).get_unit().manage_table(loop_proxy) :
 					Unit(loop_proxy.local());
 
 	/* For loops to be able to access variables from the upper scope w/o # modfr */
-	condition_unit.set_weak(true);
 	loop_proxy.set_weak(true);
 
 	/* So that the DataTable won't get cleared after the init, each iteration & condition evaluation */
 	body_unit.set_persisent(true);
-	condition_unit.set_persisent(true);
 	loop_proxy.set_persisent(true);
 
 	/* If this loop has <init> Expr, this is a <for> loop,
@@ -58,12 +55,14 @@ void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 		loop_proxy.append(step);
 	}
 
-	while (evaluator.execute(condition_unit).as<bool>()) {
-		evaluator.execute(body_unit);
+	evaluator.enter_scope(loop_proxy);
+	while (condition->evaluate(evaluator).as<bool>()) {
+		evaluator.execute(body_unit, false);
 
 		if (for_loop)
-			evaluator.execute(loop_proxy);
+			evaluator.execute(loop_proxy, false);
 	}
+	evaluator.leave_scope();
 }
 
 void LoopExpr::exec_foreach_loop(ExprEvaluator &evaluator)
@@ -73,11 +72,14 @@ void LoopExpr::exec_foreach_loop(ExprEvaluator &evaluator)
 	body_unit.call();
 	std::string as_elem = IdentifierExpr::get_name(init);
 	ValList list = condition->evaluate(evaluator).get<ValList>();
-	auto local = body_unit.local();
-	for (Value val : list) {
-		local.set(as_elem, val);
-		evaluator.execute(body_unit);
+	DataTable &local = body_unit.local();
+	evaluator.enter_scope(body_unit);
+	Value &elem = local.get_or_create(as_elem);
+	for (Value &val : list) {
+		elem = val;
+		evaluator.execute(body_unit, false);
 	}
+	evaluator.leave_scope();
 }
 
 }

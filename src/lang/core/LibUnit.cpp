@@ -154,6 +154,8 @@ void LibUnit::load_operators()
 		}
 		/* Box Unit idfr access */
 		else {
+			if constexpr (DEBUG)
+					out << "* Accessing a Box value: " << lval << " / " << rhs->info() << std::endl;
 			lval.assert_type(Type::UNIT, "Invalid dot-operator expression");
 			Unit &unit = lval.get<Unit>();
 			if (!unit.is_persistent())

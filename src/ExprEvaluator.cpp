@@ -118,12 +118,13 @@ Unit& ExprEvaluator::get_main()
 	return *exec_stack.front();
 }
 
-Value ExprEvaluator::execute(Unit &unit)
+Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 {
 	if constexpr (DEBUG)
 		std::cout << '\n' << "Executing " << unit << std::endl;
 
-	enter_scope(unit);
+	if (use_own_scope)
+		enter_scope(unit);
 
 	for (auto &expr : unit.expressions()) {
 		current_expr = expr.get();
@@ -134,7 +135,8 @@ Value ExprEvaluator::execute(Unit &unit)
 	}
 
 	Value returned_val = unit.result();
-	leave_scope();
+	if (use_own_scope)
+		leave_scope();
 
 	if constexpr (DEBUG)
 		std::cout << "Finished executing " << unit << '\n' << std::endl;
@@ -183,8 +185,15 @@ Value ExprEvaluator::invoke(Value callable, InvokeExpr &expr)
 
 Value ExprEvaluator::invoke(Function &func, ExprList &args)
 {
-	if constexpr (DEBUG)
+	if constexpr (DEBUG) {
+		if (!args.empty()) {
+			Value f = eval(args.front());
+			out << "Function first arg: " << f << std::endl;
+		}
+
+		out << "Before function invocation:" << std::endl;
 		dump_stack();
+	}
 
 	func.call(*this, args);
 	return execute(func);
@@ -217,6 +226,7 @@ void ExprEvaluator::leave_scope()
 			unit->clear_result();
 
 		exec_stack.pop_back();
+		DataTable::purge_temporary();
 
 		if constexpr (DEBUG)
 			std::cout << "<< Left scope // depth: " << exec_stack.size() << std::endl;
@@ -331,22 +341,27 @@ Value& ExprEvaluator::get(IdentifierExpr &idfr, bool follow_refs)
 
 Value& ExprEvaluator::referenced_value(ExprPtr expr, bool follow_refs)
 {
-	if (instanceof<IdentifierExpr>(expr.get()))
+	if constexpr (DEBUG)
+		out << "? Referencing " << expr->info() << std::endl;
+
+	if (instanceof<IdentifierExpr>(expr))
 		return get(try_cast<IdentifierExpr>(expr), follow_refs);
+	else if (!instanceof<BinaryOperatorExpr>(expr))
+		return DataTable::create_temporary(expr->evaluate(*this));
 
 	auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
 	if (dot_expr.get_operator() != TokenType::DOT)
 		throw std::runtime_error("Can't get a reference to a non-dot binary opr");
 
 	ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
-	return instanceof<BinaryOperatorExpr>(lhs.get()) ?
-														referenced_value(lhs) :
-														dot_operator_reference(lhs, rhs);
+	return instanceof<BinaryOperatorExpr>(lhs) ?
+													referenced_value(lhs) :
+													dot_operator_reference(lhs, rhs);
 }
 
 Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 {
-	Value &lref = get(try_cast<IdentifierExpr>(lhs));
+	Value &lref = referenced_value(lhs);
 	if (lref.object() && instanceof<IdentifierExpr>(rhs.get())) {
 		Object &obj = lref.get<Object>();
 		std::string idfr = IdentifierExpr::get_name(rhs);
@@ -364,7 +379,8 @@ Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 	if (lref.type() == Type::UNIT)
 		return lref.get<Unit>().local().get(IdentifierExpr::get_name(rhs));
 
-	throw std::runtime_error("Invalid use of dot operator");
+	return DataTable::create_temporary(apply_binary(lhs, TokenType::DOT, rhs));
+	//throw std::runtime_error("Invalid use of dot operator");
 }
 
 Value& ExprEvaluator::get(const std::string &id, bool global, bool follow_refs)
@@ -457,7 +473,7 @@ Value ExprEvaluator::invoke_unit(InvokeExpr &expr, Unit &unit)
 
 Value ExprEvaluator::evaluate(InvokeExpr &expr)
 {
-	Value callable = eval(expr.get_lhs());
+	Value callable = eval(expr.get_lhs()).get();
 	Type ctype = callable.type();
 
 	if constexpr (DEBUG)
@@ -473,7 +489,7 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 		return invoke(func, expr.arg_list());
 	}
 
-	else if (instanceof<IdentifierExpr>(expr.get_lhs().get()) && callable.nil())
+	else if (instanceof<IdentifierExpr>(expr.get_lhs()) && callable.nil())
 		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list());
 
 	throw std::runtime_error("Invalid invocation expression");

@@ -75,6 +75,8 @@ enum class TokenType : uint16_t
 	DOUBLE_EXCL,		// !!
 	IN,					// %>
 	OUT_NL,				// <%
+	FUNC_DEF_SHORT,		// #(
+	INFIX_WORD_LHS_L,	// *[
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -97,6 +99,8 @@ enum class TokenType : uint16_t
 	RETURN,
 	DEFINE_VALUE,
 	OBJECT_COPY,
+	TYPE_SAFE,
+	KEEP_TYPE,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -138,13 +142,14 @@ class Token
 				"*/", ">=", "<=", "++", "--",
 				":=", "=>", "!=", "+=", "-=",
 				"*=", "/=", "&&", "||", "^^",
-				"**", "!!", "%>", "<%"
+				"**", "!!", "%>", "<%", "#(",
+				"*["
 		};
 
 		static constexpr std::string_view word_ops[] = {
 				"do", "typeid", "delete", "func", "box",
 				"class", "if", "else", "return", "defval",
-				"objcopy"
+				"objcopy", "typesafe", "keeptype"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
@@ -187,6 +192,8 @@ class Token
 
 		bool operator ==(const Token &rhs);
 		bool operator !=(const Token &rhs);
+
+		void assert_type(TokenType type);
 
 		static TokenType get_bichar_op_type(std::string &tokstr);
 		static char escape_seq(std::string_view seq);

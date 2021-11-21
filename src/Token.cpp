@@ -67,6 +67,13 @@ std::string_view Token::reserved(const Word &word)
 	return reserved_words[static_cast<int>(word)];
 }
 
+void Token::assert_type(TokenType type)
+{
+	if (this->type != type)
+		throw std::runtime_error("Token type assertion on " + to_string() + " failed. "
+				"Expected: " + to_string(type));
+}
+
 bool Token::operator ==(const Token &rhs)
 {
 	return static_cast<int>(type) == static_cast<int>(rhs.type);

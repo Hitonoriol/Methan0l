@@ -22,6 +22,7 @@ class ValueRef
 
 		Value& value();
 		void reset(Value &val);
+		void clear();
 		bool empty() const;
 
 		friend std::ostream& operator <<(std::ostream &stream, ValueRef &ref);

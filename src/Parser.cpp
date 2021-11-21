@@ -75,7 +75,7 @@ void Parser::parse_all()
 			expression_queue.push_back(parse());
 
 			if constexpr (DEBUG)
-				expression_queue.back()->info(std::cout << "-> ") << std::endl;
+				expression_queue.back()->info(std::cout << "--> ") << std::endl;
 		}
 	}
 

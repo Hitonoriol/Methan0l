@@ -30,6 +30,7 @@ class Methan0lParser: public Parser
 		void register_literal_parser(TokenType token, Type val_type);
 
 		void register_word(TokenType wordop, Precedence prec = Precedence::PREFIX);
+		void register_infix_word(TokenType wordop, Precedence prec, BinOprType type = BinOprType::LEFT_ASSOC);
 };
 
 } /* namespace mtl */

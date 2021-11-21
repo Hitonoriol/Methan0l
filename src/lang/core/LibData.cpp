@@ -89,12 +89,12 @@ void LibData::load()
 		return Value(list);
 	});
 
-	/* <List | Map>.for_each$(action)
+	/* <List | Map>.for_each$(action, [finalizer])
 	 * Passes elements / key & value pairs to action$() one by one
 	 * action$() must be a 1-arg Function for Lists and 2-arg for Maps
 	 */
 	function("for_each", [&](Args args) {
-		Value &ctr = ref(args[0]);
+		Value ctr = ref(args[0]);
 		if (!ctr.container())
 			throw std::runtime_error("for_each can only be performed on a container type");
 
@@ -104,22 +104,30 @@ void LibData::load()
 		ValueRef elem_ref;
 
 		if constexpr(DEBUG)
-				std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
+			std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
 
 		Type valtype = ctr.type();
 
 		if (valtype == Type::LIST) {
-			auto &list = ctr.get<ValList>();
+			ValList &list = ctr.get<ValList>();
+			if (list.empty()) {
+				if constexpr (DEBUG)
+					out << "List is empty" << std::endl;
+				return Value::NO_VALUE;
+			}
+
 			auto elem_expr = LiteralExpr::empty();
 			action_args.push_front(elem_expr);
 			for(Value &elem : list) {
 				if constexpr(DEBUG)
-						std::cout << "* List for_each iteration" << std::endl;
+					std::cout << "* List for_each iteration " << list.size() << std::endl;
 
 				elem_ref.reset(elem);
 				elem_expr->raw_ref() = elem_ref;
 				eval->invoke(action, action_args);
 			}
+			if constexpr(DEBUG)
+				std::cout << "* End of list for_each" << std::endl;
 		}
 
 		else if (valtype == Type::MAP) {
@@ -128,7 +136,7 @@ void LibData::load()
 			action_args = {key, val};
 			for (auto &entry : map) {
 				if constexpr(DEBUG)
-						std::cout << "* Map for_each iteration" << std::endl;
+					std::cout << "* Map for_each iteration" << std::endl;
 
 				key->raw_ref() = entry.first;
 				elem_ref.reset(entry.second);
@@ -137,7 +145,32 @@ void LibData::load()
 			}
 		}
 
+		elem_ref.clear();
+		if (args.size() > 2) {
+			args[2]->execute(*eval);
+		}
+
 		return Value::NO_VALUE;
+	});
+
+	/* list.map(mapping_function) */
+	function("map", [&](Args args) {
+		Value vallist = ref(args[0]);
+		vallist.assert_type(Type::LIST);
+
+		ValList &list = vallist.get<ValList>();
+		Function mapper = arg(args, 1).get<Function>();
+		ValList mapped;
+
+		ExprList map_args {LiteralExpr::empty()};
+		LiteralExpr &arg = try_cast<LiteralExpr>(map_args[0]);
+
+		for (Value &val : list) {
+			arg.raw_ref() = val;
+			mapped.push_back(eval->invoke(mapper, map_args));
+		}
+
+		return Value(mapped);
 	});
 
 	/* <List>.resize$(new_size) */
@@ -153,15 +186,15 @@ void LibData::load()
 		Value &cnt = ref(args[0]);
 
 		switch(cnt.type()) {
-		case Type::LIST:
+			case Type::LIST:
 			cnt.get<ValList>().clear();
 			break;
 
-		case Type::MAP:
+			case Type::MAP:
 			cnt.get<ValMap>().clear();
 			break;
 
-		default:
+			default:
 			break;
 		}
 
@@ -175,19 +208,19 @@ void LibData::load()
 
 		switch(val.type()) {
 			case Type::STRING:
-				size = val.get<std::string>().size();
-				break;
+			size = val.get<std::string>().size();
+			break;
 
 			case Type::LIST:
-				size = val.get<ValList>().size();
-				break;
+			size = val.get<ValList>().size();
+			break;
 
 			case Type::MAP:
-				size = val.get<ValMap>().size();
-				break;
+			size = val.get<ValMap>().size();
+			break;
 
 			default:
-				break;
+			break;
 		}
 
 		return Value(size);
@@ -234,8 +267,31 @@ void LibData::load()
 	load_operators();
 }
 
+void LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
+{
+	Value &lval = eval->referenced_value(lhs);
+	Type ltype = lval.type();
+	Value rval = val(rhs).get();
+	if (ltype != rval.type()) {
+		if (convert)
+			lval = rval.convert(ltype);
+		else
+			throw InvalidTypeException(rval.type(), ltype);
+	}
+}
+
 void LibData::load_operators()
 {
+	infix_operator(TokenType::KEEP_TYPE, [&](ExprPtr lhs, ExprPtr rhs) {
+		if_not_same(lhs, rhs, true);
+		return Value::NO_VALUE;
+	});
+
+	infix_operator(TokenType::TYPE_SAFE, [&](ExprPtr lhs, ExprPtr rhs) {
+		if_not_same(lhs, rhs, false);
+		return Value::NO_VALUE;
+	});
+
 	prefix_operator(TokenType::OBJECT_COPY, [&](ExprPtr rhs) {
 		Value rval = val(rhs);
 		return Value(Object::copy(rval.get<Object>()));

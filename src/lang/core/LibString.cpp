@@ -1,19 +1,51 @@
 #include "LibString.h"
 
 #include <deque>
+#include <vector>
 #include <stdexcept>
 #include <string>
 
-#include "../../structure/Value.h"
-#include "../../type.h"
-#include "../../Token.h"
-#include "../../util/util.h"
+#include "structure/Value.h"
+#include "type.h"
+#include "Token.h"
+#include "util/util.h"
 
 namespace mtl
 {
 
+std::regex LibString::string_fmt("\\{(.?)\\}");
+
 void LibString::load()
 {
+	/*
+	 *  str.format$(arg1, arg2, ...)
+	 *  Format: "Text {1}; more text {2}. x = {}..."
+	 *  	Argument indices start from 1;
+	 *  	{} is equivalent to `next argument`
+	 */
+	function("format", [&](Args args) {
+		std::string fmt = str(args);
+		std::vector<std::string> sargs;
+		sargs.reserve(args.size() - 1);
+		for (auto it = ++args.begin(); it != args.end(); ++it)
+			sargs.push_back(val(*it).to_string(eval));
+
+		size_t last_idx {0};
+		std::smatch fmt_match;
+		std::string sidx;
+		while(std::regex_search(fmt, fmt_match, string_fmt)) {
+			sidx = fmt_match[1].str();
+			/* No index specified: `{}` */
+			if (sidx.empty())
+				++last_idx;
+			else last_idx = std::stoi(sidx);
+
+			fmt.replace(fmt_match.position(), fmt_match.length(), sargs[last_idx - 1]);
+		}
+
+		return Value(fmt);
+	});
+
 	/* str.repeat$(times) */
 	function("repeat", [&](Args args) {
 		std::string str = arg(args).to_string(eval);

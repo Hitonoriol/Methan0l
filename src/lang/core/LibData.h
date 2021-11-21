@@ -18,6 +18,7 @@ class LibData: public Library
 	private:
 		static constexpr std::string_view KEY_LIST = "keys", VAL_LIST = "values";
 		void load_operators();
+		void if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert = true);
 };
 
 } /* namespace mtl */

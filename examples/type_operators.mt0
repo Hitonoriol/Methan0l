@@ -1,0 +1,13 @@
+x = 1
+bool = defval: type boolean
+str = defval: type string
+
+/* Will perform type conversion: RHS to LHS */
+*[x] keeptype: x += 2.5
+*[bool] keeptype: bool = 1
+
+<% "x = " :: x
+<% "bool = " :: bool
+
+/* Will throw InvalidTypeException */
+*[str] typesafe: str = x

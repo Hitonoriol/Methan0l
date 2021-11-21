@@ -1,7 +1,9 @@
 #ifndef SRC_LANG_LIBSTRING_H_
 #define SRC_LANG_LIBSTRING_H_
 
-#include "../Library.h"
+#include <regex>
+
+#include "lang/Library.h"
 
 namespace mtl
 {
@@ -13,6 +15,8 @@ class LibString: public Library
 		void load() override;
 
 	private:
+		static std::regex string_fmt;
+
 		void load_operators();
 };
 

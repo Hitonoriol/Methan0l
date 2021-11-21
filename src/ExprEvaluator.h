@@ -31,6 +31,7 @@ class ExprEvaluator
 		friend class Library;
 		friend class LibUnit;
 		friend class TypeManager;
+		friend class LoopExpr;
 
 		std::vector<std::unique_ptr<Library>> libraries;
 
@@ -75,7 +76,7 @@ class ExprEvaluator
 		Unit* current_unit();
 		Unit& get_main();
 
-		Value execute(Unit &unit);
+		Value execute(Unit &unit, const bool use_own_scope = true);
 		void execute(ExprList &exprs);
 		Value invoke(Value callable, InvokeExpr &expr);
 		Value invoke_unit(InvokeExpr &expr, Unit &unit);

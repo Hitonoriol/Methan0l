@@ -60,9 +60,15 @@ Value::Value(const Value &val) : value(val.value)
 {
 }
 
+Value::~Value()
+{
+	if constexpr (DEBUG)
+		out << "[x] Destroying (" << use_count() << ") [" << type_name() << "] " << *this << std::endl;
+}
+
 Value& Value::get()
 {
-	if (type() == Type::REFERENCE)
+	if (is<ValueRef>())
 		return get<ValueRef>().value();
 	return *this;
 }
@@ -73,7 +79,7 @@ Value Value::copy()
 {
 	std::visit([&](auto v) {
 		if constexpr (is_heap_type<decltype(v)>())
-		value = std::make_shared<typename std::remove_reference<decltype(*v)>::type>(*v);
+			value = std::make_shared<typename std::remove_reference<decltype(*v)>::type>(*v);
 	}, value);
 	return *this;
 }
@@ -92,7 +98,7 @@ dec Value::use_count()
 	dec count = -1;
 	std::visit([&](auto &v) {
 		if constexpr (is_heap_type<typename std::remove_reference<decltype(v)>::type>())
-		count = v.use_count();
+			count = v.use_count();
 	}, value);
 	return count;
 }

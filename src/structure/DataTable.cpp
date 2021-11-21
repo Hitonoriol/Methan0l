@@ -5,8 +5,8 @@
 #include <memory>
 #include <utility>
 
-#include "../expression/IdentifierExpr.h"
-#include "../Token.h"
+#include "expression/IdentifierExpr.h"
+#include "Token.h"
 #include "Value.h"
 
 namespace mtl
@@ -19,6 +19,8 @@ DataTable DataTable::predefined( {
 		{ NIL_IDF, Value::NIL },
 		{ str(Token::reserved(Word::NEW_LINE)), Value(NEW_LINE) }
 });
+
+ValList DataTable::temp_queue;
 
 DataTable::DataTable() : map(std::make_shared<DataMap>())
 {
@@ -53,6 +55,25 @@ Value& DataTable::set(const std::string &id, Value value)
 Value& DataTable::get_or_create(const std::string &id)
 {
 	return (*map)[id];
+}
+
+Value& DataTable::create_temporary(Value val)
+{
+	if constexpr (DEBUG)
+		out << "Creating a temporary Value..." << std::endl;
+
+	temp_queue.push_front(val);
+	return temp_queue.front();
+}
+
+void DataTable::purge_temporary()
+{
+	if (!temp_queue.empty()) {
+		if constexpr (DEBUG)
+			out << "* Deleting temporaries [" << temp_queue.size() << " values]..." << std::endl;
+
+		temp_queue.clear();
+	}
 }
 
 Value& DataTable::get(const std::string &id, bool fail_on_nil)
@@ -106,6 +127,11 @@ void DataTable::del(const std::string &id)
 void DataTable::del(ExprPtr idfr)
 {
 	del(IdentifierExpr::get_name(idfr));
+}
+
+void DataTable::purge()
+{
+	map.reset();
 }
 
 void DataTable::clear()

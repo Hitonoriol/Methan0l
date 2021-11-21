@@ -10,13 +10,19 @@
 namespace mtl
 {
 
+/*
+ * func @(a, b, ...) {...}
+ * ~(a, b, ...) {...}
+ */
 class FunctionParser: public PrefixParser
 {
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
+			if (!parser.match(TokenType::MAP_DEF_L))
+				token.assert_type(TokenType::FUNC_DEF_SHORT);
+
 			ArgDefList args;
-			parser.consume(TokenType::MAP_DEF_L);
 			MapParser::parse(parser, [&](auto key, auto val) {
 				args.push_back(std::make_pair(key, val));
 			});

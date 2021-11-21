@@ -15,6 +15,7 @@ class DataTable
 		std::shared_ptr<DataMap> map;
 		static const std::string NIL_IDF;
 
+		static ValList temp_queue;
 		static DataTable predefined;
 
 	public:
@@ -28,6 +29,9 @@ class DataTable
 		Value& get(const std::string &id, bool fail_on_nil = false);
 		Value& get_or_create(const std::string &id);
 
+		static Value& create_temporary(Value val);
+		static void purge_temporary();
+
 		void del(const std::string &id);
 		void del(ExprPtr idfr);
 
@@ -36,7 +40,10 @@ class DataTable
 		std::shared_ptr<DataMap> map_ptr();
 
 		Value& nil();
+
+		void purge();
 		void clear();
+
 		size_t size();
 		bool empty();
 

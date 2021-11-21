@@ -131,6 +131,8 @@ class Value
 			set(val);
 		}
 
+		~Value();
+
 		template<typename T>
 		Value& operator=(const T &rhs)
 		{
