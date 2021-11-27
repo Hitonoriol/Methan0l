@@ -124,9 +124,11 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 	/* Word oprs */
 	register_word(TokenType::TYPE_ID);
+	register_word(TokenType::TYPE_NAME);
 	register_word(TokenType::DELETE);
 	register_word(TokenType::DEFINE_VALUE);
 	register_word(TokenType::OBJECT_COPY);
+	register_word(TokenType::HASHCODE);
 
 	/* Infix word oprs */
 	register_infix_word(TokenType::TYPE_SAFE, Precedence::IO);
@@ -135,7 +137,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	/* Class / Box field / method access operators */
 	register_infix_opr(TokenType::AT, Precedence::DOT);
 	register_infix_opr(TokenType::DOT, Precedence::DOT);
-
+	register_infix_opr(TokenType::ARROW_L, Precedence::DOT);
 }
 
 void Methan0lParser::register_word(TokenType wordop, Precedence prec)

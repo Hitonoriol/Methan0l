@@ -90,6 +90,11 @@ void Function::call(ExprEvaluator &eval, ExprList &args)
 	}
 }
 
+const ArgDefList& Function::get_arg_def() const
+{
+	return arg_def;
+}
+
 Function Function::create(ExprList body, ArgDefList args)
 {
 	return Function(args, body);

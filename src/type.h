@@ -37,7 +37,7 @@ using ObjectPtr = std::shared_ptr<Object>;
 
 using ExprMap = std::unordered_map<std::string, ExprPtr>;
 using DataMap = std::unordered_map<std::string, Value>;
-using ValMap = std::map<std::string, Value>;
+using ValMap = std::unordered_map<Value, Value>;
 
 using ExprList = std::deque<ExprPtr>;
 using RawExprList = std::deque<Expression*>;

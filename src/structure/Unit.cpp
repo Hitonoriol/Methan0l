@@ -74,7 +74,7 @@ void Unit::clear_result()
 	local_data.del(RETURN_KEYWORD);
 }
 
-size_t Unit::size()
+size_t Unit::size() const
 {
 	return expr_list.size();
 }
@@ -111,12 +111,12 @@ void Unit::save_return(Value value)
 	stop();
 }
 
-bool Unit::is_weak()
+bool Unit::is_weak() const
 {
 	return weak;
 }
 
-bool Unit::is_persistent()
+bool Unit::is_persistent() const
 {
 	return persistent;
 }
@@ -131,7 +131,7 @@ void Unit::set_weak(bool val)
 	weak = val;
 }
 
-bool Unit::carries_return()
+bool Unit::carries_return() const
 {
 	return weak && !persistent;
 }

@@ -1,6 +1,7 @@
 #include "IndexExpr.h"
 
 #include "parser/MapParser.h"
+#include "util/hash.h"
 
 namespace mtl
 {
@@ -11,7 +12,7 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 	Value &val =
 			instanceof<IndexExpr>(lhs.get()) ?
 					try_cast<IndexExpr>(lhs).indexed_element(evaluator) :
-					try_cast<IdentifierExpr>(lhs).referenced_value(evaluator);
+					evaluator.referenced_value(lhs);
 
 	lhs_val_type = val.type();
 	switch (lhs_val_type) {
@@ -58,7 +59,7 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValMap &map)
 	if (append())
 		throw std::runtime_error("Append operation is not supported by maps");
 
-	std::string key = idx->evaluate(evaluator).to_string();
+	Value key = idx->evaluate(evaluator);
 	Value &elem = map[key];
 
 	if (remove)
@@ -106,6 +107,16 @@ Value IndexExpr::evaluate(ExprEvaluator &evaluator)
 		return Value(val.get<std::string>()[idx->evaluate(evaluator).as<dec>()]);
 
 	return val;
+}
+
+ExprPtr IndexExpr::get_lhs()
+{
+	return lhs;
+}
+
+ExprPtr IndexExpr::get_rhs()
+{
+	return idx;
 }
 
 std::ostream& IndexExpr::info(std::ostream &str)

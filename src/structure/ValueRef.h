@@ -21,6 +21,8 @@ class ValueRef
 		ValueRef& operator=(const ValueRef &rhs);
 
 		Value& value();
+		const Value* ptr() const;
+
 		void reset(Value &val);
 		void clear();
 		bool empty() const;

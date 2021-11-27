@@ -10,17 +10,16 @@
 #include <utility>
 #include <variant>
 
-#include "../../expression/LiteralExpr.h"
-#include "../../ExprEvaluator.h"
-#include "../../lang/Library.h"
-#include "../Function.h"
-#include "../Value.h"
+#include "ExprEvaluator.h"
 #include "Object.h"
+#include "lang/Library.h"
+#include "expression/LiteralExpr.h"
+#include "structure/Function.h"
+#include "structure/Value.h"
+#include "util/hash.h"
 
 namespace mtl
 {
-
-const std::hash<std::string> ObjectType::str_hash { };
 
 ObjectType::ObjectType(ExprEvaluator &eval, const std::string &name) :
 		id(get_id(name)),

@@ -37,9 +37,6 @@ class LibArithmetic: public Library
 			case TokenType::SLASH:
 				return l / r;
 
-			case TokenType::PERCENT:
-				return (int) l % (int) r;
-
 			default:
 				return 0;
 			}

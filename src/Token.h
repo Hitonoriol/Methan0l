@@ -101,6 +101,8 @@ enum class TokenType : uint16_t
 	OBJECT_COPY,
 	TYPE_SAFE,
 	KEEP_TYPE,
+	HASHCODE,
+	TYPE_NAME,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -149,7 +151,8 @@ class Token
 		static constexpr std::string_view word_ops[] = {
 				"do", "typeid", "delete", "func", "box",
 				"class", "if", "else", "return", "defval",
-				"objcopy", "typesafe", "keeptype"
+				"objcopy", "typesafe", "keeptype", "hashcode",
+				"typename"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
@@ -234,17 +237,12 @@ class Token
 
 } /* namespace mtl */
 
-namespace std
+template<> struct std::hash<mtl::Token>
 {
-
-template<> struct hash<mtl::Token>
-{
-		std::size_t operator()(mtl::Token const &k) const
+		size_t operator()(const mtl::Token &tok) const
 		{
-			return std::hash<int>()(static_cast<int>(k.get_type()));
+			return static_cast<size_t>(tok.get_type());
 		}
 };
-
-}
 
 #endif /* TOKEN_TOKEN_H_ */

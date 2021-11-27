@@ -14,12 +14,19 @@
 namespace mtl
 {
 
+enum class IntLiteral {
+		NONE, HEX, BIN, DEC
+};
+
 class Lexer
 {
 	private:
 		std::string::iterator cur_chr, input_end;
+
 		std::string tokstr;
 		TokenType toktype = TokenType::NONE;
+		IntLiteral cur_int_literal = IntLiteral::NONE;
+
 		uint32_t line;
 		dec open_blocks;
 

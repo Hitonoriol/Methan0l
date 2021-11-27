@@ -1,0 +1,11 @@
+"Access operator `.` compound expressions" :: newl
+
+module = box {
+	list = $(#(x){x.sqrt()!}, "abc", "foo bar")
+	foo = func @() {
+		return: $(1, 2, 3)
+	}
+}
+
+<% "Indexing a list returned from function call: " :: module.foo()[1]
+<% "Calling a function from list: " :: module.list[0](81)

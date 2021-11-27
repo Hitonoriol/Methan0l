@@ -3,9 +3,9 @@
 #include <iterator>
 #include <variant>
 
-#include "../../structure/Value.h"
-#include "../../type.h"
-#include "../../Token.h"
+#include "structure/Value.h"
+#include "type.h"
+#include "Token.h"
 
 namespace mtl
 {
@@ -16,7 +16,7 @@ void LibArithmetic::load()
 	TokenType ar_ops[] = {
 			TokenType::PLUS, TokenType::MINUS,
 			TokenType::ASTERISK, TokenType::SLASH,
-			TokenType::PERCENT, TokenType::ADD,
+			TokenType::ADD,
 			TokenType::SUB, TokenType::MUL,
 			TokenType::DIV
 	};
@@ -29,6 +29,10 @@ void LibArithmetic::load()
 
 			return res;
 		});
+
+	infix_operator(TokenType::PERCENT, [&](ExprPtr lhs, ExprPtr rhs) {
+		return Value(mtl::num(val(lhs)) % mtl::num(val(rhs)));
+	});
 
 	prefix_operator(TokenType::MINUS, [this](auto rhs) {
 		Value rval = val(rhs);

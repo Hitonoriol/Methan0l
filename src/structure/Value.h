@@ -9,8 +9,13 @@
 
 #include "ValueRef.h"
 #include "Function.h"
-#include "../except/except.h"
+#include "except/except.h"
 #include "object/Object.h"
+
+#define VT(v) typename std::remove_const<typename std::remove_reference<decltype(v)>::type>::type
+#define IS_EMPTY(v) std::is_same<decltype(v), NoValue>::value
+#define IS_NIL(v) std::is_same<decltype(v), Nil>::value
+#define NIL_OR_EMPTY(v) IS_EMPTY(v) || IS_NIL(v)
 
 namespace mtl
 {
@@ -55,36 +60,37 @@ template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type
 {
 };
 
+using ValueContainer =
+std::variant<
+/* Value Placeholders */
+NoValue, Nil,
+
+/* Reference to another Value */
+ValueRef,
+
+/* Primitives */
+dec, double, bool, char,
+
+/* Heap-stored types: */
+
+/* Strings */
+VString,
+
+/* Data Structures */
+VList, VMap,
+
+/* Expression blocks */
+VUnit, VFunction,
+
+/* Custom type objects */
+VObject
+>;
+
 class Value
 {
 	private:
 		static constexpr int MAX_SIZE = 8;
-
-		using ValueContainer =
-		std::variant<
-		/* Value Placeholders */
-		NoValue, Nil,
-
-		/* Reference to another Value */
-		ValueRef,
-
-		/* Primitives */
-		dec, double, bool, char,
-
-		/* Heap-stored types: */
-
-		/* Strings */
-		VString,
-
-		/* Data Structures */
-		VList, VMap,
-
-		/* Expression blocks */
-		VUnit, VFunction,
-
-		/* Custom type objects */
-		VObject
-		>;
+		static const std::hash<Value> hasher;
 
 		ValueContainer value;
 
@@ -148,7 +154,7 @@ class Value
 		Value copy();
 
 		dec use_count();
-		bool heap_type();
+		bool heap_type() const;
 		bool container();
 		bool object();
 		bool numeric();
@@ -230,6 +236,8 @@ class Value
 
 		void assert_type(Type expected,
 				const std::string &msg = "Invalid type conversion");
+
+		size_t hash_code() const;
 };
 
 const Value NEW_LINE = Value(std::string(1, '\n'));

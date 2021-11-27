@@ -135,6 +135,7 @@ void LibUnit::load_operators()
 	/* Access operator */
 	infix_operator(TokenType::DOT, [&](auto lhs, auto rhs) -> Value {
 		Value lval = val(lhs);
+
 		/* Object field access / method invocation */
 		if (lval.object()) {
 			return object_dot_operator(lval.get<Object>(), rhs);
@@ -143,10 +144,9 @@ void LibUnit::load_operators()
 		else if (instanceof<InvokeExpr>(rhs)) {
 			if (lval.type() == Type::UNIT && lval.get<Unit>().is_persistent()
 					&& lval.get<Unit>().local().exists(Expression::get_name(rhs))) {
-				//return eval->invoke(lval.get<Unit>().local().get(Expression::get_name(rhs)), try_cast<InvokeExpr>(rhs));
-				eval->enter_scope(lval.get<Unit>());
+				eval->use(lval.get<Unit>());
 				Value ret = eval->evaluate(try_cast<InvokeExpr>(rhs));
-				eval->leave_scope();
+				eval->unuse();
 				return ret;
 			} else {
 				return invoke_pseudo_method(lhs, rhs);
@@ -164,13 +164,17 @@ void LibUnit::load_operators()
 			return Value::ref(box_value(unit, rhs));
 		}
 	});
+
+	infix_operator(TokenType::ARROW_L, [&](auto lhs, auto rhs) -> Value {
+		return invoke_pseudo_method(lhs, rhs);
+	});
 }
 
 Value& LibUnit::box_value(Unit &box, ExprPtr expr)
 {
-	eval->enter_scope(box);
+	eval->use(box);
 	Value &result = eval->referenced_value(expr);
-	eval->leave_scope();
+	eval->unuse();
 	return result;
 }
 

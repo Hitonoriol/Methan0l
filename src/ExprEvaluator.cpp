@@ -212,6 +212,21 @@ void ExprEvaluator::enter_scope(Unit &unit)
 	}
 }
 
+void ExprEvaluator::use(Object &obj)
+{
+	object_stack.push_back(&obj.get_data());
+}
+
+void ExprEvaluator::use(Unit &box)
+{
+	object_stack.push_back(&box.local());
+}
+
+void ExprEvaluator::unuse()
+{
+	object_stack.pop_back();
+}
+
 void ExprEvaluator::leave_scope()
 {
 	if constexpr (DEBUG)
@@ -256,8 +271,16 @@ DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 		std::cout << (global ? "Global" : "Local")
 				<< " scope lookup for \"" << id << "\"" << std::endl;
 
+	/* If we're in the uppermost scope, global lookup is equivalent to the local one */
 	if (global && exec_stack.size() < 2)
 		global = false;
+
+	/* If there's an object/box in use, perform lookup in its DataTable first */
+	if (!global && !object_stack.empty()) {
+		DataTable *objdata = object_stack.back();
+		if (objdata->exists(id))
+			return objdata;
+	}
 
 	const bool weak = current_unit()->is_weak();
 	if (!global && !weak)
@@ -375,12 +398,11 @@ Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 
 		return obj.field(idfr);
 	}
-
+	/*
 	if (lref.type() == Type::UNIT)
-		return lref.get<Unit>().local().get(IdentifierExpr::get_name(rhs));
-
+		return lref.get<Unit>().local().get(Expression::get_name(rhs));
+	*/
 	return DataTable::create_temporary(apply_binary(lhs, TokenType::DOT, rhs));
-	//throw std::runtime_error("Invalid use of dot operator");
 }
 
 Value& ExprEvaluator::get(const std::string &id, bool global, bool follow_refs)

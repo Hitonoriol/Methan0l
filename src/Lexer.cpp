@@ -1,4 +1,7 @@
 #include "Lexer.h"
+
+#include <bitset>
+
 #include "util/util.h"
 
 namespace mtl
@@ -7,6 +10,19 @@ namespace mtl
 Lexer::Lexer() : tokens()
 {
 
+}
+
+udec bin_to_int(const std::string &binstr)
+{
+	if (binstr.empty())
+		return 0;
+
+	udec val = 0;
+	for (char c : binstr) {
+		val <<= 1;
+		val += c - '0';
+	}
+	return val;
 }
 
 void Lexer::clear()
@@ -71,6 +87,24 @@ void Lexer::push()
 		}
 	}
 
+	else if (toktype == TokenType::INTEGER && cur_int_literal != IntLiteral::DEC) {
+		udec val;
+		switch (cur_int_literal) {
+		case IntLiteral::HEX:
+			std::istringstream(tokstr) >> std::hex >> val;
+			break;
+
+		case IntLiteral::BIN:
+			val = bin_to_int(tokstr);
+			break;
+
+		default:
+			throw std::runtime_error("Invalid integral literal");
+		}
+
+		tokstr = std::move(std::to_string(val));
+	}
+
 	if constexpr (DEBUG)
 		std::cout << "[" << tokstr << "] ";
 
@@ -131,6 +165,7 @@ bool Lexer::try_save_bichar_op(char chr, char next)
 /* Assume token type by the first character */
 void Lexer::begin(char chr)
 {
+	cur_int_literal = IntLiteral::NONE;
 	if (chr == TokenType::QUOTE || chr == TokenType::SINGLE_QUOTE) {
 		toktype = (chr == TokenType::QUOTE) ? TokenType::STRING : TokenType::CHAR;
 		save(chr);
@@ -163,6 +198,7 @@ void Lexer::consume()
 {
 	char chr = *cur_chr;
 
+	/* Deduce floating point literal */
 	if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
 		if (!std::isdigit(*std::next(cur_chr))) {
 			push();
@@ -175,6 +211,36 @@ void Lexer::consume()
 		return;
 	}
 
+	/* Deduce integral literal type */
+	else if (toktype == TokenType::INTEGER && cur_int_literal == IntLiteral::NONE) {
+		/* A regular Decimal literal */
+		if (!std::isalpha(chr) || *std::prev(cur_chr) != '0') {
+			cur_int_literal = IntLiteral::DEC;
+			if (isdigit(chr))
+				save(chr);
+			else
+				consume();
+			return;
+		}
+
+		tokstr.clear();
+		switch (chr) {
+			case 'X':
+			case 'x':
+			cur_int_literal = IntLiteral::HEX;
+			return;
+
+			case 'B':
+			case 'b':
+			cur_int_literal = IntLiteral::BIN;
+			return;
+
+		default:
+			throw std::runtime_error("Invalid integral literal id");
+		}
+	}
+
+	/* Save String / Character literal char */
 	else if (toktype == TokenType::STRING || toktype == TokenType::CHAR) {
 		/* Save `\` literally when reading a CHAR & ignore unescaped `\` when reading a STRING */
 		if (toktype == TokenType::CHAR
@@ -188,15 +254,16 @@ void Lexer::consume()
 		return;
 	}
 
+	/* Finalize current token if a punctuator is met */
 	else if (Token::is_punctuator(chr)) {
 		push();
 		begin(chr);
 		return;
 	}
 
+	/* Save non-punctuator characters including `_` */
 	if (std::isalnum(chr) || chr == TokenType::UNDERSCORE)
 		save(chr);
-
 }
 
 /* Consume chrs one-by-one, accumulating them in a buffer & deducing the token type */

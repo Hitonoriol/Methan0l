@@ -24,10 +24,12 @@ class Parser
 		std::unordered_map<TokenType, std::shared_ptr<InfixParser>> infix_parsers;
 		std::unordered_map<TokenType, std::shared_ptr<PrefixParser>> prefix_parsers;
 
+		bool parsing_access_opr;
+
 		std::deque<Token> read_queue;
 		Unit root_unit;
 
-		int get_precedence();
+		int get_lookahead_precedence();
 
 	protected:
 		Lexer lexer;
@@ -48,6 +50,10 @@ class Parser
 		Token consume();
 		Token& look_ahead(size_t n = 0);
 		void emplace(const Token &token);
+
+		void reset();
+		void parse_access_opr(bool parsing);
+		bool is_parsing_access_opr();
 		void end_of_expression();
 
 		Unit& result();

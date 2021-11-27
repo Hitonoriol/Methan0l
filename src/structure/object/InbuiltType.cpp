@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "../../type.h"
+#include "type.h"
 #include "../Value.h"
 #include "Object.h"
 

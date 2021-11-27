@@ -32,6 +32,7 @@ class Function: public Unit
 		Function& operator=(const Function &rhs);
 
 		void call(ExprEvaluator &eval, ExprList &args);
+		const ArgDefList& get_arg_def() const;
 
 		static Function create(ExprList body, ArgDefList args = ArgDefList());
 

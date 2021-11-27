@@ -146,9 +146,8 @@ void LibData::load()
 		}
 
 		elem_ref.clear();
-		if (args.size() > 2) {
+		if (args.size() > 2)
 			args[2]->execute(*eval);
-		}
 
 		return Value::NO_VALUE;
 	});
@@ -237,7 +236,7 @@ void LibData::load()
 		ValMap &map = ref(args[0]).get<ValMap>();
 		ValList list;
 		for (auto entry : map)
-			list.push_back(keylist ? Value(entry.first) : entry.second);
+			list.push_back(keylist ? entry.first : entry.second);
 		return Value(list);
 	});
 
@@ -282,6 +281,10 @@ void LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 
 void LibData::load_operators()
 {
+	prefix_operator(TokenType::HASHCODE, [&](ExprPtr rhs) {
+		return Value(ref(rhs).hash_code());
+	});
+
 	infix_operator(TokenType::KEEP_TYPE, [&](ExprPtr lhs, ExprPtr rhs) {
 		if_not_same(lhs, rhs, true);
 		return Value::NO_VALUE;
@@ -310,6 +313,10 @@ void LibData::load_operators()
 	/* typeid(val) */
 	prefix_operator(TokenType::TYPE_ID, [this](ExprPtr rhs) {
 		return Value(static_cast<int>(val(rhs).type()));
+	});
+
+	prefix_operator(TokenType::TYPE_NAME, [this](ExprPtr rhs) {
+		return Value(mtl::str(val(rhs).type_name().substr(4)));
 	});
 
 	/* Delete idfr & the Value associated with it */

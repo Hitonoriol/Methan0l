@@ -1,19 +1,24 @@
 #include "Value.h"
 
+#include <variant>
 #include <iostream>
 #include <sstream>
 #include <type_traits>
 #include <memory>
 
 #include "ValueRef.h"
-#include "../type.h"
-#include "../util/util.h"
+#include "type.h"
+#include "util/util.h"
+#include "util/hash.h"
+#include "util/meta.h"
 
 namespace mtl
 {
 
 const Value Value::NIL(Nil { });
 const Value Value::NO_VALUE(NoValue { });
+
+const std::hash<Value> Value::hasher;
 
 Value::Value() : Value(NIL)
 {
@@ -79,12 +84,12 @@ Value Value::copy()
 {
 	std::visit([&](auto v) {
 		if constexpr (is_heap_type<decltype(v)>())
-			value = std::make_shared<typename std::remove_reference<decltype(*v)>::type>(*v);
+			value = std::make_shared<VT(*v)>(*v);
 	}, value);
 	return *this;
 }
 
-bool Value::heap_type()
+bool Value::heap_type() const
 {
 	bool is_heap = false;
 	std::visit([&](auto v) {
@@ -97,7 +102,7 @@ dec Value::use_count()
 {
 	dec count = -1;
 	std::visit([&](auto &v) {
-		if constexpr (is_heap_type<typename std::remove_reference<decltype(v)>::type>())
+		if constexpr (is_heap_type<VT(v)>())
 			count = v.use_count();
 	}, value);
 	return count;
@@ -221,7 +226,11 @@ std::string Value::to_string(ExprEvaluator *eval)
 		auto it = map.begin(), end = map.end();
 		return stringify([&]() {
 			if (it == end) return empty_string;
-			std::string str = "{" + it->first + ": " + it->second.to_string() + "}";
+			std::string str = "{"
+			+ unconst(it->first).to_string(eval)
+			+ ": "
+			+ it->second.to_string()
+			+ "}";
 			it++;
 			return str;
 		});
@@ -348,6 +357,22 @@ Value Value::convert(Type new_val_type)
 	}
 }
 
+size_t Value::hash_code() const
+{
+	size_t hash = reinterpret_cast<size_t>(this);
+	std::visit([&](auto &v) {
+		if constexpr (std::is_same<VT(v), NoValue>::value || std::is_same<VT(v), Nil>::value)
+			hash = 0;
+		else if constexpr (std::is_arithmetic<VT(v)>::value)
+			hash = static_cast<size_t>(v);
+		else if constexpr (is_heap_type<VT(v)>())
+			hash = hasher(*v);
+		else
+			hash = hasher(v);
+	}, value);
+	return hash;
+}
+
 Value Value::ref(Value &val)
 {
 	return Value(ValueRef(val));
@@ -409,16 +434,21 @@ Value& Value::operator =(const Value &rhs)
 
 bool operator ==(const Value &lhs, const Value &rhs)
 {
-	if (lhs.empty() && rhs.empty())
-		return true;
+	bool equal = false;
+	std::visit([&](auto &lv, auto &rv) {
+		if constexpr (!std::is_same<decltype(lv), decltype(rv)>::value)
+			return;
 
-	if (lhs.nil() && rhs.nil())
-		return true;
+		else if constexpr (NIL_OR_EMPTY(lv) || NIL_OR_EMPTY(rv))
+			equal = (IS_NIL(lv) && IS_NIL(rv)) || (IS_EMPTY(lv) && IS_EMPTY(rv));
 
-	if (lhs.type() != rhs.type())
-		return false;
+		else if constexpr (is_shared_ptr<VT(lv)>::value && is_shared_ptr<VT(rv)>::value)
+			equal = *lv == *rv;
 
-	return lhs.value == rhs.value;
+		else if constexpr (is_equality_comparable<VT(lv), VT(rv)>::value)
+			equal = lv == rv;
+	}, lhs.value, rhs.value);
+	return equal;
 }
 
 bool Value::operator !=(const Value &rhs)

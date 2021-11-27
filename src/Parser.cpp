@@ -51,10 +51,15 @@ ExprPtr Parser::parse(int precedence)
 		return lhs;
 
 	bool infixc;
-	while ((infixc = Token::is_infix_compatible(lhs, look_ahead().get_type())) && precedence < get_precedence()) {
+	while ((infixc = Token::is_infix_compatible(lhs, look_ahead().get_type()))
+			&& precedence < get_lookahead_precedence()) {
 		token = consume();
 		auto &infix = infix_parsers.at(token.get_type());
 		lhs = infix->parse(*this, lhs, token);
+		/* Limit the "stickiness" of infix expressions to only one per `.`'s RHS,
+		 * even if there are more expressions w/ higher prcdc ahead */
+		if (parsing_access_opr)
+			break;
 	}
 
 	if constexpr (DEBUG)
@@ -72,6 +77,7 @@ void Parser::parse_all()
 	ExprList &expression_queue = root_unit.expressions();
 	while (!lexer.empty()) {
 		if (look_ahead() != Token::EOF_TOKEN) {
+			reset();
 			expression_queue.push_back(parse());
 
 			if constexpr (DEBUG)
@@ -116,6 +122,21 @@ void Parser::end_of_expression()
 	emplace(Token::END_OF_EXPR);
 }
 
+void Parser::reset()
+{
+	parse_access_opr(false);
+}
+
+void Parser::parse_access_opr(bool parsing)
+{
+	parsing_access_opr = parsing;
+}
+
+bool Parser::is_parsing_access_opr()
+{
+	return parsing_access_opr;
+}
+
 /* Put a token to the front of the read-ahead queue */
 void Parser::emplace(const Token &token)
 {
@@ -130,7 +151,7 @@ Token& Parser::look_ahead(size_t n)
 	return read_queue[n];
 }
 
-int Parser::get_precedence()
+int Parser::get_lookahead_precedence()
 {
 	auto infix_it = infix_parsers.find(look_ahead().get_type());
 	int prec = infix_it == infix_parsers.end() ? 0 : infix_it->second->precedence();

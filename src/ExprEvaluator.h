@@ -42,6 +42,7 @@ class ExprEvaluator
 		TypeManager type_mgr { *this };
 
 		std::deque<Unit*> exec_stack;
+		std::deque<DataTable*> object_stack;
 		Expression *current_expr;
 
 		void enter_scope(Unit &unit);
@@ -81,6 +82,10 @@ class ExprEvaluator
 		Value invoke(Value callable, InvokeExpr &expr);
 		Value invoke_unit(InvokeExpr &expr, Unit &unit);
 		Value invoke(Function &func, ExprList &args);
+
+		void use(Object &obj);
+		void use(Unit &box);
+		void unuse();
 
 		DataTable* scope_lookup(const std::string &id, bool global);
 		DataTable* scope_lookup(const IdentifierExpr &idfr);

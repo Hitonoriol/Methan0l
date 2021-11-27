@@ -45,18 +45,18 @@ class Unit
 		Value result();
 		void clear_result();
 
-		bool is_weak();
-		bool is_persistent();
+		bool is_weak() const;
+		bool is_persistent() const;
 		void set_persisent(bool val);
 		void set_weak(bool val);
 
-		bool carries_return();
+		bool carries_return() const;
 
 		void clear();
 		void prepend(ExprPtr expr);
 		void append(ExprPtr expr);
 
-		size_t size();
+		size_t size() const;
 		bool empty();
 
 		virtual std::string to_string();

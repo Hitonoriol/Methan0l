@@ -32,13 +32,15 @@ ValueRef& ValueRef::operator=(const ValueRef &rhs)
 
 Value& ValueRef::value()
 {
-	if constexpr (DEBUG)
-		out << "** Value reference access" << std::endl;
-
 	if (empty())
 		throw std::runtime_error("Trying to access an empty reference");
 
 	return *val;
+}
+
+const Value* ValueRef::ptr() const
+{
+	return val;
 }
 
 void ValueRef::clear()
@@ -48,9 +50,6 @@ void ValueRef::clear()
 
 void ValueRef::reset(Value &val)
 {
-	if constexpr (DEBUG)
-		out << "* Resetting Value reference to -> " << val << " " << static_cast<void*>(&val) << std::endl;
-
 	this->val = &val;
 }
 

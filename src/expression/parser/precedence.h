@@ -26,7 +26,7 @@ enum class Precedence
 	POSTFIX,			// ! !!
 	DOT,				// . @
 	INDEX,				// []
-	INVOKE,				// $()
+	INVOKE,				// ()
 	POSTFIX_INCREMENT	// expr++ expr--
 };
 
