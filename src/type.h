@@ -12,6 +12,9 @@
 
 #include "Token.h"
 
+#define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
+#define VT(v) TYPE(decltype(v))
+
 namespace mtl
 {
 
@@ -42,6 +45,8 @@ using ValMap = std::unordered_map<Value, Value>;
 using ExprList = std::deque<ExprPtr>;
 using RawExprList = std::deque<Expression*>;
 using ValList = std::deque<Value>;
+
+using ValSet = std::unordered_set<Value>;
 
 using ArgDef = std::pair<std::string, ExprPtr>;
 using ArgDefList = std::deque<ArgDef>;

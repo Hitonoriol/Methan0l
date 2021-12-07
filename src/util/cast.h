@@ -42,7 +42,7 @@ inline To& try_cast(From *ptr)
 	std::stringstream err_ss;
 	err_ss << "Invalid expression type received";
 	if (instanceof<Expression>(ptr)) {
-		static_cast<Expression&>(*ptr).info(err_ss << ": ");
+		dynamic_cast<Expression&>(*ptr).info(err_ss << ": ");
 		err_ss << " (Expected: " << type_name<To>() << ")";
 	}
 

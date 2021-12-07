@@ -11,10 +11,16 @@
 namespace mtl
 {
 
+const std::string Interpreter::LAUNCH_ARGS(".argv");
+
 Interpreter::Interpreter() : ExprEvaluator()
 {
 	inbuilt_func("load", [&](Args args) {
 		return Value(load_file(eval(args[0]).as<std::string>()));
+	});
+
+	inbuilt_func("get_launch_args", [&](Args args) {
+		return main.local().get(LAUNCH_ARGS);
 	});
 }
 
@@ -111,7 +117,9 @@ Value Interpreter::run()
 				<< e.what()
 				<< " @ line " << get_current_expr()->get_line()
 				<< std::endl;
-		dump_stack();
+		if constexpr (DEBUG)
+				dump_stack();
+		return ret = -1;
 	} catch (...) {
 		std::cerr << "[Unknown runtime error]" << std::endl;
 	}
@@ -120,6 +128,15 @@ Value Interpreter::run()
 		out << "Program execution finished" << std::endl;
 
 	return ret;
+}
+
+void Interpreter::load_args(int argc, char **argv)
+{
+	Value list_v(Type::LIST);
+	auto &list = list_v.get<ValList>();
+	for (int i = 1; i < argc; ++i)
+		list.push_back(Value(std::string(argv[i])));
+	main.local().set(LAUNCH_ARGS, list_v);
 }
 
 void Interpreter::size_info()

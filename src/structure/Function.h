@@ -16,6 +16,7 @@ class Function: public Unit
 {
 	private:
 		friend class ObjectType;
+		static std::string CALL_ARGS;
 
 		size_t argc = 0;
 
@@ -33,6 +34,7 @@ class Function: public Unit
 
 		void call(ExprEvaluator &eval, ExprList &args);
 		const ArgDefList& get_arg_def() const;
+		Value &get_callargs();
 
 		static Function create(ExprList body, ArgDefList args = ArgDefList());
 

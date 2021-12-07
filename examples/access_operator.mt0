@@ -1,6 +1,6 @@
 "Access operator `.` compound expressions" :: newl
 
-module = box {
+module = defbox {
 	list = $(#(x){x.sqrt()!}, "abc", "foo bar")
 	foo = func @() {
 		return: $(1, 2, 3)

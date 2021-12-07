@@ -53,6 +53,11 @@ void ValueRef::reset(Value &val)
 	this->val = &val;
 }
 
+void ValueRef::reset(Value &&val)
+{
+	this->val = &val;
+}
+
 bool ValueRef::empty() const
 {
 	return val == nullptr;

@@ -13,10 +13,6 @@ class AssignParser: public InfixParser
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
 		{
 			ExprPtr rhs = parser.parse(Precedence::ASSIGNMENT - 1);
-
-			if constexpr (DEBUG)
-				rhs->info(std::cout << "Assignment RHS: ") << std::endl;
-
 			return make_expr<AssignExpr>(line(token), lhs, rhs, token.get_type() == TokenType::ARROW_R);
 		}
 

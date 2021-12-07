@@ -11,6 +11,7 @@
 #include "util/util.h"
 #include "util/hash.h"
 #include "util/meta.h"
+#include "util/containers.h"
 
 namespace mtl
 {
@@ -47,6 +48,10 @@ Value::Value(Type type)
 		set(ValList());
 		break;
 
+	case Type::SET:
+		set(ValSet());
+		break;
+
 	case Type::MAP:
 		set(ValMap());
 		break;
@@ -75,6 +80,7 @@ Value& Value::get()
 {
 	if (is<ValueRef>())
 		return get<ValueRef>().value();
+
 	return *this;
 }
 
@@ -82,47 +88,49 @@ Value& Value::get()
  * 		Value should always be copied, even if heap-stored. */
 Value Value::copy()
 {
-	std::visit([&](auto v) {
-		if constexpr (is_heap_type<decltype(v)>())
-			value = std::make_shared<VT(*v)>(*v);
-	}, value);
+	accept([&](auto v) {
+		if constexpr (is_heap_type<VT(v)>())
+			if constexpr (!std::is_abstract<VT(*v)>::value)
+				value = std::make_shared<VT(*v)>(*v);
+	});
 	return *this;
 }
 
-bool Value::heap_type() const
+bool Value::heap_type()
 {
-	bool is_heap = false;
-	std::visit([&](auto v) {
-		is_heap = is_shared_ptr<decltype(v)>::value;
-	}, value);
-	return is_heap;
+	return accept([&](auto &v) {
+		return is_heap_type<VT(v)>();
+	});
 }
 
 dec Value::use_count()
 {
-	dec count = -1;
-	std::visit([&](auto &v) {
+	return accept([&](auto &v) -> dec {
 		if constexpr (is_heap_type<VT(v)>())
-			count = v.use_count();
-	}, value);
-	return count;
+			return v.use_count();
+		else
+			return -1;
+	});
 }
 
 bool Value::container()
 {
-	Type t = type();
-	return t == Type::LIST || t == Type::MAP;
+	return accept([&](auto &v) -> bool {
+		if constexpr (is_heap_type<decltype(v)>())
+			return is_container<VT(*v)>::value;
+		else
+			return false;
+	});
 }
 
 bool Value::object()
 {
-	return type() == Type::OBJECT;
+	return is<VObject>();
 }
 
 bool Value::numeric()
 {
-	Type t = type();
-	return t == Type::INTEGER || t == Type::DOUBLE;
+	return accept([&](auto &v) {return std::is_arithmetic<VT(v)>::value;});
 }
 
 bool Value::empty() const
@@ -163,6 +171,9 @@ Type Value::type() const
 	else if (is<ValueRef>())
 		return Type::REFERENCE;
 
+	else if (is<ExprPtr>())
+		return Type::EXPRESSION;
+
 	/* Heap-stored types */
 	else if (is<VString>())
 		return Type::STRING;
@@ -178,6 +189,9 @@ Type Value::type() const
 
 	else if (is<VList>())
 		return Type::LIST;
+
+	else if (is<VSet>())
+		return Type::SET;
 
 	else if (is<VMap>())
 		return Type::MAP;
@@ -212,25 +226,18 @@ std::string Value::to_string(ExprEvaluator *eval)
 		return std::string(
 				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE));
 
-	case Type::LIST: {
-		ValList &list = get<ValList>();
-		auto it = list.begin(), end = list.end();
-		return stringify([&]() {
-			if (it == end) return empty_string;
-			return (it++)->to_string();
-		});
-	}
+	case Type::LIST:
+		return stringify_container(eval, get<ValList>());
+
+	case Type::SET:
+		return stringify_container(eval, get<ValSet>());
 
 	case Type::MAP: {
 		ValMap &map = get<ValMap>();
 		auto it = map.begin(), end = map.end();
 		return stringify([&]() {
 			if (it == end) return empty_string;
-			std::string str = "{"
-			+ unconst(it->first).to_string(eval)
-			+ ": "
-			+ it->second.to_string()
-			+ "}";
+			std::string str = "{" + unconst(it->first).to_string(eval) + ": " + it->second.to_string(eval) + "}";
 			it++;
 			return str;
 		});
@@ -247,13 +254,20 @@ std::string Value::to_string(ExprEvaluator *eval)
 		std::stringstream ss;
 		ss << (eval == nullptr ? obj.to_string() : obj.to_string(*eval));
 
-		if (DEBUG && eval == nullptr) {
-			ss << "\n\t\t" << "Object data " << obj.get_data() << std::endl;
-			for (auto &entry : *obj.get_data().map_ptr())
-				ss << "\t\t\t" << entry.first << " = " << entry.second << std::endl;
+		if constexpr (DEBUG) {
+			if (eval == nullptr) {
+				ss << "\n\t\t" << "Object data " << obj.get_data() << std::endl;
+				for (auto &entry : *obj.get_data().map_ptr())
+					ss << "\t\t\t" << entry.first << " = " << entry.second << std::endl;
+			}
 		}
 
 		return ss.str();
+	}
+
+	case Type::EXPRESSION: {
+		auto &expr = *get<ExprPtr>();
+		return (eval == nullptr ? expr.info() : expr.evaluate(*eval)).to_string(eval);
 	}
 
 	default:
@@ -352,25 +366,41 @@ Value Value::convert(Type new_val_type)
 	case Type::STRING:
 		return Value(to_string());
 
-	default:
-		return NIL;
+	case Type::LIST: {
+		if (type() != Type::SET)
+			break;
+
+		ValList list;
+		return Value(add_all(get<ValSet>(), list));
 	}
+
+	case Type::SET: {
+		if (type() != Type::LIST)
+			break;
+
+		ValSet set;
+		return Value(add_all(get<ValList>(), set));
+	}
+
+	default:
+		break;
+	}
+
+	throw InvalidTypeException(type(), new_val_type);
 }
 
 size_t Value::hash_code() const
 {
-	size_t hash = reinterpret_cast<size_t>(this);
-	std::visit([&](auto &v) {
+	return std::visit([&](auto &v) -> size_t {
 		if constexpr (std::is_same<VT(v), NoValue>::value || std::is_same<VT(v), Nil>::value)
-			hash = 0;
+			return 0;
 		else if constexpr (std::is_arithmetic<VT(v)>::value)
-			hash = static_cast<size_t>(v);
+			return static_cast<size_t>(v);
 		else if constexpr (is_heap_type<VT(v)>())
-			hash = hasher(*v);
+			return hasher(*v);
 		else
-			hash = hasher(v);
+			return hasher(v);
 	}, value);
-	return hash;
 }
 
 Value Value::ref(Value &val)
@@ -434,21 +464,25 @@ Value& Value::operator =(const Value &rhs)
 
 bool operator ==(const Value &lhs, const Value &rhs)
 {
-	bool equal = false;
-	std::visit([&](auto &lv, auto &rv) {
+	return std::visit([&](auto &lv, auto &rv) -> bool {
 		if constexpr (!std::is_same<decltype(lv), decltype(rv)>::value)
-			return;
+			return false;
 
 		else if constexpr (NIL_OR_EMPTY(lv) || NIL_OR_EMPTY(rv))
-			equal = (IS_NIL(lv) && IS_NIL(rv)) || (IS_EMPTY(lv) && IS_EMPTY(rv));
+			return (IS_NIL(lv) && IS_NIL(rv)) || (IS_EMPTY(lv) && IS_EMPTY(rv));
+
+		else if constexpr (std::is_same<VT(lv), ExprPtr>::value && std::is_same<VT(rv), ExprPtr>::value)
+			return lv == rv;
 
 		else if constexpr (is_shared_ptr<VT(lv)>::value && is_shared_ptr<VT(rv)>::value)
-			equal = *lv == *rv;
+			return *lv == *rv;
 
 		else if constexpr (is_equality_comparable<VT(lv), VT(rv)>::value)
-			equal = lv == rv;
+			return lv == rv;
+
+		else
+			return false;
 	}, lhs.value, rhs.value);
-	return equal;
 }
 
 bool Value::operator !=(const Value &rhs)

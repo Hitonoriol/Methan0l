@@ -11,10 +11,11 @@
 namespace mtl
 {
 
-int Runner::run_file(mtl::Interpreter &methan0l, char *filename)
+int Runner::run_file(mtl::Interpreter &methan0l, int argc, char **argv)
 {
-	std::string src_name = std::string(filename);
+	std::string src_name = std::string(argv[1]);
 	methan0l.load(methan0l.load_file(src_name));
+	methan0l.load_args(argc, argv);
 	mtl::Value ret = methan0l.run();
 
 	if (!ret.empty() && !ret.nil())

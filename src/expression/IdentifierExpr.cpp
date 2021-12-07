@@ -15,10 +15,6 @@ namespace mtl
 
 Value IdentifierExpr::evaluate(ExprEvaluator &eval)
 {
-	Value reserved = eval_reserved(name);
-	if (!reserved.empty())
-		return reserved;
-
 	return referenced_value(eval);
 }
 
@@ -53,7 +49,7 @@ Value IdentifierExpr::eval_reserved(std::string &name)
 	if (name == Token::reserved(Word::NEW_LINE))
 		return NEW_LINE;
 
-	if (name == Token::reserved(Word::NIL))
+	if (name == Token::reserved(Word::NIL) || name == Token::reserved(Word::VOID))
 		return Value::NIL;
 
 	return Value::NO_VALUE;

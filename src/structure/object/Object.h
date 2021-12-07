@@ -41,6 +41,8 @@ class Object
 				ExprList &args);
 
 		void inject_this(ExprList &args);
+
+		static Value& get_this_v(ExprList &args);
 		static Object& get_this(ExprList &args);
 
 		bool has_prv_access();

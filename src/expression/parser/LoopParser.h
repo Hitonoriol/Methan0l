@@ -24,9 +24,6 @@ class LoopParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			if constexpr (DEBUG)
-				std::cout << "Parsing Loop Expression..." << std::endl;
-
 			ExprList loop_params = try_cast<ListExpr>(parser.parse()).raw_list();
 			ExprPtr body = parser.parse();
 			size_t size = loop_params.size();

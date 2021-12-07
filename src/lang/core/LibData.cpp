@@ -8,13 +8,13 @@
 #include <chrono>
 #include <thread>
 
-#include "../../expression/IdentifierExpr.h"
-#include "../../expression/parser/MapParser.h"
-#include "../../ExprEvaluator.h"
-#include "../../structure/Value.h"
-#include "../../type.h"
-#include "../../Token.h"
-#include "../../version.h"
+#include "expression/IdentifierExpr.h"
+#include "expression/parser/MapParser.h"
+#include "ExprEvaluator.h"
+#include "structure/Value.h"
+#include "type.h"
+#include "Token.h"
+#include "version.h"
 
 namespace mtl
 {
@@ -64,9 +64,13 @@ void LibData::load()
 		return Value(mtl::str(get_os()));
 	});
 
-	/* unit.identifier$("idfr_name")
-	 * identifier$("idfr_name") -- get idfr's Value from Main Unit */
-	function("identifier", [&](Args args) {
+	function("get_args", [&](Args args) {
+		return eval->current_function().get_callargs();
+	});
+
+	/* unit.value$("idfr_name")
+	 * value$("idfr_name") -- get idfr's Value from Main Unit */
+	function("value", [&](Args args) {
 		Unit &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : eval->get_main();
 		std::string idfr_name = mtl::str(val(args.back()));
 		Value &val = unit.local().get(idfr_name);
@@ -96,80 +100,39 @@ void LibData::load()
 	function("for_each", [&](Args args) {
 		Value ctr = ref(args[0]);
 		if (!ctr.container())
-			throw std::runtime_error("for_each can only be performed on a container type");
+			throw std::runtime_error("for_each() on a non-container type");
 
 		Function action = arg(args, 1).get<Function>();
 		action.set_weak(true);
-		ExprList action_args;
-		ValueRef elem_ref;
 
 		if constexpr(DEBUG)
 			std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
 
-		Type valtype = ctr.type();
+		ctr.accept_container([&](auto &container) {
+			for_each(*eval, container, action);
+		});
 
-		if (valtype == Type::LIST) {
-			ValList &list = ctr.get<ValList>();
-			if (list.empty()) {
-				if constexpr (DEBUG)
-					out << "List is empty" << std::endl;
-				return Value::NO_VALUE;
-			}
-
-			auto elem_expr = LiteralExpr::empty();
-			action_args.push_front(elem_expr);
-			for(Value &elem : list) {
-				if constexpr(DEBUG)
-					std::cout << "* List for_each iteration " << list.size() << std::endl;
-
-				elem_ref.reset(elem);
-				elem_expr->raw_ref() = elem_ref;
-				eval->invoke(action, action_args);
-			}
-			if constexpr(DEBUG)
-				std::cout << "* End of list for_each" << std::endl;
-		}
-
-		else if (valtype == Type::MAP) {
-			auto &map = ctr.get<ValMap>();
-			auto key = LiteralExpr::empty(), val = LiteralExpr::empty();
-			action_args = {key, val};
-			for (auto &entry : map) {
-				if constexpr(DEBUG)
-					std::cout << "* Map for_each iteration" << std::endl;
-
-				key->raw_ref() = entry.first;
-				elem_ref.reset(entry.second);
-				val->raw_ref() = elem_ref;
-				eval->invoke(action, action_args);
-			}
-		}
-
-		elem_ref.clear();
 		if (args.size() > 2)
 			args[2]->execute(*eval);
 
-		return Value::NO_VALUE;
+		if constexpr (DEBUG)
+			std::cout << "* End of " << ctr.type_name() << " for_each" << std::endl;
+
+		return Value::ref(ctr);
 	});
 
 	/* list.map(mapping_function) */
-	function("map", [&](Args args) {
-		Value vallist = ref(args[0]);
-		vallist.assert_type(Type::LIST);
+	function("map", [&](Args args) -> Value {
+		Value ctr = ref(args[0]);
+		if (!ctr.container())
+			throw std::runtime_error("map() on a non-container type");
 
-		ValList &list = vallist.get<ValList>();
 		Function mapper = arg(args, 1).get<Function>();
-		ValList mapped;
-
-		ExprList map_args {LiteralExpr::empty()};
-		LiteralExpr &arg = try_cast<LiteralExpr>(map_args[0]);
-
-		for (Value &val : list) {
-			arg.raw_ref() = val;
-			mapped.push_back(eval->invoke(mapper, map_args));
-		}
-
-		return Value(mapped);
+		Value result;
+		ctr.accept_container<false>([&](auto &container) {
+			map(container, result, mapper);
+		});
+		return result;
 	});
 
 	/* <List>.resize$(new_size) */
@@ -225,6 +188,15 @@ void LibData::load()
 		return Value(size);
 	});
 
+	function("is_empty", [&](Args args) {
+		bool empty = false;
+		Value arg = val(args[0]);
+		arg.accept_container([&](auto &c) {empty = c.empty();});
+		if (!empty && arg.type() == Type::STRING)
+			return arg.get<std::string>().empty();
+		return empty;
+	});
+
 	/* map.list_of$(keys) or map.list_of$(values) */
 	function("list_of", [&](Args args) {
 		std::string type = MapParser::key_string(args[1]);
@@ -266,28 +238,32 @@ void LibData::load()
 	load_operators();
 }
 
-void LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
+Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 {
 	Value &lval = eval->referenced_value(lhs);
 	Type ltype = lval.type();
 	Value rval = val(rhs).get();
 	if (ltype != rval.type()) {
 		if (convert)
-			lval = rval.convert(ltype);
+			return Value::ref(lval = rval.convert(ltype));
 		else
 			throw InvalidTypeException(rval.type(), ltype);
 	}
+	return convert ? Value::ref(lval = rval) : rval;
 }
 
 void LibData::load_operators()
 {
+	prefix_operator(TokenType::NO_EVAL, [&](ExprPtr rhs) {
+		return Value(rhs);
+	});
+
 	prefix_operator(TokenType::HASHCODE, [&](ExprPtr rhs) {
 		return Value(ref(rhs).hash_code());
 	});
 
-	infix_operator(TokenType::KEEP_TYPE, [&](ExprPtr lhs, ExprPtr rhs) {
-		if_not_same(lhs, rhs, true);
-		return Value::NO_VALUE;
+	infix_operator(TokenType::TYPE_ASSIGN, [&](ExprPtr lhs, ExprPtr rhs) {
+		return if_not_same(lhs, rhs, true);
 	});
 
 	infix_operator(TokenType::TYPE_SAFE, [&](ExprPtr lhs, ExprPtr rhs) {

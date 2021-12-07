@@ -3,11 +3,11 @@
 #include <iostream>
 #include <string>
 
-#include "../../expression/IdentifierExpr.h"
-#include "../../ExprEvaluator.h"
-#include "../../structure/object/Object.h"
-#include "../../structure/Value.h"
-#include "../../Token.h"
+#include "expression/IdentifierExpr.h"
+#include "ExprEvaluator.h"
+#include "structure/object/Object.h"
+#include "structure/Value.h"
+#include "Token.h"
 
 namespace mtl
 {
@@ -38,9 +38,9 @@ void LibIO::load()
 
 	/* String input function: foo = read_line$() */
 	function("read_line", [&](auto args) {
-		std::string str;
-		std::getline(std::cin, str);
-		return Value(str);
+		Value line(Type::STRING);
+		std::getline(std::cin, line.get<std::string>());
+		return line;
 	});
 }
 

@@ -1,5 +1,6 @@
 #include "File.h"
 
+#include <iterator>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -44,7 +45,7 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	/* file.set$(path) */
 	register_method("set", [&](auto args) {
 		Object::get_this(args).field(FNAME) = str(args[1]->evaluate(eval));
-		return Value::NO_VALUE;
+		return Object::get_this_v(args);
 	});
 
 	/* file.open$() */
@@ -89,6 +90,11 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	/* file.absolute_path$() */
 	register_method("absolute_path", [&](auto args) {
 		return Value(fs::absolute(path(args)).string());
+	});
+
+	/* file.absolute_path$() */
+	register_method("filename", [&](auto args) {
+		return Value(fs::path(path(args)).filename().string());
 	});
 
 	/* file.is_dir$() */
@@ -142,9 +148,11 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 
 	/* file.read_contents$() */
 	register_method("read_contents", [&](auto args) {
-		auto fname = path(args);
+		std::string fname = path(args);
 		std::ifstream file(fname);
-		Value contents(read_file(file));
+		if (!file.is_open())
+			throw std::runtime_error("Failed to open " + fname);
+		Value contents(std::string {std::istreambuf_iterator {file}, {}});
 		file.close();
 		return contents;
 	});

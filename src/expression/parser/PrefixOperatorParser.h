@@ -11,21 +11,18 @@ namespace mtl
 
 class PrefixOperatorParser: public PrefixParser
 {
-	private:
-		int precedence;
-
 	public:
-		PrefixOperatorParser() : precedence(prcdc(Precedence::PREFIX))
+		PrefixOperatorParser() : PrefixParser(prcdc(Precedence::PREFIX))
 		{
 		}
 
-		PrefixOperatorParser(int precedence) : precedence(precedence)
+		PrefixOperatorParser(int precedence) : PrefixParser(precedence)
 		{
 		}
 
 		ExprPtr parse(Parser &parser, Token token)
 		{
-			ExprPtr rhs = parser.parse(precedence);
+			ExprPtr rhs = parser.parse(prec);
 			return make_expr<PrefixExpr>(line(token), token.get_type(), rhs);
 		}
 };

@@ -23,15 +23,7 @@ namespace mtl
 ExprPtr MapParser::parse(Parser &parser, Token token)
 {
 	ExprMap map;
-
-	if constexpr (DEBUG)
-		std::cout << "Parsing map expr..." << std::endl;
-
 	parse(parser, [&](std::string key, ExprPtr val) {map.emplace(key, val);});
-
-	if constexpr (DEBUG)
-		std::cout << "Parsed a map with " << map.size() << " entries" << std::endl;
-
 	return make_expr<MapExpr>(line(token), map);
 }
 
@@ -44,8 +36,8 @@ void MapParser::parse(Parser &parser,
 			ExprPtr pair_expr = parser.parse();
 
 			/* Key with no value specified */
-			if (instanceof<IdentifierExpr>(pair_expr.get())
-					|| instanceof<LiteralExpr>(pair_expr.get())) {
+			if (instanceof<IdentifierExpr>(pair_expr)
+					|| instanceof<LiteralExpr>(pair_expr)) {
 				collector(key_string(pair_expr), LiteralExpr::empty());
 				continue;
 			}

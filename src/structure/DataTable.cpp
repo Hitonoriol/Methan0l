@@ -14,13 +14,7 @@ namespace mtl
 
 const std::string DataTable::NIL_IDF(Token::reserved(Word::NIL));
 
-/* Unused for now */
-DataTable DataTable::predefined( {
-		{ NIL_IDF, Value::NIL },
-		{ str(Token::reserved(Word::NEW_LINE)), Value(NEW_LINE) }
-});
-
-ValList DataTable::temp_queue;
+ValList DataTable::temp_queue(16);
 
 DataTable::DataTable() : map(std::make_shared<DataMap>())
 {
@@ -62,7 +56,7 @@ Value& DataTable::create_temporary(Value val)
 	if constexpr (DEBUG)
 		out << "Creating a temporary Value..." << std::endl;
 
-	temp_queue.push_front(val);
+	temp_queue.push_front(std::forward<Value>(val));
 	return temp_queue.front();
 }
 

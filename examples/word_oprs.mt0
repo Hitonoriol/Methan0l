@@ -13,13 +13,13 @@ unt = {0.75 * x + 0.25 * y!}
 some_flag = false
 
 /* type operator; can be compared to type literals */
-lst :: " is string: " :: (typeid: lst == type string)
-foo :: " is integer: " :: (typeid: foo == type integer)
-bar :: " is double: " :: (typeid: bar == type double)
-lst :: " is list: " :: (typeid: lst == type list)
-str :: " is string: " :: (typeid: str == type string)
-unt :: " is unit: " :: (typeid: unt == type unit)
-some_flag :: "is boolean: " :: (typeid: some_flag == type boolean)
+lst :: " is string: " :: ((typeid: lst) == type string)
+foo :: " is integer: " :: ((typeid: foo) == type int)
+bar :: " is double: " :: ((typeid: bar) == type double)
+lst :: " is list: " :: ((typeid: lst) == type list)
+str :: " is string: " :: ((typeid: str) == type string)
+unt :: " is unit: " :: ((typeid: unt) == type unit)
+some_flag :: "is boolean: " :: ((typeid: some_flag) == type boolean)
 newl
 
 /* delete operator */

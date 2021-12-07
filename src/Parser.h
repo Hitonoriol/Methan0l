@@ -24,12 +24,30 @@ class Parser
 		std::unordered_map<TokenType, std::shared_ptr<InfixParser>> infix_parsers;
 		std::unordered_map<TokenType, std::shared_ptr<PrefixParser>> prefix_parsers;
 
-		bool parsing_access_opr;
+		int32_t nesting_lvl;
+		int32_t access_opr_lvl;
 
 		std::deque<Token> read_queue;
 		Unit root_unit;
 
-		int get_lookahead_precedence();
+		template<typename T>
+		inline int get_lookahead_precedence(std::unordered_map<TokenType, std::shared_ptr<T>> &parsers)
+		{
+			TokenType tok = look_ahead().get_type();
+			if (Token::is_semantic(tok)) {
+				if (Token::is_transparent(tok)) {
+					consume();
+					return get_lookahead_precedence(parsers);
+				}
+				else
+					return 0;
+			}
+
+			auto it = parsers.find(tok);
+			return it == parsers.end() ? 0 : it->second->precedence();
+		}
+
+		int get_lookahead_precedence(bool prefix = false);
 
 	protected:
 		Lexer lexer;
@@ -52,7 +70,7 @@ class Parser
 		void emplace(const Token &token);
 
 		void reset();
-		void parse_access_opr(bool parsing);
+		void parse_access_opr();
 		bool is_parsing_access_opr();
 		void end_of_expression();
 

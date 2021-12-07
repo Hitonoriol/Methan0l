@@ -24,10 +24,10 @@ Return:
 calls = 0
 unit = {
 	local_var = "Blah blah" /* Shouldn't be accesible from the global scope */
-	%%("Boom! A Unit has been called! [" :: (++#calls) :: "] ")
-	%%("(my local var: " :: local_var :: ")")
+	%% "Boom! A Unit has been called! [" :: ++#calls :: "] "
+	%% "(my local var: " :: local_var :: ")"
 	%% newl
-	(#calls * 10)!
+	#calls * 10!
 	"Some dead code" /* Execution won't reach this point */
 }
 
@@ -42,7 +42,7 @@ true
 unit
 
 "Local scope check"
-%%("* Unit's local var as seen from global scope (should be nil): " :: local_var :: newl)
+%% "* Unit's local var as seen from global scope (should be nil): " :: local_var :: newl
 
 /* Capturing Unit's return value:
  * Incorrect way:
@@ -52,14 +52,14 @@ unit
  * Correct way:
  */
 ret = unit$() /* Will capture the returned value of the unit */
-%%("Unit returned: " :: ret :: newl)
+%% "Unit returned: " :: ret :: newl
 
-arg_unit = {(x + y)!}
+arg_unit = {x + y!}
 
 /* You can pass a single pseudo-arg Unit (aka init block) as an argument when invoking another Unit,
  * 	its expressions will be evaluated & Data Table will be shared with the invoked Unit */
 result = arg_unit$({x = 1.9; y = 42.42})
-%%("Result after passing init block: " :: result :: newl)
+%% "Result after passing init block: " :: result :: newl
 
 "Weak Unit scope visibility:"
 global = "This isn't visible for the Weak Unit below without the # prefix"
@@ -67,12 +67,12 @@ global = "This isn't visible for the Weak Unit below without the # prefix"
 	var = "Some variable"
 	-> {
 		local = 123456
-		%%("I'm a Weak Unit. I see my local var: \"" :: local
-			:: "\" and a var above my scope: \"" :: var :: "\"" :: newl)
-		%%("I can't see this without # prefix: " :: global :: " | Here it is: " :: #global :: newl)
+		%% "I'm a Weak Unit. I see my local var: \"" :: local
+			:: "\" and a var above my scope: \"" :: var :: "\"" :: newl
+		%% "I can't see this without # prefix: " :: global :: " | Here it is: `" :: #global :: "`" :: newl
 	}
 }
 
 nil! /* Return stops current Unit's execution */
 
-%%("This will never be printed")
+<% "This will never be printed"

@@ -72,10 +72,6 @@ void Lexer::push()
 	if (toktype == TokenType::IDENTIFIER) {
 		deduce_reserved();
 		deduce_word_op();
-		if (Token::is_semantic(toktype)) {
-			clear();
-			return;
-		}
 	}
 
 	else if (toktype == TokenType::CHAR) {
@@ -92,30 +88,33 @@ void Lexer::push()
 		switch (cur_int_literal) {
 		case IntLiteral::HEX:
 			std::istringstream(tokstr) >> std::hex >> val;
+			tokstr.clear();
 			break;
 
 		case IntLiteral::BIN:
 			val = bin_to_int(tokstr);
+			tokstr.clear();
 			break;
 
 		default:
-			throw std::runtime_error("Invalid integral literal");
+			break;
 		}
 
-		tokstr = std::move(std::to_string(val));
+		if (tokstr.empty())
+			tokstr = std::move(std::to_string(val));
 	}
 
 	if constexpr (DEBUG)
 		std::cout << "[" << tokstr << "] ";
 
-	tokens.push(Token(toktype, tokstr).set_line(line));
+	tokens.push(set_src_pos(Token(toktype, tokstr)));
 	clear();
 }
 
 void Lexer::push(char chr)
 {
 	if (!Token::is_delimiter(chr)) {
-		tokens.push(Token(chr).set_line(line));
+		tokens.push(set_src_pos(Token(chr)));
 
 		if (Token::is_block_begin(chr))
 			++open_blocks;
@@ -128,6 +127,11 @@ void Lexer::push(char chr)
 	else
 	if constexpr (DEBUG)
 		std::cout << std::endl;
+}
+
+Token& Lexer::set_src_pos(Token&& tok)
+{
+	return tok.set_line(line).set_column(column);
 }
 
 char Lexer::look_ahead(size_t n)
@@ -225,12 +229,12 @@ void Lexer::consume()
 
 		tokstr.clear();
 		switch (chr) {
-			case 'X':
+		case 'X':
 			case 'x':
 			cur_int_literal = IntLiteral::HEX;
 			return;
 
-			case 'B':
+		case 'B':
 			case 'b':
 			cur_int_literal = IntLiteral::BIN;
 			return;
@@ -269,8 +273,10 @@ void Lexer::consume()
 /* Consume chrs one-by-one, accumulating them in a buffer & deducing the token type */
 void Lexer::consume_and_deduce()
 {
-	if (*cur_chr == '\n')
+	if (*cur_chr == '\n') {
 		++line;
+		column = 1;
+	}
 
 	if (toktype == TokenType::NONE)
 		begin(*cur_chr);
@@ -282,8 +288,10 @@ void Lexer::consume_and_deduce()
 
 void Lexer::next_char()
 {
-	if (has_next())
+	if (has_next()) {
 		++cur_chr;
+		++column;
+	}
 }
 
 bool Lexer::has_next()
@@ -319,7 +327,7 @@ inline bool Lexer::escaped(TokenType tok)
 void Lexer::parse(std::string &code, bool preserve_state)
 {
 	if (!preserve_state) {
-		line = 1;
+		line = column = 1;
 		cur_chr = code.begin();
 		input_end = code.end();
 		std::queue<Token>().swap(tokens);

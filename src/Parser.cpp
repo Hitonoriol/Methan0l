@@ -10,7 +10,6 @@ namespace mtl
 
 Parser::Parser(const Lexer &lexer) : lexer(lexer)
 {
-
 }
 
 void Parser::register_parser(TokenType token, InfixParser *parser)
@@ -35,20 +34,28 @@ void Parser::alias_prefix(TokenType registered_tok, TokenType alias)
 
 ExprPtr Parser::parse(int precedence)
 {
+	++nesting_lvl;
 	Token token = consume();
+	if (Token::is_semantic(token.get_type()))
+		return parse(get_lookahead_precedence(true));
 
 	if constexpr (DEBUG)
-		out << "(" << precedence << ") [prefix consume] " << token << std::endl;
+		out << "(" << nesting_lvl << " | " << precedence << ") [prefix consume] " << token << std::endl;
 
 	auto prefix_it = prefix_parsers.find(token.get_type());
 	if (prefix_it == prefix_parsers.end())
 		throw std::runtime_error("Unknown token: " + token.to_string());
 
-	auto prefix = prefix_it->second;
+	auto &prefix = prefix_it->second;
 	ExprPtr lhs = prefix->parse(*this, token);
 
-	if (match(TokenType::EXPR_END))
+	if (match(TokenType::EXPR_END)) {
+		if constexpr (DEBUG)
+			out << "* Forced end of expression reached" << std::endl;
+
+		--nesting_lvl;
 		return lhs;
+	}
 
 	bool infixc;
 	while ((infixc = Token::is_infix_compatible(lhs, look_ahead().get_type()))
@@ -58,14 +65,21 @@ ExprPtr Parser::parse(int precedence)
 		lhs = infix->parse(*this, lhs, token);
 		/* Limit the "stickiness" of infix expressions to only one per `.`'s RHS,
 		 * even if there are more expressions w/ higher prcdc ahead */
-		if (parsing_access_opr)
+		if (is_parsing_access_opr() && nesting_lvl == access_opr_lvl) {
+			if constexpr (DEBUG)
+				out << "* Stopping infix parsing -- access opr expr" << std::endl;
+			access_opr_lvl = -1;
 			break;
+		}
 	}
 
-	if constexpr (DEBUG)
+	if constexpr (DEBUG) {
 		if (!infixc)
-			out << look_ahead().to_string() << "is infix-incompatible with " << lhs->info() << std::endl;
+			out << "[infix-incompatible] " << look_ahead() << " <--> " << lhs->info() << std::endl;
+		out << "! (" << nesting_lvl << ") Finished" << std::endl;
+	}
 
+	--nesting_lvl;
 	return lhs;
 }
 
@@ -74,19 +88,21 @@ void Parser::parse_all()
 	if constexpr (DEBUG)
 		std::cout << "Parsing expressions..." << std::endl;
 
+	if (lexer.has_unclosed_blocks())
+		throw std::runtime_error("Source code contains unclosed block or group expressions");
+
 	ExprList &expression_queue = root_unit.expressions();
 	while (!lexer.empty()) {
 		if (look_ahead() != Token::EOF_TOKEN) {
+			if constexpr (DEBUG)
+				out << "\nParsing next root expression...\n";
 			reset();
 			expression_queue.push_back(parse());
-
-			if constexpr (DEBUG)
-				expression_queue.back()->info(std::cout << "--> ") << std::endl;
 		}
 	}
 
 	if constexpr (DEBUG)
-		std::cout << "* Parsing complete. Expressions parsed: " << expression_queue.size() << std::endl;
+		std::cout << "\n* Parsing complete. Expressions parsed: " << expression_queue.size() << std::endl;
 }
 
 bool Parser::match(TokenType expected)
@@ -124,17 +140,18 @@ void Parser::end_of_expression()
 
 void Parser::reset()
 {
-	parse_access_opr(false);
+	nesting_lvl = 0;
+	access_opr_lvl = -1;
 }
 
-void Parser::parse_access_opr(bool parsing)
+void Parser::parse_access_opr()
 {
-	parsing_access_opr = parsing;
+	access_opr_lvl = nesting_lvl + 1;
 }
 
 bool Parser::is_parsing_access_opr()
 {
-	return parsing_access_opr;
+	return access_opr_lvl > -1;
 }
 
 /* Put a token to the front of the read-ahead queue */
@@ -151,13 +168,18 @@ Token& Parser::look_ahead(size_t n)
 	return read_queue[n];
 }
 
-int Parser::get_lookahead_precedence()
+int Parser::get_lookahead_precedence(bool prefix)
 {
-	auto infix_it = infix_parsers.find(look_ahead().get_type());
-	int prec = infix_it == infix_parsers.end() ? 0 : infix_it->second->precedence();
+	int prec;
+	if (prefix)
+		prec = get_lookahead_precedence(prefix_parsers);
+	else
+		prec = get_lookahead_precedence(infix_parsers);
 
 	if constexpr (DEBUG)
-		out << "  Lookahead precedence: " << prec << std::endl;
+		out << "  Lookahead precedence: " << prec << ": "
+			<< look_ahead()
+			<< std::endl;
 
 	return prec;
 }

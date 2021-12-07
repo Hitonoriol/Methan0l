@@ -77,6 +77,16 @@ inline std::string stringify(std::function<std::string(void)> str_supplier)
 	return list_str;
 }
 
+template<typename T>
+inline std::string stringify_container(ExprEvaluator *eval, const T &ctr)
+{
+	auto it = ctr.begin(), end = ctr.end();
+	return stringify([&]() {
+		if (it == end) return empty_string;
+		return unconst(*(it++)).to_string(eval);
+	});
+}
+
 }
 
 #endif /* UTIL_H_ */

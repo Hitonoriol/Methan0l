@@ -74,6 +74,8 @@ class ExprEvaluator
 	public:
 		ExprEvaluator();
 		ExprEvaluator(Unit &main);
+
+		Function& current_function();
 		Unit* current_unit();
 		Unit& get_main();
 

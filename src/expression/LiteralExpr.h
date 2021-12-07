@@ -108,7 +108,7 @@ class LiteralExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override
 		{
-			return Expression::info(str << "{Literal Expression}");
+			return Expression::info(str << "{Literal Expression: `" << value << "`}");
 		}
 };
 

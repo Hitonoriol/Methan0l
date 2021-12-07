@@ -15,12 +15,13 @@ namespace mtl
 
 ExprPtr ListParser::parse(Parser &parser, Token token)
 {
-	if constexpr (DEBUG)
-		std::cout << "Parsing List Expression..." << std::endl;
+	bool as_set = token.get_type() == TokenType::SET_DEF;
+	if (as_set)
+		parser.consume(TokenType::LIST_DEF_L);
 
 	ExprList raw_list;
 	parse(parser, [&](ExprPtr expr) {raw_list.push_back(expr);});
-	return make_expr<ListExpr>(line(token), raw_list);
+	return make_expr<ListExpr>(line(token), raw_list, as_set);
 }
 
 /* Assumes that the `$(` token is already consumed */

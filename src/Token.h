@@ -100,9 +100,10 @@ enum class TokenType : uint16_t
 	DEFINE_VALUE,
 	OBJECT_COPY,
 	TYPE_SAFE,
-	KEEP_TYPE,
 	HASHCODE,
 	TYPE_NAME,
+	NO_EVAL,
+	SET_DEF,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -118,12 +119,16 @@ enum class Word : uint8_t
 	RETURNED,
 	NEW_LINE,
 	BREAK,
+	VOID,
+	SELF_INVOKE,
 
 	TYPE_ID_START,
 	T_NIL = TYPE_ID_START,
 	T_INT, T_DOUBLE, T_STRING,
 	T_BOOLEAN, T_LIST, T_UNIT,
-	T_MAP, T_FUNCTION, T_CHAR, T_OBJECT, T_REFERENCE
+	T_MAP, T_FUNCTION, T_CHAR,
+	T_OBJECT, T_REFERENCE, T_EXPRESSION,
+	T_SET
 };
 
 bool operator ==(const char, const TokenType&);
@@ -134,6 +139,7 @@ class Token
 	private:
 		TokenType type;
 		uint32_t line;
+		uint32_t column;
 		std::string value;
 
 		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'<>|&\n#";
@@ -149,25 +155,28 @@ class Token
 		};
 
 		static constexpr std::string_view word_ops[] = {
-				"do", "typeid", "delete", "func", "box",
+				"do", "typeid", "delete", "func", "defbox",
 				"class", "if", "else", "return", "defval",
-				"objcopy", "typesafe", "keeptype", "hashcode",
-				"typename"
+				"objcopy", "typesafe", "hashcode",
+				"typename", "noeval", "defset"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
 				"", "nil", "true", "false", ".returned",
-				"newl", "break",
+				"newl", "break", "void", "selfinvoke",
 
 				/* Type idfrs (spaces are ignored by Lexer), evaluate to (int)Type enum  */
 				"typenil", "typeint", "typedouble", "typestring", "typeboolean",
 				"typelist", "typeunit", "typemap", "typefunc", "typechar",
-				"typeobject", "typereference"
+				"typeobject", "typereference", "typeexpr", "typeset"
 		};
 
-		/* Purely visual tokens that are removed during lexing */
 		static constexpr TokenType semantic_tokens[] = {
 				TokenType::IF, TokenType::ELSE
+		};
+
+		static constexpr TokenType transparent_tokens[] = {
+				TokenType::ELSE
 		};
 
 		static constexpr TokenType block_begin_tokens[] = {
@@ -190,8 +199,11 @@ class Token
 		Token& operator=(const Token &rhs);
 		TokenType get_type() const;
 		std::string& get_value();
+
 		Token& set_line(uint32_t);
 		uint32_t get_line() const;
+		Token& set_column(uint32_t);
+		uint32_t get_column() const;
 
 		bool operator ==(const Token &rhs);
 		bool operator !=(const Token &rhs);
@@ -204,6 +216,7 @@ class Token
 		static bool is_delimiter(char chr);
 		static bool is_punctuator(char chr);
 		static bool is_semantic(const TokenType &tok);
+		static bool is_transparent(const TokenType &tok);
 		static bool is_block_begin(char c);
 		static bool is_block_end(char c);
 
@@ -227,6 +240,7 @@ class Token
 		static const int WORD_OP_START = static_cast<int>(TokenType::DO);
 		static const int BICHAR_OP_START = static_cast<int>(TokenType::SHIFT_L);
 		static const int MISC_TOKENS_START = static_cast<int>(TokenType::NONE);
+		static const int PRINTABLE_END = 0x7F;
 		static const std::string digits, double_digits;
 		static bool contains_all(std::string str, std::string substr);
 

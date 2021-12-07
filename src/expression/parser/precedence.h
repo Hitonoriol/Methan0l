@@ -6,31 +6,32 @@ namespace mtl
 
 enum class Precedence
 {
-	IO = 1,				// <% %% %>
+	NO_EVAL = 1,		// noeval: expr
+	IO,					// <% %% %>
 	COMP_ASSIGNMENT,	// += -= *= /=
 	ASSIGNMENT,			// = ->
 	STRING_CONCAT,		// ::
-	CONDITIONAL,		// ?
+	CONDITIONAL,		// e1 ? e2 : e3
 	LOG_OR,				// ||
 	LOG_AND,			// &&
 	BIT_OR,				// |
 	BIT_XOR,			// ^
 	BIT_AND,			// &
-	EQUALS,				// ==
+	EQUALS,				// == !=
 	COMPARISON,			// > < <= >=
 	BIT_SHIFT,			// >> <<
 	SUM,				// + -
 	MULTIPLICATION,		// * / %
 	PREFIX,				// - ! ~
 	PREFIX_INCREMENT,	// ++expr --expr
-	POSTFIX,			// ! !!
+	POSTFIX,			//
 	DOT,				// . @
 	INDEX,				// []
 	INVOKE,				// ()
 	POSTFIX_INCREMENT	// expr++ expr--
 };
 
-constexpr inline int prcdc(Precedence prec)
+constexpr int prcdc(Precedence prec)
 {
 	return static_cast<int>(prec);
 }

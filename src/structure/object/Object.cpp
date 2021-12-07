@@ -73,10 +73,15 @@ void Object::inject_this(Args &args)
 	args.push_front(this_instance);
 }
 
-Object& Object::get_this(ExprList &args)
+Value& Object::get_this_v(ExprList &args)
 {
 	LiteralExpr &this_expr = try_cast<LiteralExpr>(args.front());
-	return this_expr.raw_ref().get<Object>();
+	return this_expr.raw_ref();
+}
+
+Object& Object::get_this(ExprList &args)
+{
+	return get_this_v(args).get<Object>();
 }
 
 bool Object::has_prv_access()

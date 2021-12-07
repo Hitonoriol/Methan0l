@@ -232,6 +232,7 @@ void ExprEvaluator::leave_scope()
 	if constexpr (DEBUG)
 		dump_stack();
 
+	DataTable::purge_temporary();
 	if (exec_stack.size() > 1) {
 		Unit *unit = current_unit();
 
@@ -241,7 +242,6 @@ void ExprEvaluator::leave_scope()
 			unit->clear_result();
 
 		exec_stack.pop_back();
-		DataTable::purge_temporary();
 
 		if constexpr (DEBUG)
 			std::cout << "<< Left scope // depth: " << exec_stack.size() << std::endl;
@@ -261,6 +261,15 @@ DataTable* ExprEvaluator::local_scope()
 Unit* ExprEvaluator::current_unit()
 {
 	return exec_stack.back();
+}
+
+Function& ExprEvaluator::current_function()
+{
+	for (auto it = std::prev(exec_stack.end()); it != std::prev(exec_stack.begin()); --it) {
+		if (instanceof<Function>(*it))
+			return try_cast<Function>(*it);
+	}
+	throw std::runtime_error("No functions in execution stack");
 }
 
 /* Search for identifier in local scope(s)
@@ -408,7 +417,12 @@ Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 Value& ExprEvaluator::get(const std::string &id, bool global, bool follow_refs)
 {
 	Value &val = scope_lookup(id, global)->get(id);
-	return follow_refs ? val.get() : val;
+	Value &ret = follow_refs ? val.get() : val;
+
+	if (ret.is<ExprPtr>())
+		return DataTable::create_temporary(ret.get<ExprPtr>()->evaluate(*this));
+
+	return ret;
 }
 
 inline Value ExprEvaluator::eval(Expression &expr)
@@ -499,9 +513,15 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 	Type ctype = callable.type();
 
 	if constexpr (DEBUG)
-		std::cout << "Invoking a callable..." << std::endl;
+		std::cout << "Invoking a callable: " << try_cast<Expression>(&expr).info() << std::endl;
 
-	if (ctype == Type::UNIT) {
+	if (instanceof<IdentifierExpr>(expr.get_lhs())
+			&& try_cast<IdentifierExpr>(expr.get_lhs()).get_name() == Token::reserved(Word::SELF_INVOKE)) {
+		Function self_copy = current_function();
+		return invoke(self_copy, expr.arg_list());
+	}
+
+	else if (ctype == Type::UNIT) {
 		Unit unit = callable.get<Unit>();
 		return invoke_unit(expr, unit);
 	}

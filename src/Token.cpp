@@ -115,6 +115,17 @@ uint32_t Token::get_line() const
 	return line;
 }
 
+Token& Token::set_column(uint32_t col)
+{
+	column = col;
+	return *this;
+}
+
+uint32_t Token::get_column() const
+{
+	return column;
+}
+
 TokenType Token::get_bichar_op_type(std::string &tokstr)
 {
 	for (size_t i = 0; i < std::size(bichar_ops); ++i)
@@ -179,6 +190,11 @@ bool Token::is_block_end(char c)
 bool Token::is_semantic(const TokenType &tok)
 {
 	return contains(semantic_tokens, tok);
+}
+
+bool Token::is_transparent(const TokenType &tok)
+{
+	return contains(transparent_tokens, tok);
 }
 
 bool Token::is_reserved(std::string &tokstr)
@@ -272,7 +288,7 @@ std::string Token::to_string(TokenType tok)
 {
 	const int type = static_cast<int>(tok);
 
-	if (type < 0x7F)
+	if (type < PRINTABLE_END)
 		return str(static_cast<char>(tok));
 
 	else if (type < Token::LITERAL_START)
@@ -290,9 +306,19 @@ std::string Token::to_string(TokenType tok)
 
 std::ostream& operator <<(std::ostream &stream, const Token &val)
 {
+	bool printable = static_cast<int>(val.type) < Token::PRINTABLE_END;
 	stream << "{"
-			<< "@" << val.line
-			<< " \"" << val.value << "\" : " << Token::to_string(val.type);
+			<< "[@" << val.line << ":" << val.column << "] ";
+
+	if (!printable)
+		stream << "`" << val.value << "` : ";
+	else
+		stream << "`";
+
+	stream << Token::to_string(val.type);
+	if (printable)
+		stream << "`";
+
 	return stream << "}";
 }
 

@@ -10,5 +10,5 @@ ref *= 2
 "Modified through reference: " :: ref
 
 /* Reset the Value reference is pointing at */
-ref.reset$(var2)
+ref.reset(var2)
 "* ref now points at: " :: ref

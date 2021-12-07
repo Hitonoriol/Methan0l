@@ -35,6 +35,11 @@ template<> struct std::hash<mtl::Value>
 			return v.hash_code();
 		}
 
+		size_t operator()(const mtl::Expression &v) const
+		{
+			return reinterpret_cast<size_t>(&v);
+		}
+
 		size_t operator()(const mtl::ValueRef &r) const
 		{
 			if (r.empty())

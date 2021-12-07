@@ -4,20 +4,17 @@
 #include <stdexcept>
 #include <memory>
 
-#include "../../type.h"
-#include "../../util/util.h"
-#include "../../Token.h"
-#include "../IdentifierExpr.h"
+#include "type.h"
+#include "util/util.h"
+#include "Token.h"
 #include "precedence.h"
+#include "../IdentifierExpr.h"
 
 namespace mtl
 {
+
 class Expression;
 class Parser;
-} /* namespace mtl */
-
-namespace mtl
-{
 
 class InfixParser
 {

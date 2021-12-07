@@ -1,7 +1,12 @@
 #include "IndexExpr.h"
 
+#include <iostream>
+
 #include "parser/MapParser.h"
 #include "util/hash.h"
+#include "util/meta.h"
+#include "PrefixExpr.h"
+#include "lang/core/LibData.h"
 
 namespace mtl
 {
@@ -14,10 +19,28 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 					try_cast<IndexExpr>(lhs).indexed_element(evaluator) :
 					evaluator.referenced_value(lhs);
 
+	if (remove && idx == nullptr) {
+		clear_container(val);
+		return val;
+	}
+
+	if (idx != nullptr
+			&& instanceof<PrefixExpr>(idx)
+			&& try_cast<PrefixExpr>(idx).get_operator() == TokenType::DO) {
+		val.accept_container([&](auto &container) {
+			Value action = try_cast<PrefixExpr>(idx).get_rhs()->evaluate(evaluator);
+			LibData::for_each(evaluator, container, action.get<Function>());
+		});
+		return val;
+	}
+
 	lhs_val_type = val.type();
 	switch (lhs_val_type) {
 	case Type::LIST:
 		return indexed_element(evaluator, val.get<ValList>());
+
+	case Type::SET:
+		return indexed_element(evaluator, val.get<ValSet>());
 
 	case Type::MAP:
 		return indexed_element(evaluator, val.get<ValMap>());
@@ -32,6 +55,11 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 	default:
 		throw std::runtime_error("Applying index operator on an unsupported type");
 	}
+}
+
+void IndexExpr::clear_container(Value &contval)
+{
+	contval.accept_container([&](auto &c) {c.clear();});
 }
 
 Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValList &list)
@@ -52,6 +80,18 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValList &list)
 		list.erase(list.begin() + elem_idx);
 
 	return elem;
+}
+
+Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValSet &set)
+{
+	Value val = idx->evaluate(evaluator);
+
+	if (insert)
+		return DataTable::create_temporary(set.insert(val).second);
+	else if (remove)
+		return DataTable::create_temporary(set.erase(val) > 0);
+	else
+		return DataTable::create_temporary(set.find(val) != set.end());
 }
 
 Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValMap &map)
@@ -109,6 +149,11 @@ Value IndexExpr::evaluate(ExprEvaluator &evaluator)
 	return val;
 }
 
+void IndexExpr::execute(mtl::ExprEvaluator &evaluator)
+{
+	evaluate(evaluator);
+}
+
 ExprPtr IndexExpr::get_lhs()
 {
 	return lhs;
@@ -123,7 +168,10 @@ std::ostream& IndexExpr::info(std::ostream &str)
 {
 	return Expression::info(str << "{Index "
 			<< (remove ? "Remove" : "Access") << " Expression"
-			<< (idx == nullptr ? " (Append)}" : "}"));
+			<< (idx == nullptr ? " (Append) " : " ")
+			<< "LHS: " << lhs->info() << " "
+			<< "idx: " << (idx == nullptr ? "absent" : idx->info())
+			<< "}");
 }
 
 }

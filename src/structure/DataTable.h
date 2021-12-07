@@ -16,7 +16,6 @@ class DataTable
 		static const std::string NIL_IDF;
 
 		static ValList temp_queue;
-		static DataTable predefined;
 
 	public:
 		DataTable();
@@ -28,9 +27,6 @@ class DataTable
 		Value& set(const std::string &id, Value value);
 		Value& get(const std::string &id, bool fail_on_nil = false);
 		Value& get_or_create(const std::string &id);
-
-		static Value& create_temporary(Value val);
-		static void purge_temporary();
 
 		void del(const std::string &id);
 		void del(ExprPtr idfr);
@@ -48,6 +44,16 @@ class DataTable
 		bool empty();
 
 		friend std::ostream& operator <<(std::ostream &stream, DataTable &val);
+
+		static Value& create_temporary(Value val);
+
+		template<typename T>
+		static Value& create_temporary(T &&val)
+		{
+			return create_temporary(std::forward<Value>(Value(val)));
+		}
+
+		static void purge_temporary();
 };
 
 }

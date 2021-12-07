@@ -33,7 +33,7 @@ udec Library::unum(ExprList args, int idx)
 
 Value Library::val(ExprPtr expr)
 {
-	return eval->eval(expr);
+	return eval->eval(expr).get();
 }
 
 Value& Library::ref(ExprPtr idfr)
@@ -49,7 +49,7 @@ Value& Library::ref(IdentifierExpr &idfr)
 Value Library::arg(ExprList args, int idx)
 {
 	if (args.size() <= (size_t) idx)
-		throw std::runtime_error("Trying to acces argument #" + std::to_string(idx) +
+		throw std::runtime_error("Trying to access argument #" + std::to_string(idx) +
 				" (only " + std::to_string(args.size()) + " argument(s) provided)");
 
 	return eval->eval(args[idx]);

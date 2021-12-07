@@ -42,6 +42,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	/* Assignment */
 	register_parser(TokenType::ASSIGN, new AssignParser());				// lhs = rhs
 	alias_infix(TokenType::ASSIGN, TokenType::ARROW_R);					// lhs -> rhs
+	register_infix_opr(TokenType::TYPE_ASSIGN, Precedence::ASSIGNMENT); // lhs := rhs
 
 	/* Group */
 	register_parser(TokenType::PAREN_L, new GroupParser());			// (a + b)
@@ -54,7 +55,8 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_parser(TokenType::LIST_DEF_L, new InvokeParser());
 	alias_infix(TokenType::LIST_DEF_L, TokenType::PAREN_L);
 
-	register_parser(TokenType::LIST_DEF_L, new ListParser());	// $(arg1, arg2, arg3)
+	register_parser(TokenType::LIST_DEF_L, new ListParser());	// $(expr1, expr2, ...)
+	alias_prefix(TokenType::LIST_DEF_L, TokenType::SET_DEF);	// defset $(expr1, expr2, ...)
 	register_parser(TokenType::BRACE_L, new UnitParser());	// {expr1; expr2; expr3}
 	register_parser(TokenType::ARROW_R, new WeakUnitParser());	// ->{expr1; expr2; expr3}
 	register_parser(TokenType::BRACKET_L, new IndexParser());	// list[expr] or list[]
@@ -129,15 +131,15 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_word(TokenType::DEFINE_VALUE);
 	register_word(TokenType::OBJECT_COPY);
 	register_word(TokenType::HASHCODE);
+	register_word(TokenType::NO_EVAL, Precedence::NO_EVAL);
 
 	/* Infix word oprs */
 	register_infix_word(TokenType::TYPE_SAFE, Precedence::IO);
-	register_infix_word(TokenType::KEEP_TYPE, Precedence::IO);
 
 	/* Class / Box field / method access operators */
-	register_infix_opr(TokenType::AT, Precedence::DOT);
-	register_infix_opr(TokenType::DOT, Precedence::DOT);
-	register_infix_opr(TokenType::ARROW_L, Precedence::DOT);
+	register_infix_opr(TokenType::AT, Precedence::DOT, BinOprType::RIGHT_ASSOC);
+	register_infix_opr(TokenType::DOT, Precedence::DOT, BinOprType::RIGHT_ASSOC);
+	register_infix_opr(TokenType::ARROW_L, Precedence::DOT, BinOprType::RIGHT_ASSOC);
 }
 
 void Methan0lParser::register_word(TokenType wordop, Precedence prec)

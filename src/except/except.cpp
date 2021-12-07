@@ -10,7 +10,23 @@
 namespace mtl
 {
 
-InvalidTypeException::InvalidTypeException(Type type, Type expected, const std::string &msg) :
+Exception::Exception(const std::string &msg) : msg(msg)
+{
+}
+
+const std::string_view& Exception::what()
+{
+	return msg;
+}
+
+Exception& Exception::operator=(const Exception &rhs)
+{
+	msg = rhs.msg;
+	return *this;
+}
+
+InvalidTypeException::InvalidTypeException(Type type, Type expected,
+		const std::string &msg) :
 		std::runtime_error(msg + " "
 				+ str(Value::type_name(type)) + " -> " +
 				(expected != Type::END ? str(Value::type_name(expected)) : "Unknown"))

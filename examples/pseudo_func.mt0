@@ -1,14 +1,14 @@
 "Pseudo Function Syntax" :: newl
 
 ratio = {
-	b == 0 ? -> {"inf"!}
-	((a / b) * 100.0)!
+	if (b == 0) ? -> {"inf"!}
+	return: (a / b) * 100.0
 }
 
 /* If a single Unit is passed as an argument when invoking another Unit,
  * 	it will be executed and its data table will be shared with the invoked Unit */
  
-"a is " :: ratio$({a = 9.125; b = 13}) :: "% of b" :: newl
+"a is " :: ratio({a = 10.5; b = 25.1}) :: "% of b" :: newl
 
 
 /* All values set in the "init block" will be destroyed

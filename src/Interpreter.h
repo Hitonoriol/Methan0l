@@ -37,11 +37,15 @@ class Interpreter: public ExprEvaluator
 		void load(std::string &code);
 		Value run();
 
+		void load_args(int argc, char **argv);
+
 		void preserve_data(bool val);
 		Unit& program();
 
 		void print_info();
 		void size_info();
+
+		static const std::string LAUNCH_ARGS;
 };
 
 } /* namespace mtl */

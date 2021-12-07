@@ -23,8 +23,7 @@ Value BinaryOperatorExpr::evaluate(ExprEvaluator &eval)
 void BinaryOperatorExpr::execute(ExprEvaluator &evaluator)
 {
 	Value val = evaluate(evaluator);
-
-	if (!Token::is_ref_opr(opr) && opr != TokenType::DOT)
+	if (opr == TokenType::STRING_CONCAT)
 		LiteralExpr::exec_literal(evaluator, val);
 }
 

@@ -2,6 +2,8 @@
 #define SRC_EXPRESSION_LOOPEXPR_H_
 
 #include "Expression.h"
+#include "UnitExpr.h"
+#include "util/cast.h"
 
 namespace mtl
 {
@@ -14,6 +16,20 @@ class LoopExpr: public Expression
 
 		void exec_for_loop(ExprEvaluator &evaluator);
 		void exec_foreach_loop(ExprEvaluator &evaluator);
+
+		template<typename T> void for_each(ExprEvaluator &evaluator, T &container, const std::string &as_elem)
+		{
+			Unit body_unit = try_cast<UnitExpr>(body).get_unit();
+			body_unit.call();
+			DataTable &local = body_unit.local();
+			evaluator.enter_scope(body_unit);
+			Value &elem = local.get_or_create(as_elem);
+			for (auto &val : container) {
+				elem = unconst(val);
+				evaluator.execute(body_unit, false);
+			}
+			evaluator.leave_scope();
+		}
 
 	public:
 

@@ -2,12 +2,19 @@ x = 1
 bool = defval: type boolean
 str = defval: type string
 
-/* Will perform type conversion: RHS to LHS */
-*[x] keeptype: x += 2.5
-*[bool] keeptype: bool = 1
+print = -> {
+	<% "x = " :: x
+	<% "bool = " :: bool
+	<% "str = \"" :: str :: "\""
+}
 
-<% "x = " :: x
-<% "bool = " :: bool
+print()
 
-/* Will throw InvalidTypeException */
-*[str] typesafe: str = x
+/* Type-keeping assignment -- converts RHS to LHS' type */
+x := 5.678
+bool := 1
+str := 0x1000
+print()
+
+/* Will throw InvalidTypeException if evaluated */
+/* *[str] typesafe: str = x */

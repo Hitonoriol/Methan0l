@@ -12,7 +12,7 @@ namespace mtl
 
 /*
  * func @(a, b, ...) {...}
- * ~(a, b, ...) {...}
+ * #(a, b, ...) {...}
  */
 class FunctionParser: public PrefixParser
 {
@@ -28,9 +28,6 @@ class FunctionParser: public PrefixParser
 			});
 
 			UnitExpr body_expr = try_cast<UnitExpr>(parser.parse());
-
-			if constexpr (DEBUG)
-				std::cout << "Function parser // Args: " << args.size() << std::endl;
 
 			return make_expr<FunctionExpr>(line(token), args, body_expr);
 		}

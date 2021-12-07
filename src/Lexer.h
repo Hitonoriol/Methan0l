@@ -27,7 +27,7 @@ class Lexer
 		TokenType toktype = TokenType::NONE;
 		IntLiteral cur_int_literal = IntLiteral::NONE;
 
-		uint32_t line;
+		uint32_t line, column;
 		dec open_blocks;
 
 		std::queue<Token> tokens;
@@ -52,6 +52,8 @@ class Lexer
 
 		bool unescaped(TokenType tok);
 		bool escaped(TokenType tok);
+
+		Token &set_src_pos(Token&&);
 
 	public:
 		Lexer();

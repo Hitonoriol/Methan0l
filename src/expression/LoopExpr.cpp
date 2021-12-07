@@ -5,13 +5,14 @@
 #include <string>
 
 #include "../ExprEvaluator.h"
-#include "../structure/DataTable.h"
-#include "../structure/Unit.h"
-#include "../structure/Value.h"
-#include "../type.h"
-#include "../util/util.h"
+#include "structure/DataTable.h"
+#include "structure/Unit.h"
+#include "structure/Value.h"
+#include "type.h"
 #include "IdentifierExpr.h"
 #include "UnitExpr.h"
+#include "util/util.h"
+#include "util/meta.h"
 
 namespace mtl
 {
@@ -68,18 +69,13 @@ void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 void LoopExpr::exec_foreach_loop(ExprEvaluator &evaluator)
 {
 	init->assert_type<IdentifierExpr>("First argument of foreach expr must be an Identifier");
-	Unit body_unit = try_cast<UnitExpr>(body).get_unit();
-	body_unit.call();
+	Value listval = condition->evaluate(evaluator);
 	std::string as_elem = IdentifierExpr::get_name(init);
-	ValList list = condition->evaluate(evaluator).get<ValList>();
-	DataTable &local = body_unit.local();
-	evaluator.enter_scope(body_unit);
-	Value &elem = local.get_or_create(as_elem);
-	for (Value &val : list) {
-		elem = val;
-		evaluator.execute(body_unit, false);
-	}
-	evaluator.leave_scope();
+	listval.accept([&](auto &container) {
+		if constexpr (Value::is_heap_type<decltype(container)>())
+			if constexpr (is_container<VT(*container)>::value && !is_associative<VT(*container)>::value)
+				for_each(evaluator, *container, as_elem);
+	});
 }
 
 }

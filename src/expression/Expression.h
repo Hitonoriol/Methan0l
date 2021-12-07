@@ -16,6 +16,10 @@ template<typename E, typename ...Args> std::shared_ptr<E> make_expr(uint32_t lin
 {
 	auto expr_ptr = std::make_shared<E>(std::forward<Args>(args)...);
 	expr_ptr->set_line(line);
+
+	if constexpr (DEBUG)
+		expr_ptr->info(std::cout << "--> ") << std::endl;
+
 	return expr_ptr;
 }
 

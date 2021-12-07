@@ -1,8 +1,8 @@
 /* Print the result of f$() 100 times */
 repeat = func @(f) {
-	range$(100).for_each$(func @(i) {
-		%%(f$() :: " ")
-		(i + 1) % 10 == 0 ? -> {%% newl}
+	range(100).for_each(func @(i) {
+		%% f() :: " "
+		if ((i + 1) % 10 == 0) ? -> {%% newl}
 	})
 	%% newl
 }

@@ -6,15 +6,16 @@
 #include <chrono>
 #include <thread>
 
-#include "../../expression/IdentifierExpr.h"
-#include "../../expression/InvokeExpr.h"
-#include "../../expression/ListExpr.h"
-#include "../../expression/parser/MapParser.h"
-#include "../../ExprEvaluator.h"
-#include "../../structure/Unit.h"
-#include "../../structure/Value.h"
-#include "../../Token.h"
-#include "../../util/util.h"
+#include "expression/IdentifierExpr.h"
+#include "expression/InvokeExpr.h"
+#include "expression/ListExpr.h"
+#include "expression/parser/MapParser.h"
+#include "ExprEvaluator.h"
+#include "structure/Unit.h"
+#include "structure/Value.h"
+#include "Token.h"
+#include "util/util.h"
+#include "util/process.h"
 
 namespace mtl
 {
@@ -27,6 +28,13 @@ void LibUnit::load()
 		args.front()->execute(*eval);
 		auto end = std::chrono::high_resolution_clock::now();
 		return Value(std::chrono::duration<double, std::milli>(end - start).count());
+	});
+
+	/* exec$(cmd) */
+	function("exec", [&](Args args) {
+		Value out_v(Type::STRING);
+		dec ret = mtl::exec(str(args, 0), out_v.get<std::string>());
+		return Value(ValList{out_v, Value(ret)});
 	});
 
 	/* pause$(ms) */
@@ -73,6 +81,10 @@ void LibUnit::load()
 			make_box(val);
 			return val;
 		}
+	});
+
+	function("is_main_unit", [&](Args args) {
+		return Value(&eval->get_main() == eval->current_unit());
 	});
 
 	/* unit.local$(action_to_exec) <-- execute Unit <action_to_exec> inside the <unit>'s local scope */

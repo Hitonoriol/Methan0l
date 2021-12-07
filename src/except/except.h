@@ -8,6 +8,16 @@
 namespace mtl
 {
 
+class Exception {
+	private:
+		std::string_view msg;
+
+	public:
+		Exception(const std::string &);
+		Exception& operator=(const Exception &rhs);
+		const std::string_view &what();
+};
+
 enum class Type : uint8_t;
 struct InvalidTypeException: public std::runtime_error
 {

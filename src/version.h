@@ -10,8 +10,8 @@ static const std::string SELF_NAME = "Methan0l";
 
 
 constexpr int MAJOR_VERSION = 0;
-constexpr int RELEASE_VERSION = 1;
-constexpr int MINOR_VERSION = 5;
+constexpr int RELEASE_VERSION = 2;
+constexpr int MINOR_VERSION = 0;
 
 constexpr int VERSION_CODE = MAJOR_VERSION * 10000 + RELEASE_VERSION * 100 + MINOR_VERSION;
 

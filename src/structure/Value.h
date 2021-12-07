@@ -11,8 +11,8 @@
 #include "Function.h"
 #include "except/except.h"
 #include "object/Object.h"
+#include "util/meta.h"
 
-#define VT(v) typename std::remove_const<typename std::remove_reference<decltype(v)>::type>::type
 #define IS_EMPTY(v) std::is_same<decltype(v), NoValue>::value
 #define IS_NIL(v) std::is_same<decltype(v), Nil>::value
 #define NIL_OR_EMPTY(v) IS_EMPTY(v) || IS_NIL(v)
@@ -24,6 +24,7 @@ class Value;
 
 using VString = std::shared_ptr<std::string>;
 using VList = std::shared_ptr<ValList>;
+using VSet = std::shared_ptr<ValSet>;
 using VMap = std::shared_ptr<ValMap>;
 using VUnit = std::shared_ptr<Unit>;
 using VFunction = std::shared_ptr<Function>;
@@ -40,7 +41,7 @@ enum class Type : uint8_t
 {
 	NIL, INTEGER, DOUBLE, STRING, BOOLEAN,
 	LIST, UNIT, MAP, FUNCTION, CHAR,
-	OBJECT, REFERENCE,
+	OBJECT, REFERENCE, EXPRESSION, SET,
 
 	END
 };
@@ -63,10 +64,13 @@ template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type
 using ValueContainer =
 std::variant<
 /* Value Placeholders */
-NoValue, Nil,
+NoValue, Nil, Exception,
 
 /* Reference to another Value */
 ValueRef,
+
+/* Unevaluated Expression */
+ExprPtr,
 
 /* Primitives */
 dec, double, bool, char,
@@ -77,7 +81,7 @@ dec, double, bool, char,
 VString,
 
 /* Data Structures */
-VList, VMap,
+VList, VSet, VMap,
 
 /* Expression blocks */
 VUnit, VFunction,
@@ -89,13 +93,13 @@ VObject
 class Value
 {
 	private:
-		static constexpr int MAX_SIZE = 8;
+		static constexpr int MAX_SIZE = 16;
 		static const std::hash<Value> hasher;
 
 		ValueContainer value;
 
 		template<typename T>
-		static constexpr bool is_heap_type()
+		static constexpr bool is_heap_storable()
 		{
 			return sizeof(T) > MAX_SIZE;
 		}
@@ -103,9 +107,9 @@ class Value
 		template<typename T>
 		void set(const T &val)
 		{
-			if constexpr (is_heap_type<T>()) {
+			if constexpr (is_heap_storable<T>()) {
 				/* Don't reallocate if this value is already of heap storable type T */
-				if (is<std::shared_ptr<T>>())
+				if (this->is<std::shared_ptr<T>>())
 					get<T>() = val;
 				else
 					value = std::make_shared<T>(val);
@@ -149,18 +153,44 @@ class Value
 		Value(const Value &val);
 		Value& operator =(const Value &rhs);
 
+		template<typename T>
+		static constexpr bool is_heap_type()
+		{
+			return is_shared_ptr<TYPE(T)>::value || is_heap_storable<T>();
+		}
+
 		Value& get();
 		Type type() const;
 		Value copy();
 
 		dec use_count();
-		bool heap_type() const;
+		bool heap_type();
 		bool container();
 		bool object();
 		bool numeric();
 
 		bool empty() const;
 		bool nil() const;
+
+		template<typename F>
+		constexpr decltype(auto) accept(F &&visitor)
+		{
+			return std::visit(visitor, value);
+		}
+
+		template<bool allow_associative = true, typename F>
+		constexpr void accept_container(F &&visitor)
+		{
+			std::visit([&](auto &v) {
+				if constexpr (is_heap_type<decltype(v)>()) {
+					using C = VT(*v);
+					if constexpr (is_container<C>::value
+							&& !(is_associative<C>::value && !allow_associative)) {
+						visitor(*v);
+					}
+				}
+			}, value);
+		}
 
 		void clear();
 		static void clear(ValueContainer &pure_val);
@@ -181,9 +211,9 @@ class Value
 			return static_cast<int>(type());
 		}
 
-		template<typename T> T& get()
+		template<typename T> inline T& get()
 		{
-			if constexpr (is_heap_type<T>())
+			if constexpr (is_heap_storable<T>())
 				return *std::get<std::shared_ptr<T>>(value);
 			else
 				return std::get<T>(value);
@@ -198,7 +228,7 @@ class Value
 		static Value ref(Value &val);
 
 		/* Get current value by copy or convert to specified type */
-		template<typename T> T as()
+		template<typename T> inline T as()
 		{
 			if constexpr (!allowed_type<T, ValueContainer>::value) {
 				if constexpr (std::is_same<T, udec>::value)
@@ -229,7 +259,7 @@ class Value
 			throw InvalidTypeException(type());
 		}
 
-		template<typename T> bool is() const
+		template<typename T> inline bool is() const
 		{
 			return std::holds_alternative<T>(value);
 		}

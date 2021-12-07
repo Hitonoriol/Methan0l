@@ -1,22 +1,29 @@
-"Loading & Running all examples"
-line_sep = "******************************"
-this = "test_all.mt0"
-root = File.new$("examples")
-<%("Absolute path: " :: root.absolute_path$())
-<%("Exists: " :: !root.exists$())
-if (!root.exists$() || !root.is_dir$()) ? -> {
-	die$("Failed to open examples directory")
+"Loading & Running all examples" :: newl
+start = now()
+this = File.new(get_launch_args()[0]).filename()
+root = File.new("examples")
+if (!root.exists() || !root.is_dir()) ? -> {
+	die("Failed to open examples directory")
 }
 
-tmp = File.new$("")
-root.for_each(func @(file) {
-	#tmp.set$(file)
-	if (#tmp.extension$() != ".mt0" || file.contains$(#this)) ? -> {
-		break!
+create_title = func @(char, str => "", width => 50) {
+	pad = char.repeat((width - str.size()) / 2 - 2)
+	space = str.is_empty() ? "" : " "
+	title = pad :: space :: str :: space :: pad
+	if ((n = width - title.size()) > 0) -> {
+		title[] = char.repeat(n)
 	}
-	newl :: file :: line_sep :: newl
-	/*
-	load$(file)$()
-	line_sep
-	*/
+	return: title
+}
+
+tmp = File.new("")
+root.for_each(func @(file) {
+	#tmp.set(file)
+	if (#tmp.extension() != ".mt0" || #tmp.filename() == #this) ? -> {
+		void!
+	}
+	<% newl :: #create_title("v", file)
+	load(file)()
+	<% #create_title("^") :: newl
 })
+<% "Done running examples. " :: (now() - start) / 1000.0 :: " secs elapsed."

@@ -16,23 +16,28 @@ class IndexExpr: public IdentifierExpr
 		ExprPtr lhs, idx;
 		Type lhs_val_type = Type::NIL;
 		bool remove;
+		bool insert;
 
 		inline bool append()
 		{
 			return idx == nullptr;
 		}
 
+		void clear_container(Value &contval);
+
 		Value& indexed_element(ExprEvaluator &evaluator);
 		Value& indexed_element(ExprEvaluator &evaluator, ValList &list);
 		Value& indexed_element(ExprEvaluator &evaluator, ValMap &map);
+		Value& indexed_element(ExprEvaluator &evaluator, ValSet &set);
 
 	public:
-		IndexExpr(ExprPtr list_idfr, ExprPtr idx, bool remove) :
-				lhs(list_idfr), idx(idx), remove(remove)
+		IndexExpr(ExprPtr list_idfr, ExprPtr idx, bool remove, bool insert) :
+				lhs(list_idfr), idx(idx), remove(remove), insert(insert)
 		{
 		}
 
 		Value evaluate(ExprEvaluator &evaluator) override;
+		void execute(mtl::ExprEvaluator &evaluator) override;
 
 		Value& assign(ExprEvaluator &eval, Value val) override;
 		Value& referenced_value(ExprEvaluator &eval, bool follow_refs = true) override;

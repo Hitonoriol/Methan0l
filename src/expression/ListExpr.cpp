@@ -9,14 +9,23 @@
 namespace mtl
 {
 
+ListExpr::ListExpr(ExprList exprs, bool as_set) : exprs(exprs), as_set(as_set)
+{
+}
+
+ExprList& ListExpr::raw_list()
+{
+	return exprs;
+}
+
 Value ListExpr::evaluate(ExprEvaluator &evaluator)
 {
-	ValList list;
+	return as_set ? create_and_populate<ValSet>(evaluator) : create_and_populate<ValList>(evaluator);
+}
 
-	for (auto expr : exprs)
-		list.push_back(expr->evaluate(evaluator));
-
-	return Value(list);
+std::ostream& ListExpr::info(std::ostream &str)
+{
+	return Expression::info(str << "{List Expression // " << exprs.size() << " elements}");
 }
 
 }

@@ -1,0 +1,2 @@
+"Command line arguments" :: newl
+<% get_launch_args()
