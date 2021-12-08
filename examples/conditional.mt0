@@ -6,9 +6,9 @@ foo = (b > a ? "b" : "a")
 %%("Ternary result: " :: foo :: newl)
 
 /* Can also be used as if-else operator using execution syntax combined with Unit definitions inside then and else arms */
-a == nil ? {
+if (a == nil) ? {
 	"[then] unit has been executed" :: newl
-} : {
+} else: {
 	"[else] unit has been executed" :: newl
 }
 

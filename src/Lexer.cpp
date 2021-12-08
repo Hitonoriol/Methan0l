@@ -151,6 +151,9 @@ bool Lexer::try_save_bichar_op(char chr, char next)
 
 	if (bichar_type == TokenType::BLOCK_COMMENT_L) {
 		do {
+			if (*cur_chr == '\n')
+				new_line();
+
 			next_char();
 		} while (*cur_chr != Token::chr(TokenType::ASTERISK) ||
 				*std::next(cur_chr) != Token::chr(TokenType::SLASH));
@@ -273,10 +276,8 @@ void Lexer::consume()
 /* Consume chrs one-by-one, accumulating them in a buffer & deducing the token type */
 void Lexer::consume_and_deduce()
 {
-	if (*cur_chr == '\n') {
-		++line;
-		column = 1;
-	}
+	if (*cur_chr == '\n')
+		new_line();
 
 	if (toktype == TokenType::NONE)
 		begin(*cur_chr);
@@ -292,6 +293,12 @@ void Lexer::next_char()
 		++cur_chr;
 		++column;
 	}
+}
+
+void Lexer::new_line()
+{
+	column = 1;
+	++line;
 }
 
 bool Lexer::has_next()

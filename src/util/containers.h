@@ -5,29 +5,66 @@
 
 #include "meta.h"
 
+#define FWD_VAL std::forward<T>(val)
+#define LIST_T decltype(c.push_back(FWD_VAL), void())
+#define SET_T decltype(c.insert(FWD_VAL), void())
+
 namespace mtl
 {
 
 template<typename C, typename T>
-inline auto insert(C &c, T &&val) -> decltype(c.push_back(std::forward<T>(val)), void())
+inline auto insert(C &c, T &&val) -> LIST_T
 {
-	c.push_back(std::forward<T>(val));
+	c.push_back(FWD_VAL);
 }
 
 template<typename C, typename T>
-inline auto insert(C &c, T &&val) -> decltype(c.insert(std::forward<T>(val)), void())
+inline auto remove(C &c, T &&val) -> LIST_T
 {
-	c.insert(std::forward<T>(val));
+	c.erase(std::remove(c.begin(), c.end(), FWD_VAL), c.end());
+}
+
+template<typename C, typename T>
+inline auto insert(C &c, T &&val) -> SET_T
+{
+	c.insert(FWD_VAL);
+}
+
+template<typename C, typename T>
+inline auto remove(C &c, T &&val) -> SET_T
+{
+	c.erase(FWD_VAL);
+}
+
+template<typename C, typename T>
+inline bool contains(C &c, T &&val)
+{
+	return std::find(std::begin(c), std::end(c), val) != std::end(c);
 }
 
 template<typename T, typename U>
 inline U& add_all(T &from, U &to)
 {
-	static_assert(is_container<T>::value && is_container<U>::value
-			&& std::is_same<typename T::value_type, typename U::value_type>::value);
-	for (auto &elem : from)
+	for (auto &&elem : from)
 		insert(to, elem);
 	return to;
+}
+
+template<typename T, typename U>
+inline U& remove_all(T &lookup_in, U &remove_from)
+{
+	for (auto &&elem : lookup_in)
+		remove(remove_from, elem);
+	return remove_from;
+}
+
+template<typename T, typename U>
+inline U& retain_all(T &lookup_in, U &retain_in)
+{
+	for (auto &&elem : lookup_in)
+		if (!contains(retain_in, elem))
+			remove(retain_in, elem);
+	return retain_in;
 }
 
 }

@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <chrono>
+#include <algorithm>
 #include <thread>
 
 #include "expression/IdentifierExpr.h"
@@ -135,6 +136,21 @@ void LibData::load()
 		return result;
 	});
 
+	/* dest.add_all(src) */
+	function("add_all", [&](Args args) {
+		return container_operation(args, [&](auto &src, auto &dst){add_all(src, dst);});
+	});
+
+	/* dest.remove_all(src) */
+	function("remove_all", [&](Args args) {
+		return container_operation(args, [&](auto &src, auto &dst){remove_all(src, dst);});
+	});
+
+	/* dest.retain_all(src) */
+	function("retain_all", [&](Args args) {
+		return container_operation(args, [&](auto &src, auto &dst) {retain_all(src, dst);});
+	});
+
 	/* <List>.resize$(new_size) */
 	function("resize", [&](Args args) {
 		Value &list_val = ref(args[0]);
@@ -191,10 +207,11 @@ void LibData::load()
 	function("is_empty", [&](Args args) {
 		bool empty = false;
 		Value arg = val(args[0]);
+		if (arg.is<std::string>())
+			return Value(arg.get<std::string>().empty());
+
 		arg.accept_container([&](auto &c) {empty = c.empty();});
-		if (!empty && arg.type() == Type::STRING)
-			return arg.get<std::string>().empty();
-		return empty;
+		return Value(empty);
 	});
 
 	/* map.list_of$(keys) or map.list_of$(values) */
@@ -235,7 +252,49 @@ void LibData::load()
 				.count());
 	});
 
+	load_set_funcs();
 	load_operators();
+}
+
+void LibData::load_set_funcs()
+{
+	/* set_a.intersect(set_b) */
+	function("intersect", [&](Args args) {
+		Value inter_v(Type::SET);
+		return set_operation(args, inter_v, [&](auto &a, auto &b, auto &c) {
+			std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
+							[&b](auto &element){return b.count(element) > 0;});
+		});
+	});
+
+	/* set_a.union(set_b) */
+	function("union", [&](Args args) {
+		Value union_v(Type::SET);
+		return set_operation(args, union_v, [&](auto &a, auto &b, auto &c) {
+			c.insert(a.begin(), a.end());
+			c.insert(b.begin(), b.end());
+		});
+	});
+
+	auto set_diff = [&](auto &a, auto &b, auto &c) {
+		std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
+		    [&b](auto &element) {return b.count(element) == 0;});
+	};
+
+	/* set_a.diff(set_b) */
+	function("diff", [&](Args args) {
+		Value diff_v(Type::SET);
+		return set_operation(args, diff_v, std::move(set_diff));
+	});
+
+	/* set_a.symdiff(set_b) */
+	function("symdiff", [&](Args args) {
+		Value sdiff_v(Type::SET);
+		return set_operation(args, sdiff_v, [&](auto &a, auto &b, auto &c) {
+			set_diff(a, b, c);
+			set_diff(b, a, c);
+		});
+	});
 }
 
 Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)

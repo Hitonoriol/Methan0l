@@ -22,7 +22,8 @@ class LibData: public Library
 		}
 		void load() override;
 
-		template<typename T> static void for_each(ExprEvaluator &eval, T &container, Function &action)
+		template<typename T>
+		static void for_each(ExprEvaluator &eval, T &container, Function &action)
 		{
 			static_assert(is_container<T>::value);
 			if (container.empty())
@@ -62,9 +63,34 @@ class LibData: public Library
 	private:
 		static constexpr std::string_view KEY_LIST = "keys", VAL_LIST = "values";
 		void load_operators();
+
+		/* Set operation where `args` contains 2 set expressions */
+		template<typename T>
+		inline Value& set_operation(Args &args, Value &result_v, T &&operation)
+		{
+			Value av = ref(args[0]), bv = ref(args[1]);
+			auto &a = av.get<ValSet>(), &b = bv.get<ValSet>(), &result = result_v.get<ValSet>();
+			operation(a, b, result);
+			return result_v;
+		}
+		void load_set_funcs();
+
+		template<typename T>
+		inline Value container_operation(Args &args, T &&operation)
+		{
+			Value &dst_v = ref(args[0]), src_v = ref(args[1]);
+			src_v.accept_container<false>([&](auto &src) {
+				dst_v.accept_container<false>([&](auto &dst) {
+					operation(src, dst);
+				});
+			});
+			return Value::ref(dst_v);
+		}
+
 		Value if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert = true);
 
-		template<typename T> Value map(T &container, Value &mapped_val, Function &mapper)
+		template<typename T>
+		Value map(T &container, Value &mapped_val, Function &mapper)
 		{
 			mapped_val = T();
 			T &mapped = mapped_val.get<T>();

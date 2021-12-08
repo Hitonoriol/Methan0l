@@ -261,7 +261,10 @@ class Value
 
 		template<typename T> inline bool is() const
 		{
-			return std::holds_alternative<T>(value);
+			if constexpr (allowed_type<T, ValueContainer>::value)
+				return std::holds_alternative<T>(value);
+			else
+				return is_heap_storable<T>() && std::holds_alternative<std::shared_ptr<T>>(value);
 		}
 
 		void assert_type(Type expected,

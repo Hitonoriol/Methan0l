@@ -14,12 +14,16 @@ cd build && make
 
 ### Run Methan0l programs
 
-**Execute** program:  
+**Execute** a program:  
 ```
-./methan0l /path/to/src_file.mt0
+./methan0l /path/to/src_file.mt0 [cmd_arg1 cmd_arg2 ...]
 ```  
 \
 **Interactive mode** (parse & execute expressions from stdin):  
 ```
 ./methan0l
 ```  
+
+## Miscellaneous tools
+
+* [Methan0l IDE](https://github.com/Hitonoriol/Methan0l-IDE) - a mini IDE written in java.

@@ -53,6 +53,7 @@ class Lexer
 		bool unescaped(TokenType tok);
 		bool escaped(TokenType tok);
 
+		void new_line();
 		Token &set_src_pos(Token&&);
 
 	public:

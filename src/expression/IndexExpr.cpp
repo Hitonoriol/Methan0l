@@ -59,7 +59,10 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 
 void IndexExpr::clear_container(Value &contval)
 {
-	contval.accept_container([&](auto &c) {c.clear();});
+	if (contval.is<std::string>())
+		contval.get<std::string>().clear();
+	else
+		contval.accept_container([&](auto &c) {c.clear();});
 }
 
 Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValList &list)
