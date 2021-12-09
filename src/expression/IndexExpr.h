@@ -29,6 +29,7 @@ class IndexExpr: public IdentifierExpr
 		Value& indexed_element(ExprEvaluator &evaluator, ValList &list);
 		Value& indexed_element(ExprEvaluator &evaluator, ValMap &map);
 		Value& indexed_element(ExprEvaluator &evaluator, ValSet &set);
+		Value& indexed_element(ExprEvaluator &evaluator, DataTable &table);
 
 	public:
 		IndexExpr(ExprPtr list_idfr, ExprPtr idx, bool remove, bool insert) :

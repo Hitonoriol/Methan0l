@@ -45,6 +45,12 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 	case Type::MAP:
 		return indexed_element(evaluator, val.get<ValMap>());
 
+	case Type::UNIT:
+		return indexed_element(evaluator, val.get<Unit>().local());
+
+	case Type::OBJECT:
+		return indexed_element(evaluator, val.get<Object>().get_data());
+
 		/* Process char deletion
 		 * 		& return the & to the string itself -- indexed char must be extracted manually (if required) */
 	case Type::STRING:
@@ -55,6 +61,18 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 	default:
 		throw std::runtime_error("Applying index operator on an unsupported type");
 	}
+}
+
+Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, DataTable &table)
+{
+	if (append() || insert)
+		throw std::runtime_error("Unsupported operation");
+
+	std::string name = idx->evaluate(evaluator).to_string(&evaluator);
+	if (remove)
+		table.del(name);
+
+	return table.get(name);
 }
 
 void IndexExpr::clear_container(Value &contval)
