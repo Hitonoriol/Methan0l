@@ -24,21 +24,27 @@ class LoopParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			ExprList loop_params = try_cast<ListExpr>(parser.parse()).raw_list();
+			if (!parser.match(TokenType::LIST_DEF_L))
+				parser.consume(TokenType::PAREN_L);
+
+			ExprList loop_params;
+			ListParser::parse(parser, [&](auto expr) {loop_params.push_back(expr);});
 			ExprPtr body = parser.parse();
 			size_t size = loop_params.size();
 			uint32_t line = mtl::line(token);
+			bool legacy_loop = token == TokenType::DO;
 
-			if (size == FOR_ARGS)
-				return make_expr<LoopExpr>(line, loop_params, body);
+			if (token == TokenType::FOR || legacy_loop) {
+				if (size == FOR_ARGS)
+					return make_expr<LoopExpr>(line, loop_params, body);
 
-			else if (size == FOREACH_ARGS)
-				return make_expr<LoopExpr>(line, loop_params.front(), loop_params[1], body);
-
-			else if (size == WHILE_ARGS)
+				else if (size == FOREACH_ARGS)
+					return make_expr<LoopExpr>(line, loop_params.front(), loop_params[1], body);
+			}
+			else if ((token == TokenType::WHILE || legacy_loop) && size == WHILE_ARGS)
 				return make_expr<LoopExpr>(line, loop_params.back(), body);
 
-			throw std::runtime_error("Invalid Loop parameter list expression quantity");
+			throw std::runtime_error("Invalid loop expression");
 		}
 };
 

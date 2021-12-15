@@ -13,7 +13,8 @@ CPP_SRCS += \
 ../src/expression/ListExpr.cpp \
 ../src/expression/LoopExpr.cpp \
 ../src/expression/MapExpr.cpp \
-../src/expression/PrefixExpr.cpp 
+../src/expression/PrefixExpr.cpp \
+../src/expression/TryCatchExpr.cpp 
 
 OBJS += \
 ./src/expression/BinaryOperatorExpr.o \
@@ -25,7 +26,8 @@ OBJS += \
 ./src/expression/ListExpr.o \
 ./src/expression/LoopExpr.o \
 ./src/expression/MapExpr.o \
-./src/expression/PrefixExpr.o 
+./src/expression/PrefixExpr.o \
+./src/expression/TryCatchExpr.o 
 
 CPP_DEPS += \
 ./src/expression/BinaryOperatorExpr.d \
@@ -37,7 +39,8 @@ CPP_DEPS += \
 ./src/expression/ListExpr.d \
 ./src/expression/LoopExpr.d \
 ./src/expression/MapExpr.d \
-./src/expression/PrefixExpr.d 
+./src/expression/PrefixExpr.d \
+./src/expression/TryCatchExpr.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

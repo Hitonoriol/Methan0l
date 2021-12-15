@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/ExceptionHandler.cpp \
 ../src/ExprEvaluator.cpp \
 ../src/InteractiveRunner.cpp \
 ../src/Interpreter.cpp \
@@ -16,6 +17,7 @@ CPP_SRCS += \
 ../src/type.cpp 
 
 OBJS += \
+./src/ExceptionHandler.o \
 ./src/ExprEvaluator.o \
 ./src/InteractiveRunner.o \
 ./src/Interpreter.o \
@@ -28,6 +30,7 @@ OBJS += \
 ./src/type.o 
 
 CPP_DEPS += \
+./src/ExceptionHandler.d \
 ./src/ExprEvaluator.d \
 ./src/InteractiveRunner.d \
 ./src/Interpreter.d \

@@ -8,6 +8,7 @@
 #include "structure/Function.h"
 #include "lang/Library.h"
 #include "structure/object/TypeManager.h"
+#include "ExceptionHandler.h"
 
 namespace mtl
 {
@@ -24,6 +25,7 @@ class InvokeExpr;
 class IndexExpr;
 class Library;
 class TypeManager;
+class Expression;
 
 class ExprEvaluator
 {
@@ -43,10 +45,9 @@ class ExprEvaluator
 
 		std::deque<Unit*> exec_stack;
 		std::deque<DataTable*> object_stack;
+		ExceptionHandler exception_handler;
+		std::stack<std::unique_ptr<Unit>> tmp_call_stack;
 		Expression *current_expr;
-
-		void enter_scope(Unit &unit);
-		void leave_scope();
 
 		void load_library(std::unique_ptr<Library> library);
 
@@ -62,9 +63,34 @@ class ExprEvaluator
 		void inbuilt_func(std::string func_name, InbuiltFunc func);
 		Value invoke_inbuilt_func(std::string name, ExprList args);
 
+		void enter_scope(Unit &unit);
+		void leave_scope();
+		void restore_execution_state(size_t depth);
+		inline void pop_tmp_callable()
+		{
+			if (!tmp_call_stack.empty() && current_unit() == tmp_call_stack.top().get()) {
+				if constexpr (DEBUG)
+					std::cout << "* Popping tmp callable "
+						<< std::hex << tmp_call_stack.top().get() << std::dec << std::endl;
+				tmp_call_stack.pop();
+			}
+		}
+
 		Value eval(Expression &expr);
-		Value eval(ExprPtr expr);
-		void exec(ExprPtr &expr);
+		inline Value eval(ExprPtr &expr)
+		{
+			return eval(*expr);
+		}
+		inline Value eval(ExprPtr &&expr)
+		{
+			return eval(expr);
+		}
+
+		void exec(Expression &expr);
+		inline void exec(ExprPtr &expr)
+		{
+			exec(*expr);
+		}
 
 		void load_main(Unit &main);
 
@@ -80,14 +106,26 @@ class ExprEvaluator
 		Unit& get_main();
 
 		Value execute(Unit &unit, const bool use_own_scope = true);
-		void execute(ExprList &exprs);
-		Value invoke(Value callable, InvokeExpr &expr);
-		Value invoke_unit(InvokeExpr &expr, Unit &unit);
-		Value invoke(Function &func, ExprList &args);
+		Value invoke(const Unit &unit, ExprList &args);
+		Value invoke(const Unit &unit);
+		Value invoke(const Function &func, ExprList &args);
+		template<typename T>
+		inline TYPE(T)& tmp_callable(T &&callable)
+		{
+			tmp_call_stack.push(std::make_unique<TYPE(T)>(callable));
+
+			if constexpr (DEBUG)
+				std::cout << "* Pushing tmp callable "
+					<< std::hex << tmp_call_stack.top().get() << std::dec << std::endl;
+
+			return static_cast<TYPE(T)&>(*tmp_call_stack.top());
+		}
 
 		void use(Object &obj);
 		void use(Unit &box);
 		void unuse();
+
+		size_t stack_depth();
 
 		DataTable* scope_lookup(const std::string &id, bool global);
 		DataTable* scope_lookup(const IdentifierExpr &idfr);
@@ -117,6 +155,7 @@ class ExprEvaluator
 		bool func_exists(const std::string &name);
 
 		TypeManager& get_type_mgr();
+		ExceptionHandler& get_exception_handler();
 
 		void stop();
 		bool force_quit();

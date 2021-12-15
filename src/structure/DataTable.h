@@ -48,7 +48,7 @@ class DataTable
 		static Value& create_temporary(Value val);
 
 		template<typename T>
-		static Value& create_temporary(T &&val)
+		static inline Value& create_temporary(T &&val)
 		{
 			return create_temporary(std::forward<Value>(Value(val)));
 		}

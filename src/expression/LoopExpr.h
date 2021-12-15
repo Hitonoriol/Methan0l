@@ -19,7 +19,7 @@ class LoopExpr: public Expression
 
 		template<typename T> void for_each(ExprEvaluator &evaluator, T &container, const std::string &as_elem)
 		{
-			Unit body_unit = try_cast<UnitExpr>(body).get_unit();
+			Unit &body_unit = evaluator.tmp_callable(try_cast<UnitExpr>(body).get_unit_ref());
 			body_unit.call();
 			DataTable &local = body_unit.local();
 			evaluator.enter_scope(body_unit);

@@ -73,7 +73,7 @@ Value::Value(const Value &val) : value(val.value)
 Value::~Value()
 {
 	if constexpr (DEBUG)
-		out << "[x] Destroying (" << use_count() << ") [" << type_name() << "] " << *this << std::endl;
+		out << "[x] Destroying (" << use_count() << ") [" << type_name() << "] `" << *this << "`" << std::endl;
 }
 
 Value& Value::get()
@@ -345,6 +345,16 @@ char Value::to_char()
 	default:
 		throw InvalidTypeException(t, Type::CHAR);
 	}
+}
+
+void* Value::identity()
+{
+	return accept([&](auto &v) -> void* {
+		if constexpr (is_heap_type<VT(v)>())
+			return v.get();
+		else
+			return this;
+	});
 }
 
 /* Create a copy with converted value */

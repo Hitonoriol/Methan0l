@@ -27,9 +27,11 @@ class FunctionParser: public PrefixParser
 				args.push_back(std::make_pair(key, val));
 			});
 
-			UnitExpr body_expr = try_cast<UnitExpr>(parser.parse());
+			ExprPtr body_expr = parser.parse();
+			UnitExpr body = instanceof<UnitExpr>(body_expr) ?
+					try_cast<UnitExpr>(body_expr) : UnitExpr({body_expr});
 
-			return make_expr<FunctionExpr>(line(token), args, body_expr);
+			return make_expr<FunctionExpr>(line(token), args, body);
 		}
 };
 

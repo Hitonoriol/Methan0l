@@ -9,6 +9,7 @@
 #include "Methan0lParser.h"
 #include "ExprEvaluator.h"
 #include "expression/AssignExpr.h"
+#include "expression/TryCatchExpr.h"
 #include "type.h"
 
 namespace mtl
@@ -44,6 +45,46 @@ class Interpreter: public ExprEvaluator
 
 		void print_info();
 		void size_info();
+
+		/* Either a std::exception-derived or a Value object can be thrown */
+		template<typename T>
+		bool handle_exception(T &exception)
+		{
+			auto &handler = get_exception_handler();
+			std::string msg;
+			constexpr bool stdex = std::is_base_of<std::exception, T>::value;
+
+			if constexpr (DEBUG)
+				out << "Attempting to handle an exception of type: " << type_name<T>() << std::endl;
+
+			if (handler.empty()) {
+				if constexpr (stdex)
+					msg = exception.what();
+				else
+					msg = exception.to_string(this);
+				std::cerr << "[Runtime error] "
+						<< msg
+						<< " @ line " << get_current_expr()->get_line()
+						<< std::endl;
+				if constexpr (DEBUG)
+					dump_stack();
+				return false;
+			}
+			else {
+				Value ex;
+				if constexpr (stdex)
+					ex = msg;
+				else
+					ex = exception;
+				handler.save_exception(ex);
+				auto exentry = handler.current_handler();
+				pop_tmp_callable();
+				restore_execution_state(exentry.first);
+				exentry.second->except(*this);
+				handler.start_handling();
+				return true;
+			}
+		}
 
 		static const std::string LAUNCH_ARGS;
 };

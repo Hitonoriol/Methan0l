@@ -29,14 +29,14 @@ class UnitExpr: public Expression
 		Value evaluate(ExprEvaluator &evaluator) override
 		{
 			if (unit.is_persistent() && unit.local().empty())
-				evaluator.execute(unit);
+				evaluator.invoke(unit);
 
 			return Value(unit);
 		}
 
 		void execute(ExprEvaluator &evaluator) override
 		{
-			evaluator.execute(unit);
+			evaluator.invoke(unit);
 		}
 
 		std::ostream& info(std::ostream &str) override

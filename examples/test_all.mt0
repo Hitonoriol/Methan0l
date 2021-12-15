@@ -23,7 +23,7 @@ root.for_each(func @(file) {
 		void!
 	}
 	<% newl :: #create_title("v", file)
-	load(file)()
-	<% #create_title("^") :: newl
+	time = measure_time(->{ load(file)() })
+	<% #create_title("^", "Finished in {} secs".format(time / 1000.0)) :: newl
 })
 <% "Done running examples. " :: (now() - start) / 1000.0 :: " secs elapsed."

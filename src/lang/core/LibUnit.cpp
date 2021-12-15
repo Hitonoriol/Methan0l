@@ -49,10 +49,10 @@ void LibUnit::load()
 		return Value::NO_VALUE;
 	});
 
-	/* die$(err_msg) */
+	/* die$(exception) */
 	function("die", [&](Args args) {
-		std::string err_msg = !args.empty() ? str(args) : "Stopping program execution";
-		throw std::runtime_error(err_msg);
+		Value exception = !args.empty() ? arg(args) : std::string("Stopping program execution");
+		throw exception;
 		return Value::NO_VALUE;
 	});
 
@@ -61,8 +61,8 @@ void LibUnit::load()
 		Value &module_val = ref(args[0]);
 		module_val.assert_type(Type::UNIT, "import$() can only be applied on a Unit");
 
-		Unit &module = module_val.get<Unit>();
-		eval->execute(module.expressions());
+		Unit &module = eval->tmp_callable(module_val.get<Unit>());
+		eval->execute(module, false);
 		return Value::NO_VALUE;
 	});
 
@@ -100,11 +100,11 @@ void LibUnit::load()
 		/* If this Unit is not persistent, execute it, save its state and only then execute <action_to_exec> */
 		if (!unit.is_persistent()) {
 			unit.set_persisent(true);
-			eval->execute(unit);
+			eval->invoke(unit);
 			unit.set_persisent(false);
 		}
 
-		return eval->execute(action);
+		return eval->invoke(action);
 	});
 
 	/* Stop program execution */

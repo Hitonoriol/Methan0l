@@ -1,0 +1,15 @@
+<% "Try-catch" :: newl
+f = func @() {
+	try {
+		<% "Throwing an exception..."
+		/* Any Value can be thrown here, not just Strings */
+		die("Some exception")
+	} catch: ex {
+		<% "Caught an exception: `{}`".format(ex)
+	}
+}
+
+x = 123
+f()
+<% "Resumed execution"
+<% "x = " :: x

@@ -20,6 +20,7 @@
 #include "expression/parser/ClassParser.h"
 #include "expression/parser/WordOperatorParser.h"
 #include "expression/parser/InfixWordOperatorParser.h"
+#include "expression/parser/TryCatchParser.h"
 
 namespace mtl
 {
@@ -60,11 +61,16 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_parser(TokenType::BRACE_L, new UnitParser());	// {expr1; expr2; expr3}
 	register_parser(TokenType::ARROW_R, new WeakUnitParser());	// ->{expr1; expr2; expr3}
 	register_parser(TokenType::BRACKET_L, new IndexParser());	// list[expr] or list[]
+
 	register_parser(TokenType::DO, new LoopParser());// do $(init_expr, condition_expr, step_expr) -> {}
+	alias_prefix(TokenType::DO, TokenType::WHILE);
+	alias_prefix(TokenType::DO, TokenType::FOR);
+
 	register_parser(TokenType::FUNC_DEF, new FunctionParser());	// func @(arg1, arg2: def_val, ...) {expr1, expr2, ...}
 	alias_prefix(TokenType::FUNC_DEF, TokenType::FUNC_DEF_SHORT);
 	register_parser(TokenType::BOX, new BoxUnitParser());// box_unit = box {expr1, expr2, ...}
 	register_parser(TokenType::CLASS, new ClassParser()); // class: ClassName = @(private => $(), ...)
+	register_parser(TokenType::TRY, new TryCatchParser());
 
 	/* Reference operator */
 	register_prefix_opr(TokenType::REF); // ref = **idfr

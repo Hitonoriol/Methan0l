@@ -33,7 +33,7 @@ Value LoopExpr::evaluate(ExprEvaluator &evaluator)
 
 void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 {
-	Unit loop_proxy;
+	Unit &loop_proxy = evaluator.tmp_callable(Unit());
 	Unit body_unit =
 			instanceof<UnitExpr>(body.get()) ?
 					try_cast<UnitExpr>(body).get_unit().manage_table(loop_proxy) :

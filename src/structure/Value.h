@@ -64,7 +64,7 @@ template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type
 using ValueContainer =
 std::variant<
 /* Value Placeholders */
-NoValue, Nil, Exception,
+NoValue, Nil,
 
 /* Reference to another Value */
 ValueRef,
@@ -224,6 +224,7 @@ class Value
 		double to_double();
 		bool to_bool();
 		char to_char();
+		void* identity();
 
 		static Value ref(Value &val);
 

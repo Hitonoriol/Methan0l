@@ -94,9 +94,7 @@ class LiteralExpr: public Expression
 
 			switch (val.type()) {
 			case Type::UNIT: {
-				Unit unit = val.get<Unit>();
-				unit.call();
-				evaluator.execute(unit);
+				evaluator.invoke(val.get<Unit>());
 				break;
 			}
 

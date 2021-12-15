@@ -57,6 +57,7 @@ Value& DataTable::create_temporary(Value val)
 		out << "Creating a temporary Value..." << std::endl;
 
 	temp_queue.push_front(std::forward<Value>(val));
+
 	return temp_queue.front();
 }
 

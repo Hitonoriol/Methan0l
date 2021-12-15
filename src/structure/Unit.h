@@ -13,6 +13,7 @@ class Unit
 		bool finished = false;
 		bool weak;
 		bool persistent = false;
+		ExprList::iterator cur_expr;
 
 	protected:
 		DataTable local_data;
@@ -35,6 +36,21 @@ class Unit
 
 		DataTable& local();
 		ExprList& expressions();
+
+		inline bool has_next_expr()
+		{
+			return cur_expr != expr_list.end();
+		}
+
+		inline void reset_execution_state()
+		{
+			cur_expr = expr_list.begin();
+		}
+
+		inline Expression* next_expression()
+		{
+			return (cur_expr++)->get();
+		}
 
 		void call();
 		void begin();

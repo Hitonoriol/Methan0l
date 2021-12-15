@@ -7,6 +7,7 @@
 #include "structure/Value.h"
 #include "util/util.h"
 #include "structure/object/InbuiltType.h"
+#include "expression/TryCatchExpr.h"
 
 namespace mtl
 {
@@ -110,19 +111,20 @@ Value Interpreter::run()
 	}
 
 	Value ret;
-	try {
-		ret = execute(main);
-	} catch (const std::exception &e) {
-		std::cerr << "[Runtime error] "
-				<< e.what()
-				<< " @ line " << get_current_expr()->get_line()
-				<< std::endl;
-		if constexpr (DEBUG)
-				dump_stack();
-		return ret = -1;
-	} catch (...) {
-		std::cerr << "[Unknown runtime error]" << std::endl;
-	}
+	auto &handler = get_exception_handler();
+	do {
+		try {
+			ret = execute(*current_unit());
+		} catch (const std::exception &e) {
+			if (!handle_exception(e))
+				return -1;
+		} catch (Value &e) {
+			if (!handle_exception(e))
+				return -1;
+		} catch (...) {
+			std::cerr << "[Unknown runtime error]" << std::endl;
+		}
+	} while (handler.is_handling());
 
 	if constexpr (DEBUG)
 		out << "Program execution finished" << std::endl;

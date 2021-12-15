@@ -104,6 +104,10 @@ enum class TokenType : uint16_t
 	TYPE_NAME,
 	NO_EVAL,
 	SET_DEF,
+	WHILE,
+	FOR,
+	TRY,
+	CATCH,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -158,7 +162,8 @@ class Token
 				"do", "typeid", "delete", "func", "defbox",
 				"class", "if", "else", "return", "defval",
 				"objcopy", "typesafe", "hashcode",
-				"typename", "noeval", "defset"
+				"typename", "noeval", "defset", "while", "for",
+				"try", "catch"
 		};
 
 		static constexpr std::string_view reserved_words[] = {

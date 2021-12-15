@@ -126,12 +126,17 @@ Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 	if (use_own_scope)
 		enter_scope(unit);
 
-	for (auto &expr : unit.expressions()) {
-		current_expr = expr.get();
+	if (exception_handler.is_handling())
+		exception_handler.stop_handling();
+	else
+		unit.reset_execution_state();
+
+	while (unit.has_next_expr()) {
+		current_expr = unit.next_expression();
 		if (unit.execution_finished())
 			break;
 
-		exec(expr);
+		exec(*current_expr);
 	}
 
 	Value returned_val = unit.result();
@@ -157,33 +162,7 @@ Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 	return returned_val;
 }
 
-/* Execute list of Expressions inside the current scope
- * 	This operation is uninterruptible
- * 	(returns or exit$() inside <exprs> will lead to UB)
- */
-void ExprEvaluator::execute(ExprList &exprs)
-{
-	for (auto &expr : exprs) {
-		current_expr = expr.get();
-		exec(expr);
-	}
-}
-
-Value ExprEvaluator::invoke(Value callable, InvokeExpr &expr)
-{
-	switch (callable.type()) {
-	case Type::FUNCTION:
-		return invoke(callable.get<Function>(), expr.arg_list());
-
-	case Type::UNIT:
-		return invoke_unit(expr, callable.get<Unit>());
-
-	default:
-		throw std::runtime_error("Trying to invoke a non-callable Value");
-	}
-}
-
-Value ExprEvaluator::invoke(Function &func, ExprList &args)
+Value ExprEvaluator::invoke(const Function &func, ExprList &args)
 {
 	if constexpr (DEBUG) {
 		if (!args.empty()) {
@@ -195,8 +174,38 @@ Value ExprEvaluator::invoke(Function &func, ExprList &args)
 		dump_stack();
 	}
 
-	func.call(*this, args);
-	return execute(func);
+	auto &f = tmp_callable(func);
+	f.call(*this, args);
+	return execute(f);
+}
+
+Value ExprEvaluator::invoke(const Unit &unit, ExprList &args)
+{
+	Unit &u = tmp_callable(unit);
+	if (args.empty())
+		u.call();
+
+	/* Unit invocation w/ init-block */
+	else {
+		Value initv = eval(args[0]);
+		Unit &init_block = initv.get<Unit>();
+		u.call();
+		init_block.manage_table(u);
+		init_block.set_persisent(true);
+		execute(init_block);
+		if constexpr (DEBUG)
+			std::cout << "Executed Unit Invocation init block " << std::endl;
+		init_block.set_persisent(false);
+	}
+
+	return execute(u);
+}
+
+Value ExprEvaluator::invoke(const Unit &unit)
+{
+	auto &u = tmp_callable(unit);
+	u.call();
+	return execute(u);
 }
 
 void ExprEvaluator::enter_scope(Unit &unit)
@@ -241,11 +250,28 @@ void ExprEvaluator::leave_scope()
 		else
 			unit->clear_result();
 
+		pop_tmp_callable();
 		exec_stack.pop_back();
 
 		if constexpr (DEBUG)
 			std::cout << "<< Left scope // depth: " << exec_stack.size() << std::endl;
+	} else {
+		if constexpr (DEBUG)
+			out << "? Tmp callable stack depth: " << tmp_call_stack.size() << std::endl;
 	}
+}
+
+void ExprEvaluator::restore_execution_state(size_t depth)
+{
+	if (exec_stack.size() <= depth)
+		return;
+
+	exec_stack.erase(exec_stack.begin() + depth, exec_stack.end());
+}
+
+size_t ExprEvaluator::stack_depth()
+{
+	return exec_stack.size();
 }
 
 DataTable* ExprEvaluator::global()
@@ -425,7 +451,7 @@ Value& ExprEvaluator::get(const std::string &id, bool global, bool follow_refs)
 	return ret;
 }
 
-inline Value ExprEvaluator::eval(Expression &expr)
+Value ExprEvaluator::eval(Expression &expr)
 {
 	if constexpr (DEBUG)
 		expr.info(std::cout << "[Eval] ") << std::endl;
@@ -433,17 +459,12 @@ inline Value ExprEvaluator::eval(Expression &expr)
 	return expr.evaluate(*this);
 }
 
-Value ExprEvaluator::eval(ExprPtr expr)
-{
-	return eval(*expr);
-}
-
-inline void ExprEvaluator::exec(ExprPtr &expr)
+void ExprEvaluator::exec(Expression &expr)
 {
 	if constexpr (DEBUG)
-		expr->info(std::cout << "[Exec] ") << std::endl;
+		expr.info(std::cout << "[Exec] ") << std::endl;
 
-	return expr->execute(*this);
+	return expr.execute(*this);
 }
 
 Value ExprEvaluator::evaluate(AssignExpr &expr)
@@ -485,28 +506,6 @@ Value ExprEvaluator::evaluate(ListExpr &expr)
 	return list;
 }
 
-Value ExprEvaluator::invoke_unit(InvokeExpr &expr, Unit &unit)
-{
-	auto args = expr.arg_list();
-	if (args.empty())
-		unit.call();
-
-	/* Unit invocation w/ init-block */
-	else {
-		Value initv = eval(args[0]);
-		Unit &init_block = initv.get<Unit>();
-		unit.call();
-		init_block.manage_table(unit);
-		init_block.set_persisent(true);
-		execute(init_block);
-		if constexpr (DEBUG)
-			std::cout << "Executed Unit Invocation init block " << std::endl;
-		init_block.set_persisent(false);
-	}
-
-	return execute(unit);
-}
-
 Value ExprEvaluator::evaluate(InvokeExpr &expr)
 {
 	Value callable = eval(expr.get_lhs()).get();
@@ -517,18 +516,15 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 
 	if (instanceof<IdentifierExpr>(expr.get_lhs())
 			&& try_cast<IdentifierExpr>(expr.get_lhs()).get_name() == Token::reserved(Word::SELF_INVOKE)) {
-		Function self_copy = current_function();
-		return invoke(self_copy, expr.arg_list());
+		return invoke(current_function(), expr.arg_list());
 	}
 
 	else if (ctype == Type::UNIT) {
-		Unit unit = callable.get<Unit>();
-		return invoke_unit(expr, unit);
+		return invoke(callable.get<Unit>(), expr.arg_list());
 	}
 
 	else if (ctype == Type::FUNCTION) {
-		Function func = callable.get<Function>();
-		return invoke(func, expr.arg_list());
+		return invoke(callable.get<Function>(), expr.arg_list());
 	}
 
 	else if (instanceof<IdentifierExpr>(expr.get_lhs()) && callable.nil())
@@ -564,6 +560,11 @@ Value ExprEvaluator::evaluate(Expression &expr)
 TypeManager& ExprEvaluator::get_type_mgr()
 {
 	return type_mgr;
+}
+
+ExceptionHandler& ExprEvaluator::get_exception_handler()
+{
+	return exception_handler;
 }
 
 void ExprEvaluator::stop()
