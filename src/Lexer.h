@@ -27,8 +27,9 @@ class Lexer
 		TokenType toktype = TokenType::NONE;
 		IntLiteral cur_int_literal = IntLiteral::NONE;
 
-		uint32_t line, column;
-		dec open_blocks;
+		uint32_t line = 1, column = 1;
+		Separator cur_sep = Separator::NONE;
+		dec open_blocks = 0;
 
 		std::queue<Token> tokens;
 
@@ -54,13 +55,16 @@ class Lexer
 		bool escaped(TokenType tok);
 
 		void new_line();
-		Token &set_src_pos(Token&&);
+		Token &finalize_token(Token&&);
 
 	public:
 		Lexer();
 		~Lexer() = default;
 		void parse(std::string &code, bool preserve_state = false);
+
 		Token next(bool peek = false);
+		Token& last();
+
 		bool has_unclosed_blocks();
 		bool empty();
 		size_t size();

@@ -29,6 +29,24 @@ class Interpreter: public ExprEvaluator
 		Interpreter();
 		~Interpreter() = default;
 
+		template<typename T>
+		bool try_load(T &&loader)
+		{
+			try {
+				loader();
+				return true;
+			} catch (const std::exception &e) {
+				std::cerr << "[Syntax error] "
+						<< e.what()
+						<< " @ line " << parser.get_lexer().next(true).get_line()
+						<< std::endl;
+			} catch (...) {
+				std::cerr << "[Unknown parsing error]" << std::endl;
+			}
+			return false;
+		}
+
+		/* For use in Interactive Mode */
 		void lex(std::string &code);
 		void load();
 
@@ -42,6 +60,7 @@ class Interpreter: public ExprEvaluator
 
 		void preserve_data(bool val);
 		Unit& program();
+		Methan0lParser& get_parser();
 
 		void print_info();
 		void size_info();

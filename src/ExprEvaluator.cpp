@@ -571,11 +571,12 @@ void ExprEvaluator::stop()
 {
 	current_unit()->stop();
 	exec_stack.clear();
+	execution_finished = true;
 }
 
 bool ExprEvaluator::force_quit()
 {
-	return exec_stack.empty();
+	return execution_finished;
 }
 
 InbuiltFuncMap& ExprEvaluator::functions()

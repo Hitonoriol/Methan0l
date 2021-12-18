@@ -35,6 +35,15 @@ void Interpreter::lex(std::string &code)
 	parser.get_lexer().parse(code, true);
 }
 
+void Interpreter::load()
+{
+	try_load([&]() {
+		parser.parse_all();
+		load(parser.result());
+		parser.clear();
+	});
+}
+
 void Interpreter::preserve_data(bool val)
 {
 	main.set_persisent(val);
@@ -62,18 +71,8 @@ Unit Interpreter::load_unit(std::istream &codestr)
 
 Unit Interpreter::load_unit(std::string &code)
 {
-	try {
-		parser.load(code);
-	} catch (const std::exception &e) {
-		std::cerr << "[Syntax error] "
-				<< e.what()
-				<< " @ line " << parser.get_lexer().next(true).get_line()
-				<< std::endl;
+	if (!try_load([&]() {parser.load(code);}))
 		return Unit();
-	} catch (...) {
-		std::cerr << "[Unknown parsing error]" << std::endl;
-		return Unit();
-	}
 
 	Unit unit = parser.result();
 	parser.clear();
@@ -98,6 +97,11 @@ void Interpreter::load(const Unit &main)
 Unit& Interpreter::program()
 {
 	return main;
+}
+
+Methan0lParser& Interpreter::get_parser()
+{
+	return parser;
 }
 
 Value Interpreter::run()

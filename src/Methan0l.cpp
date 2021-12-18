@@ -9,6 +9,6 @@ int main(int argc, char **argv)
 	if (argc > 1)
 		return mtl::Runner::run_file(methan0l, argc, argv);
 
-	mtl::InteractiveRunner().start(methan0l);
+	mtl::InteractiveRunner(methan0l).start();
 	return 0;
 }

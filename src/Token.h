@@ -138,6 +138,11 @@ enum class Word : uint8_t
 bool operator ==(const char, const TokenType&);
 bool operator !=(const char, const TokenType&);
 
+enum class Separator : uint8_t
+{
+	NONE, SPACE, NEWLINE
+};
+
 class Token
 {
 	private:
@@ -145,6 +150,7 @@ class Token
 		uint32_t line;
 		uint32_t column;
 		std::string value;
+		Separator sep;
 
 		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'<>|&\n#";
 
@@ -185,7 +191,9 @@ class Token
 		};
 
 		static constexpr TokenType block_begin_tokens[] = {
-				TokenType::PAREN_L, TokenType::BRACKET_L, TokenType::BRACE_L
+				TokenType::PAREN_L, TokenType::BRACKET_L, TokenType::BRACE_L,
+				TokenType::MAP_DEF_L, TokenType::LIST_DEF_L, TokenType::INFIX_WORD_LHS_L,
+				TokenType::FUNC_DEF_SHORT
 		};
 
 		static constexpr TokenType block_end_tokens[] = {
@@ -205,10 +213,21 @@ class Token
 		TokenType get_type() const;
 		std::string& get_value();
 
-		Token& set_line(uint32_t);
+		void set_line(uint32_t);
 		uint32_t get_line() const;
-		Token& set_column(uint32_t);
+		void set_column(uint32_t);
 		uint32_t get_column() const;
+		void set_separator(Separator);
+
+		inline bool separated() const
+		{
+			return sep != Separator::NONE;
+		}
+
+		inline bool first_in_line() const
+		{
+			return sep == Separator::NEWLINE;
+		}
 
 		bool operator ==(const Token &rhs);
 		bool operator !=(const Token &rhs);
@@ -218,11 +237,10 @@ class Token
 		static TokenType get_bichar_op_type(std::string &tokstr);
 		static char escape_seq(std::string_view seq);
 
-		static bool is_delimiter(char chr);
 		static bool is_punctuator(char chr);
 		static bool is_semantic(const TokenType &tok);
 		static bool is_transparent(const TokenType &tok);
-		static bool is_block_begin(char c);
+		static bool is_block_begin(TokenType tok);
 		static bool is_block_end(char c);
 
 		static char chr(TokenType tok);
@@ -234,8 +252,6 @@ class Token
 		static TokenType as_word_op(std::string &tokstr);
 		static std::string_view word_op(TokenType tok);
 		static std::string_view bichar_op(TokenType tok);
-		static bool is_infix_compatible(const std::shared_ptr<Expression> &lhs,
-				TokenType next);
 		static bool is_ref_opr(TokenType opr);
 
 		static const Token END_OF_EXPR;

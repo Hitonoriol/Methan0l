@@ -14,11 +14,17 @@ Parser::Parser(const Lexer &lexer) : lexer(lexer)
 
 void Parser::register_parser(TokenType token, InfixParser *parser)
 {
+	if (prefix_parsers.find(token) != prefix_parsers.end())
+		parser->ignore_newline_separated();
+
 	infix_parsers.emplace(token, std::shared_ptr<InfixParser>(parser));
 }
 
 void Parser::register_parser(TokenType token, PrefixParser *parser)
 {
+	if (auto it = infix_parsers.find(token); it != infix_parsers.end())
+		it->second->ignore_newline_separated();
+
 	prefix_parsers.emplace(token, std::shared_ptr<PrefixParser>(parser));
 }
 
@@ -57,11 +63,14 @@ ExprPtr Parser::parse(int precedence)
 		return lhs;
 	}
 
-	bool infixc;
-	while ((infixc = Token::is_infix_compatible(lhs, look_ahead().get_type()))
-			&& precedence < get_lookahead_precedence()) {
+	while (precedence < get_lookahead_precedence()) {
 		token = consume();
 		auto &infix = infix_parsers.at(token.get_type());
+		if (!infix->is_compatible(token)) {
+			emplace(token);
+			--nesting_lvl;
+			return lhs;
+		}
 		lhs = infix->parse(*this, lhs, token);
 		/* Limit the "stickiness" of infix expressions to only one per `.`'s RHS,
 		 * even if there are more expressions w/ higher prcdc ahead */
@@ -73,11 +82,8 @@ ExprPtr Parser::parse(int precedence)
 		}
 	}
 
-	if constexpr (DEBUG) {
-		if (!infixc)
-			out << "[infix-incompatible] " << look_ahead() << " <--> " << lhs->info() << std::endl;
+	if constexpr (DEBUG)
 		out << "! (" << nesting_lvl << ") Finished" << std::endl;
-	}
 
 	--nesting_lvl;
 	return lhs;
@@ -92,13 +98,11 @@ void Parser::parse_all()
 		throw std::runtime_error("Source code contains unclosed block or group expressions");
 
 	ExprList &expression_queue = root_unit.expressions();
-	while (!lexer.empty()) {
-		if (look_ahead() != Token::EOF_TOKEN) {
+	while (!lexer.empty() || look_ahead() != Token::EOF_TOKEN) {
 			if constexpr (DEBUG)
 				out << "\nParsing next root expression...\n";
 			reset();
 			expression_queue.push_back(parse());
-		}
 	}
 
 	if constexpr (DEBUG)

@@ -104,10 +104,9 @@ std::string& Token::get_value()
 	return value;
 }
 
-Token& Token::set_line(uint32_t line)
+void Token::set_line(uint32_t line)
 {
 	this->line = line;
-	return *this;
 }
 
 uint32_t Token::get_line() const
@@ -115,10 +114,15 @@ uint32_t Token::get_line() const
 	return line;
 }
 
-Token& Token::set_column(uint32_t col)
+void Token::set_column(uint32_t col)
 {
 	column = col;
-	return *this;
+}
+
+
+void Token::set_separator(Separator sep)
+{
+	this->sep = sep;
 }
 
 uint32_t Token::get_column() const
@@ -149,18 +153,6 @@ char Token::escape_seq(std::string_view seq)
 	return escape_seqs.at(seq);
 }
 
-bool Token::is_delimiter(char chr)
-{
-	switch (static_cast<TokenType>(chr)) {
-	case TokenType::SEMICOLON:
-		case TokenType::NEWLINE:
-		return true;
-
-	default:
-		return false;
-	}
-}
-
 bool Token::is_punctuator(char chr)
 {
 	for (size_t i = 0; i < std::size(punctuators); ++i)
@@ -177,9 +169,9 @@ Word Token::as_reserved(std::string &tokstr)
 	return Word::NIL;
 }
 
-bool Token::is_block_begin(char c)
+bool Token::is_block_begin(TokenType tok)
 {
-	return contains(block_begin_tokens, tok(c));
+	return contains(block_begin_tokens, tok);
 }
 
 bool Token::is_block_end(char c)
@@ -232,27 +224,6 @@ bool Token::is_ref_opr(TokenType opr)
 
 	default:
 		return false;
-	}
-}
-
-/* Used to resolve parsing collisions for tokens that can be used both as prefix & infix(postfix) operators */
-bool Token::is_infix_compatible(const ExprPtr &lhs, TokenType next)
-{
-	switch (next) {
-	case TokenType::INCREMENT:
-		case TokenType::DECREMENT:
-		case TokenType::ARROW_R:	// Move assignment
-		return instanceof<IdentifierExpr>(lhs);
-
-	case TokenType::LIST_DEF_L:	// Invocation
-		return instanceof<IdentifierExpr>(lhs)
-				|| instanceof<BinaryOperatorExpr>(lhs)
-				|| instanceof<UnitExpr>(lhs)
-				|| instanceof<FunctionExpr>(lhs)
-				|| instanceof<InvokeExpr>(lhs);
-
-	default:
-		return true;
 	}
 }
 

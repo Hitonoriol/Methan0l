@@ -48,6 +48,7 @@ class ExprEvaluator
 		ExceptionHandler exception_handler;
 		std::stack<std::unique_ptr<Unit>> tmp_call_stack;
 		Expression *current_expr;
+		bool execution_finished = false;
 
 		void load_library(std::unique_ptr<Library> library);
 

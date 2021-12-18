@@ -12,15 +12,20 @@ namespace mtl
 
 class InteractiveRunner
 {
-	using CommandMap = std::unordered_map<std::string, std::function<void(Interpreter&)>>;
+	using CommandMap = std::unordered_map<std::string_view, std::function<void(Interpreter&)>>;
 
 	private:
+		static constexpr std::string_view prompt = "[Methan0l] <-- ", prompt_multiline = "             * ";
+
+		Interpreter &methan0l;
 		static const CommandMap intr_cmds;
 
-		bool process_commands(Interpreter&);
+		bool process_commands(const std::string &cmd);
+		bool load_line(std::string &line);
 
 	public:
-		void start(Interpreter&);
+		InteractiveRunner(Interpreter&);
+		void start();
 };
 
 } /* namespace mtl */

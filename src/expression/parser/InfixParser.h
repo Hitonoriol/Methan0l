@@ -8,6 +8,7 @@
 #include "util/util.h"
 #include "Token.h"
 #include "precedence.h"
+#include "ExprParser.h"
 #include "../IdentifierExpr.h"
 
 namespace mtl
@@ -16,12 +17,26 @@ namespace mtl
 class Expression;
 class Parser;
 
-class InfixParser
+class InfixParser: public ExprParser
 {
+	private:
+		friend class Parser;
+
+		bool ignore_nl_separated = false;
+
+	protected:
+		inline void ignore_newline_separated()
+		{
+			ignore_nl_separated = true;
+		}
+
 	public:
 		virtual ~InfixParser() = default;
 		virtual ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) = 0;
-		virtual int precedence() = 0;
+		inline bool is_compatible(const Token &tok) override
+		{
+			return !(ignore_nl_separated && tok.first_in_line());
+		}
 };
 
 } /* namespace mtl */
