@@ -2,6 +2,7 @@
 #define SRC_LANG_LIBARITHMETIC_H_
 
 #include "../Library.h"
+#include "Token.h"
 
 namespace mtl
 {

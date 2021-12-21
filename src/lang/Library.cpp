@@ -55,9 +55,9 @@ Value Library::arg(ExprList args, int idx)
 	return eval->eval(args[idx]);
 }
 
-void Library::function(std::string func_name, InbuiltFunc func)
+void Library::function(std::string func_name, InbuiltFunc &&func)
 {
-	eval->inbuilt_func(func_name, func);
+	eval->register_func(func_name, std::move(func));
 }
 
 void Library::prefix_operator(TokenType tok, PrefixOpr opr)

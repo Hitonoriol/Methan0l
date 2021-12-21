@@ -1,1 +1,19 @@
 RM := rm -rf
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
+LIB_EXCLUDE = $()
+LIB_OBJ = $(filter-out $(LIB_EXCLUDE),$(call rwildcard,./src,*.o))
+LIB_DIR = methan0l-dev
+BOOST_DEPS = -lboost_filesystem-mt -lboost_system-mt
+
+hdir=$(dir $(patsubst ../src/%,./$(LIB_DIR)/include/%,$1))
+
+lib: all libclean
+	mkdir -p $(LIB_DIR)/include
+	cp methan0l.h $(LIB_DIR)/include
+	ar rvs $(LIB_DIR)/libmethan0l.a $(LIB_OBJ)
+	$(foreach f, $(call rwildcard,../src,*.h), \
+		$(eval $(shell mkdir -p "$(call hdir,$f)" || cp "$f" "$(call hdir,$f)")))
+
+libclean:
+	$(RM) $(LIB_DIR)/*

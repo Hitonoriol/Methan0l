@@ -1,6 +1,7 @@
 #ifndef SRC_TYPE_H_
 #define SRC_TYPE_H_
 
+#include <unordered_set>
 #include <functional>
 #include <memory>
 #include <string>
@@ -10,8 +11,6 @@
 #include <vector>
 #include <deque>
 
-#include "Token.h"
-
 #define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
 #define VT(v) TYPE(decltype(v))
 
@@ -20,10 +19,12 @@ namespace mtl
 
 constexpr bool DEBUG = false;
 
+enum class TokenType : uint16_t;
+class Value;
+
 using dec = int64_t;
 using udec = uint64_t;
 
-struct Value;
 std::string str(Value);
 double dbl(Value);
 dec num(Value);
@@ -43,6 +44,7 @@ using DataMap = std::unordered_map<std::string, Value>;
 using ValMap = std::unordered_map<Value, Value>;
 
 using ExprList = std::deque<ExprPtr>;
+using Args = ExprList;
 using RawExprList = std::deque<Expression*>;
 using ValList = std::deque<Value>;
 

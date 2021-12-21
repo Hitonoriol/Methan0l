@@ -43,7 +43,7 @@ void replace_all(std::string &str, const std::string &from, const std::string &t
 	}
 }
 
-std::string to_base(unsigned int value, int base)
+std::string to_base(udec value, int base)
 {
 	if (value == 0)
 		return "0";

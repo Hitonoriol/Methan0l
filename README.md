@@ -1,3 +1,4 @@
+
 # Methan0l
 
 ## Documentation
@@ -7,10 +8,23 @@ Available in the [Wiki Section](https://github.com/Hitonoriol/Methan0l/wiki)
 
 ### Build Methan0l
 
+**Interpreter binary:**  
+
 ```
 cd build && make
 ```  
-(GCC 10+ is required)  
+\
+**Static library & headers:**  
+
+```
+cd build && make lib
+```  
+As a result, `libmethan0l.a` will be located under `build/methan0l-dev/` and all headers will be copied under `build/methan0l-dev/include/` preserving their directory structure.
+
+\
+**Dependencies:**  
+* `g++10` (or any other compiler that supports C++17)
+* `libboost` (for `boost::dll` and its dependencies)  
 
 ### Run Methan0l programs
 

@@ -56,6 +56,10 @@ Value::Value(Type type)
 		set(ValMap());
 		break;
 
+	case Type::UNIT:
+		set(Unit());
+		break;
+
 	case Type::STRING:
 		set(std::string());
 		break;
@@ -184,7 +188,7 @@ Type Value::type() const
 	else if (is<VUnit>())
 		return Type::UNIT;
 
-	else if (is<VFunction>())
+	else if (is<VFunction>() || is<VInbuiltFunc>())
 		return Type::FUNCTION;
 
 	else if (is<VList>())
@@ -247,6 +251,8 @@ std::string Value::to_string(ExprEvaluator *eval)
 		return get<Unit>().to_string();
 
 	case Type::FUNCTION:
+		if (is<InbuiltFunc>())
+			return "Inbuilt function 0x" + to_base(reinterpret_cast<udec>(identity()), 16);
 		return get<Function>().to_string();
 
 	case Type::OBJECT: {

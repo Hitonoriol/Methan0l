@@ -28,6 +28,7 @@ using VSet = std::shared_ptr<ValSet>;
 using VMap = std::shared_ptr<ValMap>;
 using VUnit = std::shared_ptr<Unit>;
 using VFunction = std::shared_ptr<Function>;
+using VInbuiltFunc = std::shared_ptr<InbuiltFunc>;
 using VObject = std::shared_ptr<Object>;
 
 struct Nil: public std::monostate
@@ -84,7 +85,7 @@ VString,
 VList, VSet, VMap,
 
 /* Expression blocks */
-VUnit, VFunction,
+VUnit, VFunction, VInbuiltFunc,
 
 /* Custom type objects */
 VObject
@@ -120,6 +121,8 @@ class Value
 						&& !std::is_same<T, bool>::value
 						&& std::is_integral<T>())
 					value = (dec) val;
+				else if constexpr (std::is_floating_point<T>::value)
+					value = (double) val;
 				else
 					value = val;
 			}
@@ -234,6 +237,10 @@ class Value
 			if constexpr (!allowed_type<T, ValueContainer>::value) {
 				if constexpr (std::is_same<T, udec>::value)
 					return (udec) as<dec>();
+				else if constexpr (std::is_integral<T>::value)
+					return (T) as<dec>();
+				else if constexpr (std::is_floating_point<T>::value)
+					return (T) as<double>();
 				else
 					return get<T>();
 			}

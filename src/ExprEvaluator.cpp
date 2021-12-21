@@ -22,6 +22,7 @@
 #include "lang/core/LibUnit.h"
 #include "lang/core/LibData.h"
 #include "lang/core/LibString.h"
+#include "lang/core/LibModule.h"
 
 #include "lang/lib/LibMath.h"
 #include "lang/structure/File.h"
@@ -39,6 +40,7 @@ ExprEvaluator::ExprEvaluator()
 	load_library(std::make_unique<LibString>(this));
 	load_library(std::make_unique<LibMath>(this));
 	load_library(std::make_unique<LibData>(this));
+	load_library(std::make_unique<LibModule>(this));
 
 	type_mgr.register_type(std::make_unique<File>(*this));
 	type_mgr.register_type(std::make_unique<Random>(*this));
@@ -55,9 +57,14 @@ ExprEvaluator::ExprEvaluator(Unit &main) : ExprEvaluator()
 	load_main(main);
 }
 
-void ExprEvaluator::inbuilt_func(std::string func_name, InbuiltFunc func)
+void ExprEvaluator::register_func(const std::string &name, InbuiltFunc &&func)
 {
-	inbuilt_funcs.emplace(func_name, func);
+	if (exec_stack.size() <= 1)
+		inbuilt_funcs.emplace(name, func);
+	else {
+		DataTable &table = current_unit()->local();
+		table.set(name, func);
+	}
 }
 
 void ExprEvaluator::prefix_op(TokenType tok, PrefixOpr opr)
@@ -524,7 +531,10 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 	}
 
 	else if (ctype == Type::FUNCTION) {
-		return invoke(callable.get<Function>(), expr.arg_list());
+		if (callable.is<InbuiltFunc>())
+			return (callable.get<InbuiltFunc>())(expr.arg_list());
+		else
+			return invoke(callable.get<Function>(), expr.arg_list());
 	}
 
 	else if (instanceof<IdentifierExpr>(expr.get_lhs()) && callable.nil())

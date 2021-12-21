@@ -7,6 +7,7 @@
 #include "../type.h"
 #include "../structure/Value.h"
 #include "../util/memory.h"
+#include "Token.h"
 
 namespace mtl
 {

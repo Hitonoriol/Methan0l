@@ -34,6 +34,7 @@ class ExprEvaluator
 		friend class LibUnit;
 		friend class TypeManager;
 		friend class LoopExpr;
+		friend class LibModule;
 
 		std::vector<std::unique_ptr<Library>> libraries;
 
@@ -61,7 +62,6 @@ class ExprEvaluator
 		void binary_op(TokenType tok, BinaryOpr opr);
 		void postfix_op(TokenType tok, PostfixOpr opr);
 
-		void inbuilt_func(std::string func_name, InbuiltFunc func);
 		Value invoke_inbuilt_func(std::string name, ExprList args);
 
 		void enter_scope(Unit &unit);
@@ -98,9 +98,62 @@ class ExprEvaluator
 		Expression* get_current_expr();
 		InbuiltFuncMap& functions();
 
+		template<typename T>
+		inline T eval(Expression &expr)
+		{
+			Value val = eval(expr);
+			return val.as<T>();
+		}
+
+		template<bool Done, typename Functor, typename Container,
+				unsigned N, unsigned ...I>
+		struct call_helper
+		{
+				template<typename R, typename ... Types>
+				static auto engage(ExprEvaluator &evaluator, R (*f)(Types ...), const Container &c)
+				{
+					return call_helper<sizeof...(I) + 1 == N, Functor, Container,
+							N, I..., sizeof...(I)>::engage(evaluator, f, c);
+				}
+		};
+
+		template<typename Functor, typename Container,
+				unsigned N, unsigned ...I>
+		struct call_helper<true, Functor, Container, N, I...>
+		{
+				template<typename R, typename ... Types>
+				static auto engage(ExprEvaluator &evaluator, R (*f)(Types ...), const Container &c)
+				{
+					if (c.size() < N)
+						throw std::runtime_error("Too few arguments");
+					return f(evaluator.eval<Types>(*c.at(I))...);
+				}
+		};
+
+		template<typename R, typename ... Types, typename Container>
+		auto call(R (*f)(Types ...), const Container &c)
+		{
+			constexpr unsigned argc = get_arity<decltype(f)>::value;
+			return call_helper<argc == 0, decltype(f), Container, argc>::engage(*this, f, c);
+		}
+
 	public:
 		ExprEvaluator();
 		ExprEvaluator(Unit &main);
+
+		void register_func(const std::string &name, InbuiltFunc &&func);
+
+		template<typename R, typename ... Types>
+		void register_func(const std::string &name, R (*f)(Types ...))
+		{
+			register_func(name, [&, f](Args args) -> Value {
+				if constexpr (std::is_same<R, void>::value) {
+					call(f, args);
+					return Value::NO_VALUE;
+				} else
+					return call(f, args);
+			});
+		}
 
 		Function& current_function();
 		Unit* current_unit();

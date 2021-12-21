@@ -12,8 +12,6 @@ class ExprEvaluator;
 class Value;
 class IdentifierExpr;
 
-using Args = ExprList;
-
 class Library
 {
 	protected:
@@ -29,7 +27,7 @@ class Library
 		Value& ref(IdentifierExpr &idfr);
 		Value arg(ExprList args, int idx = 0);
 
-		void function(std::string, InbuiltFunc);
+		void function(std::string, InbuiltFunc&&);
 
 		void prefix_operator(TokenType, PrefixOpr);
 		void infix_operator(TokenType, BinaryOpr);

@@ -16,11 +16,11 @@ const std::string Interpreter::LAUNCH_ARGS(".argv");
 
 Interpreter::Interpreter() : ExprEvaluator()
 {
-	inbuilt_func("load", [&](Args args) {
+	register_func("load", [&](Args args) {
 		return Value(load_file(eval(args[0]).as<std::string>()));
 	});
 
-	inbuilt_func("get_launch_args", [&](Args args) {
+	register_func("get_launch_args", [&](Args args) {
 		return main.local().get(LAUNCH_ARGS);
 	});
 }
