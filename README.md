@@ -19,7 +19,7 @@ cd build && make
 ```
 cd build && make lib
 ```  
-As a result, `libmethan0l.a` will be located under `build/methan0l-dev/` and all headers will be copied under `build/methan0l-dev/include/` preserving their directory structure.
+As a result, `libmethan0l.so` will be located under `build/methan0l-dev/` and all headers will be copied under `build/methan0l-dev/include/` preserving their directory structure.
 
 \
 **Dependencies:**  

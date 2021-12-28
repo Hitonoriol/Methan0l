@@ -1,19 +1,40 @@
-RM := rm -rf
-rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+-include ../makeutils.inc
 
-LIB_EXCLUDE = $()
-LIB_OBJ = $(filter-out $(LIB_EXCLUDE),$(call rwildcard,./src,*.o))
+RM := rm -rf
+
+LIB_EXCLUDE = %Methan0l.cpp
+LIB_OBJ = $(call rwildcard,./src,*.o)
+LIB_SRC = $(patsubst %.cpp,%.o.pic,$(filter-out $(LIB_EXCLUDE),$(call rwildcard,../src,*.cpp)))
 LIB_DIR = methan0l-dev
+LIB_NAME=libmethan0l
+LIB_INC=-I../src
 BOOST_DEPS = -lboost_filesystem-mt -lboost_system-mt
 
 hdir=$(dir $(patsubst ../src/%,./$(LIB_DIR)/include/%,$1))
 
-lib: all libclean
-	mkdir -p $(LIB_DIR)/include
+release: all lib
+	cd ../modules && make
+
+lib: shared-lib
+
+shared-lib: all libclean lib-dirs headers $(LIB_SRC)
+	g++ $(filter-out $(patsubst %.cpp,%.o.pic,$(LIB_EXCLUDE)),$(patsubst %.o,%.o.pic,$(LIB_OBJ))) -shared -Wl,-Bstatic $(BOOST_DEPS) -Wl,-Bdynamic -o $(LIB_NAME).so
+
+%.o.pic: %.cpp
+	$(eval src:=$^)
+	g++ -std=c++17 -O3 $(LIB_INC) -c -fPIC $(src) -o $(patsubst %.cpp,%.o.pic,$(patsubst ../%,./%,$(src)))
+
+.PHONY: headers
+headers:
 	cp methan0l.h $(LIB_DIR)/include
-	ar rvs $(LIB_DIR)/libmethan0l.a $(LIB_OBJ)
 	$(foreach f, $(call rwildcard,../src,*.h), \
 		$(eval $(shell mkdir -p "$(call hdir,$f)" || cp "$f" "$(call hdir,$f)")))
 
+lib-dirs:
+	mkdir -p $(LIB_DIR)/include
+
+static-lib: all libclean lib-dirs headers
+	ar rvs $(LIB_DIR)/$(LIB_NAME).a $(LIB_OBJ)
+
 libclean:
-	$(RM) $(LIB_DIR)/*
+	$(RM) $(LIB_DIR)/include/*
