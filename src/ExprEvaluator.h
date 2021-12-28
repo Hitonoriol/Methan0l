@@ -4,7 +4,10 @@
 #include <deque>
 #include <cmath>
 #include <utility>
+#include <type_traits>
 
+#include "util/meta/function_traits.h"
+#include "util/cast.h"
 #include "structure/Function.h"
 #include "lang/Library.h"
 #include "structure/object/TypeManager.h"
@@ -98,19 +101,40 @@ class ExprEvaluator
 		Expression* get_current_expr();
 		InbuiltFuncMap& functions();
 
+		/* In-place evaluation & type conversion for C++ to Methan0l function parameter list binding */
 		template<typename T>
 		inline T eval(Expression &expr)
 		{
-			Value val = eval(expr);
-			return val.as<T>();
+			using V = TYPE(T);
+			if constexpr (std::is_same<T, Expression*>::value)
+				return &expr;
+
+			else if constexpr (std::is_same<typename std::remove_pointer<V>::type, Value>::value) {
+				if constexpr (std::is_reference<T>::value)
+					return referenced_value(&expr);
+				else if constexpr (std::is_pointer<T>::value)
+					return &referenced_value(&expr);
+				else
+					return eval(expr);
+			}
+
+			else if constexpr (std::is_reference<T>::value)
+				return referenced_value(&expr).get<V>();
+
+			else if constexpr (std::is_pointer<T>::value)
+				return &referenced_value(&expr).get<typename std::remove_pointer<V>::type>();
+
+			else {
+				Value val = eval(expr);
+				return val.as<T>();
+			}
 		}
 
 		template<bool Done, typename Functor, typename Container,
 				unsigned N, unsigned ...I>
 		struct call_helper
 		{
-				template<typename R, typename ... Types>
-				static auto engage(ExprEvaluator &evaluator, R (*f)(Types ...), const Container &c)
+				static auto engage(ExprEvaluator &evaluator, Functor &&f, const Container &c)
 				{
 					return call_helper<sizeof...(I) + 1 == N, Functor, Container,
 							N, I..., sizeof...(I)>::engage(evaluator, f, c);
@@ -121,19 +145,18 @@ class ExprEvaluator
 				unsigned N, unsigned ...I>
 		struct call_helper<true, Functor, Container, N, I...>
 		{
-				template<typename R, typename ... Types>
-				static auto engage(ExprEvaluator &evaluator, R (*f)(Types ...), const Container &c)
+				static auto engage(ExprEvaluator &evaluator, Functor &&f, const Container &c)
 				{
 					if (c.size() < N)
 						throw std::runtime_error("Too few arguments");
-					return f(evaluator.eval<Types>(*c.at(I))...);
+					return std::invoke(f, evaluator.eval<typename function_traits<Functor>::template argument<I>::type>(*c.at(I))...);
 				}
 		};
 
-		template<typename R, typename ... Types, typename Container>
-		auto call(R (*f)(Types ...), const Container &c)
+		template<typename F, typename Container>
+		auto call(F &&f, const Container &c)
 		{
-			constexpr unsigned argc = get_arity<decltype(f)>::value;
+			constexpr unsigned argc = function_traits<decltype(f)>::arity;
 			return call_helper<argc == 0, decltype(f), Container, argc>::engage(*this, f, c);
 		}
 
@@ -143,16 +166,56 @@ class ExprEvaluator
 
 		void register_func(const std::string &name, InbuiltFunc &&func);
 
-		template<typename R, typename ... Types>
-		void register_func(const std::string &name, R (*f)(Types ...))
+		template<unsigned default_argc = 0, typename F>
+		void register_func(const std::string &name, F &&f, Value default_args = Value::NO_VALUE)
 		{
-			register_func(name, [&, f](Args args) -> Value {
-				if constexpr (std::is_same<R, void>::value) {
-					call(f, args);
-					return Value::NO_VALUE;
-				} else
-					return call(f, args);
-			});
+			using R = typename function_traits<F>::return_type;
+			if constexpr (function_traits<F>::arity == 0) {
+				register_func(name, [&](Args args) -> Value {
+					if constexpr (std::is_void<R>::value) {
+						call(f, args);
+						return Value::NO_VALUE;
+					} else
+						return call(f, args);
+				});
+			}
+			/* Function accepts the ExprList itself - no binding required */
+			else if constexpr (std::is_same<typename function_traits<F>::argument<0>::type, mtl::Args>::value) {
+				register_func(name, InbuiltFunc(f));
+			}
+			else {
+				constexpr bool has_default_args = default_argc > 0;
+				if constexpr (has_default_args) {
+					ValList defaults;
+					for (auto val : default_args.get<ValList>())
+						defaults.push_back(Value::wrapped(val));
+					default_args = defaults;
+				}
+
+				register_func(name, [&, f, default_args](Args args) -> Value {
+					if constexpr (has_default_args) {
+						constexpr unsigned arity = function_traits<F>::arity;
+						auto argc = args.size();
+						if (argc < arity) {
+							auto &defargs = unconst(default_args).get<ValList>();
+							for (size_t i = argc - default_argc; i < argc; ++i)
+								args.push_back(defargs.at(i).get<ExprPtr>());
+						}
+					}
+					if constexpr (std::is_void<R>::value) {
+						call(f, args);
+						return Value::NO_VALUE;
+					}
+					else
+						return call(f, args);
+				});
+			}
+		}
+
+		template<unsigned N, typename F>
+		inline void register_func(const std::string &name, std::initializer_list<Value> list, F &&f)
+		{
+			register_func<N>(name, std::forward<F>(f), list);
 		}
 
 		Function& current_function();
@@ -188,7 +251,12 @@ class ExprEvaluator
 		DataTable* local_scope();
 
 		Value& dot_operator_reference(ExprPtr lhs, ExprPtr rhs);
-		Value& referenced_value(ExprPtr idfr, bool follow_refs = true);
+		Value& referenced_value(Expression *expr, bool follow_refs = true);
+		inline Value& referenced_value(ExprPtr expr, bool follow_refs = true)
+		{
+			return referenced_value(expr.get(), follow_refs);
+		}
+
 		Value& get(IdentifierExpr &idfr, bool follow_refs = true);
 		Value& get(const std::string &id, bool global, bool follow_refs = true);
 

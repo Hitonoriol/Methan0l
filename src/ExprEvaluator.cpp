@@ -31,6 +31,16 @@
 namespace mtl
 {
 
+int noarg()
+{
+	return -123;
+}
+
+void noarg_void()
+{
+	std::cout << "I'm a no-arg void function" << std::endl;
+}
+
 ExprEvaluator::ExprEvaluator()
 {
 	load_library(std::make_unique<LibArithmetic>(this));
@@ -44,6 +54,11 @@ ExprEvaluator::ExprEvaluator()
 
 	type_mgr.register_type(std::make_unique<File>(*this));
 	type_mgr.register_type(std::make_unique<Random>(*this));
+
+	register_func<1>("test", {__, 10}, [](int x, int y) {return x * y;});
+	register_func("noarg", noarg);
+	register_func("noarg_void", noarg_void);
+
 }
 
 void ExprEvaluator::load_library(std::unique_ptr<Library> library)
@@ -404,7 +419,7 @@ Value& ExprEvaluator::get(IdentifierExpr &idfr, bool follow_refs)
 	return idfr.referenced_value(*this, follow_refs);
 }
 
-Value& ExprEvaluator::referenced_value(ExprPtr expr, bool follow_refs)
+Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)
 {
 	if constexpr (DEBUG)
 		out << "? Referencing " << expr->info() << std::endl;
