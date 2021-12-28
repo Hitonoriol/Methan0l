@@ -17,7 +17,7 @@
 namespace mtl
 {
 
-constexpr bool DEBUG = false;
+constexpr bool DEBUG = true;
 
 enum class TokenType : uint16_t;
 class Value;
@@ -44,6 +44,7 @@ using DataMap = std::unordered_map<std::string, Value>;
 using ValMap = std::unordered_map<Value, Value>;
 
 using ExprList = std::deque<ExprPtr>;
+using ExprListPtr = std::shared_ptr<ExprList>;
 using Args = ExprList;
 using RawExprList = std::deque<Expression*>;
 using ValList = std::deque<Value>;
@@ -63,6 +64,8 @@ using PostfixOprMap = std::unordered_map<TokenType, PostfixOpr>;
 
 using InbuiltFunc = std::function<Value(ExprList)>;
 using InbuiltFuncMap = std::unordered_map<std::string, InbuiltFunc>;
+
+constexpr std::string_view PROGRAM_EXT = ".mt0";
 
 }
 

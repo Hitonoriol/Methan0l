@@ -43,6 +43,17 @@ inline std::string str(std::ostream &s)
 	return ss.str();
 }
 
+inline void clear(std::stringstream &ss)
+{
+	std::stringstream().swap(ss);
+}
+
+inline bool ends_with(std::string_view str, std::string_view suffix)
+{
+	auto end = str.substr(str.size() - suffix.size());
+	return end == suffix;
+}
+
 inline std::string& strip_quotes(std::string &str)
 {
 	if (str[0] != '"' && str[0] != '\'')
@@ -85,6 +96,14 @@ inline std::string stringify_container(ExprEvaluator *eval, const T &ctr)
 		if (it == end) return empty_string;
 		return unconst(*(it++)).to_string(eval);
 	});
+}
+
+template<typename T>
+inline bool contains(const std::string &str, const T &needle)
+{
+	if (needle.size() > str.size())
+		return false;
+	return str.find(needle) != std::string::npos;
 }
 
 }

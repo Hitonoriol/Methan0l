@@ -39,6 +39,8 @@ class Lexer
 		void save(char chr);
 		void deduce_reserved();
 		void deduce_word_op();
+		void deduce_separator(char chr);
+		void deduce_separator();
 		void push();
 		void push(char chr);
 		void next_char();
@@ -65,6 +67,7 @@ class Lexer
 		Token next(bool peek = false);
 		Token& last();
 
+		void reset(bool full = true);
 		bool has_unclosed_blocks();
 		bool empty();
 		size_t size();

@@ -12,6 +12,7 @@
 #include "util/hash.h"
 #include "util/meta.h"
 #include "util/containers.h"
+#include "expression/LiteralExpr.h"
 
 namespace mtl
 {
@@ -23,6 +24,14 @@ const std::hash<Value> Value::hasher;
 
 Value::Value() : Value(NIL)
 {
+}
+
+Value::Value(std::initializer_list<Value> values)
+{
+	set(ValList(values));
+	auto &list = get<ValList>();
+	while(!list.empty() && list.front().empty())
+		list.pop_front();
 }
 
 Value::Value(Type type)
@@ -422,6 +431,11 @@ size_t Value::hash_code() const
 Value Value::ref(Value &val)
 {
 	return Value(ValueRef(val));
+}
+
+ExprPtr Value::wrapped(const Value &val)
+{
+	return std::make_shared<LiteralExpr>(val);
 }
 
 void Value::assert_type(Type expected, const std::string &msg)

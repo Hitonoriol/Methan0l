@@ -7,6 +7,8 @@
 #include <string_view>
 #include <type_traits>
 
+#include "memory.h"
+
 namespace mtl
 {
 
@@ -40,12 +42,9 @@ inline To& try_cast(From *ptr)
 		return static_cast<To&>(*ptr);
 
 	std::stringstream err_ss;
-	err_ss << "Invalid expression type received";
-	if (instanceof<Expression>(ptr)) {
-		dynamic_cast<Expression&>(*ptr).info(err_ss << ": ");
-		err_ss << " (Expected: " << type_name<To>() << ")";
-	}
-
+	err_ss << "Invalid value type received: "
+			<< type_name<From>()
+			<< " (Expected: " << type_name<To>() << ")";
 	throw std::runtime_error(err_ss.str());
 }
 

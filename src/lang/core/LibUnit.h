@@ -15,6 +15,8 @@ class LibUnit: public Library
 		LibUnit(ExprEvaluator *eval) : Library(eval) {}
 		void load() override;
 
+		static void import(ExprEvaluator *eval, Unit &module);
+
 	private:
 		void load_operators();
 

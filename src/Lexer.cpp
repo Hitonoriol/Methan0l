@@ -270,6 +270,7 @@ void Lexer::consume()
 	/* Finalize current token if a punctuator is met */
 	else if (Token::is_punctuator(chr)) {
 		push();
+		deduce_separator(*std::prev(cur_chr));
 		begin(chr);
 		return;
 	}
@@ -279,22 +280,28 @@ void Lexer::consume()
 		save(chr);
 }
 
+void Lexer::deduce_separator(char chr)
+{
+	if (chr == '\n' || chr == Token::chr(TokenType::SEMICOLON))
+		new_line();
+	else if (cur_sep != Separator::NEWLINE && std::isspace(chr))
+		cur_sep = Separator::SPACE;
+}
+
+void Lexer::deduce_separator()
+{
+	deduce_separator(*cur_chr);
+}
+
 /* Consume chrs one-by-one, accumulating them in a buffer & deducing the token type */
 void Lexer::consume_and_deduce()
 {
-	if (*cur_chr == '\n')
-		new_line();
-	else if (cur_sep != Separator::NEWLINE && std::isspace(*cur_chr))
-		cur_sep = Separator::SPACE;
-
 	if (toktype == TokenType::NONE)
 		begin(*cur_chr);
 	else
 		consume();
 
-	if (*cur_chr == Token::chr(TokenType::SEMICOLON))
-		cur_sep = Separator::NEWLINE;
-
+	deduce_separator();
 	next_char();
 }
 
@@ -347,12 +354,7 @@ void Lexer::parse(std::string &code, bool preserve_state)
 {
 	cur_chr = code.begin();
 	input_end = code.end();
-	column = 1;
-	if (!preserve_state) {
-		line = 1;
-		std::queue<Token>().swap(tokens);
-		open_blocks = 0;
-	}
+	reset(!preserve_state);
 
 	if constexpr (DEBUG)
 		std::cout << "Lexing the input..." << std::endl;
@@ -366,6 +368,16 @@ void Lexer::parse(std::string &code, bool preserve_state)
 
 	if (!preserve_state)
 		tokens.push(Token::EOF_TOKEN);
+}
+
+void Lexer::reset(bool full)
+{
+	column = 1;
+	if (full) {
+		line = 1;
+		std::queue<Token>().swap(tokens);
+		open_blocks = 0;
+	}
 }
 
 Token Lexer::next(bool peek)

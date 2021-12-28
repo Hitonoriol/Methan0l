@@ -45,6 +45,11 @@ Token::Token() : Token(TokenType::NONE, "")
 {
 }
 
+Token::Token(const Token &rhs)
+{
+	operator =(rhs);
+}
+
 /* Punctuator token */
 Token::Token(char chr) : Token(static_cast<TokenType>(chr), std::string(1, chr))
 {
@@ -59,6 +64,9 @@ Token& Token::operator=(const Token &rhs)
 {
 	value = rhs.value;
 	type = rhs.type;
+	line = rhs.line;
+	column = rhs.column;
+	sep = rhs.sep;
 	return *this;
 }
 

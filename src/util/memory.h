@@ -13,6 +13,12 @@ inline bool instanceof(const T *ptr)
 }
 
 template<typename Base, typename T>
+inline bool instanceof(const T &ptr)
+{
+	return instanceof<Base>(&ptr);
+}
+
+template<typename Base, typename T>
 inline bool instanceof(const std::shared_ptr<T> &ptr)
 {
 	return instanceof<Base>(ptr.get());

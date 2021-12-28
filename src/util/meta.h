@@ -80,47 +80,6 @@ struct is_associative<T, std::void_t<typename T::key_type,
 {
 };
 
-template<typename T>
-struct get_arity: get_arity<decltype(&T::operator())>
-{
-};
-template<typename R, typename ... Args>
-struct get_arity<R (*)(Args...)> : std::integral_constant<unsigned, sizeof...(Args)>
-{
-};
-template<typename R, typename C, typename ... Args>
-struct get_arity<R (C::*)(Args...)> :
-		std::integral_constant<unsigned, sizeof...(Args)>
-{
-};
-template<typename R, typename C, typename ... Args>
-struct get_arity<R (C::*)(Args...) const > :
-		std::integral_constant<unsigned, sizeof...(Args)>
-{
-};
-
-template<int...> struct seq
-{
-	using type = seq;
-};
-template<typename T1, typename T2> struct concat;
-template<int ... I1, int ... I2> struct concat<seq<I1...>, seq<I2...>> : seq<I1...,
-		(sizeof...(I1) + I2)...>
-{
-};
-
-template<int N> struct gen_seq;
-template<int N> struct gen_seq: concat<typename gen_seq<N / 2>::type,
-		typename gen_seq<N - N / 2>::type>::type
-{
-};
-template<> struct gen_seq<0> : seq<>
-{
-};
-template<> struct gen_seq<1> : seq<0>
-{
-};
-
 }
 
 #endif /* SRC_UTIL_META_H_ */

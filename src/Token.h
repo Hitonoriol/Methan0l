@@ -108,6 +108,7 @@ enum class TokenType : uint16_t
 	FOR,
 	TRY,
 	CATCH,
+	USING_MODULE,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -150,7 +151,7 @@ class Token
 		uint32_t line;
 		uint32_t column;
 		std::string value;
-		Separator sep;
+		Separator sep = Separator::NONE;
 
 		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'<>|&\n#";
 
@@ -169,7 +170,7 @@ class Token
 				"class", "if", "else", "return", "defval",
 				"objcopy", "typesafe", "hashcode",
 				"typename", "noeval", "defset", "while", "for",
-				"try", "catch"
+				"try", "catch", "using_module"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
@@ -206,6 +207,7 @@ class Token
 
 	public:
 		Token();
+		Token(const Token &rhs);
 		Token(TokenType type, std::string value = "");
 		Token(char chr);
 		Token(std::string op);

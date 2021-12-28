@@ -108,7 +108,10 @@ class Value
 		template<typename T>
 		void set(const T &val)
 		{
-			if constexpr (is_heap_storable<T>()) {
+			if constexpr (std::is_same<TYPE(T), char*>::value)
+				set(std::string(val));
+
+			else if constexpr (is_heap_storable<T>()) {
 				/* Don't reallocate if this value is already of heap storable type T */
 				if (this->is<std::shared_ptr<T>>())
 					get<T>() = val;
@@ -137,6 +140,7 @@ class Value
 
 		Value();
 		Value(Type type);
+		Value(std::initializer_list<Value>);
 
 		template<typename T>
 		Value(const T &val)
@@ -231,6 +235,8 @@ class Value
 
 		static Value ref(Value &val);
 
+		static ExprPtr wrapped(const Value &val);
+
 		/* Get current value by copy or convert to specified type */
 		template<typename T> inline T as()
 		{
@@ -241,6 +247,8 @@ class Value
 					return (T) as<dec>();
 				else if constexpr (std::is_floating_point<T>::value)
 					return (T) as<double>();
+				else if constexpr (std::is_same<T, const char*>::value)
+					return as<std::string>().c_str();
 				else
 					return get<T>();
 			}
@@ -281,6 +289,7 @@ class Value
 		size_t hash_code() const;
 };
 
+const Value __ = Value::NO_VALUE;
 const Value NEW_LINE = Value(std::string(1, '\n'));
 
 }
