@@ -35,7 +35,13 @@ class InfixParser: public ExprParser
 		virtual ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) = 0;
 		inline bool is_compatible(const Token &tok) override
 		{
-			return !(ignore_nl_separated && tok.first_in_line());
+			if constexpr (DEBUG)
+				std::cout << "Ignoring NLs: " << ignore_nl_separated << " | "
+						<< tok << " is first in line: " << tok.first_in_line() << std::endl;
+
+			if (ignore_nl_separated && tok.first_in_line())
+				return false;
+			return true;
 		}
 };
 

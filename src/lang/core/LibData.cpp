@@ -214,6 +214,19 @@ void LibData::load()
 		return Value(empty);
 	});
 
+	/* list.fill(val, [n]) */
+	function("fill", [&](Args args) {
+		Value &list_v = ref(args[0]);
+		ValList &list = list_v.get<ValList>();
+		Value val = arg(args, 1);
+		size_t n = args.size() > 2 ? num(args, 2) : list.size();
+		if (n > list.size())
+			list.resize(n);
+		for (auto &elem : list)
+			elem = val;
+		return Value::ref(list_v);
+	});
+
 	/* map.list_of$(keys) or map.list_of$(values) */
 	function("list_of", [&](Args args) {
 		std::string type = MapParser::key_string(args[1]);

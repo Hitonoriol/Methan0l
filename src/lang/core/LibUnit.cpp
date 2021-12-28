@@ -5,7 +5,9 @@
 #include <stdexcept>
 #include <chrono>
 #include <thread>
+#include <filesystem>
 
+#include "Interpreter.h"
 #include "expression/IdentifierExpr.h"
 #include "expression/InvokeExpr.h"
 #include "expression/ListExpr.h"
@@ -28,6 +30,16 @@ void LibUnit::load()
 		args.front()->execute(*eval);
 		auto end = std::chrono::high_resolution_clock::now();
 		return Value(std::chrono::duration<double, std::milli>(end - start).count());
+	});
+
+	/* sync_work_dir() */
+	function("sync_work_dir", [&](Args args) {
+		Value &argv_v = eval->global()->get(Interpreter::LAUNCH_ARGS);
+		if (!argv_v.nil()) {
+			auto &argv = argv_v.get<ValList>();
+			std::filesystem::current_path(argv[0].get<std::string>());
+		}
+		return Value::NO_VALUE;
 	});
 
 	/* exec$(cmd) */
@@ -60,9 +72,8 @@ void LibUnit::load()
 	function("import", [&](Args args) {
 		Value &module_val = ref(args[0]);
 		module_val.assert_type(Type::UNIT, "import$() can only be applied on a Unit");
-
-		Unit &module = eval->tmp_callable(module_val.get<Unit>());
-		eval->execute(module, false);
+		Unit &module = module_val.get<Unit>();
+		import(eval, module);
 		return Value::NO_VALUE;
 	});
 
@@ -114,6 +125,13 @@ void LibUnit::load()
 	});
 
 	load_operators();
+}
+
+void LibUnit::import(ExprEvaluator *eval, Unit &module)
+{
+	DataMap &local_scope = *eval->local_scope()->map_ptr();
+	for (auto &&entry : module.local().managed_map())
+		local_scope.insert(entry);
 }
 
 void LibUnit::load_operators()
