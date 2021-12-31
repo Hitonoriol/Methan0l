@@ -67,7 +67,11 @@ void LibString::load()
 
 	/* str.split$(delim_expr) */
 	function("split", [&](Args args) {
-		return Value(split(str(args), str(args, 1)));
+		Value tokv(Type::LIST);
+		auto &toks = tokv.get<ValList>();
+		for (auto &&tok : split(str(args), str(args, 1)))
+			toks.push_back(tok);
+		return tokv;
 	});
 
 	/* str.insert$(pos, substr) */

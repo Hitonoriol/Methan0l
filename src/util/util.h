@@ -66,7 +66,7 @@ inline std::string& strip_quotes(std::string &str)
 
 void replace_all(std::string &str, const std::string &from, const std::string &to,
 		int limit = -1);
-std::deque<Value> split(const std::string &s, const std::string &delimiter);
+std::vector<std::string> split(const std::string &s, const std::string &delimiter);
 std::string to_base(udec value, int base);
 
 std::string read_file(const std::string &name);

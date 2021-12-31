@@ -14,37 +14,78 @@
 namespace mtl
 {
 
-const InteractiveRunner::CommandMap InteractiveRunner::intr_cmds
+const InteractiveRunner::CommandMap InteractiveRunner::commands
 {
+		{ "help",
+				[](auto &runner)
+					{
+						for (auto &&[cmd, f] : InteractiveRunner::commands)
+							std::cout << "* " << cmd << std::endl;
+					}
+		},
 		{ "version",
-				[](auto &mtl)
+				[](auto &runner)
 					{
 						std::cout << FULL_VERSION_STR << std::endl;
 					}
 		},
-		{ "info",
-				[](auto &mtl)
+		{ "stack",
+				[](auto &runner)
 					{
-						mtl.print_info();
+						runner.interpreter().dump_stack();
 					}
 		},
 		{ "size_info",
-				[](auto &mtl)
+				[](auto &runner)
 					{
-						mtl.size_info();
+						runner.interpreter().size_info();
 					}
 		},
 		{ "expressions",
-				[](auto &mtl)
+				[](auto &runner)
 					{
-						for (auto &&expr : mtl.program().expressions())
+						for (auto &&expr : runner.interpreter().program().expressions())
 							std::cout << "\t" << expr->info() << std::endl;
+					}
+		},
+		{ "load",
+				[](auto &runner)
+					{
+						auto &mt0 = runner.interpreter();
+						mt0.load(mt0.load_file(runner.next_arg()));
+					}
+		},
+		{ "translate",
+				[](auto &runner)
+					{
+						runner.interpreter().translate(runner.next_arg());
+					}
+		},
+		{ "compile",
+				[](auto &runner)
+					{
+						runner.interpreter().compile(runner.next_arg());
 					}
 		}
 };
 
 InteractiveRunner::InteractiveRunner(Interpreter &methan0l) : methan0l(methan0l)
 {
+}
+
+void InteractiveRunner::save_arg(const std::string &arg)
+{
+	arg_queue.push_front(arg);
+}
+
+std::string InteractiveRunner::next_arg()
+{
+	if (arg_queue.empty())
+		throw std::runtime_error("Too few arguments supplied.");
+
+	std::string arg = std::move(arg_queue.back());
+	arg_queue.pop_back();
+	return arg;
 }
 
 /* Format: !!command */
@@ -54,12 +95,23 @@ bool InteractiveRunner::process_commands(const std::string &cmd)
 		return false;
 
 	if (cmd.size() < 3
-			|| !(cmd[0] == TokenType::EXCLAMATION && cmd[1] == TokenType::EXCLAMATION))
+			|| std::string_view(cmd).substr(0, cmd_prefix.size()) != cmd_prefix)
 		return false;
 
-	auto f_cmd = intr_cmds.find(std::string_view(cmd).substr(2));
-	if (f_cmd != intr_cmds.end()) {
-		f_cmd->second(methan0l);
+	auto toks = split(cmd, " ");
+	auto f_cmd = commands.find(std::string_view(toks[0]).substr(2));
+	for (auto it = std::next(toks.begin()); it != toks.end(); ++it)
+		save_arg(*it);
+
+	if (f_cmd != commands.end()) {
+		try {
+			f_cmd->second(*this);
+		} catch (std::exception &e) {
+			std::cerr << "[Interpreter command error] " << e.what() << std::endl;
+		} catch (...) {
+			std::cerr << "[Unknown interpreter command error]" << std::endl;
+		}
+		arg_queue.clear();
 		return true;
 	}
 
@@ -84,7 +136,8 @@ bool InteractiveRunner::load_line(std::string &line)
 
 void InteractiveRunner::start()
 {
-	std::cout << FULL_VERSION_STR << " on " << get_os() << std::endl;
+	std::cout << FULL_VERSION_STR << " on " << get_os() << ". "
+			<< "Use \"" << cmd_prefix << "help\" to view command list." << std::endl;
 	methan0l.preserve_data(true);
 	std::string line;
 	bool ready = true;
