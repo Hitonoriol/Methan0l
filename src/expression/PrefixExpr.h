@@ -12,12 +12,14 @@ namespace mtl
 class PrefixExpr: public Expression
 {
 	private:
-		TokenType op;
+		Token op;
 		ExprPtr rhs;
 
 	public:
-		PrefixExpr(TokenType op, ExprPtr rhs);
+		TRANSLATABLE
+		PrefixExpr(Token op, ExprPtr rhs);
 
+		Token get_token();
 		TokenType get_operator();
 		ExprPtr get_rhs();
 

@@ -2,14 +2,17 @@
 
 #include "../ExprEvaluator.h"
 #include "../type.h"
-#include "../Token.h"
+#include "Token.h"
 #include "LiteralExpr.h"
+#include "translator/Translator.h"
 
 namespace mtl
 {
 
+TRANSLATE(BinaryOperatorExpr)
+
 BinaryOperatorExpr::BinaryOperatorExpr(ExprPtr lhs,
-		TokenType opr,
+		Token opr,
 		ExprPtr rhs) :
 		lhs(lhs), opr(opr), rhs(rhs)
 {
@@ -29,6 +32,11 @@ void BinaryOperatorExpr::execute(ExprEvaluator &evaluator)
 
 TokenType BinaryOperatorExpr::get_operator()
 {
+	return opr.get_type();
+}
+
+Token BinaryOperatorExpr::get_token()
+{
 	return opr;
 }
 
@@ -46,7 +54,7 @@ std::ostream& BinaryOperatorExpr::info(std::ostream &str)
 {
 	return Expression::info(str << "{Binary Opr Expression // \n\t"
 			<< "[" << lhs->info() << "] "
-			<< "[" << Token::to_string(opr) << "]"
+			<< "[" << opr << "]"
 			<< " [" << rhs->info() << "]"
 			<< "}");
 }

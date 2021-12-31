@@ -32,6 +32,7 @@ class LoopExpr: public Expression
 		}
 
 	public:
+		TRANSLATABLE
 
 		/* do $(i = 0, i < 10, ++i) -> {expr1; expr2; expr3} */
 		LoopExpr(ExprPtr init, ExprPtr condition, ExprPtr step, ExprPtr body) :
@@ -56,9 +57,39 @@ class LoopExpr: public Expression
 
 		Value evaluate(ExprEvaluator &evaluator) override;
 
-		bool is_foreach()
+		ExprPtr get_init()
+		{
+			return init;
+		}
+
+		ExprPtr get_condition()
+		{
+			return condition;
+		}
+
+		ExprPtr get_step()
+		{
+			return step;
+		}
+
+		ExprPtr get_body()
+		{
+			return body;
+		}
+
+		inline bool is_foreach()
 		{
 			return init != nullptr && condition != nullptr && step == nullptr;
+		}
+
+		inline bool is_while()
+		{
+			return !is_foreach() && init == nullptr;
+		}
+
+		inline bool is_for()
+		{
+			return !is_foreach() && !is_while();
 		}
 
 		void execute(ExprEvaluator &evaluator) override;

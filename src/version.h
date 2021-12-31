@@ -22,10 +22,11 @@ static const std::string VERSION_STR = "v"
 
 static const std::string FULL_VERSION_STR = SELF_NAME + " " + VERSION_STR;
 
+constexpr std::string_view WINDOWS("Windows 64-bit");
 constexpr std::string_view get_os()
 {
 	#ifdef _WIN64
-	return "Windows 64-bit";
+	return WINDOWS;
 
 	#elif __APPLE__ || __MACH__
 	return "Mac OSX";

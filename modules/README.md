@@ -3,10 +3,10 @@
 ### Build individual modules
 
 ```
-cd modules && make ./module
+cd modules && make module-name
 ```  
 
-Where `module` is the name of the folder which contains the module's sources.  
+Where `name` is the name of the folder which contains the module's sources.  
 
 ### Use modules inside Methan0l
 

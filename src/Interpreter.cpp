@@ -8,18 +8,18 @@
 #include "util/util.h"
 #include "structure/object/InbuiltType.h"
 #include "expression/TryCatchExpr.h"
+#include "util/meta/function_traits.h"
+#include "translator/Translator.h"
 
 namespace mtl
 {
 
 const std::string Interpreter::LAUNCH_ARGS(".argv");
+const std::string Interpreter::F_LOAD_FILE(".load");
 
 Interpreter::Interpreter() : ExprEvaluator()
 {
-	register_func("load", [&](Args args) {
-		return Value(load_file(eval(args[0]).as<std::string>()));
-	});
-
+	register_func(F_LOAD_FILE, member(this, load_file));
 	register_func("get_launch_args", [&](Args args) {
 		return main.local().get(LAUNCH_ARGS);
 	});
@@ -41,6 +41,7 @@ void Interpreter::load()
 		parser.parse_all();
 		load(parser.result());
 		parser.clear();
+		parser.get_lexer().reset();
 	});
 }
 
@@ -136,6 +137,18 @@ Value Interpreter::run()
 	return ret;
 }
 
+void Interpreter::translate(const std::string &outfile)
+{
+	Translator translator(*this);
+	translator.translate_to_file(outfile);
+}
+
+void Interpreter::compile(const std::string &outfile)
+{
+	Translator translator(*this);
+	translator.compile(outfile);
+}
+
 void Interpreter::load_args(int argc, char **argv)
 {
 	Value list_v(Type::LIST);
@@ -171,15 +184,6 @@ void Interpreter::size_info()
 			<< "* InbuiltType: " << sizeof(InbuiltType) << '\n'
 			<< "* InbuiltFunc: " << sizeof(InbuiltFunc) << '\n'
 			<< std::endl;
-}
-
-void Interpreter::print_info()
-{
-	dump_stack();
-	out << "Available inbuilt functions:" << std::endl;
-	for (auto &func : functions())
-		out << "* " << func.first << '\n';
-	out << std::endl;
 }
 
 } /* namespace mtl */

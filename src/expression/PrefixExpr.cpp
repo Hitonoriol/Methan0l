@@ -6,15 +6,23 @@
 #include "../ExprEvaluator.h"
 #include "../type.h"
 #include "LiteralExpr.h"
+#include "translator/Translator.h"
 
 namespace mtl
 {
 
-PrefixExpr::PrefixExpr(TokenType op, ExprPtr rhs) : op(op), rhs(rhs)
+TRANSLATE(PrefixExpr)
+
+PrefixExpr::PrefixExpr(Token op, ExprPtr rhs) : op(op), rhs(rhs)
 {
 }
 
 TokenType PrefixExpr::get_operator()
+{
+	return op.get_type();
+}
+
+Token PrefixExpr::get_token()
 {
 	return op;
 }
@@ -32,7 +40,7 @@ Value PrefixExpr::evaluate(ExprEvaluator &eval)
 std::ostream& PrefixExpr::info(std::ostream &str)
 {
 	return Expression::info(str << "{Prefix Expression // \n\t"
-			<< "[" << Token::to_string(op) << "] "
+			<< "[" << op << "] "
 			<< "[" << rhs->info() << "]"
 			<< "}");
 }

@@ -9,6 +9,9 @@
 #include "../util/memory.h"
 #include "Token.h"
 
+#define TRANSLATABLE void translate(Translator&) override;\
+					 sstream& translate(Translator&, sstream&) override;
+
 namespace mtl
 {
 
@@ -29,6 +32,7 @@ inline uint32_t line(const Token &tok)
 	return tok.get_line();
 }
 
+class Translator;
 struct Value;
 
 class Expression
@@ -44,6 +48,9 @@ class Expression
 		/* called instead of evaluate() for parent-less exprs */
 		virtual void execute(ExprEvaluator &evaluator);
 
+		virtual void translate(Translator &translator);
+		virtual sstream& translate(Translator &translator, sstream&);
+
 		void set_line(uint32_t line);
 		uint32_t get_line();
 
@@ -58,7 +65,11 @@ class Expression
 				throw std::runtime_error(msg_on_fail);
 		}
 
-		static std::string get_name(ExprPtr expr);
+		static std::string get_name(Expression *expr);
+		inline static std::string get_name(ExprPtr expr)
+		{
+			return get_name(expr.get());
+		}
 
 		/* Create a "return" expression which returns the evaluated <expr> */
 		static ExprPtr return_expr(ExprPtr expr);

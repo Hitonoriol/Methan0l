@@ -10,17 +10,18 @@ class BinaryOperatorExpr: public Expression
 {
 	private:
 		ExprPtr lhs;
-		TokenType opr;
+		Token opr;
 		ExprPtr rhs;
 
 	public:
-
-		BinaryOperatorExpr(ExprPtr lhs, TokenType opr, ExprPtr rhs);
+		TRANSLATABLE
+		BinaryOperatorExpr(ExprPtr lhs, Token opr, ExprPtr rhs);
 
 		Value evaluate(ExprEvaluator &eval) override;
 		void execute(ExprEvaluator &evaluator) override;
 
 		TokenType get_operator();
+		Token get_token();
 		ExprPtr& get_lhs();
 		ExprPtr& get_rhs();
 

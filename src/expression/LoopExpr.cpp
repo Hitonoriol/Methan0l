@@ -14,8 +14,12 @@
 #include "util/util.h"
 #include "util/meta.h"
 
+#include "translator/Translator.h"
+
 namespace mtl
 {
+
+TRANSLATE(LoopExpr)
 
 void LoopExpr::execute(ExprEvaluator &evaluator)
 {

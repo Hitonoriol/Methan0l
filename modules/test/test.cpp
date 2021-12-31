@@ -52,6 +52,6 @@ FUNCTION(list_vars)
 void list_vars(mtl::Unit &unit)
 {
 	std::cout << "List of all variables:" << std::endl;
-	for (auto &&var : unit.local())
-		std::cout << "* " << var->first << " (" << var->second.type_name() << ")" << std::endl;
+	for (auto &&var : *unit.local().map_ptr())
+		std::cout << "* " << var.first << " (" << var.second.type_name() << ")" << std::endl;
 }

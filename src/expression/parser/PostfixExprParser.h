@@ -19,7 +19,7 @@ class PostfixExprParser: public InfixParser
 
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
 		{
-			return make_expr<PostfixExpr>(line(token), lhs, token.get_type());
+			return make_expr<PostfixExpr>(line(token), lhs, token);
 		}
 
 		int precedence() override

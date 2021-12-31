@@ -17,7 +17,7 @@
 namespace mtl
 {
 
-constexpr bool DEBUG = true;
+constexpr bool DEBUG = false;
 
 enum class TokenType : uint16_t;
 class Value;
@@ -30,6 +30,8 @@ double dbl(Value);
 dec num(Value);
 udec unum(Value);
 bool bln(Value);
+
+using sstream = std::stringstream;
 
 class Expression;
 class Object;

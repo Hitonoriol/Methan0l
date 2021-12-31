@@ -67,6 +67,8 @@ ExprPtr Parser::parse(int precedence)
 		token = consume();
 		auto &infix = infix_parsers.at(token.get_type());
 		if (!infix->is_compatible(token)) {
+			if constexpr (DEBUG)
+				std::cout << "Infix-incompatible token met: " << token << std::endl;
 			emplace(token);
 			--nesting_lvl;
 			return lhs;

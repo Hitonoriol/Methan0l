@@ -9,6 +9,7 @@
 #include "InvokeExpr.h"
 #include "LiteralExpr.h"
 #include "PostfixExpr.h"
+#include "translator/Translator.h"
 
 namespace mtl
 {
@@ -28,7 +29,17 @@ uint32_t Expression::get_line()
 	return line;
 }
 
-std::string Expression::get_name(ExprPtr expr)
+void Expression::translate(Translator &translator)
+{
+	translator.translate(*this);
+}
+
+sstream& Expression::translate(Translator &translator, sstream &out)
+{
+	return translator.translate(*this, out);
+}
+
+std::string Expression::get_name(Expression *expr)
 {
 	if (instanceof<IdentifierExpr>(expr))
 		return IdentifierExpr::get_name(expr);

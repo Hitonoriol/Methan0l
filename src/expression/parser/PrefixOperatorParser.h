@@ -23,7 +23,7 @@ class PrefixOperatorParser: public PrefixParser
 		ExprPtr parse(Parser &parser, Token token)
 		{
 			ExprPtr rhs = parser.parse(prec);
-			return make_expr<PrefixExpr>(line(token), token.get_type(), rhs);
+			return make_expr<PrefixExpr>(line(token), token, rhs);
 		}
 };
 

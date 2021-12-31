@@ -58,7 +58,6 @@ ExprEvaluator::ExprEvaluator()
 	register_func<1>("test", {__, 10}, [](int x, int y) {return x * y;});
 	register_func("noarg", noarg);
 	register_func("noarg_void", noarg_void);
-
 }
 
 void ExprEvaluator::load_library(std::unique_ptr<Library> library)

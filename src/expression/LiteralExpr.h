@@ -16,98 +16,36 @@ class LiteralExpr: public Expression
 		Value value;
 
 	public:
-		LiteralExpr(Type val_type, Token token)
-		{
-			std::string &tokstr = token.get_value();
-			auto type = token.get_type();
-
-			if (val_type == Type::INTEGER)
-				value = std::stol(tokstr);
-
-			else if (val_type == Type::DOUBLE)
-				value = std::stod(tokstr);
-
-			else if (type == TokenType::BOOLEAN)
-				value = tokstr == Token::reserved(Word::TRUE);
-
-			else if (type == TokenType::STRING)
-				value = strip_quotes(tokstr);
-
-			else if (val_type == Type::CHAR)
-				value = strip_quotes(tokstr)[0];
-		}
+		TRANSLATABLE
+		LiteralExpr(Type val_type, Token token);
 
 		template<typename T>
 		LiteralExpr(T value) : value(value)
 		{
 		}
 
-		LiteralExpr(const Value &val) : value(val)
-		{
-		}
+		LiteralExpr(const Value &val);
+		LiteralExpr();
 
-		LiteralExpr() : value(NoValue())
-		{
-		}
+		bool is_empty();
 
-		bool is_empty()
-		{
-			return value.empty();
-		}
+		Value evaluate(ExprEvaluator &eval);
 
-		Value evaluate(ExprEvaluator &eval) override
-		{
-			return Value(value);
-		}
+		Value raw_value();
+		Value& raw_ref();
 
-		Value raw_value()
-		{
-			return value;
-		}
+		void execute(ExprEvaluator &evaluator) override;
 
-		Value& raw_ref()
-		{
-			return value;
-		}
-
-		void execute(ExprEvaluator &evaluator) override
-		{
-			Value evald = evaluate(evaluator);
-			exec_literal(evaluator, evald);
-		}
-
-		static std::shared_ptr<LiteralExpr> empty()
-		{
-			return std::make_shared<LiteralExpr>();
-		}
-
+		static std::shared_ptr<LiteralExpr> empty();
 		template<typename T>
 		static std::shared_ptr<LiteralExpr> create(T val)
 		{
 			return std::make_shared<LiteralExpr>(val);
 		}
 
-		static void exec_literal(ExprEvaluator &evaluator, Value &val)
-		{
-			if (val.empty())
-				return;
+		static void exec_literal(ExprEvaluator &evaluator, Value &val);
 
-			switch (val.type()) {
-			case Type::UNIT: {
-				evaluator.invoke(val.get<Unit>());
-				break;
-			}
-
-			default:
-				std::cout << val << std::endl;
-				break;
-			}
-		}
-
-		std::ostream& info(std::ostream &str) override
-		{
-			return Expression::info(str << "{Literal Expression: `" << value << "`}");
-		}
+		std::ostream& info(std::ostream &str) override;
 };
 
 } /* namespace mtl */

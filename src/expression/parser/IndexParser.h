@@ -46,7 +46,7 @@ class IndexParser: public InfixParser
 
 					idx = foreach_expr ?
 							make_expr<PrefixExpr>(line(token), TokenType::DO, parser.parse()) :
-							parser.parse(precedence() - 1);
+							parser.parse();
 					parser.consume(TokenType::BRACKET_R);
 				}
 			}

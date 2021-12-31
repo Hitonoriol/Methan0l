@@ -10,8 +10,12 @@
 #include "../type.h"
 #include "../Token.h"
 
+#include "translator/Translator.h"
+
 namespace mtl
 {
+
+TRANSLATE(IdentifierExpr)
 
 Value IdentifierExpr::evaluate(ExprEvaluator &eval)
 {
@@ -65,7 +69,7 @@ const std::string& IdentifierExpr::get_name() const
 	return name;
 }
 
-std::string IdentifierExpr::get_name(ExprPtr expr)
+std::string IdentifierExpr::get_name(Expression *expr)
 {
 	return try_cast<IdentifierExpr>(expr).name;
 }

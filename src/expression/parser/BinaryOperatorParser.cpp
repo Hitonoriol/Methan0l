@@ -19,7 +19,7 @@ ExprPtr BinaryOperatorParser::parse(Parser &parser, ExprPtr lhs, Token token)
 		parser.parse_access_opr();
 
 	ExprPtr rhs = parser.parse(opr_precedence - (right_assoc ? 1 : 0));
-	return make_expr<BinaryOperatorExpr>(line(token), lhs, token.get_type(), rhs);
+	return make_expr<BinaryOperatorExpr>(line(token), lhs, token, rhs);
 }
 
 int BinaryOperatorParser::precedence()

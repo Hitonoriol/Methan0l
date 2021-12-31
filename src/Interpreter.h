@@ -54,7 +54,10 @@ class Interpreter: public ExprEvaluator
 		void load(const Unit &main);
 		void load(std::istream &codestr);
 		void load(std::string &code);
+
 		Value run();
+		void translate(const std::string &outfile);
+		void compile(const std::string &outfile);
 
 		void load_args(int argc, char **argv);
 
@@ -62,7 +65,6 @@ class Interpreter: public ExprEvaluator
 		Unit& program();
 		Methan0lParser& get_parser();
 
-		void print_info();
 		void size_info();
 
 		/* Either a std::exception-derived or a Value object can be thrown */
@@ -105,7 +107,7 @@ class Interpreter: public ExprEvaluator
 			}
 		}
 
-		static const std::string LAUNCH_ARGS;
+		static const std::string LAUNCH_ARGS, F_LOAD_FILE;
 };
 
 } /* namespace mtl */

@@ -6,16 +6,73 @@
 #include <type_traits>
 #include <variant>
 #include <vector>
+#include <typeinfo>
 
 #include "ValueRef.h"
 #include "Function.h"
 #include "except/except.h"
 #include "object/Object.h"
 #include "util/meta.h"
+#include "util/cast.h"
 
 #define IS_EMPTY(v) std::is_same<decltype(v), NoValue>::value
 #define IS_NIL(v) std::is_same<decltype(v), Nil>::value
 #define NIL_OR_EMPTY(v) IS_EMPTY(v) || IS_NIL(v)
+
+#define ARITHMETIC_OP(op) 	template<typename T>\
+							Value operator op (const T &rhs) {\
+								return accept([&](auto &lhs) -> Value {\
+									if constexpr (numeric<VT(lhs)>() && numeric<VT(rhs)>()) {\
+										return lhs op rhs;\
+									} else {throw InvalidTypeException(type()); return NO_VALUE;}\
+								});\
+							}
+
+#define UNARY_ARITHMETIC(op)	Value operator op () {\
+									return accept([&](auto &lhs) -> Value {\
+										if constexpr (std::is_same<VT(lhs), bool>::value || std::is_same<VT(lhs), double>::value)\
+											return op (dec) lhs;\
+										else if constexpr (numeric<VT(lhs)>())\
+											return op lhs;\
+										else {throw InvalidTypeException(type()); return NO_VALUE;}\
+									});\
+								}
+
+#define PREFIX_UNARY(op)	Value& operator op () {\
+								return accept([&](auto &lhs) -> Value& {\
+									if constexpr (numeric<VT(lhs)>() && !std::is_same<VT(lhs), bool>::value) {\
+										op lhs;\
+										return *this;\
+									}\
+									else {throw InvalidTypeException(type()); return unconst(NO_VALUE);}\
+								});\
+							}
+
+#define POSTFIX_UNARY(op)	Value operator op (int) {\
+								return accept([&](auto &lhs) -> Value {\
+									if constexpr (numeric<VT(lhs)>() && !std::is_same<VT(lhs), bool>::value) {\
+										return lhs op;\
+									}\
+									else {throw InvalidTypeException(type()); return NO_VALUE;}\
+								});\
+							}
+
+#define COMPOUND_ASSIGN(op, allow_bool) template<typename T>\
+									Value& operator op (const T &rhs) {\
+										return accept([&](auto &lhs) -> Value& {\
+											if constexpr (numeric<VT(lhs)>() && numeric<VT(rhs)>() && allow_bool) {\
+												lhs op rhs;\
+												return *this;\
+											} else {throw InvalidTypeException(type()); return unconst(NO_VALUE);}\
+										});\
+									}
+
+#define COMMA2(A,B) A,B
+#define COMMA3(A,B,C) A,B,C
+#define COMPOUND_ARITHMETIC(op) COMPOUND_ASSIGN(op, COMMA2(!std::is_same<VT(lhs), bool>::value))
+#define COMPOUND_ARITHMETIC_NODBL(op) COMPOUND_ASSIGN(op, COMMA2(!std::is_same<VT(lhs), double>::value))
+#define COMPOUND_ARITHMETIC_NODBL_NOBOOL(op) COMPOUND_ASSIGN(op, COMMA3(!std::is_same<VT(lhs), double>::value && !std::is_same<VT(lhs), bool>::value))
+#define COMPOUND_ARITHMETIC_ALL(op) COMPOUND_ASSIGN(op, true)
 
 namespace mtl
 {
@@ -108,8 +165,15 @@ class Value
 		template<typename T>
 		void set(const T &val)
 		{
-			if constexpr (std::is_same<TYPE(T), char*>::value)
+			/* Provides the ability to assign char[] string literals */
+			if constexpr (std::is_array<T>::value)
+				set((typename std::decay<T>::type) val);
+			else if constexpr (std::is_same<TYPE(T), char*>::value)
 				set(std::string(val));
+
+			else if constexpr (is_shared_ptr<T>::value) {
+				value = val;
+			}
 
 			else if constexpr (is_heap_storable<T>()) {
 				/* Don't reallocate if this value is already of heap storable type T */
@@ -171,9 +235,27 @@ class Value
 		Value copy();
 
 		dec use_count();
+		bool object();
+
+		template<typename T>
+		static constexpr bool string_type()
+		{
+			if constexpr (is_shared_ptr<TYPE(T)>()) {
+				return std::is_same<typename T::element_type, std::string>::value;
+			} else {
+				using U = typename std::decay<TYPE(T)>::type;
+				return std::is_same<U, std::string>::value || std::is_same<U, char*>::value;
+			}
+		}
+
+		template<typename T>
+		static constexpr bool numeric()
+		{
+			return std::is_arithmetic<TYPE(T)>::value;
+		}
+
 		bool heap_type();
 		bool container();
-		bool object();
 		bool numeric();
 
 		bool empty() const;
@@ -183,6 +265,12 @@ class Value
 		constexpr decltype(auto) accept(F &&visitor)
 		{
 			return std::visit(visitor, value);
+		}
+
+		template<typename F>
+		constexpr decltype(auto) accept(const Value &rhs, F &&visitor)
+		{
+			return std::visit(visitor, value, rhs.value);
 		}
 
 		template<bool allow_associative = true, typename F>
@@ -227,6 +315,10 @@ class Value
 		}
 
 		std::string to_string(ExprEvaluator *eval = nullptr);
+		inline std::string str(ExprEvaluator *eval = nullptr) const
+		{
+			return unconst(*this).to_string(eval);
+		}
 		dec to_dec();
 		double to_double();
 		bool to_bool();
@@ -274,6 +366,88 @@ class Value
 
 			throw InvalidTypeException(type());
 		}
+
+		template <typename T>
+		operator T ()
+		{
+			return as<T>();
+		}
+
+		template<typename T>
+		Value operator+(const T &rhs)
+		{
+			return accept([&](auto &lhs) -> Value {
+				if constexpr (numeric<VT(lhs)>() && numeric<VT(rhs)>()) {
+					return lhs + rhs;
+				}
+				else if constexpr (string_type<VT(lhs)>()) {
+					return *lhs + Value(rhs).str();
+				}
+				else if constexpr (string_type<VT(rhs)>()) {
+					return Value(lhs).str() + Value(rhs).str();
+				}
+				else {
+					throw InvalidTypeException(type());
+					return NO_VALUE;
+				}
+			});
+		}
+
+		template<typename T>
+		Value& operator +=(const T &rhs)
+		{
+			return accept([&](auto &lhs) -> Value& {
+				if constexpr (numeric<VT(lhs)>() && numeric<VT(rhs)>()) {
+					lhs += rhs;
+					return *this;
+				}
+				else if constexpr (string_type<VT(lhs)>()) {
+					*lhs += Value(rhs).str();
+					return *this;
+				}
+				else {
+					throw InvalidTypeException(type());
+					return unconst(NO_VALUE);
+				}
+			});
+		}
+
+		ARITHMETIC_OP(-)
+		ARITHMETIC_OP(*)
+		ARITHMETIC_OP(/)
+		ARITHMETIC_OP(%)
+
+		ARITHMETIC_OP(>)
+		ARITHMETIC_OP(<)
+		ARITHMETIC_OP(>=)
+		ARITHMETIC_OP(<=)
+
+		ARITHMETIC_OP(&&)
+		ARITHMETIC_OP(||)
+		UNARY_ARITHMETIC(!)
+
+		ARITHMETIC_OP(>>)
+		ARITHMETIC_OP(<<)
+		ARITHMETIC_OP(&)
+		ARITHMETIC_OP(|)
+		ARITHMETIC_OP(^)
+		UNARY_ARITHMETIC(~)
+
+		COMPOUND_ARITHMETIC(-=)
+		COMPOUND_ARITHMETIC(*=)
+		COMPOUND_ARITHMETIC(/=)
+		COMPOUND_ARITHMETIC_NODBL(%=)
+
+		COMPOUND_ARITHMETIC_NODBL(>>=)
+		COMPOUND_ARITHMETIC_NODBL_NOBOOL(<<=)
+		COMPOUND_ARITHMETIC_NODBL(&=)
+		COMPOUND_ARITHMETIC_NODBL(|=)
+		COMPOUND_ARITHMETIC_NODBL(^=)
+
+		PREFIX_UNARY(++)
+		POSTFIX_UNARY(++)
+		PREFIX_UNARY(--)
+		POSTFIX_UNARY(--)
 
 		template<typename T> inline bool is() const
 		{

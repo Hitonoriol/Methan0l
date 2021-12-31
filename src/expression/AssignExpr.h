@@ -17,43 +17,16 @@ class AssignExpr: public Expression
 		bool move;
 
 	public:
-		AssignExpr(ExprPtr lhs, ExprPtr rhs, bool move = false) :
-				lhs(lhs), rhs(rhs), move(move)
-		{
-		}
+		TRANSLATABLE
+		AssignExpr(ExprPtr lhs, ExprPtr rhs, bool move = false);
+		Value evaluate(ExprEvaluator &eval);
 
-		Value evaluate(ExprEvaluator &eval)
-		{
-			return eval.evaluate(*this);
-		}
+		bool is_move_assignment();
 
-		ExprPtr get_lhs()
-		{
-			return lhs;
-		}
+		ExprPtr get_lhs();
+		ExprPtr get_rhs();
 
-		ExprPtr get_rhs()
-		{
-			return rhs;
-		}
-
-		bool is_move_assignment()
-		{
-			return move;
-		}
-
-		std::ostream& info(std::ostream &str) override
-		{
-			return Expression::info(str
-					<< "{"
-							<< (move ? "Move" : "Copy")
-							<< " Assignment Expression // \n\t"
-							<< "[" << lhs->info() << "]"
-							<< " = "
-							<< "[" << rhs->info() << "]"
-							<< "}");
-		}
-
+		std::ostream& info(std::ostream &str) override;
 };
 
 } /* namespace mtl */

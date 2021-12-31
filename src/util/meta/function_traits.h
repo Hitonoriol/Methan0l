@@ -12,10 +12,10 @@ template<class F>
 struct function_traits;
 
 // function pointer
-template<class R, class ... Args>
-struct function_traits<R (*)(Args...)> : public function_traits<R(Args...)>
-{
-};
+#define F_TRAIT_PTR(sig) 	template<class R, class ... Args>\
+							struct function_traits<sig> : public function_traits<R(Args...)> {};
+F_TRAIT_PTR(R(*)(Args...))
+F_TRAIT_PTR(R(*const)(Args...))
 
 template<class R, class ... Args>
 struct function_traits<R(Args...)>

@@ -11,32 +11,19 @@ class PostfixExpr: public Expression
 {
 	private:
 		ExprPtr lhs;
-		TokenType op;
+		Token op;
 
 	public:
-		PostfixExpr(ExprPtr lhs, TokenType op) : lhs(lhs), op(op)
-		{
-		}
+		TRANSLATABLE
+		PostfixExpr(ExprPtr lhs, Token op);
 
-		Value evaluate(ExprEvaluator &evaluator) override
-		{
-			return evaluator.evaluate(*this);
-		}
+		Value evaluate(ExprEvaluator &evaluator) override;
 
-		ExprPtr& get_lhs()
-		{
-			return lhs;
-		}
+		ExprPtr& get_lhs();
+		Token get_token();
+		TokenType get_operator();
 
-		TokenType get_operator()
-		{
-			return op;
-		}
-
-		std::ostream& info(std::ostream &str) override
-		{
-			return Expression::info(str << "{Postfix Expression | " << Token::to_string(op) << "}");
-		}
+		std::ostream& info(std::ostream &str) override;
 };
 
 } /* namespace mtl */

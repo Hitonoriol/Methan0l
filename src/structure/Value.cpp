@@ -75,7 +75,7 @@ Value::Value(Type type)
 
 	default:
 		throw std::runtime_error("Can't define default value of type: "
-				+ str(type_name(type)));
+				+ mtl::str(type_name(type)));
 	}
 }
 
@@ -143,7 +143,7 @@ bool Value::object()
 
 bool Value::numeric()
 {
-	return accept([&](auto &v) {return std::is_arithmetic<VT(v)>::value;});
+	return accept([&](auto &v) {return Value::numeric<VT(v)>();});
 }
 
 bool Value::empty() const
@@ -227,7 +227,7 @@ std::string Value::to_string(ExprEvaluator *eval)
 		return get<std::string>();
 
 	case Type::CHAR:
-		return str(get<char>());
+		return mtl::str(get<char>());
 
 	case Type::INTEGER:
 		return std::to_string(get<dec>());
@@ -282,7 +282,7 @@ std::string Value::to_string(ExprEvaluator *eval)
 
 	case Type::EXPRESSION: {
 		auto &expr = *get<ExprPtr>();
-		return (eval == nullptr ? expr.info() : expr.evaluate(*eval)).to_string(eval);
+		return (eval == nullptr ? expr.info() : expr.evaluate(*eval).to_string(eval));
 	}
 
 	default:

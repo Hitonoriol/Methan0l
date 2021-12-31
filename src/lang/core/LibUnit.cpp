@@ -63,7 +63,7 @@ void LibUnit::load()
 
 	/* die$(exception) */
 	function("die", [&](Args args) {
-		Value exception = !args.empty() ? arg(args) : std::string("Stopping program execution");
+		Value exception = !args.empty() ? arg(args) : "Stopping program execution";
 		throw exception;
 		return Value::NO_VALUE;
 	});
