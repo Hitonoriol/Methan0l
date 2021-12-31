@@ -1,6 +1,6 @@
 include ../makeutils.inc
 
-DEV=../build/methan0l-dev
+DEV=../build/methan0l-sdk
 LIB_PATH=../build
 
 MODULES=$(patsubst ../modules/%,./%,$(sort $(dir $(wildcard ../modules/*/.))))
@@ -19,10 +19,11 @@ module-%: ./%
 # Any additional headers must be located under `<module_name>/include`
 ./%:
 	$(eval dir:=$(@:%/=%))
+	$(eval dir:=$(dir:module-%=%))
 	@echo Building module $(dir)...
 	
 	$(eval SRCS:=$(call rwildcard,./$(dir),*.cpp))
 	$(eval LIB_SUFFIX:=$(if $(filter $(OS),Windows_NT),-w,))
 	$(eval MODULE_DEPS:=$(call rwildcard,$(dir)/lib,*$(LIB_SUFFIX).so *$(LIB_SUFFIX).a))
 	$(eval MODULE_INCLUDES:=$(patsubst %,-I%,$(dir)/include))
-	g++ -std=c++17 -fPIC $(FLAGS) $(SRCS) -I$(DEV)/include $(MODULE_INCLUDES) -I$(dir) -shared $(FLAGS) $(DEPS) $(addprefix -l:,$(MODULE_DEPS)) -o $(dir)/$(dir).so
+	g++ -std=c++17 -fPIC $(FLAGS) $(SRCS) -I$(DEV) $(MODULE_INCLUDES) -I$(dir) -shared $(FLAGS) $(DEPS) $(addprefix -l:,$(MODULE_DEPS)) -o $(dir)/$(dir).so

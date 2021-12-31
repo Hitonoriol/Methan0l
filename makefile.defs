@@ -5,15 +5,16 @@ RM := rm -rf
 LIB_EXCLUDE = %Methan0l.cpp
 LIB_OBJ = $(call rwildcard,./src,*.o)
 LIB_SRC = $(patsubst %.cpp,%.o.pic,$(filter-out $(LIB_EXCLUDE),$(call rwildcard,../src,*.cpp)))
-LIB_DIR = methan0l-dev
+LIB_DIR = methan0l-sdk
 LIB_NAME=libmethan0l
 LIB_INC=-I../src
 BOOST_DEPS = -lboost_filesystem-mt -lboost_system-mt
 
-hdir=$(dir $(patsubst ../src/%,./$(LIB_DIR)/include/%,$1))
+hdir=$(dir $(patsubst ../src/%,./$(LIB_DIR)/%,$1))
 
-release: all lib
+release: all lib static-lib
 	cd ../modules && make
+	tar -czf $(LIB_DIR).tar.gz $(LIB_DIR) $(LIB_NAME).so $(LIB_NAME).a ../modules
 
 lib: shared-lib
 
@@ -26,15 +27,15 @@ shared-lib: all libclean lib-dirs headers $(LIB_SRC)
 
 .PHONY: headers
 headers:
-	cp methan0l.h $(LIB_DIR)/include
+	cp methan0l.h $(LIB_DIR)
 	$(foreach f, $(call rwildcard,../src,*.h), \
 		$(eval $(shell mkdir -p "$(call hdir,$f)" || cp "$f" "$(call hdir,$f)")))
 
 lib-dirs:
-	mkdir -p $(LIB_DIR)/include
+	mkdir -p $(LIB_DIR)
 
 static-lib: all libclean lib-dirs headers
 	ar rvs $(LIB_DIR)/$(LIB_NAME).a $(LIB_OBJ)
 
 libclean:
-	$(RM) $(LIB_DIR)/include/*
+	$(RM) $(LIB_DIR)/*
