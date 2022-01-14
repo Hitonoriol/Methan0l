@@ -7,11 +7,12 @@
 #include <unordered_map>
 #include <utility>
 
-#include "../../Parser.h"
-#include "../../structure/Value.h"
-#include "../../type.h"
-#include "../../Token.h"
-#include "../../util/util.h"
+#include "Parser.h"
+#include "structure/Value.h"
+#include "type.h"
+#include "Token.h"
+#include "util/util.h"
+
 #include "../BinaryOperatorExpr.h"
 #include "../IdentifierExpr.h"
 #include "../LiteralExpr.h"

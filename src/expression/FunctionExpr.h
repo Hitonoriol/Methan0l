@@ -18,6 +18,7 @@ class FunctionExpr: public Expression
 		void execute(ExprEvaluator &evaluator) override;
 
 		Function get_function();
+		Function& function_ref();
 
 		std::ostream& info(std::ostream &str) override
 		{

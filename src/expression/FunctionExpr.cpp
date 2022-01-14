@@ -26,4 +26,9 @@ Function FunctionExpr::get_function()
 	return func;
 }
 
+Function& FunctionExpr::function_ref()
+{
+	return func;
+}
+
 }
