@@ -16,7 +16,6 @@ class LiteralExpr: public Expression
 		Value value;
 
 	public:
-		TRANSLATABLE
 		LiteralExpr(Type val_type, Token token);
 
 		template<typename T>

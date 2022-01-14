@@ -8,12 +8,8 @@
 #include "PrefixExpr.h"
 #include "lang/core/LibData.h"
 
-#include "translator/Translator.h"
-
 namespace mtl
 {
-
-TRANSLATE(IndexExpr)
 
 /* Get a & to the indexed value depending on the type of the LHS */
 Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)

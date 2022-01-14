@@ -32,8 +32,6 @@ class LoopExpr: public Expression
 		}
 
 	public:
-		TRANSLATABLE
-
 		/* do $(i = 0, i < 10, ++i) -> {expr1; expr2; expr3} */
 		LoopExpr(ExprPtr init, ExprPtr condition, ExprPtr step, ExprPtr body) :
 				init(init), condition(condition), step(step), body(body)

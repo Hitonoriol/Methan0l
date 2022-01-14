@@ -9,9 +9,6 @@
 #include "../util/memory.h"
 #include "Token.h"
 
-#define TRANSLATABLE void translate(Translator&) override;\
-					 sstream& translate(Translator&, sstream&) override;
-
 namespace mtl
 {
 
@@ -47,9 +44,6 @@ class Expression
 
 		/* called instead of evaluate() for parent-less exprs */
 		virtual void execute(ExprEvaluator &evaluator);
-
-		virtual void translate(Translator &translator);
-		virtual sstream& translate(Translator &translator, sstream&);
 
 		void set_line(uint32_t line);
 		uint32_t get_line();

@@ -12,7 +12,6 @@ class UnitExpr: public Expression
 		Unit unit;
 
 	public:
-		TRANSLATABLE
 		UnitExpr(ExprList unit, bool weak = false);
 
 		Unit get_unit();

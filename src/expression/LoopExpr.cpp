@@ -14,12 +14,8 @@
 #include "util/util.h"
 #include "util/meta.h"
 
-#include "translator/Translator.h"
-
 namespace mtl
 {
-
-TRANSLATE(LoopExpr)
 
 void LoopExpr::execute(ExprEvaluator &evaluator)
 {
@@ -53,14 +49,14 @@ void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 	/* If this loop has <init> Expr, this is a <for> loop,
 	 * 		else -- this is a <while> loop and has only the <condition> expression */
 	const bool for_loop = init != nullptr;
+	evaluator.enter_scope(loop_proxy);
 	if (for_loop) {
 		loop_proxy.append(init);
-		evaluator.execute(loop_proxy);
+		evaluator.execute(loop_proxy, false);
 		loop_proxy.clear();
 		loop_proxy.append(step);
 	}
 
-	evaluator.enter_scope(loop_proxy);
 	while (condition->evaluate(evaluator).as<bool>()) {
 		evaluator.execute(body_unit, false);
 

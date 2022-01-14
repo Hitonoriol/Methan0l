@@ -16,7 +16,6 @@ class PrefixExpr: public Expression
 		ExprPtr rhs;
 
 	public:
-		TRANSLATABLE
 		PrefixExpr(Token op, ExprPtr rhs);
 
 		Token get_token();

@@ -6,12 +6,8 @@
 #include <string>
 #include <string_view>
 
-#include "translator/Translator.h"
-
 namespace mtl
 {
-
-TRANSLATE(LiteralExpr)
 
 LiteralExpr::LiteralExpr(Type val_type, Token token)
 {

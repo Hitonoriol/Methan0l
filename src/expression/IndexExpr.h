@@ -32,7 +32,6 @@ class IndexExpr: public IdentifierExpr
 		Value& indexed_element(ExprEvaluator &evaluator, DataTable &table);
 
 	public:
-		TRANSLATABLE
 		IndexExpr(ExprPtr list_idfr, ExprPtr idx, bool remove, bool insert) :
 				lhs(list_idfr), idx(idx), remove(remove), insert(insert)
 		{

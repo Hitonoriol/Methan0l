@@ -3,15 +3,12 @@
 #include <ExprEvaluator.h>
 #include <type.h>
 #include <Token.h>
-#include "translator/Translator.h"
 
 #include <iostream>
 
 
 namespace mtl
 {
-
-TRANSLATE(PostfixExpr)
 
 PostfixExpr::PostfixExpr(ExprPtr lhs, Token op) : lhs(lhs), op(op)
 {

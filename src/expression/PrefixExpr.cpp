@@ -6,12 +6,9 @@
 #include "../ExprEvaluator.h"
 #include "../type.h"
 #include "LiteralExpr.h"
-#include "translator/Translator.h"
 
 namespace mtl
 {
-
-TRANSLATE(PrefixExpr)
 
 PrefixExpr::PrefixExpr(Token op, ExprPtr rhs) : op(op), rhs(rhs)
 {

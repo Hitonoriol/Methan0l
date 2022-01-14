@@ -1,11 +1,7 @@
 #include "UnitExpr.h"
 
-#include "translator/Translator.h"
-
 namespace mtl
 {
-
-TRANSLATE(UnitExpr)
 
 UnitExpr::UnitExpr(ExprList unit, bool weak) : unit(unit, weak)
 {

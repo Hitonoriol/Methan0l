@@ -4,12 +4,9 @@
 #include "../type.h"
 #include "Token.h"
 #include "LiteralExpr.h"
-#include "translator/Translator.h"
 
 namespace mtl
 {
-
-TRANSLATE(BinaryOperatorExpr)
 
 BinaryOperatorExpr::BinaryOperatorExpr(ExprPtr lhs,
 		Token opr,

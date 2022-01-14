@@ -17,7 +17,6 @@ class AssignExpr: public Expression
 		bool move;
 
 	public:
-		TRANSLATABLE
 		AssignExpr(ExprPtr lhs, ExprPtr rhs, bool move = false);
 		Value evaluate(ExprEvaluator &eval);
 

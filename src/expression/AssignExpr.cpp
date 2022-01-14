@@ -1,13 +1,10 @@
 #include "AssignExpr.h"
 
 #include <ExprEvaluator.h>
-#include <translator/Translator.h>
 #include <iostream>
 
 namespace mtl
 {
-
-TRANSLATE(AssignExpr)
 
 AssignExpr::AssignExpr(ExprPtr lhs, ExprPtr rhs, bool move) :
 		lhs(lhs), rhs(rhs), move(move)

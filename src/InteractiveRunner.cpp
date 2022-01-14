@@ -54,18 +54,6 @@ const InteractiveRunner::CommandMap InteractiveRunner::commands
 						auto &mt0 = runner.interpreter();
 						mt0.load(mt0.load_file(runner.next_arg()));
 					}
-		},
-		{ "translate",
-				[](auto &runner)
-					{
-						runner.interpreter().translate(runner.next_arg());
-					}
-		},
-		{ "compile",
-				[](auto &runner)
-					{
-						runner.interpreter().compile(runner.next_arg());
-					}
 		}
 };
 

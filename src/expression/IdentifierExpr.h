@@ -17,7 +17,6 @@ class IdentifierExpr: public Expression
 		bool global = false;
 
 	public:
-		TRANSLATABLE
 		IdentifierExpr() = default;
 		IdentifierExpr(std::string name, bool global) : name(name), global(global) {}
 

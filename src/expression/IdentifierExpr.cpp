@@ -10,12 +10,8 @@
 #include "../type.h"
 #include "../Token.h"
 
-#include "translator/Translator.h"
-
 namespace mtl
 {
-
-TRANSLATE(IdentifierExpr)
 
 Value IdentifierExpr::evaluate(ExprEvaluator &eval)
 {

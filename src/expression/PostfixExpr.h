@@ -14,7 +14,6 @@ class PostfixExpr: public Expression
 		Token op;
 
 	public:
-		TRANSLATABLE
 		PostfixExpr(ExprPtr lhs, Token op);
 
 		Value evaluate(ExprEvaluator &evaluator) override;

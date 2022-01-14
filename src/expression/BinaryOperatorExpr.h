@@ -14,7 +14,6 @@ class BinaryOperatorExpr: public Expression
 		ExprPtr rhs;
 
 	public:
-		TRANSLATABLE
 		BinaryOperatorExpr(ExprPtr lhs, Token opr, ExprPtr rhs);
 
 		Value evaluate(ExprEvaluator &eval) override;

@@ -9,7 +9,6 @@
 #include "InvokeExpr.h"
 #include "LiteralExpr.h"
 #include "PostfixExpr.h"
-#include "translator/Translator.h"
 
 namespace mtl
 {
@@ -27,16 +26,6 @@ void Expression::set_line(uint32_t line)
 uint32_t Expression::get_line()
 {
 	return line;
-}
-
-void Expression::translate(Translator &translator)
-{
-	translator.translate(*this);
-}
-
-sstream& Expression::translate(Translator &translator, sstream &out)
-{
-	return translator.translate(*this, out);
 }
 
 std::string Expression::get_name(Expression *expr)

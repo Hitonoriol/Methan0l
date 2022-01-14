@@ -13,7 +13,6 @@ class ConditionalExpr: public Expression
 		ExprPtr condition, then_expr, else_expr;
 
 	public:
-		TRANSLATABLE
 		ConditionalExpr(ExprPtr condition, ExprPtr then_expr, ExprPtr else_expr);
 
 		ExprPtr get_condition();

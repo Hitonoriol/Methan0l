@@ -1,12 +1,8 @@
 #include "ConditionalExpr.h"
 #include "UnitExpr.h"
 
-#include "translator/Translator.h"
-
 namespace mtl
 {
-
-TRANSLATE(ConditionalExpr);
 
 ConditionalExpr::ConditionalExpr(ExprPtr condition, ExprPtr then_expr, ExprPtr else_expr) :
 		condition(condition),
