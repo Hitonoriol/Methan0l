@@ -33,6 +33,5 @@ src/lang/lib \
 src/lang/structure \
 src/structure \
 src/structure/object \
-src/translator \
 src/util \
 

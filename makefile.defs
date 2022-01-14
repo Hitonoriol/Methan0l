@@ -2,6 +2,7 @@
 
 RM := rm -rf
 
+BIN_NAME = $(addsuffix $(if $(filter $(OS),Windows_NT),.exe,),methan0l)
 LIB_EXCLUDE = %Methan0l.cpp
 LIB_OBJ = $(call rwildcard,./src,*.o)
 LIB_SRC = $(patsubst %.cpp,%.o.pic,$(filter-out $(LIB_EXCLUDE),$(call rwildcard,../src,*.cpp)))
@@ -12,9 +13,9 @@ BOOST_DEPS = -lboost_filesystem-mt -lboost_system-mt
 
 hdir=$(dir $(patsubst ../src/%,./$(LIB_DIR)/%,$1))
 
-release: all lib static-lib
+release: all lib
 	cd ../modules && make
-	tar -czf $(LIB_DIR).tar.gz $(LIB_DIR) $(LIB_NAME).so $(LIB_NAME).a ../modules
+	tar -czf methan0l.tar.gz $(BIN_NAME) $(LIB_DIR) $(LIB_NAME).so ../modules
 
 lib: shared-lib
 

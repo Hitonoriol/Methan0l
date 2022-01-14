@@ -1,4 +1,5 @@
 
+
 # Methan0l
 
 ## Documentation
@@ -14,17 +15,19 @@ Available in the [Wiki Section](https://github.com/Hitonoriol/Methan0l/wiki)
 cd build && make
 ```  
 \
-**Static library & headers:**  
+**Static & shared libraries & headers:**  
 
 ```
 cd build && make lib
+make static-lib
 ```  
-As a result, `libmethan0l.so` will be located under `build/methan0l-dev/` and all headers will be copied under `build/methan0l-dev/include/` preserving their directory structure.
+As a result, `libmethan0l.so` & `libmethan0l.a` will be located under `build/methan0l-dev/` and all headers will be copied under `build/methan0l-sdk/include/` preserving their directory structure.
 
 \
-**Dependencies:**  
-* `g++10` (or any other compiler that supports C++17)
+**Build requirements:**  
+* `g++10` or newer
 * `libboost` (for `boost::dll` and its dependencies)  
+* If you're using M$ Windows, you also need win32 ports of `gnu make` and `gnu coreutils` for build scripts to work
 
 ### Run Methan0l programs
 
