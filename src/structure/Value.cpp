@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <memory>
 
+#include "object/Object.h"
 #include "ValueRef.h"
 #include "type.h"
 #include "util/util.h"
@@ -86,13 +87,14 @@ Value::Value(const Value &val) : value(val.value)
 Value::~Value()
 {
 	if constexpr (DEBUG)
-		out << "[x] Destroying (" << use_count() << ") [" << type_name() << "] `" << *this << "`" << std::endl;
+		out << "[x] Destroying (" << use_count() << ") [" << type_name() << "] 0x"
+				<< to_base((udec) identity(), 16) << " `" << *this << "`" << std::endl;
 }
 
 Value& Value::get()
 {
 	if (is<ValueRef>())
-		return get<ValueRef>().value();
+		return get<ValueRef>().value().get();
 
 	return *this;
 }
@@ -209,9 +211,23 @@ Type Value::type() const
 	else if (is<VMap>())
 		return Type::MAP;
 
+	else if (is<std::any>())
+		return Type::FALLBACK;
+
 	/* No value / Unknown type */
 	else
 		return Type::NIL;
+}
+
+dec Value::type_id() const
+{
+	Type t = type();
+	if (t == Type::OBJECT)
+		return unconst(*this).get<Object>().type_id();
+	else if (t != Type::FALLBACK)
+		return static_cast<dec>(t);
+	else
+		return std::get<std::any>(value).type().hash_code();
 }
 
 std::string Value::to_string(ExprEvaluator *eval)
@@ -285,8 +301,11 @@ std::string Value::to_string(ExprEvaluator *eval)
 		return (eval == nullptr ? expr.info() : expr.evaluate(*eval).to_string(eval));
 	}
 
-	default:
-		return "";
+	default: {
+		sstream ss;
+		ss << "{" << type_name() << "}";
+		return ss.str();
+	}
 	}
 }
 
@@ -483,12 +502,19 @@ std::string_view Value::type_name(Type type)
 
 std::string_view Value::type_name()
 {
-	return type_name(type());
+	Type t = type();
+	if (t != Type::FALLBACK)
+		return type_name(t);
+	else
+		return std::string_view(as_any().type().name());
 }
 
 Value& Value::operator =(const Value &rhs)
 {
-	value = rhs.value;
+	if (is<ValueRef>())
+		get().value = rhs.value;
+	else
+		value = rhs.value;
 	return *this;
 }
 

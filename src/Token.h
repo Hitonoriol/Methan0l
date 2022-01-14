@@ -133,7 +133,7 @@ enum class Word : uint8_t
 	T_BOOLEAN, T_LIST, T_UNIT,
 	T_MAP, T_FUNCTION, T_CHAR,
 	T_OBJECT, T_REFERENCE, T_EXPRESSION,
-	T_SET
+	T_SET, T_FALLBACK
 };
 
 bool operator ==(const char, const TokenType&);
@@ -180,7 +180,7 @@ class Token
 				/* Type idfrs (spaces are ignored by Lexer), evaluate to (int)Type enum  */
 				"typenil", "typeint", "typedouble", "typestring", "typeboolean",
 				"typelist", "typeunit", "typemap", "typefunc", "typechar",
-				"typeobject", "typereference", "typeexpr", "typeset"
+				"typeobject", "typereference", "typeexpr", "typeset", "typefallback"
 		};
 
 		static constexpr TokenType semantic_tokens[] = {

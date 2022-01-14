@@ -7,6 +7,7 @@
 #include <variant>
 #include <vector>
 #include <typeinfo>
+#include <any>
 
 #include "ValueRef.h"
 #include "Function.h"
@@ -100,7 +101,7 @@ enum class Type : uint8_t
 	NIL, INTEGER, DOUBLE, STRING, BOOLEAN,
 	LIST, UNIT, MAP, FUNCTION, CHAR,
 	OBJECT, REFERENCE, EXPRESSION, SET,
-
+	FALLBACK,
 	END
 };
 
@@ -145,7 +146,11 @@ VList, VSet, VMap,
 VUnit, VFunction, VInbuiltFunc,
 
 /* Custom type objects */
-VObject
+VObject,
+
+/* Any other non-default type, used primarily for passing and receiving
+ * values of arbitrary types to and from module functions */
+std::any
 >;
 
 class Value
@@ -165,15 +170,15 @@ class Value
 		template<typename T>
 		void set(const T &val)
 		{
-			/* Provides the ability to assign char[] string literals */
-			if constexpr (std::is_array<T>::value)
-				set((typename std::decay<T>::type) val);
-			else if constexpr (std::is_same<TYPE(T), char*>::value)
+			if constexpr (std::is_same<TYPE(T), const char*>::value
+					|| std::is_same<TYPE(T), std::string_view>::value)
 				set(std::string(val));
 
-			else if constexpr (is_shared_ptr<T>::value) {
+			else if constexpr (std::is_array<T>::value)
+				set((typename std::decay<T>::type) val);
+
+			else if constexpr (allowed_type<T>() && is_shared_ptr<T>::value)
 				value = val;
-			}
 
 			else if constexpr (is_heap_storable<T>()) {
 				/* Don't reallocate if this value is already of heap storable type T */
@@ -183,13 +188,16 @@ class Value
 					value = std::make_shared<T>(val);
 			}
 			else {
-				/* Cast integral types to one internal type <dec> */
+				/* Cast numeric types */
 				if constexpr (!std::is_same<T, char>::value
 						&& !std::is_same<T, bool>::value
 						&& std::is_integral<T>())
 					value = (dec) val;
 				else if constexpr (std::is_floating_point<T>::value)
 					value = (double) val;
+
+				else if constexpr (!allowed_type<T>())
+					value = std::any(val);
 				else
 					value = val;
 			}
@@ -230,8 +238,15 @@ class Value
 			return is_shared_ptr<TYPE(T)>::value || is_heap_storable<T>();
 		}
 
+		template<typename T>
+		static constexpr bool is_convertible()
+		{
+			return std::is_arithmetic<TYPE(T)>::value || string_type<T>();
+		}
+
 		Value& get();
 		Type type() const;
+		dec type_id() const;
 		Value copy();
 
 		dec use_count();
@@ -244,7 +259,7 @@ class Value
 				return std::is_same<typename T::element_type, std::string>::value;
 			} else {
 				using U = typename std::decay<TYPE(T)>::type;
-				return std::is_same<U, std::string>::value || std::is_same<U, char*>::value;
+				return std::is_same<U, std::string>::value || std::is_same<U, const char*>::value;
 			}
 		}
 
@@ -252,6 +267,19 @@ class Value
 		static constexpr bool numeric()
 		{
 			return std::is_arithmetic<TYPE(T)>::value;
+		}
+
+		template<typename T>
+		static constexpr bool allowed_type()
+		{
+			return mtl::allowed_type<T, ValueContainer>::value;
+		}
+
+		template<typename T>
+		static constexpr bool allowed_or_heap()
+		{
+			return allowed_type<T>()
+					|| mtl::allowed_type<std::shared_ptr<T>, ValueContainer>::value;
 		}
 
 		bool heap_type();
@@ -301,15 +329,22 @@ class Value
 		static Value from_string(std::string str);
 		Value convert(Type new_val_type);
 
-		inline int type_id()
+		inline std::any& as_any()
 		{
-			return static_cast<int>(type());
+			if (!is<std::any>())
+				throw std::runtime_error("Value doesn't hold a fallback type");
+			return std::get<std::any>(value);
 		}
 
 		template<typename T> inline T& get()
 		{
-			if constexpr (is_heap_storable<T>())
-				return *std::get<std::shared_ptr<T>>(value);
+			using P = std::shared_ptr<T>;
+			if constexpr (!allowed_type<T>() && !allowed_type<P>())
+				return std::any_cast<T&>(as_any());
+
+			else if constexpr (is_heap_storable<T>())
+				return *std::get<P>(value);
+
 			else
 				return std::get<T>(value);
 		}
@@ -326,20 +361,19 @@ class Value
 		void* identity();
 
 		static Value ref(Value &val);
-
 		static ExprPtr wrapped(const Value &val);
 
 		/* Get current value by copy or convert to specified type */
 		template<typename T> inline T as()
 		{
-			if constexpr (!allowed_type<T, ValueContainer>::value) {
+			if constexpr (!allowed_type<T>()) {
 				if constexpr (std::is_same<T, udec>::value)
 					return (udec) as<dec>();
 				else if constexpr (std::is_integral<T>::value)
 					return (T) as<dec>();
 				else if constexpr (std::is_floating_point<T>::value)
 					return (T) as<double>();
-				else if constexpr (std::is_same<T, const char*>::value)
+				else if constexpr (std::is_same<TYPE(T), const char*>::value)
 					return as<std::string>().c_str();
 				else
 					return get<T>();
@@ -451,7 +485,7 @@ class Value
 
 		template<typename T> inline bool is() const
 		{
-			if constexpr (allowed_type<T, ValueContainer>::value)
+			if constexpr (allowed_type<T>())
 				return std::holds_alternative<T>(value);
 			else
 				return is_heap_storable<T>() && std::holds_alternative<std::shared_ptr<T>>(value);
