@@ -303,7 +303,7 @@ std::string Value::to_string(ExprEvaluator *eval)
 
 	default: {
 		sstream ss;
-		ss << "{" << type_name() << "}";
+		ss << "{" << type_name() << " @ 0x" << to_base(reinterpret_cast<udec>(identity()), 16) << "}";
 		return ss.str();
 	}
 	}

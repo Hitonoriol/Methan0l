@@ -416,6 +416,8 @@ Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)
 
 	if (instanceof<IdentifierExpr>(expr))
 		return get(try_cast<IdentifierExpr>(expr), follow_refs);
+	else if (instanceof<PrefixExpr>(expr) && try_cast<PrefixExpr>(expr).get_operator() == TokenType::REF)
+		return referenced_value(try_cast<PrefixExpr>(expr).get_rhs());
 	else if (!instanceof<BinaryOperatorExpr>(expr))
 		return DataTable::create_temporary(expr->evaluate(*this));
 

@@ -137,8 +137,29 @@ class ExprEvaluator
 				return &referenced_value(&expr).get<typename std::remove_pointer<V>::type>();
 
 			/* Get as a value of fallback type (std::any) */
-			else if constexpr (!is_allowed && !is_convertible)
-				return referenced_value(&expr).get<T>();
+			else if constexpr (!is_allowed && !is_convertible) {
+				auto &val = referenced_value(&expr).get();
+				auto &any = val.as_any();
+				auto &t = any.type();
+
+				IFDBG(std::cout << "any_casting func arg to: " << type_name<T>() << ", " << val << std::endl)
+
+				/* Get a non-const* as const* */
+				if constexpr (std::is_pointer<T>::value) {
+					using U = typename std::add_pointer<typename std::remove_const<typename std::remove_pointer<T>::type>::type>::type;
+					IFDBG(std::cout << "U = " << type_name<U>() << std::endl)
+					if (t == typeid(U))
+						return std::any_cast<U>(any);
+				}
+
+				/* Get a reference to a const fallback object */
+				using UR = typename std::remove_reference<T>::type;
+				if (t == typeid(UR))
+					return std::any_cast<UR>(any);
+
+				else
+					return std::any_cast<T>(any);
+			}
 
 			/* Otherwise -- evaluate and convert to T */
 			else {
