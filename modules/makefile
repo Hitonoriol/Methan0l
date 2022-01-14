@@ -25,5 +25,7 @@ module-%: ./%
 	$(eval SRCS:=$(call rwildcard,./$(dir),*.cpp))
 	$(eval LIB_SUFFIX:=$(if $(filter $(OS),Windows_NT),-w,))
 	$(eval MODULE_DEPS:=$(call rwildcard,$(dir)/lib,*$(LIB_SUFFIX).so *$(LIB_SUFFIX).a))
+	$(eval MODULE_DEPS:=$(patsubst $(dir)/lib/lib%.a,-l%,$(MODULE_DEPS)))
+	$(eval MODULE_DEPS:=$(patsubst $(dir)/lib/lib%.so,-l:$(dir)/lib/lib%.so,$(MODULE_DEPS)))
 	$(eval MODULE_INCLUDES:=$(patsubst %,-I%,$(dir)/include))
-	g++ -std=c++17 -fPIC $(FLAGS) $(SRCS) -I$(DEV) $(MODULE_INCLUDES) -I$(dir) -shared $(FLAGS) $(DEPS) $(addprefix -l:,$(MODULE_DEPS)) -o $(dir)/$(dir).so
+	g++ -std=c++17 -fPIC $(FLAGS) $(SRCS) -I$(DEV) $(MODULE_INCLUDES) -I$(dir) -shared $(FLAGS) $(DEPS) -L$(dir)/lib $(MODULE_DEPS) -o $(dir)/$(dir).so
