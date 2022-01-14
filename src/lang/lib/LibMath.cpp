@@ -3,9 +3,9 @@
 #include <cmath>
 #include <functional>
 
-#include "../../ExprEvaluator.h"
-#include "../../structure/Value.h"
-#include "../../type.h"
+#include "ExprEvaluator.h"
+#include "structure/Value.h"
+#include "type.h"
 
 namespace mtl
 {

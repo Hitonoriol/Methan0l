@@ -27,7 +27,8 @@ class Library
 		Value& ref(IdentifierExpr &idfr);
 		Value arg(ExprList args, int idx = 0);
 
-		void function(std::string, InbuiltFunc&&);
+		void function(const std::string&, InbuiltFunc&&);
+		void getter(const std::string &name, Value);
 
 		void prefix_operator(TokenType, PrefixOpr);
 		void infix_operator(TokenType, BinaryOpr);
@@ -35,6 +36,7 @@ class Library
 
 	public:
 		Library(ExprEvaluator *eval);
+		Library(const Library&);
 		virtual ~Library() {}
 		virtual void load() = 0;
 };

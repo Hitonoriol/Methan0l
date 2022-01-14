@@ -22,6 +22,13 @@ namespace mtl
 
 void LibData::load()
 {
+	getter("get_os_name", mtl::str(get_os()));
+	getter("get_major_version", MAJOR_VERSION);
+	getter("get_release_version", RELEASE_VERSION);
+	getter("get_minor_version", MINOR_VERSION);
+	getter("get_version_code", VERSION_CODE);
+	getter("get_version", VERSION_STR);
+
 	/* obj = Type.new$(arg1, arg2, ...) */
 	function("new", [&](Args args) {
 		std::string type_name = MapParser::key_string(args[0]);
@@ -39,30 +46,6 @@ void LibData::load()
 		Value &new_val = ref(args[1]);
 		ref_val.get<ValueRef>().reset(new_val);
 		return Value::NO_VALUE;
-	});
-
-	function("get_version_code", [&](Args args) {
-		return Value(VERSION_CODE);
-	});
-
-	function("get_minor_version", [&](Args args) {
-		return Value(MINOR_VERSION);
-	});
-
-	function("get_release_version", [&](Args args) {
-		return Value(RELEASE_VERSION);
-	});
-
-	function("get_major_version", [&](Args args) {
-		return Value(MAJOR_VERSION);
-	});
-
-	function("get_version", [&](Args args) {
-		return Value(VERSION_STR);
-	});
-
-	function("get_os_name", [&](Args args) {
-		return Value(mtl::str(get_os()));
 	});
 
 	function("get_args", [&](Args args) {
@@ -156,7 +139,7 @@ void LibData::load()
 		Value &list_val = ref(args[0]);
 		list_val.assert_type(Type::LIST, "resize$() can only be applied on a List");
 		list_val.get<ValList>().resize(unum(args, 1));
-		return Value::ref(list_val);
+		return list_val;
 	});
 
 	/* <Map | List>.clear$() */
@@ -216,7 +199,7 @@ void LibData::load()
 
 	/* list.fill(val, [n]) */
 	function("fill", [&](Args args) {
-		Value &list_v = ref(args[0]);
+		Value list_v = ref(args[0]);
 		ValList &list = list_v.get<ValList>();
 		Value val = arg(args, 1);
 		size_t n = args.size() > 2 ? num(args, 2) : list.size();
@@ -224,7 +207,7 @@ void LibData::load()
 			list.resize(n);
 		for (auto &elem : list)
 			elem = val;
-		return Value::ref(list_v);
+		return list_v;
 	});
 
 	/* map.list_of$(keys) or map.list_of$(values) */
@@ -343,9 +326,20 @@ void LibData::load_operators()
 		return Value::NO_VALUE;
 	});
 
-	prefix_operator(TokenType::OBJECT_COPY, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::OBJECT_COPY, [&](ExprPtr rhs) -> Value {
 		Value rval = val(rhs);
-		return Value(Object::copy(rval.get<Object>()));
+		if (rval.is<Object>())
+			return Object::copy(rval.get<Object>());
+		else if (rval.is<Unit>()) {
+			Value copy(Type::UNIT);
+			Unit &box = copy.get<Unit>();
+			box.set_persisent(true);
+			box.manage_table(rval.get<Unit>());
+			box.local().copy_managed_map();
+			return copy;
+		}
+		else
+			throw std::runtime_error("`objcopy` can only be applied on an Object or a Box Unit");
 	});
 
 	prefix_operator(TokenType::DEFINE_VALUE, [&](ExprPtr rhs) {
@@ -359,16 +353,16 @@ void LibData::load_operators()
 	});
 
 	/* typeid(val) */
-	prefix_operator(TokenType::TYPE_ID, [this](ExprPtr rhs) {
-		return Value(static_cast<int>(val(rhs).type()));
+	prefix_operator(TokenType::TYPE_ID, [&](ExprPtr rhs) {
+		return val(rhs).type_id();
 	});
 
-	prefix_operator(TokenType::TYPE_NAME, [this](ExprPtr rhs) {
-		return Value(mtl::str(val(rhs).type_name().substr(4)));
+	prefix_operator(TokenType::TYPE_NAME, [&](ExprPtr rhs) {
+		return mtl::str(val(rhs).type_name());
 	});
 
 	/* Delete idfr & the Value associated with it */
-	prefix_operator(TokenType::DELETE, [this](ExprPtr rhs) {
+	prefix_operator(TokenType::DELETE, [&](ExprPtr rhs) {
 		eval->scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
 		return Value::NIL;
 	});

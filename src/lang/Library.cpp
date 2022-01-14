@@ -11,6 +11,10 @@ Library::Library(ExprEvaluator *eval) : eval(eval)
 {
 }
 
+Library::Library(const Library &rhs) : eval(rhs.eval)
+{
+}
+
 std::string Library::str(ExprList args, int idx)
 {
 	return mtl::str(arg(args, idx));
@@ -55,7 +59,12 @@ Value Library::arg(ExprList args, int idx)
 	return eval->eval(args[idx]);
 }
 
-void Library::function(std::string func_name, InbuiltFunc &&func)
+void Library::getter(const std::string &name, Value val)
+{
+	eval->register_getter(name, val);
+}
+
+void Library::function(const std::string &func_name, InbuiltFunc &&func)
 {
 	eval->register_func(func_name, std::move(func));
 }
