@@ -37,7 +37,8 @@ void LibUnit::load()
 		Value &argv_v = eval->global()->get(Interpreter::LAUNCH_ARGS);
 		if (!argv_v.nil()) {
 			auto &argv = argv_v.get<ValList>();
-			std::filesystem::current_path(argv[0].get<std::string>());
+			auto path = std::filesystem::absolute(argv[0].get<std::string>()).parent_path();
+			std::filesystem::current_path(path);
 		}
 		return Value::NO_VALUE;
 	});
@@ -130,8 +131,12 @@ void LibUnit::load()
 void LibUnit::import(ExprEvaluator *eval, Unit &module)
 {
 	DataMap &local_scope = *eval->local_scope()->map_ptr();
-	for (auto &&entry : module.local().managed_map())
-		local_scope.insert(entry);
+	for (auto &&entry : module.local().managed_map()) {
+		if (entry.second.is<InbuiltFunc>())
+			eval->register_func(entry.first, unconst(entry.second).get<InbuiltFunc>());
+		else
+			local_scope.insert(entry);
+	}
 }
 
 void LibUnit::load_operators()
