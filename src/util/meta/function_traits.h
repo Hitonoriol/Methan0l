@@ -1,6 +1,8 @@
 #ifndef SRC_UTIL_META_FUNCTION_TRAITS_H_
 #define SRC_UTIL_META_FUNCTION_TRAITS_H_
 
+#include <type.h>
+
 #include <type_traits>
 #include <utility>
 #include <functional>
@@ -16,6 +18,8 @@ struct function_traits;
 							struct function_traits<sig> : public function_traits<R(Args...)> {};
 F_TRAIT_PTR(R(*)(Args...))
 F_TRAIT_PTR(R(*const)(Args...))
+F_TRAIT_PTR(R(*)(Args...,...))
+F_TRAIT_PTR(R(*const)(Args...,...))
 
 template<class R, class ... Args>
 struct function_traits<R(Args...)>
