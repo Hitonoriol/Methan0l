@@ -112,12 +112,6 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 		return Value(fs::create_directories(path(args)));
 	});
 
-	/* file.cd$() */
-	register_method("cd", [&](auto args) {
-		fs::current_path(path(args));
-		return Value::NO_VALUE;
-	});
-
 	/* file.equivalent$(path) */
 	register_method("equivalent", [&](auto args) {
 		std::string file = path(args);
@@ -188,6 +182,12 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	register_method("cwd", [&](auto args) {
 		return Value(fs::current_path().string());
 	});
+
+	/* file.cd$() */
+	register_method("cd", [&](auto args) {
+		fs::current_path(path(args));
+		return Value::NO_VALUE;
+	});
 }
 
 void File::reset(std::fstream &file)
@@ -212,6 +212,10 @@ void File::write_line(Object &obj, const std::string &line)
 
 std::string File::path(ExprList &args)
 {
+	/* This allows to use all `File` methods statically by providing the `path` as the first argument */
+	if (ObjectType::static_call(args))
+		return args[1]->evaluate(eval);
+
 	return str(Object::get_this(args).field(FNAME));
 }
 
