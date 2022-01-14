@@ -14,6 +14,9 @@
 #define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
 #define VT(v) TYPE(decltype(v))
 
+#define DBG if constexpr (mtl::DEBUG)
+#define IFDBG(body) DBG { body; }
+
 namespace mtl
 {
 

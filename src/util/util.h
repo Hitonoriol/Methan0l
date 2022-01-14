@@ -24,7 +24,13 @@ namespace mtl
 
 struct Value;
 
-extern std::ostream &out, &log;
+extern std::ostream &out;
+
+template<typename T>
+inline auto str(T val) -> typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type
+{
+	return std::to_string(val);
+}
 
 inline std::string str(char chr)
 {

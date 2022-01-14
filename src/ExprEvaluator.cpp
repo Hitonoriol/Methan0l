@@ -43,27 +43,21 @@ void noarg_void()
 
 ExprEvaluator::ExprEvaluator()
 {
-	load_library(std::make_unique<LibArithmetic>(this));
-	load_library(std::make_unique<LibLogical>(this));
-	load_library(std::make_unique<LibUnit>(this));
-	load_library(std::make_unique<LibIO>(this));
-	load_library(std::make_unique<LibString>(this));
-	load_library(std::make_unique<LibMath>(this));
-	load_library(std::make_unique<LibData>(this));
-	load_library(std::make_unique<LibModule>(this));
+	load_library<LibArithmetic>();
+	load_library<LibLogical>();
+	load_library<LibUnit>();
+	load_library<LibIO>();
+	load_library<LibString>();
+	load_library<LibMath>();
+	load_library<LibData>();
+	load_library<LibModule>();
 
-	type_mgr.register_type(std::make_unique<File>(*this));
-	type_mgr.register_type(std::make_unique<Random>(*this));
+	type_mgr.register_type<File>();
+	type_mgr.register_type<Random>();
 
 	register_func<1>("test", {__, 10}, [](int x, int y) {return x * y;});
 	register_func("noarg", noarg);
 	register_func("noarg_void", noarg_void);
-}
-
-void ExprEvaluator::load_library(std::unique_ptr<Library> library)
-{
-	library->load();
-	libraries.push_back(std::move(library));
 }
 
 ExprEvaluator::ExprEvaluator(Unit &main) : ExprEvaluator()
@@ -259,8 +253,7 @@ void ExprEvaluator::unuse()
 
 void ExprEvaluator::leave_scope()
 {
-	if constexpr (DEBUG)
-		dump_stack();
+	IFDBG(dump_stack())
 
 	DataTable::purge_temporary();
 	if (exec_stack.size() > 1) {
@@ -274,12 +267,10 @@ void ExprEvaluator::leave_scope()
 		pop_tmp_callable();
 		exec_stack.pop_back();
 
-		if constexpr (DEBUG)
-			std::cout << "<< Left scope // depth: " << exec_stack.size() << std::endl;
-	} else {
-		if constexpr (DEBUG)
-			out << "? Tmp callable stack depth: " << tmp_call_stack.size() << std::endl;
+		IFDBG(std::cout << "<< Left scope // depth: " << exec_stack.size() << std::endl);
 	}
+	else
+		IFDBG(out << "? Tmp callable stack depth: " << tmp_call_stack.size() << std::endl);
 }
 
 void ExprEvaluator::restore_execution_state(size_t depth)
@@ -562,11 +553,11 @@ bool ExprEvaluator::func_exists(const std::string &name)
 	return inbuilt_funcs.find(name) != inbuilt_funcs.end();
 }
 
-Value ExprEvaluator::invoke_inbuilt_func(std::string name, ExprList args)
+Value ExprEvaluator::invoke_inbuilt_func(const std::string &name, ExprList args)
 {
 	auto entry = inbuilt_funcs.find(name);
 	if (entry == inbuilt_funcs.end())
-		return Value::NO_VALUE;
+		throw std::runtime_error("Function \"" + name + "\" is not defined");
 
 	if constexpr (DEBUG)
 		std::cout << "* Invoking inbuilt function \"" << name << "\"" << std::endl;
@@ -629,16 +620,19 @@ void ExprEvaluator::dump_stack()
 		std::cout << std::endl;
 		for (auto &val : *(*un)->local().map_ptr()) {
 			Value &v = val.second;
-			Type type = val.second.type();
+			Type type = v.type();
 			const char quote = (type == Type::STRING || type == Type::CHAR ? '"' : '\0');
 			std::cout << '\t'
 					<< "(" << v.use_count() << ") "
 					<< "["
 					<< Value::type_name(type)
-					<< " | " << (v.heap_type() ? "heap" : "non-heap")
-					<< "] "
-					<< val.first << " = "
-					<< quote << v << quote << std::endl;
+					<< " | " << (v.heap_type() ? "heap" : "non-heap");
+
+			if (v.heap_type())
+				std::cout << " 0x" << to_base((udec) v.identity(), 16);
+
+			std::cout << "] " << val.first << " = " << std::flush;
+			std::cout << quote << v << quote << std::endl;
 		}
 	}
 }

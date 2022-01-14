@@ -13,7 +13,7 @@
 namespace mtl
 {
 
-void TypeManager::register_type(std::unique_ptr<ObjectType> type)
+void TypeManager::register_type(std::unique_ptr<ObjectType> &&type)
 {
 	if constexpr (DEBUG)
 		out << "! Registering type ["

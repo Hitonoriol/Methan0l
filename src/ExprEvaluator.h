@@ -6,12 +6,14 @@
 #include <utility>
 #include <type_traits>
 
-#include "util/meta/function_traits.h"
-#include "util/cast.h"
 #include "structure/Function.h"
 #include "lang/Library.h"
 #include "structure/object/TypeManager.h"
 #include "ExceptionHandler.h"
+
+#include "util/meta/function_traits.h"
+#include "util/cast.h"
+#include "util/util.h"
 
 namespace mtl
 {
@@ -54,7 +56,13 @@ class ExprEvaluator
 		Expression *current_expr;
 		bool execution_finished = false;
 
-		void load_library(std::unique_ptr<Library> library);
+		template<typename T>
+		inline void load_library()
+		{
+			auto library = std::make_unique<T>(this);
+			library->load();
+			libraries.push_back(std::move(library));
+		}
 
 		Value apply_prefix(TokenType op, ExprPtr rhs);
 		Value apply_binary(ExprPtr &lhs, TokenType op, ExprPtr &rhs);
@@ -65,7 +73,7 @@ class ExprEvaluator
 		void binary_op(TokenType tok, BinaryOpr opr);
 		void postfix_op(TokenType tok, PostfixOpr opr);
 
-		Value invoke_inbuilt_func(std::string name, ExprList args);
+		Value invoke_inbuilt_func(const std::string &name, ExprList args);
 
 		void enter_scope(Unit &unit);
 		void leave_scope();
@@ -106,9 +114,13 @@ class ExprEvaluator
 		inline T eval(Expression &expr)
 		{
 			using V = TYPE(T);
+			constexpr bool is_allowed = Value::allowed_or_heap<typename std::remove_pointer<V>::type>();
+			constexpr bool is_convertible = Value::is_convertible<V>();
+			/* Get as unevaluated expression */
 			if constexpr (std::is_same<T, Expression*>::value)
 				return &expr;
 
+			/* Get as mtl::Value by &, *, or = */
 			else if constexpr (std::is_same<typename std::remove_pointer<V>::type, Value>::value) {
 				if constexpr (std::is_reference<T>::value)
 					return referenced_value(&expr);
@@ -118,15 +130,23 @@ class ExprEvaluator
 					return eval(expr);
 			}
 
-			else if constexpr (std::is_reference<T>::value)
+			/* Get as a & or * to a value of a valid ValueContainer variant type */
+			else if constexpr (is_allowed && std::is_reference<T>::value)
 				return referenced_value(&expr).get<V>();
-
-			else if constexpr (std::is_pointer<T>::value)
+			else if constexpr (is_allowed && std::is_pointer<T>::value)
 				return &referenced_value(&expr).get<typename std::remove_pointer<V>::type>();
 
+			/* Get as a value of fallback type (std::any) */
+			else if constexpr (!is_allowed && !is_convertible)
+				return referenced_value(&expr).get<T>();
+
+			/* Otherwise -- evaluate and convert to T */
 			else {
 				Value val = eval(expr);
-				return val.as<T>();
+				if constexpr (!is_allowed && is_convertible)
+					return val.as<V>();
+				else
+					return val.as<T>();
 			}
 		}
 
@@ -148,7 +168,9 @@ class ExprEvaluator
 				static auto engage(ExprEvaluator &evaluator, Functor &&f, const Container &c)
 				{
 					if (c.size() < N)
-						throw std::runtime_error("Too few arguments");
+						throw std::runtime_error("Too few arguments: "
+								+ str(c.size()) + " received, " + str(N) + " expected");
+
 					return std::invoke(f, evaluator.eval<typename function_traits<Functor>::template argument<I>::type>(*c.at(I))...);
 				}
 		};
@@ -164,24 +186,22 @@ class ExprEvaluator
 		ExprEvaluator();
 		ExprEvaluator(Unit &main);
 
-		void register_func(const std::string &name, InbuiltFunc &&func);
-
 		template<unsigned default_argc = 0, typename F>
-		void register_func(const std::string &name, F &&f, Value default_args = Value::NO_VALUE)
+		InbuiltFunc bind_func(F &&f, Value default_args = Value::NO_VALUE)
 		{
 			using R = typename function_traits<F>::return_type;
 			if constexpr (function_traits<F>::arity == 0) {
-				register_func(name, [&](Args args) -> Value {
+				return [&, f](Args args) -> Value {
 					if constexpr (std::is_void<R>::value) {
 						call(f, args);
 						return Value::NO_VALUE;
 					} else
 						return call(f, args);
-				});
+				};
 			}
 			/* Function accepts the ExprList itself - no binding required */
 			else if constexpr (std::is_same<typename function_traits<F>::argument<0>::type, mtl::Args>::value) {
-				register_func(name, InbuiltFunc(f));
+				return InbuiltFunc(f);
 			}
 			else {
 				constexpr bool has_default_args = default_argc > 0;
@@ -192,7 +212,7 @@ class ExprEvaluator
 					default_args = defaults;
 				}
 
-				register_func(name, [&, f, default_args](Args args) -> Value {
+				return [&, f, default_args](Args args) -> Value {
 					if constexpr (has_default_args) {
 						constexpr unsigned arity = function_traits<F>::arity;
 						auto argc = args.size();
@@ -208,14 +228,40 @@ class ExprEvaluator
 					}
 					else
 						return call(f, args);
-				});
+				};
 			}
+		}
+
+		void register_func(const std::string &name, InbuiltFunc &&func);
+
+		template<unsigned default_argc = 0, typename F>
+		void register_func(const std::string &name, F &&f, Value default_args = Value::NO_VALUE)
+		{
+			register_func(name, bind_func<default_argc>(f, default_args));
 		}
 
 		template<unsigned N, typename F>
 		inline void register_func(const std::string &name, std::initializer_list<Value> list, F &&f)
 		{
 			register_func<N>(name, std::forward<F>(f), list);
+		}
+
+		template<typename ...Args>
+		inline Value invoke(const std::string &name, Args ...args)
+		{
+			ExprList eargs( { Value::wrapped(Value(args))... });
+
+			if constexpr (DEBUG)
+				for (auto &&val : eargs)
+					std::cout << val << " " << std::endl;
+
+			return invoke_inbuilt_func(name, eargs);
+		}
+
+		template<typename T>
+		inline void register_getter(const std::string &name, T &&value)
+		{
+			register_func(name, [wrapped = Value(value)]() {return wrapped;});
 		}
 
 		Function& current_function();

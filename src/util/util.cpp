@@ -11,7 +11,6 @@ namespace mtl
 {
 
 std::ostream &out = std::cout;
-std::ostream &log = std::clog;
 
 std::vector<std::string> split(const std::string &s, const std::string &delimiter)
 {

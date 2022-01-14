@@ -19,8 +19,14 @@ class TypeManager
 
 	public:
 		TypeManager(ExprEvaluator &eval) : eval(eval) {}
-		void register_type(std::unique_ptr<ObjectType> type);
 		ObjectType& get_type(size_t id);
+		void register_type(std::unique_ptr<ObjectType> &&type);
+
+		template<typename T>
+		inline void register_type()
+		{
+			register_type(std::make_unique<T>(eval));
+		}
 
 		Value invoke_method(Object &obj, const std::string &name, Args &args);
 
