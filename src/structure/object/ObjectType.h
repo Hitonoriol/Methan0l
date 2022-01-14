@@ -53,6 +53,8 @@ class ObjectType
 		void register_private(std::string name);
 		bool is_private(const std::string &name);
 
+		bool static_call(Args &args);
+
 		virtual Value invoke_method(Object &obj, const std::string &name, ExprList &args);
 		Value invoke_static(const std::string &name, ExprList &args);
 

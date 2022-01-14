@@ -76,6 +76,11 @@ bool ObjectType::is_private(const std::string &name)
 	return private_members.find(name) != private_members.end();
 }
 
+bool ObjectType::static_call(Args &args)
+{
+	return static_cast<void*>(&Object::get_this(args)) == static_instance->raw_ref().identity();
+}
+
 DataTable& ObjectType::get_class_data()
 {
 	return class_data;
