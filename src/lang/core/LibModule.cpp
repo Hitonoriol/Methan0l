@@ -78,17 +78,31 @@ void LibModule::load_module(const std::string &path, Unit &unit)
 		throw std::runtime_error("Couldn't load module " + name);
 }
 
+std::filesystem::path &append(std::filesystem::path &path, const std::string &apx)
+{
+	return path.assign(path.string() + apx).make_preferred();
+}
+
+std::filesystem::path &append(std::filesystem::path &path, std::string_view apx)
+{
+	return append(path, std::string(apx));
+}
+
 std::string LibModule::find_module(const std::string &path_str)
 {
-	std::filesystem::path path(path_str);
+	auto path = std::filesystem::absolute(path_str);
 	const bool exists = std::filesystem::exists(path);
-	if (exists && !std::filesystem::is_directory(path))
-		return path_str;
+	if (exists) {
+		if (!std::filesystem::is_directory(path))
+			return path_str;
+		else
+			return find_module(append(path, "/" + path.filename().string()).string());
+	}
 
 	if (!exists && !path.has_extension()) {
-		if (std::filesystem::exists(path.append(PROGRAM_EXT)))
+		if (std::filesystem::exists(append(path, PROGRAM_EXT)))
 			return path.string();
-		else if (std::filesystem::exists(path.assign(path_str).append(MODULE_EXT)))
+		else if (std::filesystem::exists(append(path.assign(path_str), MODULE_EXT)))
 			return path.string();
 	}
 
