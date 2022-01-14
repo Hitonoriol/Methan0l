@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <utility>
+#include <filesystem>
 
 #include "lang/Library.h"
 #include "structure/Value.h"
@@ -9,7 +10,6 @@
 #include "structure/object/InbuiltType.h"
 #include "expression/TryCatchExpr.h"
 #include "util/meta/function_traits.h"
-#include "translator/Translator.h"
 
 namespace mtl
 {
@@ -19,15 +19,23 @@ const std::string Interpreter::F_LOAD_FILE(".load");
 
 Interpreter::Interpreter() : ExprEvaluator()
 {
-	register_func(F_LOAD_FILE, member(this, load_file));
+	init_inbuilt_funcs();
+}
+
+Interpreter::Interpreter(const char *path) : runpath(std::filesystem::absolute(path).string())
+{
+	init_inbuilt_funcs();
+}
+
+void Interpreter::init_inbuilt_funcs()
+{
+	register_getter("get_runpath", runpath);
+	register_getter("get_rundir", get_rundir().string());
 	register_func("get_launch_args", [&](Args args) {
 		return main.local().get(LAUNCH_ARGS);
 	});
-}
 
-Interpreter::Interpreter(std::string code) : Interpreter()
-{
-	load(code);
+	register_func(F_LOAD_FILE, member(this, load_file));
 }
 
 void Interpreter::lex(std::string &code)
@@ -50,7 +58,7 @@ void Interpreter::preserve_data(bool val)
 	main.set_persisent(val);
 }
 
-Unit Interpreter::load_file(std::string path)
+Unit Interpreter::load_file(const std::string &path)
 {
 	std::ifstream src_file(path, std::ios::binary | std::ios::ate);
 
@@ -137,18 +145,6 @@ Value Interpreter::run()
 	return ret;
 }
 
-void Interpreter::translate(const std::string &outfile)
-{
-	Translator translator(*this);
-	translator.translate_to_file(outfile);
-}
-
-void Interpreter::compile(const std::string &outfile)
-{
-	Translator translator(*this);
-	translator.compile(outfile);
-}
-
 void Interpreter::load_args(int argc, char **argv)
 {
 	Value list_v(Type::LIST);
@@ -177,6 +173,7 @@ void Interpreter::size_info()
 			<< std::endl;
 
 	out << "Internal structures:\n"
+			<< "* ExprEvaluator: " << sizeof(ExprEvaluator) << '\n'
 			<< "* Expression: " << sizeof(Expression) << '\n'
 			<< "* Token: " << sizeof(Token) << '\n'
 			<< "* Library: " << sizeof(Library) << '\n'

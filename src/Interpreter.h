@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <filesystem>
 
 #include "Lexer.h"
 #include "Methan0lParser.h"
@@ -18,16 +19,29 @@ namespace mtl
 class Interpreter: public ExprEvaluator
 {
 	private:
+		const std::string runpath;
 		Methan0lParser parser;
 		Unit main;
 
 		Unit load_unit(std::istream &codestr);
 		Unit load_unit(std::string &code);
 
+		void init_inbuilt_funcs();
+
 	public:
-		Interpreter(std::string code);
 		Interpreter();
+		Interpreter(const char *runpath);
 		~Interpreter() = default;
+
+		inline const std::string& get_runpath()
+		{
+			return runpath;
+		}
+
+		inline std::filesystem::path get_rundir()
+		{
+			return std::filesystem::path(runpath).parent_path();
+		}
 
 		template<typename T>
 		bool try_load(T &&loader)
@@ -50,14 +64,12 @@ class Interpreter: public ExprEvaluator
 		void lex(std::string &code);
 		void load();
 
-		Unit load_file(std::string path);
+		Unit load_file(const std::string &path);
 		void load(const Unit &main);
 		void load(std::istream &codestr);
 		void load(std::string &code);
 
 		Value run();
-		void translate(const std::string &outfile);
-		void compile(const std::string &outfile);
 
 		void load_args(int argc, char **argv);
 
