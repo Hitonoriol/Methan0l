@@ -56,4 +56,13 @@ std::ostream& BinaryOperatorExpr::info(std::ostream &str)
 			<< "}");
 }
 
+bool BinaryOperatorExpr::is(Expression &expr, TokenType op)
+{
+	bool match = false;
+	if_instanceof<BinaryOperatorExpr>(expr, [&](auto &bin) {
+		match = bin.opr.get_type() == op;
+	});
+	return match;
+}
+
 }

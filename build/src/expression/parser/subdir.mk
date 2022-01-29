@@ -6,6 +6,7 @@
 CPP_SRCS += \
 ../src/expression/parser/BinaryOperatorParser.cpp \
 ../src/expression/parser/ClassParser.cpp \
+../src/expression/parser/FunctionParser.cpp \
 ../src/expression/parser/GroupParser.cpp \
 ../src/expression/parser/InfixWordOperatorParser.cpp \
 ../src/expression/parser/ListParser.cpp \
@@ -16,6 +17,7 @@ CPP_SRCS += \
 OBJS += \
 ./src/expression/parser/BinaryOperatorParser.o \
 ./src/expression/parser/ClassParser.o \
+./src/expression/parser/FunctionParser.o \
 ./src/expression/parser/GroupParser.o \
 ./src/expression/parser/InfixWordOperatorParser.o \
 ./src/expression/parser/ListParser.o \
@@ -26,6 +28,7 @@ OBJS += \
 CPP_DEPS += \
 ./src/expression/parser/BinaryOperatorParser.d \
 ./src/expression/parser/ClassParser.d \
+./src/expression/parser/FunctionParser.d \
 ./src/expression/parser/GroupParser.d \
 ./src/expression/parser/InfixWordOperatorParser.d \
 ./src/expression/parser/ListParser.d \

@@ -77,6 +77,7 @@ enum class TokenType : uint16_t
 	OUT_NL,				// <%
 	FUNC_DEF_SHORT,		// #(
 	INFIX_WORD_LHS_L,	// *[
+	FUNC_DEF_SHORT_ALT,	// @:
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -112,6 +113,7 @@ enum class TokenType : uint16_t
 
 	NONE = 0x300,
 	EXPR_END,
+	LAMBDA_RET,
 	END = 0xFFFF
 };
 
@@ -162,7 +164,7 @@ class Token
 				":=", "=>", "!=", "+=", "-=",
 				"*=", "/=", "&&", "||", "^^",
 				"**", "!!", "%>", "<%", "#(",
-				"*["
+				"*[", "@:"
 		};
 
 		static constexpr std::string_view word_ops[] = {
@@ -212,6 +214,7 @@ class Token
 		Token(char chr);
 		Token(std::string op);
 		Token& operator=(const Token &rhs);
+		void set_type(TokenType);
 		TokenType get_type() const;
 		std::string& get_value();
 

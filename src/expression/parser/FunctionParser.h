@@ -11,28 +11,22 @@ namespace mtl
 {
 
 /*
- * func @(a, b, ...) {...}
- * #(a, b, ...) {...}
+ * 1. func @(a, b, ...) {...}
+ * 2. func: a, b, ... {...}
+ * 3. #(a, b, ...) {...}
+ * 4. @: a, b, ... {...}
+ *
+ * Or:
+ * <1|2|3|4> -> expr
  */
 class FunctionParser: public PrefixParser
 {
+	private:
+		/* Re-contextualize the `->` token to stop parser from interpreting it as an infix operator */
+		bool lambdize_arrow(Parser &parser);
+
 	public:
-		ExprPtr parse(Parser &parser, Token token) override
-		{
-			if (!parser.match(TokenType::MAP_DEF_L))
-				token.assert_type(TokenType::FUNC_DEF_SHORT);
-
-			ArgDefList args;
-			MapParser::parse(parser, [&](auto key, auto val) {
-				args.push_back(std::make_pair(key, val));
-			});
-
-			ExprPtr body_expr = parser.parse();
-			UnitExpr body = instanceof<UnitExpr>(body_expr) ?
-					try_cast<UnitExpr>(body_expr) : UnitExpr({body_expr});
-
-			return make_expr<FunctionExpr>(line(token), args, body);
-		}
+		ExprPtr parse(Parser &parser, Token token) override;
 };
 
 } /* namespace mtl */

@@ -25,6 +25,8 @@ class BinaryOperatorExpr: public Expression
 		ExprPtr& get_rhs();
 
 		std::ostream& info(std::ostream &str);
+
+		static bool is(Expression&, TokenType);
 };
 
 } /* namespace mtl */

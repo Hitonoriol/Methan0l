@@ -68,6 +68,8 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 	register_parser(TokenType::FUNC_DEF, new FunctionParser());	// func @(arg1, arg2: def_val, ...) {expr1, expr2, ...}
 	alias_prefix(TokenType::FUNC_DEF, TokenType::FUNC_DEF_SHORT);
+	alias_prefix(TokenType::FUNC_DEF, TokenType::FUNC_DEF_SHORT_ALT);
+
 	register_parser(TokenType::BOX, new BoxUnitParser());// box_unit = box {expr1, expr2, ...}
 	register_parser(TokenType::CLASS, new ClassParser()); // class: ClassName = @(private => $(), ...)
 	register_parser(TokenType::TRY, new TryCatchParser());

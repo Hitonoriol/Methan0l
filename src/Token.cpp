@@ -102,6 +102,11 @@ bool operator !=(const char chr, const TokenType &token)
 	return !(chr == token);
 }
 
+void Token::set_type(TokenType type)
+{
+	this->type = type;
+}
+
 TokenType Token::get_type() const
 {
 	return type;
