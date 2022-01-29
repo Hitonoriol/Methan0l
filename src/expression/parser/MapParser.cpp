@@ -30,26 +30,34 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 
 /* Assumes that the `@(` token is already consumed */
 void MapParser::parse(Parser &parser,
-		std::function<void(std::string, ExprPtr)> collector)
+		std::function<void(std::string, ExprPtr)> collector,
+		TokenType ends_with)
 {
-	if (!parser.match(TokenType::PAREN_R)) {
+	if (!parser.match(ends_with)) {
 		do {
-			ExprPtr pair_expr = parser.parse();
-
-			/* Key with no value specified */
+			ExprPtr pair_expr = parser.peek_parse();
+			/* Collect key with no value specified */
 			if (instanceof<IdentifierExpr>(pair_expr)
 					|| instanceof<LiteralExpr>(pair_expr)) {
+				parser.consume_peeked();
 				collector(key_string(pair_expr), LiteralExpr::empty());
 				continue;
 			}
 
-			BinaryOperatorExpr &pair = try_cast<BinaryOperatorExpr>(pair_expr);
-			if (pair.get_operator() != TokenType::KEYVAL)
-				throw std::runtime_error("Unexpected opr in map declaration");
+			/* Stop parsing if a binary non-`=>` token is reached */
+			if (!BinaryOperatorExpr::is(*pair_expr, TokenType::KEYVAL)) {
+				collector(key_string(parser.parse(0, true)), LiteralExpr::empty());
+				break;
+			} else
+				parser.consume_peeked();
 
+			/* Collect key-value pair: `key => value_expr` */
+			BinaryOperatorExpr &pair = try_cast<BinaryOperatorExpr>(pair_expr);
 			collector(key_string(pair.get_lhs()), pair.get_rhs());
 		} while (parser.match(TokenType::COMMA));
-		parser.consume(TokenType::PAREN_R);
+
+		if (ends_with != TokenType::NONE)
+			parser.consume(ends_with);
 	}
 }
 
@@ -59,9 +67,9 @@ std::string MapParser::key_string(ExprPtr expr)
 		return IdentifierExpr::get_name(expr);
 
 	if (instanceof<LiteralExpr>(expr.get()))
-		return Value(try_cast<LiteralExpr>(expr).raw_value()).to_string();
+		return try_cast<LiteralExpr>(expr).raw_value().to_string();
 
-	throw std::runtime_error("Unsupported map key type");
+	throw std::runtime_error("Invalid map key expression: " + expr->info());
 }
 
 }

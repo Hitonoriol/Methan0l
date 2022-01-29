@@ -2,6 +2,7 @@
 #define SRC_EXPRESSION_PARSER_MAPPARSER_H_
 
 #include "PrefixParser.h"
+#include "Token.h"
 
 namespace mtl
 {
@@ -11,7 +12,7 @@ class MapParser: public PrefixParser
 {
 	public:
 		ExprPtr parse(Parser &parser, Token token) override;
-		static void parse(Parser &parser, std::function<void(std::string, ExprPtr)> collector);
+		static void parse(Parser &parser, std::function<void(std::string, ExprPtr)> collector, TokenType ends_with = TokenType::PAREN_R);
 		static std::string key_string(ExprPtr expr);
 };
 

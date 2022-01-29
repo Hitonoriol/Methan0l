@@ -16,6 +16,8 @@
 
 #define DBG if constexpr (mtl::DEBUG)
 #define IFDBG(body) DBG { body; }
+#define LOG(out) DBG{ std::cout << out << std::endl; }
+#define TRACE(out) LOG(__FILE__ << ":" << __LINE__ << "[" << __func__ << "] " << out)
 
 namespace mtl
 {
