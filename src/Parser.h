@@ -30,8 +30,15 @@ class Parser
 		std::deque<Token> read_queue;
 		Unit root_unit;
 
+		int32_t peek_start = -1;
+		int32_t peek_idx = -1;
+
+		void peek_mode(bool);
+		bool peeking();
+
 		template<typename T>
-		inline int get_lookahead_precedence(std::unordered_map<TokenType, std::shared_ptr<T>> &parsers)
+		inline int get_lookahead_precedence(
+				std::unordered_map<TokenType, std::shared_ptr<T>> &parsers)
 		{
 			TokenType tok = look_ahead().get_type();
 			if (Token::is_semantic(tok)) {
@@ -62,11 +69,16 @@ class Parser
 		~Parser() = default;
 
 		void parse_all();
-		ExprPtr parse(int precedence = 0);
+		ExprPtr parse(int precedence = 0, bool prefix_only = false);
+
+		ExprPtr peek_parse(int precedence = 0);
+		void consume_peeked();
+
 		bool match(TokenType expected);
 		Token consume(TokenType expected);
 		Token consume();
 		Token& look_ahead(size_t n = 0);
+
 		void emplace(const Token &token);
 
 		void reset();

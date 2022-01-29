@@ -38,7 +38,7 @@ void Parser::alias_prefix(TokenType registered_tok, TokenType alias)
 	prefix_parsers.emplace(alias, prefix_parsers.at(registered_tok));
 }
 
-ExprPtr Parser::parse(int precedence)
+ExprPtr Parser::parse(int precedence, bool prefix_only)
 {
 	++nesting_lvl;
 	Token token = consume();
@@ -55,7 +55,7 @@ ExprPtr Parser::parse(int precedence)
 	auto &prefix = prefix_it->second;
 	ExprPtr lhs = prefix->parse(*this, token);
 
-	if (match(TokenType::EXPR_END)) {
+	if (prefix_only || match(TokenType::EXPR_END)) {
 		if constexpr (DEBUG)
 			out << "* Forced end of expression reached" << std::endl;
 
@@ -91,6 +91,14 @@ ExprPtr Parser::parse(int precedence)
 	return lhs;
 }
 
+ExprPtr Parser::peek_parse(int precedence)
+{
+	peek_mode(true);
+	ExprPtr expr = parse(precedence);
+	peek_mode(false);
+	return expr;
+}
+
 void Parser::parse_all()
 {
 	if constexpr (DEBUG)
@@ -124,8 +132,10 @@ bool Parser::match(TokenType expected)
 Token Parser::consume()
 {
 	look_ahead();
-	Token &ret = read_queue.front();
-	read_queue.pop_front();
+	Token &ret = !peeking() ? read_queue.front() : read_queue[peek_idx];
+	if (!peeking())
+		read_queue.pop_front();
+	else ++peek_idx;
 	return ret;
 }
 
@@ -168,10 +178,36 @@ void Parser::emplace(const Token &token)
 
 Token& Parser::look_ahead(size_t n)
 {
+	if (peeking())
+		n += peek_idx;
+
 	while (n >= read_queue.size())
 		read_queue.push_back(lexer.next());
 
 	return read_queue[n];
+}
+
+void Parser::peek_mode(bool enable)
+{
+	if (enable && !peeking()) {
+		peek_start = nesting_lvl;
+		peek_idx = 0;
+	}
+	else if (!enable && peek_start == nesting_lvl)
+		peek_start = -1;
+}
+
+bool Parser::peeking()
+{
+	return peek_start > -1;
+}
+
+void Parser::consume_peeked()
+{
+	if (peek_idx > -1) {
+		read_queue.erase(read_queue.begin(), read_queue.begin() + peek_idx);
+		peek_idx = -1;
+	}
 }
 
 int Parser::get_lookahead_precedence(bool prefix)
