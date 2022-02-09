@@ -124,7 +124,7 @@ bool InteractiveRunner::load_line(std::string &line)
 
 void InteractiveRunner::start()
 {
-	std::cout << FULL_VERSION_STR << " on " << get_os() << ". "
+	std::cout << FULL_VERSION_STR << " on " << get_os() << ".\n"
 			<< "Use \"" << cmd_prefix << "help\" to view command list." << std::endl;
 	methan0l.preserve_data(true);
 	std::string line;
