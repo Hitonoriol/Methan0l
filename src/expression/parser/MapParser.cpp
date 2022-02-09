@@ -35,11 +35,12 @@ void MapParser::parse(Parser &parser,
 {
 	if (!parser.match(ends_with)) {
 		do {
-			ExprPtr pair_expr = parser.peek_parse();
+			auto peeked = parser.peek_parse();
+			ExprPtr pair_expr = peeked.expression;
 			/* Collect key with no value specified */
 			if (instanceof<IdentifierExpr>(pair_expr)
 					|| instanceof<LiteralExpr>(pair_expr)) {
-				parser.consume_peeked();
+				parser.consume_peeked(peeked.descriptor);
 				collector(key_string(pair_expr), LiteralExpr::empty());
 				continue;
 			}
@@ -49,7 +50,7 @@ void MapParser::parse(Parser &parser,
 				collector(key_string(parser.parse(0, true)), LiteralExpr::empty());
 				break;
 			} else
-				parser.consume_peeked();
+				parser.consume_peeked(peeked.descriptor);
 
 			/* Collect key-value pair: `key => value_expr` */
 			BinaryOperatorExpr &pair = try_cast<BinaryOperatorExpr>(pair_expr);

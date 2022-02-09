@@ -18,6 +18,23 @@
 namespace mtl
 {
 
+struct PeekPos
+{
+	int32_t start, offset;
+	PeekPos(int32_t start, int32_t offset) : start(start), offset(offset) {}
+	inline int32_t next()
+	{
+		return start + (offset++);
+	}
+};
+
+struct PeekedExpr
+{
+	PeekPos descriptor;
+	ExprPtr expression;
+	PeekedExpr(PeekPos desc, ExprPtr expr) : descriptor(desc), expression(expr) {}
+};
+
 class Parser
 {
 	private:
@@ -30,11 +47,12 @@ class Parser
 		std::deque<Token> read_queue;
 		Unit root_unit;
 
-		int32_t peek_start = -1;
-		int32_t peek_idx = -1;
+		std::stack<PeekPos> peek_stack;
+		int32_t peek_pos = 0;
 
 		void peek_mode(bool);
 		bool peeking();
+		PeekPos& peek_descriptor();
 
 		template<typename T>
 		inline int get_lookahead_precedence(
@@ -71,8 +89,8 @@ class Parser
 		void parse_all();
 		ExprPtr parse(int precedence = 0, bool prefix_only = false);
 
-		ExprPtr peek_parse(int precedence = 0);
-		void consume_peeked();
+		PeekedExpr peek_parse(int precedence = 0);
+		void consume_peeked(PeekPos);
 
 		bool match(TokenType expected);
 		Token consume(TokenType expected);
