@@ -70,11 +70,6 @@ Token& Token::operator=(const Token &rhs)
 	return *this;
 }
 
-std::string_view Token::reserved(const Word &word)
-{
-	return reserved_words[static_cast<int>(word)];
-}
-
 void Token::assert_type(TokenType type)
 {
 	if (this->type != type)

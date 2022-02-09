@@ -10,6 +10,7 @@
 #include <thread>
 
 #include "expression/IdentifierExpr.h"
+#include "expression/InvokeExpr.h"
 #include "expression/parser/MapParser.h"
 #include "ExprEvaluator.h"
 #include "structure/Value.h"
@@ -29,11 +30,12 @@ void LibData::load()
 	getter("get_version_code", VERSION_CODE);
 	getter("get_version", VERSION_STR);
 
-	/* obj = Type.new$(arg1, arg2, ...) */
-	function("new", [&](Args args) {
-		std::string type_name = MapParser::key_string(args[0]);
-		args.pop_front();
-		return Value(eval->get_type_mgr().create_object(type_name, args));
+	/* obj = new: Class(arg1, arg2, ...) */
+	prefix_operator(TokenType::NEW, [&](ExprPtr rhs) {
+		rhs->assert_type<InvokeExpr>("Invalid `new` expression");
+		auto &ctor_call = try_cast<InvokeExpr>(rhs);
+		std::string type_name = MapParser::key_string(ctor_call.get_lhs());
+		return Value(eval->get_type_mgr().create_object(type_name, ctor_call.arg_list()));
 	});
 
 	/* ref.reset$(new_idfr) */

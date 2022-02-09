@@ -39,6 +39,10 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 
 	ArgDefList args;
 	MapParser::parse(parser, [&](auto key, auto val) {
+		/* Handles the no-arg case for unparenthesized forms */
+		if (short_form && key == Token::reserved(Word::NIL))
+			return;
+
 		args.push_back(std::make_pair(key, val));
 		LOG("* Parsed argdef pair")
 	}, short_form ? TokenType::NONE : TokenType::PAREN_R);

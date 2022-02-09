@@ -141,6 +141,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_word(TokenType::HASHCODE);
 	register_word(TokenType::NO_EVAL, Precedence::NO_EVAL);
 	register_word(TokenType::USING_MODULE);
+	register_word(TokenType::NEW);
 
 	/* Infix word oprs */
 	register_infix_word(TokenType::TYPE_SAFE, Precedence::IO);

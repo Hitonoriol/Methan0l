@@ -110,6 +110,7 @@ enum class TokenType : uint16_t
 	TRY,
 	CATCH,
 	USING_MODULE,
+	NEW,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -172,7 +173,7 @@ class Token
 				"class", "if", "else", "return", "defval",
 				"objcopy", "typesafe", "hashcode",
 				"typename", "noeval", "defset", "while", "for",
-				"try", "catch", "using_module"
+				"try", "catch", "using_module", "new"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
@@ -251,7 +252,11 @@ class Token
 		static char chr(TokenType tok);
 		static TokenType tok(char chr);
 
-		static std::string_view reserved(const Word &word);
+		static constexpr std::string_view reserved(const Word &word)
+		{
+			return reserved_words[static_cast<int>(word)];
+		}
+
 		static Word as_reserved(std::string &tokstr);
 		static bool is_reserved(std::string &tokstr);
 		static TokenType as_word_op(std::string &tokstr);
