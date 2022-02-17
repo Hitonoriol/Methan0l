@@ -21,6 +21,7 @@
 #include "expression/parser/WordOperatorParser.h"
 #include "expression/parser/InfixWordOperatorParser.h"
 #include "expression/parser/TryCatchParser.h"
+#include "expression/parser/FormatStrParser.h"
 
 namespace mtl
 {
@@ -34,6 +35,8 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_literal_parser(TokenType::DOUBLE, Type::DOUBLE);
 	register_literal_parser(TokenType::INTEGER, Type::INTEGER);
 	register_literal_parser(TokenType::CHAR, Type::CHAR);
+	register_parser(TokenType::FORMAT_STRING, new FormatStrParser()); // $"... {} ..." arg1, arg2, ...
+
 
 	/* Core syntax constructs */
 	register_parser(TokenType::HASH, new IdentifierParser()); // #foo -- global scope lookup

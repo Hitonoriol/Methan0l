@@ -85,6 +85,7 @@ enum class TokenType : uint16_t
 	STRING,
 	BOOLEAN,
 	CHAR,
+	FORMAT_STRING,
 
 	IDENTIFIER,
 

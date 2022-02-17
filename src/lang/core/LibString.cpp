@@ -13,16 +13,11 @@
 namespace mtl
 {
 
-std::regex LibString::string_fmt("\\{(.?)\\}");
+const std::regex LibString::string_fmt("\\{(.?)\\}");
 
 void LibString::load()
 {
-	/*
-	 *  str.format$(arg1, arg2, ...)
-	 *  Format: "Text {1}; more text {2}. x = {}..."
-	 *  	Argument indices start from 1;
-	 *  	{} is equivalent to `next argument`
-	 */
+	/* str.format$(arg1, arg2, ...) */
 	function("format", [&](Args args) {
 		std::string fmt = str(args);
 		std::vector<std::string> sargs;
@@ -30,19 +25,7 @@ void LibString::load()
 		for (auto it = ++args.begin(); it != args.end(); ++it)
 			sargs.push_back(val(*it).to_string(eval));
 
-		size_t last_idx {0};
-		std::smatch fmt_match;
-		std::string sidx;
-		while(std::regex_search(fmt, fmt_match, string_fmt)) {
-			sidx = fmt_match[1].str();
-			/* No index specified: `{}` */
-			if (sidx.empty())
-				++last_idx;
-			else last_idx = std::stoi(sidx);
-
-			fmt.replace(fmt_match.position(), fmt_match.length(), sargs[last_idx - 1]);
-		}
-
+		format(fmt, sargs);
 		return Value(fmt);
 	});
 
@@ -141,11 +124,37 @@ void LibString::load()
 
 void LibString::load_operators()
 {
-	/* Inline concatenation */
+	/* String concatenation */
 	infix_operator(TokenType::STRING_CONCAT, [this](auto lhs, auto rhs) {
 		auto lexpr = val(lhs), rexpr = val(rhs);
 		return Value(lexpr.to_string(eval) + rexpr.to_string(eval));
 	});
+}
+
+/*
+ 	 *  `fmt` format: "Text {1}; more text {2}. x = {}..."
+	 *  	Argument indices start from 1;
+	 *  	{} is equivalent to `next argument`
+*/
+void LibString::format(std::string &fmt, const std::vector<std::string> &sargs)
+{
+	size_t last_idx { 0 };
+	std::smatch fmt_match;
+	std::string sidx;
+	while (std::regex_search(fmt, fmt_match, string_fmt)) {
+		sidx = fmt_match[1].str();
+		/* No index specified: `{}` */
+		if (sidx.empty())
+			++last_idx;
+		else
+			last_idx = std::stoi(sidx);
+
+		if (last_idx > sargs.size())
+			throw std::runtime_error("Invalid format argument index: "
+					+ mtl::str(last_idx));
+
+		fmt.replace(fmt_match.position(), fmt_match.length(), sargs[last_idx - 1]);
+	}
 }
 
 } /* namespace mtl */

@@ -11,11 +11,14 @@ namespace mtl
 class LibString: public Library
 {
 	public:
+		static const std::regex string_fmt;
+
 		LibString(ExprEvaluator *eval) : Library(eval) {}
 		void load() override;
 
+		static void format(std::string &fmt, const std::vector<std::string> &sargs);
+
 	private:
-		static std::regex string_fmt;
 
 		void load_operators();
 };

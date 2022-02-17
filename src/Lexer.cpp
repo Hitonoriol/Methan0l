@@ -179,11 +179,21 @@ bool Lexer::try_save_bichar_op(char chr, char next)
 void Lexer::begin(char chr)
 {
 	cur_int_literal = IntLiteral::NONE;
-	if (chr == TokenType::QUOTE || chr == TokenType::SINGLE_QUOTE) {
-		toktype = (chr == TokenType::QUOTE) ? TokenType::STRING : TokenType::CHAR;
+	/* Formatted String literal: $"..." */
+	if (chr == TokenType::LIST && match_next(TokenType::QUOTE)) {
+		toktype = TokenType::FORMAT_STRING;
+		next_char();
+		begin(*cur_chr);
+	}
+
+	/* String / Char literal */
+	else if (chr == TokenType::QUOTE || chr == TokenType::SINGLE_QUOTE) {
+		if (toktype != TokenType::FORMAT_STRING)
+			toktype = (chr == TokenType::QUOTE) ? TokenType::STRING : TokenType::CHAR;
 		save(chr);
 	}
 
+	/* Punctuator / Compound punctuator token */
 	else if (!std::isalnum(chr) && Token::is_punctuator(chr)) {
 		char next = look_ahead();
 		if (Token::is_punctuator(next))
@@ -254,13 +264,13 @@ void Lexer::consume()
 	}
 
 	/* Save String / Character literal char */
-	else if (toktype == TokenType::STRING || toktype == TokenType::CHAR) {
+	else if (toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING || toktype == TokenType::CHAR) {
 		/* Save `\` literally when reading a CHAR & ignore unescaped `\` when reading a STRING */
 		if (toktype == TokenType::CHAR
 				|| (chr != TokenType::BACKSLASH || escaped(TokenType::BACKSLASH)))
 			save(chr);
 
-		if ((toktype == TokenType::STRING && unescaped(TokenType::QUOTE))
+		if (((toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING) && unescaped(TokenType::QUOTE))
 				|| (toktype == TokenType::CHAR && unescaped(TokenType::SINGLE_QUOTE)))
 			push();
 
