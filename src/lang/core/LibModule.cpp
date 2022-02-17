@@ -3,6 +3,7 @@
 #include "structure/Value.h"
 #include "ExprEvaluator.h"
 #include "util/util.h"
+#include "lang/structure/File.h"
 
 #include <filesystem>
 #include <boost/dll.hpp>
@@ -90,7 +91,7 @@ std::filesystem::path &append(std::filesystem::path &path, std::string_view apx)
 
 std::string LibModule::find_module(const std::string &path_str)
 {
-	auto path = std::filesystem::absolute(path_str);
+	std::filesystem::path path(File::absolute_path(*eval, path_str));
 	const bool exists = std::filesystem::exists(path);
 	if (exists) {
 		if (!std::filesystem::is_directory(path))

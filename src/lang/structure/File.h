@@ -6,10 +6,11 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <filesystem>
 
-#include "../../structure/object/InbuiltType.h"
-#include "../../structure/object/Object.h"
-#include "../../structure/object/ObjectType.h"
+#include "structure/object/InbuiltType.h"
+#include "structure/object/Object.h"
+#include "structure/object/ObjectType.h"
 
 namespace mtl
 {
@@ -27,6 +28,7 @@ class File: public InbuiltType
 
 		std::fstream &managed_file(Object &obj);
 
+		void set_path(ExprList &args);
 		std::string path(ExprList &args);
 		bool open(Object &obj);
 		bool close(Object &obj);
@@ -39,6 +41,9 @@ class File: public InbuiltType
 	public:
 		File(ExprEvaluator &eval);
 		~File() = default;
+
+		static std::string path(ExprEvaluator&, const std::string&);
+		static std::string absolute_path(ExprEvaluator&, const std::string&);
 };
 
 } /* namespace mtl */

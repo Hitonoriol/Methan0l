@@ -12,14 +12,10 @@
 namespace mtl
 {
 
+extern const std::string SELF_NAME;
 constexpr int VERSION_CODE = MAJOR_VERSION * 10000 + RELEASE_VERSION * 100 + MINOR_VERSION;
-
-static const std::string SELF_NAME = "Methan0l";
-
-static const std::string VERSION_STR = "v"
-		+ str(MAJOR_VERSION) + "."
-		+ str(RELEASE_VERSION)
-		+ (MINOR_VERSION != 0 ? "." + str(MINOR_VERSION) : "");
+extern const std::string VERSION_STR, FULL_VERSION_STR;
+extern const std::string BUILD_TIMESTAMP;
 
 constexpr std::string_view WINDOWS("Windows 64-bit");
 constexpr std::string_view get_os()
@@ -88,17 +84,6 @@ constexpr std::string_view get_os()
 
 #define BUILD_DAY_CH0 ((__DATE__[4] >= '0') ? (__DATE__[4]) : '0')
 #define BUILD_DAY_CH1 (__DATE__[5])
-
-static const std::string BUILD_TIMESTAMP(
-		str(BUILD_YEAR_CH0) + str(BUILD_YEAR_CH1) + str(BUILD_YEAR_CH2)	+ str(BUILD_YEAR_CH3) + "/"
-		+ str(BUILD_MONTH_CH0) + str(BUILD_MONTH_CH1) + "/"
-		+ str(BUILD_DAY_CH0) + str(BUILD_DAY_CH1) + ", " __TIME__
-);
-
-static const std::string FULL_VERSION_STR(
-		SELF_NAME + " " + VERSION_STR + " "
-		"(#" + str(VERSION_CODE) + ", " + BUILD_TIMESTAMP + ")"
-);
 
 }
 

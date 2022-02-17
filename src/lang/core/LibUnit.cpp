@@ -34,20 +34,9 @@ void LibUnit::load()
 
 	/* sync_work_dir() */
 	function("sync_work_dir", [&](Args args) {
-		Value &argv_v = eval->global()->get(Interpreter::LAUNCH_ARGS);
-		if (!argv_v.nil()) {
-			auto &argv = argv_v.get<ValList>();
-			auto path = std::filesystem::absolute(argv[0].get<std::string>()).parent_path();
-			std::filesystem::current_path(path);
-		}
+		Value &scrdir = eval->global()->get(Interpreter::SCRDIR, true);
+		std::filesystem::current_path(scrdir.get<std::string>());
 		return Value::NO_VALUE;
-	});
-
-	/* exec$(cmd) */
-	function("exec", [&](Args args) {
-		Value out_v(Type::STRING);
-		dec ret = mtl::exec(str(args, 0), out_v.get<std::string>());
-		return Value(ValList{out_v, Value(ret)});
 	});
 
 	/* pause$(ms) */
@@ -97,6 +86,15 @@ void LibUnit::load()
 
 	function("is_main_unit", [&](Args args) {
 		return Value(&eval->get_main() == eval->current_unit());
+	});
+
+	/* unit.value$("idfr_name")
+		 * value$("idfr_name") -- get idfr's Value from Main Unit */
+	function("value", [&](Args args) {
+		Unit &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : eval->get_main();
+		std::string idfr_name = mtl::str(val(args.back()));
+		Value &val = unit.local().get(idfr_name);
+		return Value::ref(val);
 	});
 
 	/* unit.local$(action_to_exec) <-- execute Unit <action_to_exec> inside the <unit>'s local scope */

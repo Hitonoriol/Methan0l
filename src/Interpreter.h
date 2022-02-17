@@ -12,6 +12,7 @@
 #include "expression/AssignExpr.h"
 #include "expression/TryCatchExpr.h"
 #include "type.h"
+#include "util/global.h"
 
 namespace mtl
 {
@@ -19,7 +20,6 @@ namespace mtl
 class Interpreter: public ExprEvaluator
 {
 	private:
-		const std::string runpath;
 		Methan0lParser parser;
 		Unit main;
 
@@ -35,12 +35,12 @@ class Interpreter: public ExprEvaluator
 
 		inline const std::string& get_runpath()
 		{
-			return runpath;
+			return RUNPATH;
 		}
 
-		inline std::filesystem::path get_rundir()
+		inline const std::string& get_rundir()
 		{
-			return std::filesystem::path(runpath).parent_path();
+			return RUNDIR;
 		}
 
 		template<typename T>
@@ -119,7 +119,7 @@ class Interpreter: public ExprEvaluator
 			}
 		}
 
-		static const std::string LAUNCH_ARGS, F_LOAD_FILE;
+		static const std::string LAUNCH_ARGS, SCRDIR, F_LOAD_FILE;
 };
 
 } /* namespace mtl */

@@ -9,6 +9,7 @@ CPP_SRCS += \
 ../src/expression/ClassExpr.cpp \
 ../src/expression/ConditionalExpr.cpp \
 ../src/expression/Expression.cpp \
+../src/expression/FormatStrExpr.cpp \
 ../src/expression/FunctionExpr.cpp \
 ../src/expression/IdentifierExpr.cpp \
 ../src/expression/IndexExpr.cpp \
@@ -27,6 +28,7 @@ OBJS += \
 ./src/expression/ClassExpr.o \
 ./src/expression/ConditionalExpr.o \
 ./src/expression/Expression.o \
+./src/expression/FormatStrExpr.o \
 ./src/expression/FunctionExpr.o \
 ./src/expression/IdentifierExpr.o \
 ./src/expression/IndexExpr.o \
@@ -45,6 +47,7 @@ CPP_DEPS += \
 ./src/expression/ClassExpr.d \
 ./src/expression/ConditionalExpr.d \
 ./src/expression/Expression.d \
+./src/expression/FormatStrExpr.d \
 ./src/expression/FunctionExpr.d \
 ./src/expression/IdentifierExpr.d \
 ./src/expression/IndexExpr.d \

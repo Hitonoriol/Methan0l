@@ -288,6 +288,8 @@ class ExprEvaluator
 		Function& current_function();
 		Unit* current_unit();
 		Unit& get_main();
+		const std::string& get_scriptpath();
+		const std::string& get_scriptdir();
 
 		Value execute(Unit &unit, const bool use_own_scope = true);
 		Value invoke(const Unit &unit, ExprList &args);

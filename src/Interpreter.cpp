@@ -15,6 +15,7 @@ namespace mtl
 {
 
 const std::string Interpreter::LAUNCH_ARGS(".argv");
+const std::string Interpreter::SCRDIR(".scrdir");
 const std::string Interpreter::F_LOAD_FILE(".load");
 
 Interpreter::Interpreter() : ExprEvaluator()
@@ -22,15 +23,19 @@ Interpreter::Interpreter() : ExprEvaluator()
 	init_inbuilt_funcs();
 }
 
-Interpreter::Interpreter(const char *path) : runpath(std::filesystem::absolute(path).string())
+Interpreter::Interpreter(const char *path)
 {
+	auto rpath = std::filesystem::absolute(path);
+	RUNPATH = rpath.string();
+	RUNDIR = rpath.parent_path().string();
+	INTERPRETER = this;
 	init_inbuilt_funcs();
 }
 
 void Interpreter::init_inbuilt_funcs()
 {
-	register_getter("get_runpath", runpath);
-	register_getter("get_rundir", get_rundir().string());
+	register_getter("get_runpath", RUNPATH);
+	register_getter("get_rundir", RUNDIR);
 	register_func("get_launch_args", [&](Args args) {
 		return main.local().get(LAUNCH_ARGS);
 	});
@@ -151,7 +156,10 @@ void Interpreter::load_args(int argc, char **argv)
 	auto &list = list_v.get<ValList>();
 	for (int i = 1; i < argc; ++i)
 		list.push_back(Value(std::string(argv[i])));
-	main.local().set(LAUNCH_ARGS, list_v);
+
+	auto &table = main.local();
+	table.set(LAUNCH_ARGS, list_v);
+	table.set(SCRDIR, std::filesystem::absolute(argv[0]).parent_path().string());
 }
 
 void Interpreter::size_info()

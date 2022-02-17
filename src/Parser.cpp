@@ -52,7 +52,7 @@ ExprPtr Parser::parse(int precedence, bool prefix_only)
 
 	auto prefix_it = prefix_parsers.find(token.get_type());
 	if (prefix_it == prefix_parsers.end())
-		throw std::runtime_error("Unknown token: " + token.to_string());
+		throw std::runtime_error("Unknown prefix token: " + token.to_string());
 
 	auto &prefix = prefix_it->second;
 	ExprPtr lhs = prefix->parse(*this, token);

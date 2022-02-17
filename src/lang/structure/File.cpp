@@ -11,14 +11,16 @@
 #include <utility>
 #include <filesystem>
 
-#include "../../expression/LiteralExpr.h"
-#include "../../expression/Expression.h"
-#include "../../ExprEvaluator.h"
-#include "../../structure/Function.h"
-#include "../../structure/object/Object.h"
-#include "../../structure/Value.h"
-#include "../../type.h"
-#include "../../util/util.h"
+#include "Interpreter.h"
+#include "expression/LiteralExpr.h"
+#include "expression/Expression.h"
+#include "ExprEvaluator.h"
+#include "structure/Function.h"
+#include "structure/object/Object.h"
+#include "structure/Value.h"
+#include "type.h"
+#include "util/util.h"
+#include "util/global.h"
 
 namespace mtl
 {
@@ -27,13 +29,13 @@ namespace fs = std::filesystem;
 
 File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 {
-	/* file = File.new$("path/to/file.ext") */
+	/* file = new: File("path/to/file.ext") */
 	register_method(std::string(CONSTRUCT), [&](auto args) {
 		Object &obj = Object::get_this(args);
 		if constexpr (DEBUG)
 		out << "File data: " << obj.get_data() << std::endl;
 
-		obj.field(FNAME) = str(args[1]->evaluate(eval));
+		set_path(args);
 		return Value::NO_VALUE;
 	});
 
@@ -44,7 +46,7 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 
 	/* file.set$(path) */
 	register_method("set", [&](auto args) {
-		Object::get_this(args).field(FNAME) = str(args[1]->evaluate(eval));
+		set_path(args);
 		return Object::get_this_v(args);
 	});
 
@@ -89,10 +91,15 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 
 	/* file.absolute_path$() */
 	register_method("absolute_path", [&](auto args) {
-		return Value(fs::absolute(path(args)).string());
+		return Value(absolute_path(eval, path(args)));
 	});
 
-	/* file.absolute_path$() */
+	/* file.path$() */
+	register_method("path", [&](auto args) {
+		return Object::get_this(args).field(FNAME);
+	});
+
+	/* file.filename$() */
 	register_method("filename", [&](auto args) {
 		return Value(fs::path(path(args)).filename().string());
 	});
@@ -190,6 +197,11 @@ File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
 	});
 }
 
+void File::set_path(ExprList &args)
+{
+	Object::get_this(args).field(FNAME) = path(eval, str(args[1]->evaluate(eval)));
+}
+
 void File::reset(std::fstream &file)
 {
 	file.clear();
@@ -214,7 +226,7 @@ std::string File::path(ExprList &args)
 {
 	/* This allows to use all `File` methods statically by providing the `path` as the first argument */
 	if (ObjectType::static_call(args))
-		return args[1]->evaluate(eval);
+		return path(*INTERPRETER, args[1]->evaluate(eval));
 
 	return str(Object::get_this(args).field(FNAME));
 }
@@ -249,6 +261,42 @@ std::fstream& File::managed_file(Object &obj)
 		throw std::runtime_error("Can't access a non-open file");
 
 	return *(managed_files.at(obj.id()));
+}
+
+struct PathPrefix
+{
+	static constexpr std::string_view
+		RUNDIR = "$:",
+		SCRDIR = "#:";
+};
+
+/*
+ * Expands `path aliases`:
+ * 		`$:` - expands into interpreter run directory
+ * 		`#:` - expands into script run directory
+ * And prepends the result to the rest of the `pathstr`
+ * Example: `$:/modules/ncurses` becomes: `/path/to/binary/modules/ncurses`
+ * Or expands relative paths into absolute ones via the std::filesystem::absolute if no aliases are present in the `pathstr`
+ */
+std::string File::absolute_path(ExprEvaluator &eval, const std::string &pathstr)
+{
+	auto alias = std::string_view(pathstr).substr(0, 2);
+	std::string retpath = pathstr;
+	if (alias == PathPrefix::RUNDIR)
+		replace_all(retpath, alias, RUNDIR);
+	else if (alias == PathPrefix::SCRDIR) {
+		replace_all(retpath, alias, eval.get_scriptdir());
+	} else
+		retpath = fs::absolute(retpath).string();
+	return retpath;
+}
+
+std::string File::path(ExprEvaluator &eval, const std::string &pathstr)
+{
+	auto alias = std::string_view(pathstr).substr(0, 2);
+	if (alias == PathPrefix::RUNDIR || alias == PathPrefix::SCRDIR)
+		return absolute_path(eval, pathstr);
+	return pathstr;
 }
 
 } /* namespace mtl */

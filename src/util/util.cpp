@@ -28,7 +28,7 @@ std::vector<std::string> split(const std::string &s, const std::string &delimite
 	return res;
 }
 
-void replace_all(std::string &str, const std::string &from, const std::string &to,
+void replace_all(std::string &str, std::string_view from, const std::string &to,
 		int limit)
 {
 	if (from.empty())

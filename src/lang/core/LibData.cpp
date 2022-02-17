@@ -30,14 +30,6 @@ void LibData::load()
 	getter("get_version_code", VERSION_CODE);
 	getter("get_version", VERSION_STR);
 
-	/* obj = new: Class(arg1, arg2, ...) */
-	prefix_operator(TokenType::NEW, [&](ExprPtr rhs) {
-		rhs->assert_type<InvokeExpr>("Invalid `new` expression");
-		auto &ctor_call = try_cast<InvokeExpr>(rhs);
-		std::string type_name = MapParser::key_string(ctor_call.get_lhs());
-		return Value(eval->get_type_mgr().create_object(type_name, ctor_call.arg_list()));
-	});
-
 	/* ref.reset$(new_idfr) */
 	function("reset", [&](Args args) {
 		Value &ref_val = eval->referenced_value(args[0], false);
@@ -52,15 +44,6 @@ void LibData::load()
 
 	function("get_args", [&](Args args) {
 		return eval->current_function().get_callargs();
-	});
-
-	/* unit.value$("idfr_name")
-	 * value$("idfr_name") -- get idfr's Value from Main Unit */
-	function("value", [&](Args args) {
-		Unit &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : eval->get_main();
-		std::string idfr_name = mtl::str(val(args.back()));
-		Value &val = unit.local().get(idfr_name);
-		return Value::ref(val);
 	});
 
 	/* range$(n)				<-- Returns a list w\ Values in range [0; n - 1]
@@ -311,6 +294,14 @@ Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 
 void LibData::load_operators()
 {
+	/* obj = new: Class(arg1, arg2, ...) */
+	prefix_operator(TokenType::NEW, [&](ExprPtr rhs) {
+		rhs->assert_type<InvokeExpr>("Invalid `new` expression");
+		auto &ctor_call = try_cast<InvokeExpr>(rhs);
+		std::string type_name = MapParser::key_string(ctor_call.get_lhs());
+		return Value(eval->get_type_mgr().create_object(type_name, ctor_call.arg_list()));
+	});
+
 	prefix_operator(TokenType::NO_EVAL, [&](ExprPtr rhs) {
 		return Value(rhs);
 	});

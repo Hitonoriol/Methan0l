@@ -3,6 +3,8 @@
 #include <iostream>
 #include <memory>
 
+#include "Interpreter.h"
+
 #include "expression/AssignExpr.h"
 #include "expression/BinaryOperatorExpr.h"
 #include "expression/ConditionalExpr.h"
@@ -131,6 +133,16 @@ void ExprEvaluator::load_main(Unit &main)
 Unit& ExprEvaluator::get_main()
 {
 	return *exec_stack.front();
+}
+
+const std::string& ExprEvaluator::get_scriptpath()
+{
+	return global()->get(Interpreter::LAUNCH_ARGS, true).get<ValList>()[0].get<std::string>();
+}
+
+const std::string& ExprEvaluator::get_scriptdir()
+{
+	return global()->get(Interpreter::SCRDIR, true).get<std::string>();
 }
 
 Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
