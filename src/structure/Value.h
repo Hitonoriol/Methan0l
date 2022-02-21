@@ -164,7 +164,7 @@ class Value
 		template<typename T>
 		static constexpr bool is_heap_storable()
 		{
-			return sizeof(T) > MAX_SIZE;
+			return allowed_type<std::shared_ptr<TYPE(T)>>();
 		}
 
 		template<typename T>
