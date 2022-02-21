@@ -62,6 +62,7 @@ class LibData: public Library
 
 	private:
 		static constexpr std::string_view KEY_LIST = "keys", VAL_LIST = "values";
+		void import_reference(const IdentifierExpr&);
 		void load_operators();
 
 		/* Set operation where `args` contains 2 set expressions */

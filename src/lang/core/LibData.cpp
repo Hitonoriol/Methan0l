@@ -10,6 +10,7 @@
 #include <thread>
 
 #include "expression/IdentifierExpr.h"
+#include "expression/ListExpr.h"
 #include "expression/InvokeExpr.h"
 #include "expression/parser/MapParser.h"
 #include "ExprEvaluator.h"
@@ -292,8 +293,24 @@ Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 	return convert ? Value::ref(lval = rval) : rval;
 }
 
+void LibData::import_reference(const IdentifierExpr &idfr) {
+	auto &name = idfr.get_name();
+	eval->local_scope()->set(name, Value::ref(eval->scope_lookup(name, true)->get(name)));
+}
+
 void LibData::load_operators()
 {
+	prefix_operator(TokenType::GLOBAL, [&](ExprPtr rhs) {
+		if_instanceof<IdentifierExpr>(*rhs, [&](auto &idfr) {
+			import_reference(idfr);
+		});
+		if_instanceof<ListExpr>(*rhs, [&](auto &listexpr) {
+			for (auto &idfr : listexpr.raw_list())
+				import_reference(try_cast<IdentifierExpr>(idfr));
+		});
+		return Value::NO_VALUE;
+	});
+
 	/* obj = new: Class(arg1, arg2, ...) */
 	prefix_operator(TokenType::NEW, [&](ExprPtr rhs) {
 		rhs->assert_type<InvokeExpr>("Invalid `new` expression");

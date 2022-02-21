@@ -112,6 +112,7 @@ enum class TokenType : uint16_t
 	CATCH,
 	USING_MODULE,
 	NEW,
+	GLOBAL,
 
 	NONE = 0x300,
 	EXPR_END,
@@ -174,7 +175,7 @@ class Token
 				"class", "if", "else", "return", "defval",
 				"objcopy", "typesafe", "hashcode",
 				"typename", "noeval", "defset", "while", "for",
-				"try", "catch", "using_module", "new"
+				"try", "catch", "using_module", "new", "global"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
