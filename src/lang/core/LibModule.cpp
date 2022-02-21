@@ -62,15 +62,15 @@ void LibModule::load_module(const std::string &path, Unit &unit)
 	if (!module.has(MODULE_ENTRYPOINT))
 		throw std::runtime_error("\"" + name + "\" is not a methan0l module");
 
-	boost::dll::import_symbol<void(ExprEvaluator*)>(module, MODULE_ENTRYPOINT)(eval);
+	IMPORT<void(ExprEvaluator*)>(module, MODULE_ENTRYPOINT)(eval);
 	for (std::string &symbol : boost::dll::library_info(name).symbols()) {
 		if (contains(symbol, FUNC_DEF_PREFIX))
-			boost::dll::import_symbol<void(void)>(module, symbol)();
+			IMPORT<void(void)>(module, symbol)();
 	}
 
 	unit.local().set(MODULE_NAME, name);
 	if (module.has(MODULE_MAIN))
-		boost::dll::import_symbol<void(void)>(module, MODULE_MAIN)();
+		IMPORT<void(void)>(module, MODULE_MAIN)();
 
 	eval->leave_scope();
 	if (module.is_loaded())

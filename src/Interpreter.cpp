@@ -40,7 +40,7 @@ void Interpreter::init_inbuilt_funcs()
 		return main.local().get(LAUNCH_ARGS);
 	});
 
-	register_func(F_LOAD_FILE, member(this, load_file));
+	register_func(F_LOAD_FILE, member(this, &Interpreter::load_file));
 }
 
 void Interpreter::lex(std::string &code)

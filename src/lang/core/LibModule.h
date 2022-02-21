@@ -9,6 +9,14 @@ namespace mtl
 
 class Unit;
 
+/* `boost::dll::import` was renamed to `boost::dll::import_symbol`
+ * in Boost 1.76 to avoid collision with C++20 `import` keyword */
+#if BOOST_VERSION >= 107600
+	#define IMPORT boost::dll::import_symbol
+#else
+	#define IMPORT boost::dll::import
+#endif
+
 class LibModule: public Library
 {
 	private:
