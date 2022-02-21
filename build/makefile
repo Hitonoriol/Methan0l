@@ -68,7 +68,7 @@ main-build: methan0l
 methan0l: $(OBJS) $(USER_OBJS) makefile objects.mk $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MinGW C++ Linker'
-	g++ -o "methan0l" $(OBJS) $(USER_OBJS) $(LIBS) $(LINK_LIBS) $(LINK_DYNAMIC)
+	g++ -o "methan0l" $(OBJS) $(USER_OBJS) $(LIBS) -m$(BITS) -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

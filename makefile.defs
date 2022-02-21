@@ -18,8 +18,13 @@ LIB_DIR = methan0l-sdk
 LIB_NAME=libmethan0l
 LIB_INC=-I../src
 
-LINK_LIBS=-lboost_filesystem -lboost_system
-LINK_DYNAMIC=
+LINK_LIBS:=-lboost_filesystem -lboost_system
+LINK_DYNAMIC:=
+
+ifdef NO_STATIC
+	LINK_DYNAMIC+= $(LINK_LIBS)
+	LINK_LIBS=
+endif
 
 ifneq ($(OS_NAME),Windows)
 	ifeq ($(OS_NAME),Linux)
@@ -32,13 +37,13 @@ hdir=$(dir $(patsubst ../src/%,./$(LIB_DIR)/%,$1))
 .PHONY: all
 
 release: all lib
-	cd ../modules && (make clean || true) && make
+	cd ../modules; make clean; make || true
 	tar -czf methan0l-$(OS_NAME)$(BITS).tar.gz $(BIN_NAME) $(LIB_DIR) $(LIB_NAME).so ../modules
 
-lib: shared-lib
+lib: libmethan0l.so
 
-shared-lib: all libclean lib-dirs headers $(LIB_SRC)
-	g++ $(filter-out $(patsubst %.cpp,%.o.pic,$(LIB_EXCLUDE)),$(patsubst %.o,%.o.pic,$(LIB_OBJ))) -shared -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME).so
+libmethan0l.so: all libclean lib-dirs headers $(LIB_SRC)
+	g++ $(filter-out $(patsubst %.cpp,%.o.pic,$(LIB_EXCLUDE)),$(patsubst %.o,%.o.pic, $(call rwildcard,./src,*.o))) -shared -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME).so
 
 %.o.pic: %.cpp
 	$(eval src:=$^)
@@ -53,7 +58,7 @@ lib-dirs:
 	mkdir -p $(LIB_DIR)
 
 static-lib: all libclean lib-dirs headers
-	ar rvs $(LIB_DIR)/$(LIB_NAME).a $(LIB_OBJ)
+	ar rvs $(LIB_DIR)/$(LIB_NAME).a  $(call rwildcard,./src,*.o)
 
 libclean:
 	$(RM) $(LIB_DIR)/*

@@ -1,8 +1,8 @@
-LINK_STATIC:=
-LINK_DYNAMIC:=-lncurses -lmenu -lform -lpanel
-MOD_FLAGS:=
+M_LINK_STATIC:= 
+M_LINK_DYNAMIC:=-lncurses
+MOD_FLAGS= 
 
 ifeq ($(OS),Windows_NT)
-	LINK_STATIC=$(LINK_DYNAMIC)
-	LINK_DYNAMIC= 
+	M_LINK_STATIC+=$(M_LINK_DYNAMIC)
+	M_LINK_DYNAMIC= 
 endif
