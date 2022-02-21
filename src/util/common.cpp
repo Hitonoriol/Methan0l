@@ -21,7 +21,7 @@ const std::string BUILD_TIMESTAMP(
 
 const std::string FULL_VERSION_STR(
 		SELF_NAME + " " + VERSION_STR + " "
-		"(#" + str(VERSION_CODE) + ", " + BUILD_TIMESTAMP + ")"
+		"(#" + str(VERSION_CODE) + ", " + str(BITS) + "-bit, " + BUILD_TIMESTAMP + ")"
 );
 
 std::string RUNPATH, RUNDIR;

@@ -7,7 +7,6 @@
 #define MAJOR_VERSION 0
 #define RELEASE_VERSION 2
 #define MINOR_VERSION 1
-#define STR(n) #n
 
 namespace mtl
 {
@@ -17,10 +16,12 @@ constexpr int VERSION_CODE = MAJOR_VERSION * 10000 + RELEASE_VERSION * 100 + MIN
 extern const std::string VERSION_STR, FULL_VERSION_STR;
 extern const std::string BUILD_TIMESTAMP;
 
-constexpr std::string_view WINDOWS("Windows 64-bit");
+constexpr std::string_view WINDOWS("Windows");
 constexpr std::string_view get_os()
 {
 	#ifdef _WIN64
+	return WINDOWS;
+	#elif _WIN32
 	return WINDOWS;
 
 	#elif __APPLE__ || __MACH__
@@ -35,10 +36,18 @@ constexpr std::string_view get_os()
 	#elif __unix || __unix__
 	return "Unix";
 
+	#elif __posix
+	return "POSIX";
+
 	#else
 	return "Other OS";
 
 	#endif
+}
+
+constexpr uint8_t get_bits()
+{
+	return BITS;
 }
 
 // Example of __DATE__ string: "Jul 27 2012"

@@ -2,35 +2,52 @@
 
 RM := rm -rf
 
-BIN_NAME = $(addsuffix $(if $(filter $(OS),Windows_NT),.exe,),methan0l)
+BITS=64
+ifeq ($(OS),Windows_NT) 
+    OS_NAME:=Windows
+else
+    OS_NAME:=$(shell sh -c 'uname -s 2>/dev/null || echo Unknown')
+endif
+
+MACROS=-DBITS=$(BITS)
+BIN_NAME = $(addsuffix $(if $(filter $(OS_NAME),Windows),.exe,),methan0l)
 LIB_EXCLUDE = %Methan0l.cpp
 LIB_OBJ = $(call rwildcard,./src,*.o)
 LIB_SRC = $(patsubst %.cpp,%.o.pic,$(filter-out $(LIB_EXCLUDE),$(call rwildcard,../src,*.cpp)))
 LIB_DIR = methan0l-sdk
 LIB_NAME=libmethan0l
 LIB_INC=-I../src
-BOOST_DEPS = -lboost_filesystem-mt -lboost_system-mt
+
+LINK_LIBS=-lboost_filesystem -lboost_system
+LINK_DYNAMIC=
+
+ifneq ($(OS_NAME),Windows)
+	ifeq ($(OS_NAME),Linux)
+		LINK_DYNAMIC+= -ldl
+	endif
+endif
 
 hdir=$(dir $(patsubst ../src/%,./$(LIB_DIR)/%,$1))
 
+.PHONY: all
+
 release: all lib
-	cd ../modules && make
-	tar -czf methan0l.tar.gz $(BIN_NAME) $(LIB_DIR) $(LIB_NAME).so ../modules
+	cd ../modules && (make clean || true) && make
+	tar -czf methan0l-$(OS_NAME)$(BITS).tar.gz $(BIN_NAME) $(LIB_DIR) $(LIB_NAME).so ../modules
 
 lib: shared-lib
 
 shared-lib: all libclean lib-dirs headers $(LIB_SRC)
-	g++ $(filter-out $(patsubst %.cpp,%.o.pic,$(LIB_EXCLUDE)),$(patsubst %.o,%.o.pic,$(LIB_OBJ))) -shared -Wl,-Bstatic $(BOOST_DEPS) -Wl,-Bdynamic -o $(LIB_NAME).so
+	g++ $(filter-out $(patsubst %.cpp,%.o.pic,$(LIB_EXCLUDE)),$(patsubst %.o,%.o.pic,$(LIB_OBJ))) -shared -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME).so
 
 %.o.pic: %.cpp
 	$(eval src:=$^)
-	g++ -std=c++17 -O3 $(LIB_INC) -c -fPIC $(src) -o $(patsubst %.cpp,%.o.pic,$(patsubst ../%,./%,$(src)))
+	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -fPIC $(src) -o $(patsubst %.cpp,%.o.pic,$(patsubst ../%,./%,$(src)))
 
-.PHONY: headers
 headers:
 	cp methan0l.h $(LIB_DIR)
 	$(foreach f, $(call rwildcard,../src,*.h), \
-		$(eval $(shell mkdir -p "$(call hdir,$f)" || cp "$f" "$(call hdir,$f)")))
+		$(eval $(shell mkdir -p "$(call hdir,$f)"; cp "$f" "$(call hdir,$f)")))
 
 lib-dirs:
 	mkdir -p $(LIB_DIR)

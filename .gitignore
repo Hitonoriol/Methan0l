@@ -6,3 +6,4 @@ build/methan0l.exe
 *.o
 /build/
 *.so
+/build32/

@@ -14,6 +14,9 @@
 #define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
 #define VT(v) TYPE(decltype(v))
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
 #define DBG if constexpr (mtl::DEBUG)
 #define IFDBG(body) DBG { body; }
 #define LOG(out) DBG{ std::cout << out << std::endl; }
