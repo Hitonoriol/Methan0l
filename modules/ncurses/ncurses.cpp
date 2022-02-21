@@ -1,5 +1,9 @@
 #include "methan0l.h"
-#include "ncurses.h"
+#ifdef __linux__
+	#include <ncurses.h>
+#else
+	#include <ncurses/ncurses.h>
+#endif
 
 LOAD_MODULE
 {

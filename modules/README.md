@@ -8,6 +8,12 @@ cd modules && make module-name
 
 Where `name` is the name of the folder which contains the module's sources.  
 
+### Build all modules  
+
+```
+cd modules && make clean && make all
+```
+
 ### Use modules inside Methan0l
 
 You can load `.so` and `.mt0` modules as **Box Units** in Methan0l using the following syntax:  
