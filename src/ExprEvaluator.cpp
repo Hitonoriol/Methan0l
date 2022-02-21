@@ -331,8 +331,8 @@ DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 				<< " scope lookup for \"" << id << "\"" << std::endl;
 
 	/* If we're in the uppermost scope, global lookup is equivalent to the local one */
-	if (global && exec_stack.size() < 2)
-		global = false;
+	if (exec_stack.size() < 2)
+		return local_scope();
 
 	/* If there's an object/box in use, perform lookup in its DataTable first */
 	if (!global && !object_stack.empty()) {
@@ -342,8 +342,9 @@ DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 	}
 
 	const bool weak = current_unit()->is_weak();
+	DataTable *local = local_scope();
 	if (!global && !weak)
-		return local_scope();
+		return local;
 
 	if constexpr (DEBUG)
 		if (weak)
@@ -356,13 +357,13 @@ DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 		if (!weak && global && instanceof<Function>(*scope))
 			continue;
 
-		DataTable *local = &((*scope)->local());
-		if (local->exists(id))
-			return local;
+		DataTable *curscope = &((*scope)->local());
+		if (curscope->exists(id))
+			return curscope;
 
 		/* Weak Units can locally "see" any identifier above their scope up to the first Regular Unit's scope */
 		if (!global && weak && !(*scope)->is_weak())
-			return local_scope();
+			return local;
 	}
 
 	auto global_scope = this->global();
@@ -370,7 +371,7 @@ DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 	/* For weak Units -- if the uppermost scope lookup failed,
 	 * 		return the innermost local scope */
 	if (!global && !global_scope->exists(id))
-		return local_scope();
+		return local;
 
 	return global_scope;
 }
@@ -534,20 +535,25 @@ Value ExprEvaluator::evaluate(ListExpr &expr)
 
 Value ExprEvaluator::evaluate(InvokeExpr &expr)
 {
-	Value callable = eval(expr.get_lhs()).get();
-	Type ctype = callable.type();
+	ExprPtr lhs = expr.get_lhs();
+	if (instanceof<IdentifierExpr>(lhs)
+			&& try_cast<IdentifierExpr>(lhs).get_name() == Token::reserved(Word::SELF_INVOKE)) {
+		return invoke(current_function(), expr.arg_list());
+	}
+
+	Value callable = eval(lhs).get();
+	if (callable.nil())
+		if_instanceof<IdentifierExpr>(*lhs, [&](IdentifierExpr &fidfr) {
+			auto &fname = fidfr.get_name();
+			callable = scope_lookup(fname, true)->get(fname).get();
+		});
 
 	if constexpr (DEBUG)
 		std::cout << "Invoking a callable: " << try_cast<Expression>(&expr).info() << std::endl;
 
-	if (instanceof<IdentifierExpr>(expr.get_lhs())
-			&& try_cast<IdentifierExpr>(expr.get_lhs()).get_name() == Token::reserved(Word::SELF_INVOKE)) {
-		return invoke(current_function(), expr.arg_list());
-	}
-
-	else if (ctype == Type::UNIT) {
+	Type ctype = callable.type();
+	if (ctype == Type::UNIT)
 		return invoke(callable.get<Unit>(), expr.arg_list());
-	}
 
 	else if (ctype == Type::FUNCTION) {
 		if (callable.is<InbuiltFunc>())
@@ -556,7 +562,7 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 			return invoke(callable.get<Function>(), expr.arg_list());
 	}
 
-	else if (instanceof<IdentifierExpr>(expr.get_lhs()) && callable.nil())
+	else if (instanceof<IdentifierExpr>(lhs) && callable.nil())
 		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list());
 
 	throw std::runtime_error("Invalid invocation expression");
