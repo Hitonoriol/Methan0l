@@ -132,13 +132,11 @@ void InteractiveRunner::start()
 	do {
 		std::cout << (ready ? prompt : prompt_multiline) << std::flush;
 		getline(std::cin, line);
-		if (!line.empty()) {
-			if (process_commands(line))
-				continue;
-			ready = load_line(line);
-		}
-		/* Empty line when multi-line parsing is in progress */
-		else if (!ready) {
+		if (process_commands(line))
+			continue;
+		ready = load_line(line);
+		/* Force parse all lexed tokens when a single `\` is received */
+		if (!ready && (line.size() == 1 && line[0] == TokenType::BACKSLASH)) {
 			ready = true;
 			methan0l.load();
 		}
