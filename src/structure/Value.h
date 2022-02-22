@@ -345,8 +345,13 @@ class Value
 			else if constexpr (is_heap_storable<T>())
 				return *std::get<P>(value);
 
-			else
+			else {
+				if constexpr (!std::is_same<TYPE(T), ValueRef>::value)
+					if (std::holds_alternative<ValueRef>(value))
+						return get<ValueRef>().value().get<T>();
+
 				return std::get<T>(value);
+			}
 		}
 
 		std::string to_string(ExprEvaluator *eval = nullptr);
