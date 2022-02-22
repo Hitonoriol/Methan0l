@@ -89,6 +89,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_prefix_opr(TokenType::OUT, Precedence::IO);				// %% expr
 	register_prefix_opr(TokenType::IN, Precedence::IO);					// %> expr
 	register_infix_opr(TokenType::STRING_CONCAT, Precedence::STRING_CONCAT);// expr1 :: expr2 :: expr3
+	register_prefix_opr(TokenType::DOUBLE_DOLLAR); // $$expr
 
 	/* Return operators */
 	register_postfix_opr(TokenType::EXCLAMATION, Precedence::IO);				// expr!

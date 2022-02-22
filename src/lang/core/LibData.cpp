@@ -319,6 +319,11 @@ void LibData::load_operators()
 		return Value(eval->get_type_mgr().create_object(type_name, ctor_call.arg_list()));
 	});
 
+	/* Evaluate and convert to string: $$expr */
+	prefix_operator(TokenType::DOUBLE_DOLLAR, [&](ExprPtr rhs) {
+		return rhs->evaluate(*eval).to_string(eval);
+	});
+
 	prefix_operator(TokenType::NO_EVAL, [&](ExprPtr rhs) {
 		return Value(rhs);
 	});
