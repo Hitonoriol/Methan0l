@@ -210,7 +210,7 @@ void Lexer::begin(char chr)
 		save(chr);
 	}
 
-	else if (std::isalpha(chr)) {
+	else if (std::isalpha(chr) || chr == TokenType::UNDERSCORE) {
 		toktype = TokenType::IDENTIFIER;
 		save(chr);
 	}
