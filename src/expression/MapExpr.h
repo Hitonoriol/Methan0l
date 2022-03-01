@@ -31,10 +31,7 @@ class MapExpr: public Expression
 			return exprs;
 		}
 
-		std::ostream& info(std::ostream &str) override
-		{
-			return Expression::info(str << "{Map Expression // " << exprs.size() << " elements}");
-		}
+		std::ostream& info(std::ostream &str) override;
 };
 
 } /* namespace mtl */

@@ -36,11 +36,10 @@ std::ostream& AssignExpr::info(std::ostream &str)
 	return Expression::info(str
 			<< "{"
 					<< (move ? "Move" : "Copy")
-					<< " Assignment Expression // \n\t"
-					<< "[" << lhs->info() << "]"
-					<< " = "
-					<< "[" << rhs->info() << "]"
-					<< "}");
+					<< " Assignment: " << NLTAB
+					<< "LHS: " << lhs->info() << NL
+					<< "RHS: " << rhs->info() << NL
+					<< "}\b");
 }
 
 }

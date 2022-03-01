@@ -12,11 +12,12 @@
 namespace mtl
 {
 
-constexpr std::string_view TAB = "  |  ";
-constexpr char TAB_CHR = '\t', UNTAB_CHR = '\b';
+constexpr std::string_view TAB_S = "  |  ";
 
 /* Keeps indentation levels after new line when using `\t` character */
 std::string tab(std::string&&);
+std::string tab(std::ostream&);
+std::string indent(std::string&&);
 
 void replace_all(std::string &str, std::string_view from, const std::string &to,
 		int limit = -1);

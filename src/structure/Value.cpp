@@ -86,9 +86,10 @@ Value::Value(const Value &val) : value(val.value)
 
 Value::~Value()
 {
-	if constexpr (DEBUG)
+	if constexpr (DEBUG) {
 		out << "[x] Destroying (" << use_count() << ") [" << type_name() << "] 0x"
-				<< to_base((udec) identity(), 16) << " `" << *this << "`" << std::endl;
+				<< to_base((udec) identity(), 16) << ":" << (heap_type() ? NL : ' ') << *this << std::endl;
+	}
 }
 
 Value& Value::get()

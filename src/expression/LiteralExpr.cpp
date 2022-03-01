@@ -88,6 +88,9 @@ void LiteralExpr::exec_literal(ExprEvaluator &evaluator, Value &val)
 
 std::ostream& LiteralExpr::info(std::ostream &str)
 {
-	return Expression::info(str << "{Literal Expression: `" << value << "`}");
+	return Expression::info(str
+			<< "{"
+					<< "Literal Expression: `" << value << "`"
+					<< "}");
 }
 }

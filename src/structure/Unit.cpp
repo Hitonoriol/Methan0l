@@ -6,6 +6,8 @@
 #include <sstream>
 
 #include "../Token.h"
+#include "expression/Expression.h"
+#include "util/string.h"
 
 namespace mtl
 {
@@ -204,12 +206,16 @@ std::string Unit::to_string()
 
 std::ostream& operator <<(std::ostream &stream, Unit &val)
 {
-	return stream << "{" << (val.weak ? "Weak" : "Regular")
-			<< " Unit (" << static_cast<void*>(&val) << ") "
-			<< "[" << val.expressions().size() << " exprs] "
-			<< val.local_data << " ("
-			<< (val.persistent ? "Persistent" : "Non-persistent")
-			<< ")}";
+	sstream ss;
+	ss << "{"
+			<< (val.weak ? "Weak" : "Regular")
+			<< " " << (val.persistent ? "Persistent" : "Non-persistent")
+			<< " Unit (" << static_cast<void*>(&val) << ") " << NL
+			<< val.local_data << NL
+			<< "Expressions (" << val.expressions().size() << "): " << NL
+			<< indent(Expression::info(val.expr_list)) << NL
+			<< "}";
+	return stream << tab(ss.str());
 }
 
 } /* namespace mtl */

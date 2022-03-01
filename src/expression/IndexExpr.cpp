@@ -187,12 +187,15 @@ ExprPtr IndexExpr::get_rhs()
 
 std::ostream& IndexExpr::info(std::ostream &str)
 {
-	return Expression::info(str << "{Index "
-			<< (remove ? "Remove" : "Access") << " Expression"
-			<< (idx == nullptr ? " (Append) " : " ")
-			<< "LHS: " << lhs->info() << " "
-			<< "idx: " << (idx == nullptr ? "absent" : idx->info())
-			<< "}");
+	return Expression::info(str
+			<< "{"
+					<< "Index "
+					<< (remove ? "Remove" : "Access") << " Expression"
+					<< (idx == nullptr ? " (Append) " : " ")
+					<< ": " << NLTAB
+					<< "LHS: " << lhs->info() << NL
+					<< "IDX: " << (idx == nullptr ? "absent" : idx->info()) << NL
+					<< "}\b");
 }
 
 }

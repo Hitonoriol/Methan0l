@@ -40,26 +40,40 @@ std::string tab(std::string &&str)
 	bool replace;
 	for (size_t idx = 0; idx < str.size(); ++idx) {
 		/* Increase indentation level and insert indentation (`TAB`) */
-		if ((replace = (str[idx] == TAB_CHR))) {
-			indent += TAB;
+		if ((replace = (str[idx] == TAB))) {
+			indent += TAB_S;
 			str.replace(idx, 1, indent);
 			idx += indent.size() - 1;
 		}
 		/* Decrease indentation level (`UNTAB`) */
-		else if (str[idx] == UNTAB_CHR) {
+		else if (str[idx] == UNTAB) {
 			if (!indent.empty())
-				indent.erase(indent.size() - TAB.size());
+				indent.erase(indent.size() - TAB_S.size());
 			str.erase(idx, 1);
 			--idx;
 		}
 		/* Insert indentation when a newline char without a trailing `TAB` is met */
 		else if (idx + 1 < str.size() && !indent.empty()) {
-			if (str[idx] == '\n' && str[idx + 1] != TAB_CHR) {
+			if (str[idx] == NL && str[idx + 1] != TAB) {
 				str.insert(idx + 1, indent);
 				idx += indent.size() - 1;
 			}
 		}
 	}
+	return str;
+}
+
+std::string tab(std::ostream &os)
+{
+	sstream ss;
+	ss << os.rdbuf();
+	return tab(std::move(ss.str()));
+}
+
+std::string indent(std::string &&str)
+{
+	str.insert(str.begin(), TAB);
+	str += UNTAB;
 	return str;
 }
 

@@ -36,10 +36,11 @@ Value PrefixExpr::evaluate(ExprEvaluator &eval)
 
 std::ostream& PrefixExpr::info(std::ostream &str)
 {
-	return Expression::info(str << "{Prefix Expression // \n\t"
-			<< "[" << op << "] "
-			<< "[" << rhs->info() << "]"
-			<< "}");
+	return Expression::info(str
+			<< "{"
+					"Prefix Operator: " << op << NLTAB
+					<< rhs->info()
+					<< "}\b");
 }
 
 }

@@ -49,4 +49,10 @@ void ClassExpr::execute(ExprEvaluator &eval)
 	eval.get_type_mgr().register_type(std::move(type));
 }
 
-} /* namespace mtl */
+std::ostream& ClassExpr::info(std::ostream &str)
+{
+	return Expression::info(str << "{" << "Class Definition: " << name << "}");
+}
+
+}
+/* namespace mtl */

@@ -481,7 +481,7 @@ Value& ExprEvaluator::get(const std::string &id, bool global, bool follow_refs)
 Value ExprEvaluator::eval(Expression &expr)
 {
 	if constexpr (DEBUG)
-		expr.info(std::cout << "[Eval] ") << std::endl;
+		std::cout << "[Eval] " << expr.info() << std::endl;
 
 	return expr.evaluate(*this);
 }
@@ -489,7 +489,7 @@ Value ExprEvaluator::eval(Expression &expr)
 void ExprEvaluator::exec(Expression &expr)
 {
 	if constexpr (DEBUG)
-		expr.info(std::cout << "[Exec] ") << std::endl;
+		std::cout << "[Exec] " << expr.info() << std::endl;
 
 	return expr.execute(*this);
 }

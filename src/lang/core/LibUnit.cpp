@@ -230,8 +230,7 @@ void LibUnit::make_box(Value &unit_val)
 
 Value LibUnit::object_dot_operator(Object &obj, ExprPtr rhs)
 {
-	if constexpr (DEBUG)
-		rhs->info(std::cout << "Applying dot opr on: " << obj << " RHS: ") << std::endl;
+	LOG("Applying dot opr on: " << obj << " RHS: " << rhs->info())
 
 	if (instanceof<InvokeExpr>(rhs.get())) {
 		InvokeExpr &method = try_cast<InvokeExpr>(rhs);

@@ -124,13 +124,18 @@ std::string Function::to_string()
 
 std::ostream& operator <<(std::ostream &stream, Function &func)
 {
-	stream << "{"
-			<< "Function // " << func.arg_def.size() << " args: {";
-
-	for (auto &entry : func.arg_def)
-		entry.second->info(stream << "\"" << entry.first << "\" -> ") << "; ";
-
-	return stream << "}}";
+	sstream ss;
+	ss << "{" << "Function: " << NLTAB;
+	ss << "Arguments (" << func.arg_def.size() << "): " << NLTAB;
+	auto last = std::prev(func.arg_def.end());
+	for (auto it = func.arg_def.begin(); it != func.arg_def.end(); ++it) {
+		if (it == last)
+			ss << UNTAB;
+		ss << "* \"" << it->first << "\" -> " << it->second->info() << NL;
+	}
+	ss << "Body:" << NLTAB;
+	ss << static_cast<Unit&>(func) << UNTAB << UNTAB << NL << "}";
+	return stream << tab(ss.str());
 }
 
 } /* namespace mtl */

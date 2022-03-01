@@ -34,4 +34,12 @@ void MapExpr::execute(ExprEvaluator &evaluator)
 	}
 }
 
+std::ostream& MapExpr::info(std::ostream &str)
+{
+	return Expression::info(str
+			<< "{"
+					<< "Map Expression: " << exprs.size() << " elements"
+					<< "}");
+}
+
 }

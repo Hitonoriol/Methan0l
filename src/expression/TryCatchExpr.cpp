@@ -44,7 +44,13 @@ void TryCatchExpr::except(ExprEvaluator &evaluator)
 
 std::ostream& TryCatchExpr::info(std::ostream &str)
 {
-	return Expression::info(str << "{TryCatchExpression}");
+	return Expression::info(str
+			<< "{"
+					<< "Try-Catch: " << NLTAB
+					<< "Try body: " << try_body->info() << NL
+					<< "Catching as \"" << catch_as << "\"" << NL
+					<< "Catch body: " << catch_body->info()
+					<< "}\b");
 }
 
 } /* namespace mtl */

@@ -20,12 +20,19 @@ ExprList& ListExpr::raw_list()
 
 Value ListExpr::evaluate(ExprEvaluator &evaluator)
 {
-	return as_set ? create_and_populate<ValSet>(evaluator) : create_and_populate<ValList>(evaluator);
+	return as_set ?
+			create_and_populate<ValSet>(evaluator) :
+			create_and_populate<ValList>(evaluator);
 }
 
 std::ostream& ListExpr::info(std::ostream &str)
 {
-	return Expression::info(str << "{List Expression // " << exprs.size() << " elements}");
+	return Expression::info(str
+			<< "{"
+					<< "List Expression: " << NLTAB
+					<< "Elements (" << exprs.size() << "): " << NL
+					<< indent(Expression::info(exprs))
+					<< "}\b");
 }
 
 }

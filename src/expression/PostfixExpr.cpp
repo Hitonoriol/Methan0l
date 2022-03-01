@@ -36,7 +36,11 @@ TokenType PostfixExpr::get_operator()
 
 std::ostream& PostfixExpr::info(std::ostream &str)
 {
-	return Expression::info(str << "{Postfix Expression | " << op << "}");
+	return Expression::info(str
+			<< "{"
+					<< "Postfix Operator: " << op << NLTAB
+					<< lhs->info()
+					<< "}\b");
 }
 
 }

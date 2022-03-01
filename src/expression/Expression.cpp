@@ -3,8 +3,9 @@
 #include <memory>
 #include <string>
 
-#include "../Token.h"
-#include "../util/util.h"
+#include "Token.h"
+#include "util/util.h"
+#include "util/string.h"
 #include "IdentifierExpr.h"
 #include "InvokeExpr.h"
 #include "LiteralExpr.h"
@@ -62,6 +63,14 @@ std::string Expression::info()
 {
 	std::stringstream ss;
 	info(ss);
+	return tab(ss.str());
+}
+
+std::string Expression::info(ExprList &list)
+{
+	sstream ss;
+	for (auto &&expr : list)
+		ss << "* " << expr->info() << NL;
 	return ss.str();
 }
 

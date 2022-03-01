@@ -54,7 +54,7 @@ Value& DataTable::get_or_create(const std::string &id)
 Value& DataTable::create_temporary(Value val)
 {
 	if constexpr (DEBUG)
-		out << "Creating a temporary Value..." << std::endl;
+		out << "Creating a temporary Value: `" << val << "`" << std::endl;
 
 	temp_queue.push_front(std::forward<Value>(val));
 
@@ -71,7 +71,7 @@ void DataTable::purge_temporary()
 	}
 }
 
-Value& DataTable::get(const std::string &id, bool fail_on_nil)
+Value& DataTable::get(const std::string &id, bool fail_if_undefined)
 {
 	if constexpr (DEBUG)
 		std::cout << "Accessing \"" << id << "\" in " << *this << std::endl;
@@ -83,7 +83,7 @@ Value& DataTable::get(const std::string &id, bool fail_on_nil)
 	if constexpr (DEBUG)
 		std::cout << "\t(No such identifier)" << std::endl;
 
-	if (fail_on_nil)
+	if (fail_if_undefined)
 		throw std::runtime_error("\"" + id + "\" is not defined");
 
 	return nil();

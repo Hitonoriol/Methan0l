@@ -24,7 +24,7 @@ class BinaryOperatorExpr: public Expression
 		ExprPtr& get_lhs();
 		ExprPtr& get_rhs();
 
-		std::ostream& info(std::ostream &str);
+		std::ostream& info(std::ostream &str) override;
 
 		static bool is(Expression&, TokenType);
 };

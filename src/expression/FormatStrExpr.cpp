@@ -22,7 +22,10 @@ Value FormatStrExpr::evaluate(ExprEvaluator &evaluator)
 
 std::ostream& FormatStrExpr::info(std::ostream &str)
 {
-	return Expression::info(str << "{Formatted String Expression // `" << fmt << "`}");
+	return Expression::info(str
+			<< "{"
+					<< "Formatted String: `" << fmt << "`"
+					<< "}");
 }
 
 } /* namespace mtl */

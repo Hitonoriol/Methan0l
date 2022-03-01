@@ -78,4 +78,13 @@ void LoopExpr::exec_foreach_loop(ExprEvaluator &evaluator)
 	});
 }
 
+std::ostream& LoopExpr::info(std::ostream &str)
+{
+	return Expression::info(str
+			<< "{"
+					<< (is_foreach() ? "For-Each" : (init != nullptr ? "For" : "While"))
+					<< " Loop"
+					<< "}");
+}
+
 }

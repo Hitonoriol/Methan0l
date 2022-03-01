@@ -20,10 +20,7 @@ class FunctionExpr: public Expression
 		Function get_function();
 		Function& function_ref();
 
-		std::ostream& info(std::ostream &str) override
-		{
-			return Expression::info(str << "{Function Definition}");
-		}
+		std::ostream& info(std::ostream &str) override;
 };
 
 } /* namespace mtl */

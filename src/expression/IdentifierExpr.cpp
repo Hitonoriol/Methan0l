@@ -72,7 +72,11 @@ std::string IdentifierExpr::get_name(Expression *expr)
 
 std::ostream& IdentifierExpr::info(std::ostream &str)
 {
-	return Expression::info(str << "{Identifier Expression name = \"" << name << "\"}");
+	return Expression::info(str
+			<< "{"
+					<< (global ? "Global" : "Local")
+					<< " Identifier: \"" << name << "\""
+					<< "}");
 }
 
 }

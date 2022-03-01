@@ -31,4 +31,13 @@ Function& FunctionExpr::function_ref()
 	return func;
 }
 
+std::ostream& FunctionExpr::info(std::ostream &str)
+{
+	return Expression::info(str
+			<< "{"
+					<< "Function Definition: " << NLTAB
+					<< func
+					<< "}");
+}
+
 }

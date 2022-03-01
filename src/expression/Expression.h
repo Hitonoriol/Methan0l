@@ -12,18 +12,6 @@
 namespace mtl
 {
 
-template<typename E, typename ...Args> std::shared_ptr<E> make_expr(uint32_t line,
-		Args &&...args)
-{
-	auto expr_ptr = std::make_shared<E>(std::forward<Args>(args)...);
-	expr_ptr->set_line(line);
-
-	if constexpr (DEBUG)
-		expr_ptr->info(std::cout << "--> ") << std::endl;
-
-	return expr_ptr;
-}
-
 inline uint32_t line(const Token &tok)
 {
 	return tok.get_line();
@@ -68,7 +56,21 @@ class Expression
 		/* Create a "return" expression which returns the evaluated <expr> */
 		static ExprPtr return_expr(ExprPtr expr);
 		static ExprPtr return_val(Value val);
+
+		static std::string info(ExprList&);
 };
+
+template<typename E, typename ...Args> std::shared_ptr<E> make_expr(uint32_t line,
+		Args &&...args)
+{
+	auto expr_ptr = std::make_shared<E>(std::forward<Args>(args)...);
+	expr_ptr->set_line(line);
+
+	if constexpr (DEBUG)
+		std::cout << "--> " << static_cast<Expression&>(*expr_ptr).info() << std::endl;
+
+	return expr_ptr;
+}
 
 inline RawExprList as_raw_list(ExprList &list)
 {

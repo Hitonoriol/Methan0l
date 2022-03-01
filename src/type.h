@@ -25,7 +25,7 @@
 namespace mtl
 {
 
-constexpr bool DEBUG = false;
+constexpr bool DEBUG = true;
 
 enum class TokenType : uint16_t;
 class Value;
@@ -76,6 +76,8 @@ using InbuiltFunc = std::function<Value(ExprList)>;
 using InbuiltFuncMap = std::unordered_map<std::string, InbuiltFunc>;
 
 constexpr std::string_view PROGRAM_EXT = ".mt0";
+constexpr char NL = '\n', TAB = '\t', UNTAB = '\b';
+constexpr std::string_view NLTAB = "\n\t";
 
 }
 

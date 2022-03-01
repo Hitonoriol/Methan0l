@@ -92,12 +92,7 @@ class LoopExpr: public Expression
 
 		void execute(ExprEvaluator &evaluator) override;
 
-		std::ostream& info(std::ostream &str) override
-		{
-			return Expression::info(str << "{"
-					<< (is_foreach() ? "For-Each" : (init != nullptr ? "For" : "While"))
-					<< " Loop Expression}");
-		}
+		std::ostream& info(std::ostream &str) override;
 };
 
 } /* namespace mtl */

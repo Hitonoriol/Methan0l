@@ -28,10 +28,7 @@ class ClassExpr: public Expression
 			return Value::NO_VALUE;
 		}
 
-		std::ostream& info(std::ostream &str) override
-		{
-			return Expression::info(str << "{Class Definition Expression // " << name << "}");
-		}
+		std::ostream& info(std::ostream &str) override;
 };
 
 } /* namespace mtl */
