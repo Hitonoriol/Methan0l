@@ -151,10 +151,9 @@ void LibUnit::load_operators()
 		return Value::NO_VALUE;
 	});
 
-	/* Postfix return by reference */
+	/* Dereference value */
 	postfix_operator(TokenType::DOUBLE_EXCL, [&](auto lhs) {
-		save_return(lhs, true);
-		return Value::NO_VALUE;
+		return ref(lhs).get();
 	});
 
 	/* Static method invocation: Type@method$(arg1, arg2, ...) */
