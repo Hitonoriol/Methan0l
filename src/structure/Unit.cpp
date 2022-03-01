@@ -42,6 +42,7 @@ Unit::Unit() : Unit(ExprList())
 Unit::Unit(const Unit &rhs) : Unit(rhs.expr_list, rhs.local_data, rhs.weak)
 {
 	persistent = rhs.persistent;
+	noreturn = rhs.noreturn;
 }
 
 Unit& Unit::operator=(const Unit &rhs)
@@ -107,8 +108,10 @@ void Unit::stop()
 
 void Unit::save_return(Value value)
 {
-	local_data.set(Unit::RETURN_KEYWORD, value);
-	stop();
+	if (!noreturn) {
+		local_data.set(Unit::RETURN_KEYWORD, value);
+		stop();
+	}
 }
 
 bool Unit::is_weak() const
@@ -131,9 +134,24 @@ void Unit::set_weak(bool val)
 	weak = val;
 }
 
+void Unit::set_no_return_carry()
+{
+	weak = persistent = true;
+}
+
 bool Unit::carries_return() const
 {
 	return weak && !persistent;
+}
+
+void Unit::set_noreturn(bool val)
+{
+	noreturn = val;
+}
+
+bool Unit::is_noreturn() const
+{
+	return noreturn;
 }
 
 bool Unit::has_returned()

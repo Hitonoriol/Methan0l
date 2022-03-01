@@ -13,6 +13,7 @@ class Unit
 		bool finished = false;
 		bool weak;
 		bool persistent = false;
+		bool noreturn = false;
 		ExprList::iterator cur_expr;
 
 	protected:
@@ -66,7 +67,11 @@ class Unit
 		void set_persisent(bool val);
 		void set_weak(bool val);
 
+		void set_no_return_carry();
 		bool carries_return() const;
+
+		void set_noreturn(bool);
+		bool is_noreturn() const;
 
 		void clear();
 		void prepend(ExprPtr expr);
