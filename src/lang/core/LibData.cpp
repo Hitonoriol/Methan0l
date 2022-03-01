@@ -73,11 +73,12 @@ void LibData::load()
 			throw std::runtime_error("for_each() on a non-container type");
 
 		Function action = arg(args, 1).get<Function>();
-		action.set_weak(true);
 
 		if constexpr(DEBUG)
 			std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
 
+		action.set_noreturn(true);
+		action.set_weak(true);
 		ctr.accept_container([&](auto &container) {
 			for_each(*eval, container, action);
 		});
@@ -88,7 +89,7 @@ void LibData::load()
 		if constexpr (DEBUG)
 			std::cout << "* End of " << ctr.type_name() << " for_each" << std::endl;
 
-		return Value::ref(ctr);
+		return ctr;
 	});
 
 	/* list.map(mapping_function) */
