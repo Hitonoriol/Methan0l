@@ -50,11 +50,10 @@ ExprPtr& BinaryOperatorExpr::get_rhs()
 std::ostream& BinaryOperatorExpr::info(std::ostream &str)
 {
 	return Expression::info(str
-			<< "{"
-					<< "Binary Operator: " << opr << NLTAB
+			<< "Binary Operator: " << opr << " " << BEG
 					<< "LHS: " << lhs->info() << NL
 					<< "RHS: " << rhs->info()
-					<< "}\b");
+					<< END);
 }
 
 bool BinaryOperatorExpr::is(Expression &expr, TokenType op)

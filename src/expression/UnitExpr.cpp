@@ -32,11 +32,7 @@ void UnitExpr::execute(ExprEvaluator &evaluator)
 
 std::ostream& UnitExpr::info(std::ostream &str)
 {
-	return Expression::info(str
-			<< "{"
-					<< "Unit Expression: " << NLTAB
-					<< unit
-					<< "}\b");
+	return Expression::info(str << "Unit Expression: " << BEG << unit << END);
 }
 
 }

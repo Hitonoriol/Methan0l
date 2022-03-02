@@ -207,14 +207,12 @@ std::string Unit::to_string()
 std::ostream& operator <<(std::ostream &stream, Unit &val)
 {
 	sstream ss;
-	ss << "{"
-			<< (val.weak ? "Weak" : "Regular")
+	ss << (val.weak ? "Weak" : "Regular")
 			<< " " << (val.persistent ? "Persistent" : "Non-persistent")
-			<< " Unit (" << static_cast<void*>(&val) << ") " << NL
+			<< " Unit (" << static_cast<void*>(&val) << "): " << NL
 			<< val.local_data << NL
 			<< "Expressions (" << val.expressions().size() << "): " << NL
-			<< indent(Expression::info(val.expr_list)) << NL
-			<< "}";
+			<< indent(Expression::info(val.expr_list));
 	return stream << tab(ss.str());
 }
 

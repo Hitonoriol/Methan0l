@@ -37,10 +37,9 @@ Value PrefixExpr::evaluate(ExprEvaluator &eval)
 std::ostream& PrefixExpr::info(std::ostream &str)
 {
 	return Expression::info(str
-			<< "{"
-					"Prefix Operator: " << op << NLTAB
-					<< rhs->info()
-					<< "}\b");
+			<< "Prefix Operator: " << op << " " << BEG
+					<< "RHS: " << rhs->info()
+					<< END);
 }
 
 }

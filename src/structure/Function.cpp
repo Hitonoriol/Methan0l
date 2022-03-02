@@ -125,7 +125,7 @@ std::string Function::to_string()
 std::ostream& operator <<(std::ostream &stream, Function &func)
 {
 	sstream ss;
-	ss << "{" << "Function: " << NLTAB;
+	ss << "Function: " << Expr::BEG;
 	ss << "Arguments (" << func.arg_def.size() << "): " << NLTAB;
 	auto last = std::prev(func.arg_def.end());
 	for (auto it = func.arg_def.begin(); it != func.arg_def.end(); ++it) {
@@ -134,7 +134,7 @@ std::ostream& operator <<(std::ostream &stream, Function &func)
 		ss << "* \"" << it->first << "\" -> " << it->second->info() << NL;
 	}
 	ss << "Body:" << NLTAB;
-	ss << static_cast<Unit&>(func) << UNTAB << UNTAB << NL << "}";
+	ss << static_cast<Unit&>(func) << UNTAB << Expr::END;
 	return stream << tab(ss.str());
 }
 

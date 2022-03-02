@@ -188,14 +188,11 @@ ExprPtr IndexExpr::get_rhs()
 std::ostream& IndexExpr::info(std::ostream &str)
 {
 	return Expression::info(str
-			<< "{"
-					<< "Index "
-					<< (remove ? "Remove" : "Access") << " Expression"
-					<< (idx == nullptr ? " (Append) " : " ")
-					<< ": " << NLTAB
+			<< "Subscript " << (remove ? "Remove" : "Access")
+					<< (idx == nullptr ? "Append" : "") << ": " << BEG
 					<< "LHS: " << lhs->info() << NL
-					<< "IDX: " << (idx == nullptr ? "absent" : idx->info()) << NL
-					<< "}\b");
+					<< "IDX: " << (idx == nullptr ? "absent" : idx->info())
+					<< END);
 }
 
 }

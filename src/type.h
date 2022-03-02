@@ -40,12 +40,15 @@ udec unum(Value);
 bool bln(Value);
 
 using sstream = std::stringstream;
+using charr = const char[];
+using cstr = const char*;
 
 class Expression;
 class Object;
 
 const std::string empty_string;
 
+using Expr = Expression;
 using ExprPtr = std::shared_ptr<Expression>;
 using ObjectPtr = std::shared_ptr<Object>;
 

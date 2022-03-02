@@ -3,11 +3,13 @@
 
 #include <iostream>
 
-#include "../ExprEvaluator.h"
-#include "../type.h"
-#include "../structure/Value.h"
-#include "../util/memory.h"
+#include "ExprEvaluator.h"
+#include "type.h"
+#include "structure/Value.h"
 #include "Token.h"
+
+#include "util/memory.h"
+#include "util/string.h"
 
 namespace mtl
 {
@@ -23,7 +25,7 @@ struct Value;
 class Expression
 {
 	private:
-		uint32_t line;
+		uint32_t line = 0;
 
 	public:
 		Expression() = default;
@@ -58,6 +60,9 @@ class Expression
 		static ExprPtr return_val(Value val);
 
 		static std::string info(ExprList&);
+
+		/* Beginning and end of Expression info string */
+		static constexpr charr BEG = {'{', NL, TAB, '\0'}, END = {UNTAB, NL, '}', '\0'};
 };
 
 template<typename E, typename ...Args> std::shared_ptr<E> make_expr(uint32_t line,

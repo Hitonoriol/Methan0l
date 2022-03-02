@@ -51,12 +51,10 @@ ExprPtr Expression::return_val(Value val)
 
 std::ostream& Expression::info(std::ostream &str)
 {
-	str << " @ line ";
-	if (line > 0)
-		str << line;
-	else
-		str << "unknown";
-	return str;
+	if (line == 0)
+		return str;
+
+	return str << " @ line " << line;
 }
 
 std::string Expression::info()
@@ -69,8 +67,12 @@ std::string Expression::info()
 std::string Expression::info(ExprList &list)
 {
 	sstream ss;
-	for (auto &&expr : list)
-		ss << "* " << expr->info() << NL;
+	auto last = std::prev(list.end());
+	for (auto it = list.begin(); it != list.end(); ++it) {
+		ss << "* " << (*it)->info();
+		if (it != last)
+			ss << NL;
+	}
 	return ss.str();
 }
 

@@ -54,12 +54,11 @@ void ConditionalExpr::execute(ExprEvaluator &evaluator)
 std::ostream& ConditionalExpr::info(std::ostream &str)
 {
 	return Expression::info(str
-			<< "{"
-			<< "Conditional Expression: " << NLTAB
-			<< "Condition: " << condition->info() << NL
-			<< "Then: " << then_expr->info() << NL
-			<< "Else: " << (else_expr == nullptr ? "absent" : else_expr->info()) << NL
-			<< "}\b");
+			<< "Conditional Expression: " << BEG
+					<< "Condition: " << condition->info() << NL
+					<< "Then: " << then_expr->info() << NL
+					<< "Else: " << (else_expr == nullptr ? "absent" : else_expr->info()) << NL
+					<< END);
 }
 
 }

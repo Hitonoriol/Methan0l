@@ -34,12 +34,10 @@ bool AssignExpr::is_move_assignment()
 std::ostream& AssignExpr::info(std::ostream &str)
 {
 	return Expression::info(str
-			<< "{"
-					<< (move ? "Move" : "Copy")
-					<< " Assignment: " << NLTAB
+			<< (move ? "Move" : "Copy") << " Assignment: " << BEG
 					<< "LHS: " << lhs->info() << NL
-					<< "RHS: " << rhs->info() << NL
-					<< "}\b");
+					<< "RHS: " << rhs->info()
+					<< END);
 }
 
 }

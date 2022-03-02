@@ -154,8 +154,8 @@ class Token
 {
 	private:
 		TokenType type;
-		uint32_t line;
-		uint32_t column;
+		uint32_t line = 0;
+		uint32_t column = 0;
 		std::string value;
 		Separator sep = Separator::NONE;
 

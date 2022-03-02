@@ -41,12 +41,11 @@ class InvokeExpr: public Expression
 		std::ostream& info(std::ostream &str) override
 		{
 			return Expression::info(str
-					<< "{"
-							<< "Invoke Expression: " << NLTAB
+					<< "Invoke Expression: " << BEG
 							<< "LHS: " << lhs->info() << NL
 							<< "Arguments (" << args.size() << "): " << NL
 							<< indent(Expression::info(args)) << NL
-							<< "}\b");
+							<< END);
 		}
 };
 

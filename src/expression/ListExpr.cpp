@@ -28,11 +28,10 @@ Value ListExpr::evaluate(ExprEvaluator &evaluator)
 std::ostream& ListExpr::info(std::ostream &str)
 {
 	return Expression::info(str
-			<< "{"
-					<< "List Expression: " << NLTAB
+			<< "List Expression: " << BEG
 					<< "Elements (" << exprs.size() << "): " << NL
 					<< indent(Expression::info(exprs))
-					<< "}\b");
+					<< END);
 }
 
 }

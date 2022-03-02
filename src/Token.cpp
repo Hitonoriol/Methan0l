@@ -285,9 +285,11 @@ std::string Token::to_string(TokenType tok)
 
 std::ostream& operator <<(std::ostream &stream, const Token &val)
 {
-	bool printable = static_cast<int>(val.type) < Token::PRINTABLE_END;
-	stream << "{"
-			<< "[@" << val.line << ":" << val.column << "] ";
+	bool printable = static_cast<int>(val.type) < Token::LITERAL_START;
+	stream << "[";
+
+	if (val.line != 0)
+		stream << "(@" << val.line << ":" << val.column << ") ";
 
 	if (!printable)
 		stream << "`" << val.value << "` : ";
@@ -298,7 +300,7 @@ std::ostream& operator <<(std::ostream &stream, const Token &val)
 	if (printable)
 		stream << "`";
 
-	return stream << "}";
+	return stream << "]";
 }
 
 }
