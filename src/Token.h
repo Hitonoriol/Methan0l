@@ -79,6 +79,7 @@ enum class TokenType : uint16_t
 	INFIX_WORD_LHS_L,	// *[
 	FUNC_DEF_SHORT_ALT,	// @:
 	DOUBLE_DOLLAR,		// $$
+	LONG_ARROW_RIGHT,	// -->
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -161,14 +162,14 @@ class Token
 
 		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'<>|&\n#";
 
-		static constexpr std::string_view bichar_ops[] = {
+		static constexpr std::string_view multichar_ops[] = {
 				"<<", ">>", "->", "<-", "$(",
 				"@(", "==", "%%", "::", "/*",
 				"*/", ">=", "<=", "++", "--",
 				":=", "=>", "!=", "+=", "-=",
 				"*=", "/=", "&&", "||", "^^",
 				"**", "!!", "%>", "<%", "#(",
-				"*[", "@:", "$$"
+				"*[", "@:", "$$", "-->"
 		};
 
 		static constexpr std::string_view word_ops[] = {
@@ -243,7 +244,7 @@ class Token
 
 		void assert_type(TokenType type);
 
-		static TokenType get_bichar_op_type(std::string &tokstr);
+		static TokenType get_multichar_op_type(std::string &tokstr);
 		static char escape_seq(std::string_view seq);
 
 		static bool is_punctuator(char chr);

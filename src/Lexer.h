@@ -47,7 +47,7 @@ class Lexer
 		bool has_next();
 		void begin(char chr);
 		char look_ahead(size_t n = 1);
-		bool try_save_bichar_op(char chr, char next);
+		bool try_save_multichar_op(char chr, char next);
 
 		bool match_cur(TokenType tok);
 		bool match_prev(TokenType tok);

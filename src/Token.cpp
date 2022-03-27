@@ -138,10 +138,10 @@ uint32_t Token::get_column() const
 	return column;
 }
 
-TokenType Token::get_bichar_op_type(std::string &tokstr)
+TokenType Token::get_multichar_op_type(std::string &tokstr)
 {
-	for (size_t i = 0; i < std::size(bichar_ops); ++i)
-		if (tokstr == bichar_ops[i])
+	for (size_t i = 0; i < std::size(multichar_ops); ++i)
+		if (tokstr == multichar_ops[i])
 			return static_cast<TokenType>(BICHAR_OP_START + i);
 
 	return TokenType::NONE;
@@ -151,7 +151,7 @@ TokenType Token::deduce_type(std::string &tokstr)
 {
 	const size_t len = tokstr.size();
 	if (len == 2)
-		return get_bichar_op_type(tokstr);
+		return get_multichar_op_type(tokstr);
 
 	return TokenType::NONE;
 }
@@ -218,7 +218,7 @@ std::string_view Token::word_op(TokenType tok)
 
 std::string_view Token::bichar_op(TokenType tok)
 {
-	return bichar_ops[static_cast<int>(tok) - BICHAR_OP_START];
+	return multichar_ops[static_cast<int>(tok) - BICHAR_OP_START];
 }
 
 bool Token::is_ref_opr(TokenType opr)

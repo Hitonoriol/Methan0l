@@ -145,17 +145,24 @@ char Lexer::look_ahead(size_t n)
 	return *std::next(cur_chr, n);
 }
 
-/* Test if current and next chars are a double char opr, push to token queue if true */
-bool Lexer::try_save_bichar_op(char chr, char next)
+/*
+ * Test if current and next chars are a multi-char opr, push to token queue if true,
+ * or handle block comments.
+ */
+bool Lexer::try_save_multichar_op(char chr, char next)
 {
-	std::string bichar_op(2, chr);
-	bichar_op[1] = next;
-	TokenType bichar_type = Token::get_bichar_op_type(bichar_op);
-	if (bichar_type == TokenType::NONE) {
-		return false;
-	}
+	std::string op(2, chr);
+	op[1] = next;
+	/* If characters after `next` are also punctuators, append them to this multi-char opr */
+	for (auto it = std::next(cur_chr, 2); it != input_end && Token::is_punctuator(*it); ++it)
+		op += *it;
 
-	if (bichar_type == TokenType::BLOCK_COMMENT_L) {
+	TokenType multichar_type = Token::get_multichar_op_type(op);
+	if (multichar_type == TokenType::NONE)
+		return false;
+
+	/* Skip everything inside a block comment */
+	if (multichar_type == TokenType::BLOCK_COMMENT_L) {
 		do {
 			if (*cur_chr == '\n')
 				new_line();
@@ -168,8 +175,8 @@ bool Lexer::try_save_bichar_op(char chr, char next)
 		return true;
 	}
 
-	tokstr = bichar_op;
-	toktype = bichar_type;
+	tokstr = op;
+	toktype = multichar_type;
 	push();
 	next_char();
 	return true;
@@ -197,7 +204,7 @@ void Lexer::begin(char chr)
 	else if (!std::isalnum(chr) && Token::is_punctuator(chr)) {
 		char next = look_ahead();
 		if (Token::is_punctuator(next))
-			if (try_save_bichar_op(chr, next))
+			if (try_save_multichar_op(chr, next))
 				return;
 
 		push(chr);
@@ -264,13 +271,15 @@ void Lexer::consume()
 	}
 
 	/* Save String / Character literal char */
-	else if (toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING || toktype == TokenType::CHAR) {
+	else if (toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING
+			|| toktype == TokenType::CHAR) {
 		/* Save `\` literally when reading a CHAR & ignore unescaped `\` when reading a STRING */
 		if (toktype == TokenType::CHAR
 				|| (chr != TokenType::BACKSLASH || escaped(TokenType::BACKSLASH)))
 			save(chr);
 
-		if (((toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING) && unescaped(TokenType::QUOTE))
+		if (((toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING)
+				&& unescaped(TokenType::QUOTE))
 				|| (toktype == TokenType::CHAR && unescaped(TokenType::SINGLE_QUOTE)))
 			push();
 
