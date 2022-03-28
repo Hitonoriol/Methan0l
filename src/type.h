@@ -17,6 +17,7 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
+#define OUT(seq) out << seq << std::endl;
 #define DBG if constexpr (mtl::DEBUG)
 #define IFDBG(body) DBG { body; }
 #define LOG(out) DBG{ std::cout << out << std::endl; }
@@ -25,7 +26,7 @@
 namespace mtl
 {
 
-constexpr bool DEBUG = true;
+constexpr bool DEBUG = false;
 
 enum class TokenType : uint16_t;
 class Value;

@@ -147,8 +147,7 @@ const std::string& ExprEvaluator::get_scriptdir()
 
 Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 {
-	if constexpr (DEBUG)
-		std::cout << '\n' << "Executing " << unit << std::endl;
+	LOG('\n' << "Executing " << unit)
 
 	if (use_own_scope)
 		enter_scope(unit);
@@ -166,23 +165,23 @@ Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 		exec(*current_expr);
 	}
 
+	/* Weak Non-Persistent Units cause their parent units to return */
 	Value returned_val = unit.result();
+	bool carry_return = unit.carries_return();
+
+	/* `unit` may not exist anymore after the leave_scope() call */
 	if (use_own_scope)
 		leave_scope();
 
-	if constexpr (DEBUG)
-		std::cout << "Finished executing " << unit << '\n' << std::endl;
+	LOG("Finished executing " << &unit << '\n')
 
 	if (force_quit())
 		return Value::NO_VALUE;
 
-	/* Weak Non-Persistent Units cause their parent units to return */
+	/* Handle return carry */
 	Unit *parent = current_unit();
-	if (unit.carries_return() && &unit != parent && !returned_val.empty()) {
-
-		if constexpr (DEBUG)
-			std::cout << "Carrying return from child weak unit to " << *parent << std::endl;
-
+	if (carry_return && &unit != parent && !returned_val.empty()) {
+		LOG("Carrying return from child weak unit: " << &unit << " to: " << *parent)
 		parent->save_return(returned_val);
 	}
 

@@ -120,11 +120,10 @@ Methan0lParser& Interpreter::get_parser()
 
 Value Interpreter::run()
 {
-	if constexpr (DEBUG)
-		out << "Running parsed program..." << std::endl;
+	LOG("Running parsed program...")
 
 	if (main.empty()) {
-		std::cerr << "Main Unit is empty. Nothing to run." << std::endl;
+		IFDBG(std::cerr << "Main Unit is empty. Nothing to run." << std::endl)
 		return Value::NO_VALUE;
 	}
 
@@ -144,9 +143,7 @@ Value Interpreter::run()
 		}
 	} while (handler.is_handling());
 
-	if constexpr (DEBUG)
-		out << "Program execution finished" << std::endl;
-
+	LOG("Program execution finished")
 	return ret;
 }
 

@@ -51,6 +51,7 @@ Unit& Unit::operator=(const Unit &rhs)
 {
 	expr_list = rhs.expr_list;
 	local_data = rhs.local_data;
+	noreturn = rhs.noreturn;
 	return *this;
 }
 
@@ -209,7 +210,8 @@ std::ostream& operator <<(std::ostream &stream, Unit &val)
 	sstream ss;
 	ss << (val.weak ? "Weak" : "Regular")
 			<< " " << (val.persistent ? "Persistent" : "Non-persistent")
-			<< " Unit (" << static_cast<void*>(&val) << "): " << NL
+			<< " Unit (" << static_cast<void*>(&val) << ") " <<
+			"[" << (val.carries_return() ? "Carries" : "Doesn't carry") << " return value]: " << NL
 			<< val.local_data << NL
 			<< "Expressions (" << val.expressions().size() << "): " << NL
 			<< indent(Expression::info(val.expr_list));
