@@ -146,18 +146,26 @@ char Lexer::look_ahead(size_t n)
 }
 
 /*
- * Test if current and next chars are a multi-char opr, push to token queue if true,
+ * Test if current and next n chars are a multi-char opr, push to token queue if true,
  * or handle block comments.
  */
 bool Lexer::try_save_multichar_op(char chr, char next)
 {
 	std::string op(2, chr);
 	op[1] = next;
+
 	/* If characters after `next` are also punctuators, append them to this multi-char opr */
 	for (auto it = std::next(cur_chr, 2); it != input_end && Token::is_punctuator(*it); ++it)
 		op += *it;
 
-	TokenType multichar_type = Token::get_multichar_op_type(op);
+	/* Test from longest to shortest possible punctuator combination */
+	TokenType multichar_type;
+	while(op.length() >= 2) {
+		if ((multichar_type = Token::get_multichar_op_type(op)) != TokenType::NONE)
+			break;
+		op.erase(op.length() - 1);
+	}
+
 	if (multichar_type == TokenType::NONE)
 		return false;
 
