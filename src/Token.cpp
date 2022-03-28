@@ -87,6 +87,16 @@ bool Token::operator !=(const Token &rhs)
 	return !(*this == rhs);
 }
 
+bool Token::operator ==(const TokenType &rhs)
+{
+	return type == rhs;
+}
+
+bool Token::operator !=(const TokenType &rhs)
+{
+	return type != rhs;
+}
+
 bool operator ==(const char chr, const TokenType &token)
 {
 	return static_cast<char>(token) == chr;
@@ -126,7 +136,6 @@ void Token::set_column(uint32_t col)
 {
 	column = col;
 }
-
 
 void Token::set_separator(Separator sep)
 {

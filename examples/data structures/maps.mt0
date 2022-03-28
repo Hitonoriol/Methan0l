@@ -6,7 +6,7 @@
  */
 map = @(key1 => 123,
 	"string key" => 0.5,
-	1337 => "numeric key", 	/* Numeric keys are converted to string */
+	1337 => "numeric key",
 	some_list => $(1, 3, 5, 7),
 	"another map" => @(foo => "bar"),
 	bar => "baz",
@@ -14,9 +14,6 @@ map = @(key1 => 123,
 
 "Map: " :: map :: newl
 
-/* When using [] operator, expressions inside it are evaluated and converted to string,
- *	so string literals must be used to access string keys, even if defined without quotes.
- */
 "Accessing an element: " :: map["key1"]
 
 "Deleting an element..."
@@ -37,3 +34,11 @@ do $(key, map.list_of$(keys)) -> {
 
 "Map Functional for_each"
 map.for_each$(func @(key, val) { <% "{" :: key :: ": " :: val :: "} " })
+
+"No comma map definition"
+map = @(
+	a => 1
+	b => 3
+	c => 5
+)
+<% map

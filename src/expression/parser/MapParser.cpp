@@ -33,6 +33,7 @@ void MapParser::parse(Parser &parser,
 		std::function<void(std::string, ExprPtr)> collector,
 		TokenType ends_with)
 {
+	bool has_end_tok = ends_with != TokenType::NONE;
 	if (!parser.match(ends_with)) {
 		do {
 			auto peeked = parser.peek_parse();
@@ -55,9 +56,11 @@ void MapParser::parse(Parser &parser,
 			/* Collect key-value pair: `key => value_expr` */
 			BinaryOperatorExpr &pair = try_cast<BinaryOperatorExpr>(pair_expr);
 			collector(key_string(pair.get_lhs()), pair.get_rhs());
-		} while (parser.match(TokenType::COMMA));
 
-		if (ends_with != TokenType::NONE)
+			/* Key-value pair delimiters: `,` or newline / `;` */
+		} while (parser.match(TokenType::COMMA) || (has_end_tok && parser.look_ahead() != ends_with));
+
+		if (has_end_tok)
 			parser.consume(ends_with);
 	}
 }

@@ -241,6 +241,8 @@ class Token
 
 		bool operator ==(const Token &rhs);
 		bool operator !=(const Token &rhs);
+		bool operator ==(const TokenType &rhs);
+		bool operator !=(const TokenType &rhs);
 
 		void assert_type(TokenType type);
 

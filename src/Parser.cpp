@@ -141,6 +141,9 @@ Token Parser::consume()
 		read_queue.pop_front();
 	else
 		++peek_pos;
+
+	LOG("[consume token] " << ret)
+
 	return ret;
 }
 
@@ -218,11 +221,17 @@ PeekPos& Parser::peek_descriptor()
 
 void Parser::consume_peeked(PeekPos desc)
 {
-	LOG("** Consuming peeked expression @ " << desc.start << "-" << desc.offset)
+	LOG("** Consuming peeked expression @ " << desc.start << "-" << (desc.offset + desc.start))
+	IFDBG(
+			for (auto it = read_queue.begin() + desc.start; it != read_queue.begin() + desc.start + desc.offset; ++it)
+				out << *it << " ";
+			out << std::endl;
+	)
 	if (desc.start <= peek_pos)
 		read_queue.erase(read_queue.begin() + desc.start, read_queue.begin() + desc.start + desc.offset);
 	else
 		throw std::runtime_error("Can't consume peeked expression after modifying the token queue");
+	LOG("Done consuming. First token in queue: " << look_ahead())
 }
 
 int Parser::get_lookahead_precedence(bool prefix)
