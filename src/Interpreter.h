@@ -98,6 +98,7 @@ class Interpreter: public ExprEvaluator
 				std::cerr << "[Runtime error] "
 						<< msg
 						<< " @ line " << get_current_expr()->get_line()
+						<< " in expression: " << indent(get_current_expr()->info())
 						<< std::endl;
 				if constexpr (DEBUG)
 					dump_stack();
