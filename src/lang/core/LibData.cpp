@@ -156,7 +156,7 @@ void LibData::load()
 
 		switch(val.type()) {
 			case Type::STRING:
-			size = val.get<std::string>().size();
+			size = mtl::str_length(val.get<std::string>());
 			break;
 
 			case Type::LIST:
@@ -168,6 +168,7 @@ void LibData::load()
 			break;
 
 			default:
+			throw std::runtime_error(mtl::str(val.type_name()) + " has no (pseudo-)method size()");
 			break;
 		}
 

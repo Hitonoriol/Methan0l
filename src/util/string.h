@@ -8,6 +8,7 @@
 #include <string_view>
 #include <type_traits>
 #include <vector>
+#include <cwchar>
 
 namespace mtl
 {
@@ -46,6 +47,12 @@ inline std::string str(std::ostream &s)
 	std::stringstream ss;
 	ss << s.rdbuf();
 	return ss.str();
+}
+
+inline size_t str_length(const std::string &str)
+{
+	return str.length() - std::count_if(str.begin(), str.end(),
+			[](char c) -> bool {return (c & 0xC0) == 0x80;});
 }
 
 inline void clear(std::stringstream &ss)
