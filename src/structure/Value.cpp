@@ -462,7 +462,7 @@ void Value::assert_type(Type expected, const std::string &msg)
 {
 	Type this_type = type();
 	if (this_type != expected)
-		throw InvalidTypeException(this_type, expected, msg);
+		throw InvalidTypeException(this_type, expected, msg + " [Value: `" + to_string() + "`]");
 }
 
 Value Value::from_string(std::string str)

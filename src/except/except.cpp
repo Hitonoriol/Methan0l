@@ -27,9 +27,13 @@ Exception& Exception::operator=(const Exception &rhs)
 
 InvalidTypeException::InvalidTypeException(Type type, Type expected,
 		const std::string &msg) :
-		std::runtime_error(msg + " "
-				+ str(Value::type_name(type)) + " -> " +
-				(expected != Type::END ? str(Value::type_name(expected)) : "Unknown"))
+		std::runtime_error(msg
+				+ " received \""
+				+ str(Value::type_name(type))
+				+ "\" but expected \"" +
+				(expected != Type::END ? str(Value::type_name(expected)) : "Unknown")
+				+ "\""
+				)
 {
 }
 
