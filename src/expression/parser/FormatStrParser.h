@@ -30,7 +30,7 @@ class FormatStrParser: public PrefixParser
 				do {
 					args.push_back(parser.parse());
 				} while (parser.match(TokenType::COMMA));
-				return make_expr<FormatStrExpr>(line(token), token.get_value(), args);
+				return make_expr<FormatStrExpr>(line(token), strip_quotes(token.get_value()), args);
 			}
 
 			return make_expr<LiteralExpr>(line(token), token.get_value());
