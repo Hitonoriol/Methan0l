@@ -12,6 +12,10 @@ namespace mtl
 
 void LibMath::load()
 {
+	eval->register_func("round", [](double value, int decimal_places) {
+		const double multiplier = std::pow(10.0, decimal_places);
+		return std::ceil(value * multiplier) / multiplier;
+	});
 	function("rad", [&](Args args) {return Value(dbl(args) * DEGREE);});
 	function("deg", [&](Args args) {return Value(dbl(args) * RADIAN);});
 
