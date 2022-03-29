@@ -101,7 +101,9 @@ class LibData: public Library
 
 			for (auto &val : container) {
 				arg.raw_ref() = val;
-				insert(mapped, eval->invoke(mapper, map_args));
+				Value new_val = eval->invoke(mapper, map_args);
+				if (!new_val.empty())
+					insert(mapped, new_val);
 			}
 
 			return mapped_val;
