@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string_view>
+#include <numeric>
 
 #include "../Library.h"
 #include "expression/LiteralExpr.h"
@@ -17,6 +18,8 @@ namespace mtl
 class LibData: public Library
 {
 	public:
+		using DblBinOperation = const std::function<double(double, Value)>;
+
 		LibData(ExprEvaluator *eval) : Library(eval)
 		{
 		}
@@ -62,8 +65,27 @@ class LibData: public Library
 
 	private:
 		static constexpr std::string_view KEY_LIST = "keys", VAL_LIST = "values";
+		static DblBinOperation summator, multiplicator;
+
 		void import_reference(const IdentifierExpr&);
 		void load_operators();
+		void load_container_funcs();
+
+		/* std::accumulate wrapper for `mtl::Value`s */
+		template<typename T, typename F>
+		T accumulate(Value &ctr, T init, F &&operation)
+		{
+			eval->assert_true(ctr.is<ValList>() || ctr.is<ValSet>());
+
+			T sum;
+			ctr.accept_container([&](auto &v) {
+				if constexpr (!is_associative<VT(v)>::value)
+					sum = std::accumulate(v.begin(),v.end(), init, operation);
+			});
+			return sum;
+		}
+
+		double mean(Value&);
 
 		/* Set operation where `args` contains 2 set expressions */
 		template<typename T>

@@ -7,6 +7,7 @@
 #include <utility>
 #include <chrono>
 #include <algorithm>
+#include <numeric>
 #include <thread>
 
 #include "expression/IdentifierExpr.h"
@@ -62,6 +63,150 @@ void LibData::load()
 
 		return Value(list);
 	});
+
+	function("purge", [&](Args args) {
+		eval->current_unit()->local().clear();
+		return Value::NO_VALUE;
+	});
+
+	/* val.convert$(typeid) -- does not modify <val>, returns a copy of type typeid (if possible)*/
+	function("convert", [&](Args args) {
+		Value val = arg(args);
+		int type_id = num(args, 1);
+
+		if (type_id >= static_cast<int>(Type::END))
+			throw std::runtime_error("Invalid typeid");
+
+		return val.convert(static_cast<Type>(type_id));
+	});
+
+	/* ms = now$() */
+	function("now", [&](Args args) {
+		return Value(std::chrono::duration_cast<std::chrono::milliseconds>(
+						std::chrono::system_clock::now().time_since_epoch())
+				.count());
+	});
+
+	load_set_funcs();
+	load_container_funcs();
+	load_operators();
+}
+
+void LibData::load_set_funcs()
+{
+	/* set_a.intersect(set_b) */
+	function("intersect", [&](Args args) {
+		Value inter_v(Type::SET);
+		return set_operation(args, inter_v, [&](auto &a, auto &b, auto &c) {
+			std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
+							[&b](auto &element){return b.count(element) > 0;});
+		});
+	});
+
+	/* set_a.union(set_b) */
+	function("union", [&](Args args) {
+		Value union_v(Type::SET);
+		return set_operation(args, union_v, [&](auto &a, auto &b, auto &c) {
+			c.insert(a.begin(), a.end());
+			c.insert(b.begin(), b.end());
+		});
+	});
+
+	auto set_diff = [&](auto &a, auto &b, auto &c) {
+		std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
+		    [&b](auto &element) {return b.count(element) == 0;});
+	};
+
+	/* set_a.diff(set_b) */
+	function("diff", [&](Args args) {
+		Value diff_v(Type::SET);
+		return set_operation(args, diff_v, std::move(set_diff));
+	});
+
+	/* set_a.symdiff(set_b) */
+	function("symdiff", [&](Args args) {
+		Value sdiff_v(Type::SET);
+		return set_operation(args, sdiff_v, [&](auto &a, auto &b, auto &c) {
+			set_diff(a, b, c);
+			set_diff(b, a, c);
+		});
+	});
+}
+
+Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
+{
+	Value &lval = eval->referenced_value(lhs);
+	Type ltype = lval.type();
+	Value rval = val(rhs).get();
+	if (ltype != rval.type()) {
+		if (convert)
+			return Value::ref(lval = rval.convert(ltype));
+		else
+			throw InvalidTypeException(rval.type(), ltype);
+	}
+	return convert ? Value::ref(lval = rval) : rval;
+}
+
+void LibData::import_reference(const IdentifierExpr &idfr) {
+	auto &name = idfr.get_name();
+	eval->local_scope()->set(name, Value::ref(eval->scope_lookup(name, true)->get(name)));
+}
+
+LibData::DblBinOperation LibData::summator = [](double l, Value r) {return l + r.as<double>();};
+LibData::DblBinOperation LibData::multiplicator = [](double l, Value r) {return l * r.as<double>();};
+
+double LibData::mean(Value &ctr)
+{
+	double sum = accumulate(ctr, 0.0, summator);
+	double n;
+	ctr.accept_container([&n](auto &v) {n = v.size();});
+	return sum / n;
+}
+
+void LibData::load_container_funcs()
+{
+	/* ------------------ Accumulative container functions ------------------- */
+	eval->register_func("sum", [this](Value ctr) {
+		return accumulate(ctr, 0.0, summator);
+	});
+
+	eval->register_func("product", [this](Value ctr) {
+			return accumulate(ctr, 1.0, multiplicator);
+	});
+
+	eval->register_func("mean", mtl::member(this, LibData::mean));
+
+	/* Root mean square */
+	eval->register_func("rms", [this](Value ctr) {
+		double n;
+		ctr.accept_container([&n](auto &v) {n = v.size();});
+		double rsum = accumulate(ctr, 0.0, [](double l, Value r) {
+			return l + r.as<double>() * r.as<double>();
+		});
+		return sqrt(rsum / n);
+	});
+
+	/* Standard deviation */
+	eval->register_func("deviation", [this](Value ctr) {
+		double mean = this->mean(ctr);
+		double dsum = 0, n;
+		ctr.accept_container([&n, &dsum, mean](auto &v) {
+			if constexpr (!is_associative<VT(v)>::value) {
+				n = v.size();
+				std::for_each (v.begin(), v.end(), [&](const Value &elem) {
+					dsum += (unconst(elem).as<double>() - mean) * (unconst(elem).as<double>() - mean);
+				});
+			}
+		});
+		return sqrt(dsum / n);
+	});
+
+	eval->register_func("join", [this](Value ctr) {
+		return accumulate(ctr, std::string(""), [this](std::string l, Value r) {
+			return std::move(l) + r.to_string(eval);
+		});
+	});
+	/* ----------------------------------------------------------------------- */
 
 	/* <List | Map>.for_each$(action, [finalizer])
 	 * Passes elements / key & value pairs to action$() one by one
@@ -212,92 +357,6 @@ void LibData::load()
 			list.push_back(keylist ? entry.first : entry.second);
 		return Value(list);
 	});
-
-	function("purge", [&](Args args) {
-		eval->current_unit()->local().clear();
-		return Value::NO_VALUE;
-	});
-
-	/* val.convert$(typeid) -- does not modify <val>, returns a copy of type typeid (if possible)*/
-	function("convert", [&](Args args) {
-		Value val = arg(args);
-		int type_id = num(args, 1);
-
-		if (type_id >= static_cast<int>(Type::END))
-			throw std::runtime_error("Invalid typeid");
-
-		return val.convert(static_cast<Type>(type_id));
-	});
-
-	/* ms = now$() */
-	function("now", [&](Args args) {
-		return Value(std::chrono::duration_cast<std::chrono::milliseconds>(
-						std::chrono::system_clock::now().time_since_epoch())
-				.count());
-	});
-
-	load_set_funcs();
-	load_operators();
-}
-
-void LibData::load_set_funcs()
-{
-	/* set_a.intersect(set_b) */
-	function("intersect", [&](Args args) {
-		Value inter_v(Type::SET);
-		return set_operation(args, inter_v, [&](auto &a, auto &b, auto &c) {
-			std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
-							[&b](auto &element){return b.count(element) > 0;});
-		});
-	});
-
-	/* set_a.union(set_b) */
-	function("union", [&](Args args) {
-		Value union_v(Type::SET);
-		return set_operation(args, union_v, [&](auto &a, auto &b, auto &c) {
-			c.insert(a.begin(), a.end());
-			c.insert(b.begin(), b.end());
-		});
-	});
-
-	auto set_diff = [&](auto &a, auto &b, auto &c) {
-		std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
-		    [&b](auto &element) {return b.count(element) == 0;});
-	};
-
-	/* set_a.diff(set_b) */
-	function("diff", [&](Args args) {
-		Value diff_v(Type::SET);
-		return set_operation(args, diff_v, std::move(set_diff));
-	});
-
-	/* set_a.symdiff(set_b) */
-	function("symdiff", [&](Args args) {
-		Value sdiff_v(Type::SET);
-		return set_operation(args, sdiff_v, [&](auto &a, auto &b, auto &c) {
-			set_diff(a, b, c);
-			set_diff(b, a, c);
-		});
-	});
-}
-
-Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
-{
-	Value &lval = eval->referenced_value(lhs);
-	Type ltype = lval.type();
-	Value rval = val(rhs).get();
-	if (ltype != rval.type()) {
-		if (convert)
-			return Value::ref(lval = rval.convert(ltype));
-		else
-			throw InvalidTypeException(rval.type(), ltype);
-	}
-	return convert ? Value::ref(lval = rval) : rval;
-}
-
-void LibData::import_reference(const IdentifierExpr &idfr) {
-	auto &name = idfr.get_name();
-	eval->local_scope()->set(name, Value::ref(eval->scope_lookup(name, true)->get(name)));
 }
 
 void LibData::load_operators()

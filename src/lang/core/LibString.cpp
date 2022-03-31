@@ -106,19 +106,6 @@ void LibString::load()
 		return Value(str.substr(start, len));
 	});
 
-	/* list.join$() */
-	function("join", [&](Args rhs) {
-		Value list_val = arg(rhs);
-		list_val.assert_type(Type::LIST);
-		ValList &list = list_val.get<ValList>();
-		std::string str;
-
-		for (Value val : list)
-		str += val.to_string(eval);
-
-		return Value(str);
-	});
-
 	load_operators();
 }
 
