@@ -33,16 +33,6 @@
 namespace mtl
 {
 
-int noarg()
-{
-	return -123;
-}
-
-void noarg_void()
-{
-	std::cout << "I'm a no-arg void function" << std::endl;
-}
-
 ExprEvaluator::ExprEvaluator()
 {
 	load_library<LibArithmetic>();
@@ -56,10 +46,6 @@ ExprEvaluator::ExprEvaluator()
 
 	type_mgr.register_type<File>();
 	type_mgr.register_type<Random>();
-
-	register_func<1>("test", {__, 10}, [](int x, int y) {return x * y;});
-	register_func("noarg", noarg);
-	register_func("noarg_void", noarg_void);
 }
 
 ExprEvaluator::ExprEvaluator(Unit &main) : ExprEvaluator()
@@ -599,6 +585,12 @@ TypeManager& ExprEvaluator::get_type_mgr()
 ExceptionHandler& ExprEvaluator::get_exception_handler()
 {
 	return exception_handler;
+}
+
+void ExprEvaluator::assert_true(bool val, const std::string &msg)
+{
+	if (!val)
+		throw std::runtime_error(msg);
 }
 
 void ExprEvaluator::stop()

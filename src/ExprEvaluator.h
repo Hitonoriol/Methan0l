@@ -348,6 +348,7 @@ class ExprEvaluator
 		TypeManager& get_type_mgr();
 		ExceptionHandler& get_exception_handler();
 
+		void assert_true(bool, const std::string& = "Assertion failed");
 		void stop();
 		bool force_quit();
 
