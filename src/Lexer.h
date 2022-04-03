@@ -43,7 +43,7 @@ class Lexer
 		void deduce_separator();
 		void push();
 		void push(char chr);
-		void next_char();
+		void next_char(size_t n = 1);
 		bool has_next();
 		void begin(char chr);
 		char look_ahead(size_t n = 1);
@@ -62,7 +62,7 @@ class Lexer
 	public:
 		Lexer();
 		~Lexer() = default;
-		void parse(std::string &code, bool preserve_state = false);
+		void lex(std::string &code, bool preserve_state = false);
 
 		Token next(bool peek = false);
 		Token& last();

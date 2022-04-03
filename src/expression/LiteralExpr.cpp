@@ -11,7 +11,7 @@ namespace mtl
 
 LiteralExpr::LiteralExpr(Type val_type, Token token)
 {
-	std::string &tokstr = token.get_value();
+	std::string &tokstr = unconst(token.get_value());
 	auto type = token.get_type();
 
 	if (val_type == Type::INTEGER)
@@ -28,6 +28,9 @@ LiteralExpr::LiteralExpr(Type val_type, Token token)
 
 	else if (val_type == Type::CHAR)
 		value = strip_quotes(tokstr)[0];
+
+	else if (val_type == Type::TOKEN)
+		value = token;
 }
 
 LiteralExpr::LiteralExpr(const Value &val) : value(val)

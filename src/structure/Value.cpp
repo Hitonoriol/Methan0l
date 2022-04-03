@@ -297,6 +297,9 @@ std::string Value::to_string(ExprEvaluator *eval)
 		return ss.str();
 	}
 
+	case Type::TOKEN:
+		return get<Token>().get_value();
+
 	case Type::EXPRESSION: {
 		auto &expr = *get<ExprPtr>();
 		return (eval == nullptr ? expr.info() : expr.evaluate(*eval).to_string(eval));

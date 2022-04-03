@@ -45,7 +45,7 @@ void Interpreter::init_inbuilt_funcs()
 
 void Interpreter::lex(std::string &code)
 {
-	parser.get_lexer().parse(code, true);
+	parser.get_lexer().lex(code, true);
 }
 
 void Interpreter::load()

@@ -18,7 +18,7 @@ class IdentifierParser: public PrefixParser
 			if (global)
 				token = parser.consume(TokenType::IDENTIFIER);
 
-			std::string &name = token.get_value();
+			auto &name = token.get_value();
 			Value reserved(IdentifierExpr::eval_reserved(name));
 			if (!reserved.empty())
 				return make_expr<LiteralExpr>(line(token), reserved);

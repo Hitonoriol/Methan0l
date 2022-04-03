@@ -44,7 +44,7 @@ void IdentifierExpr::execute(mtl::ExprEvaluator &evaluator)
 	LiteralExpr::exec_literal(evaluator, val);
 }
 
-Value IdentifierExpr::eval_reserved(std::string &name)
+Value IdentifierExpr::eval_reserved(const std::string &name)
 {
 	if (name == Token::reserved(Word::NEW_LINE))
 		return NEW_LINE;

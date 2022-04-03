@@ -52,6 +52,11 @@ template<> struct std::hash<mtl::Value>
 			return mtl::str_hash(s);
 		}
 
+		size_t operator()(const mtl::Token &tok) const
+		{
+			return mtl::str_hash(tok.get_value());
+		}
+
 		size_t operator()(const mtl::ValList &lst) const
 		{
 			size_t hash = lst.size();

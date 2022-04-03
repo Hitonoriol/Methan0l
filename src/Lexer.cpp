@@ -185,8 +185,8 @@ bool Lexer::try_save_multichar_op(char chr, char next)
 
 	tokstr = op;
 	toktype = multichar_type;
+	next_char(tokstr.size() - 1); // First token was already consumed by this point
 	push();
-	next_char();
 	return true;
 }
 
@@ -206,6 +206,15 @@ void Lexer::begin(char chr)
 		if (toktype != TokenType::FORMAT_STRING)
 			toktype = (chr == TokenType::QUOTE) ? TokenType::STRING : TokenType::CHAR;
 		save(chr);
+	}
+
+	/* Token literal  */
+	else if (chr == TokenType::QUOTE_ALT) {
+		/*
+		 * ` is ignored at the beginning of the token,
+		 * 	 but if met when consme()`ing subsequent tokens after begin()
+		 * 	 turns current token into a Token literal (TokenType::TOKEN)
+		 */
 	}
 
 	/* Punctuator / Compound punctuator token */
@@ -236,8 +245,14 @@ void Lexer::consume()
 {
 	char chr = *cur_chr;
 
+	/* Save Token literal */
+	if (chr == TokenType::QUOTE_ALT) {
+		toktype = TokenType::TOKEN;
+		push();
+	}
+
 	/* Deduce floating point literal */
-	if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
+	else if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
 		if (!std::isdigit(*std::next(cur_chr))) {
 			push();
 			push(chr);
@@ -332,11 +347,11 @@ void Lexer::consume_and_deduce()
 	next_char();
 }
 
-void Lexer::next_char()
+void Lexer::next_char(size_t n)
 {
 	if (has_next()) {
-		++cur_chr;
-		++column;
+		cur_chr += n;
+		column += n;
 	}
 }
 
@@ -377,7 +392,7 @@ inline bool Lexer::escaped(TokenType tok)
 	return match_cur(tok) && match_prev(TokenType::BACKSLASH);
 }
 
-void Lexer::parse(std::string &code, bool preserve_state)
+void Lexer::lex(std::string &code, bool preserve_state)
 {
 	cur_chr = code.begin();
 	input_end = code.end();

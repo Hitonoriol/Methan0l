@@ -79,6 +79,7 @@ namespace mtl
 {
 
 class Value;
+class Token;
 
 using VString = std::shared_ptr<std::string>;
 using VList = std::shared_ptr<ValList>;
@@ -88,6 +89,7 @@ using VUnit = std::shared_ptr<Unit>;
 using VFunction = std::shared_ptr<Function>;
 using VInbuiltFunc = std::shared_ptr<InbuiltFunc>;
 using VObject = std::shared_ptr<Object>;
+using VToken = std::shared_ptr<Token>;
 
 struct Nil: public std::monostate
 {
@@ -100,7 +102,7 @@ enum class Type : uint8_t
 {
 	NIL, INTEGER, DOUBLE, STRING, BOOLEAN,
 	LIST, UNIT, MAP, FUNCTION, CHAR,
-	OBJECT, REFERENCE, EXPRESSION, SET,
+	OBJECT, REFERENCE, TOKEN, EXPRESSION, SET,
 	FALLBACK,
 	END
 };
@@ -147,6 +149,9 @@ VUnit, VFunction, VInbuiltFunc,
 
 /* Custom type objects */
 VObject,
+
+/* Raw unevaluated Token */
+VToken,
 
 /* Any other non-default type, used primarily for passing and receiving
  * values of arbitrary types to and from module functions */

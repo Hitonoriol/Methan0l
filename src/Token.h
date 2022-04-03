@@ -43,6 +43,7 @@ enum class TokenType : uint16_t
 
 	QUOTE = '"',
 	SINGLE_QUOTE = '\'',
+	QUOTE_ALT = '`',
 	NEWLINE = '\n',
 
 	/* Double-char operators */
@@ -88,6 +89,7 @@ enum class TokenType : uint16_t
 	BOOLEAN,
 	CHAR,
 	FORMAT_STRING,
+	TOKEN,
 
 	IDENTIFIER,
 
@@ -139,7 +141,8 @@ enum class Word : uint8_t
 	T_INT, T_DOUBLE, T_STRING,
 	T_BOOLEAN, T_LIST, T_UNIT,
 	T_MAP, T_FUNCTION, T_CHAR,
-	T_OBJECT, T_REFERENCE, T_EXPRESSION,
+	T_OBJECT, T_REFERENCE,
+	T_TOKEN, T_EXPRESSION,
 	T_SET, T_FALLBACK
 };
 
@@ -160,7 +163,7 @@ class Token
 		std::string value;
 		Separator sep = Separator::NONE;
 
-		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'<>|&\n#";
+		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'`<>|&\n#";
 
 		static constexpr std::string_view multichar_ops[] = {
 				"<<", ">>", "->", "<-", "$(",
@@ -187,7 +190,9 @@ class Token
 				/* Type idfrs (spaces are ignored by Lexer), evaluate to (int)Type enum  */
 				"typenil", "typeint", "typedouble", "typestring", "typeboolean",
 				"typelist", "typeunit", "typemap", "typefunc", "typechar",
-				"typeobject", "typereference", "typeexpr", "typeset", "typefallback"
+				"typeobject", "typereference",
+				"typetoken", "typeexpr",
+				"typeset", "typefallback"
 		};
 
 		static constexpr TokenType semantic_tokens[] = {
@@ -221,7 +226,7 @@ class Token
 		Token& operator=(const Token &rhs);
 		void set_type(TokenType);
 		TokenType get_type() const;
-		std::string& get_value();
+		const std::string& get_value() const;
 
 		void set_line(uint32_t);
 		uint32_t get_line() const;

@@ -117,7 +117,7 @@ TokenType Token::get_type() const
 	return type;
 }
 
-std::string& Token::get_value()
+const std::string& Token::get_value() const
 {
 	return value;
 }

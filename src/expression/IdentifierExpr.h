@@ -31,7 +31,7 @@ class IdentifierExpr: public Expression
 		bool is_global() const;
 		const std::string& get_name() const;
 
-		static Value eval_reserved(std::string &name);
+		static Value eval_reserved(const std::string &name);
 		static std::string get_name(Expression *expr);
 		inline static std::string get_name(ExprPtr expr)
 		{

@@ -35,6 +35,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_literal_parser(TokenType::DOUBLE, Type::DOUBLE);
 	register_literal_parser(TokenType::INTEGER, Type::INTEGER);
 	register_literal_parser(TokenType::CHAR, Type::CHAR);
+	register_literal_parser(TokenType::TOKEN, Type::TOKEN);
 	register_parser(TokenType::FORMAT_STRING, new FormatStrParser()); // $"... {} ..." arg1, arg2, ...
 
 
@@ -191,7 +192,7 @@ void Methan0lParser::register_infix_opr(TokenType token, Precedence precedence,
 
 void Methan0lParser::load(std::string &code)
 {
-	lexer.parse(code);
+	lexer.lex(code);
 	parse_all();
 }
 

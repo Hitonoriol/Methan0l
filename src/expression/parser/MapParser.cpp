@@ -71,7 +71,7 @@ std::string MapParser::key_string(ExprPtr expr)
 		return IdentifierExpr::get_name(expr);
 
 	if (instanceof<LiteralExpr>(expr.get()))
-		return try_cast<LiteralExpr>(expr).raw_value().to_string();
+		return try_cast<LiteralExpr>(expr).raw_ref().to_string();
 
 	throw std::runtime_error("Invalid map key expression: " + expr->info());
 }
