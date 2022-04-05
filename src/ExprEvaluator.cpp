@@ -63,49 +63,19 @@ void ExprEvaluator::register_func(const std::string &name, InbuiltFunc &&func)
 	}
 }
 
-void ExprEvaluator::prefix_op(TokenType tok, PrefixOpr opr)
-{
-	prefix_ops.emplace(tok, opr);
-}
-
-void ExprEvaluator::binary_op(TokenType tok, BinaryOpr opr)
-{
-	binary_ops.emplace(tok, opr);
-}
-
-void ExprEvaluator::postfix_op(TokenType tok, PostfixOpr opr)
-{
-	postfix_ops.emplace(tok, opr);
-}
-
 Value ExprEvaluator::evaluate(BinaryOperatorExpr &opr)
 {
 	return apply_binary(opr.get_lhs(), opr.get_operator(), opr.get_rhs());
 }
 
-Value ExprEvaluator::apply_binary(ExprPtr &lhs, TokenType op, ExprPtr &rhs)
-{
-	return binary_ops.find(op)->second(lhs, rhs);
-}
-
 Value ExprEvaluator::evaluate(PostfixExpr &opr)
 {
-	return apply_postfix(opr.get_lhs(), opr.get_operator());
-}
-
-Value ExprEvaluator::apply_postfix(ExprPtr &lhs, TokenType op)
-{
-	return postfix_ops.find(op)->second(lhs);
+	return apply_postfix(opr.get_operator(), opr.get_lhs());
 }
 
 Value ExprEvaluator::evaluate(PrefixExpr &opr)
 {
 	return apply_prefix(opr.get_operator(), opr.get_rhs());
-}
-
-Value ExprEvaluator::apply_prefix(TokenType op, ExprPtr rhs)
-{
-	return prefix_ops.find(op)->second(rhs);
 }
 
 void ExprEvaluator::load_main(Unit &main)

@@ -15,6 +15,15 @@ Library::Library(const Library &rhs) : eval(rhs.eval)
 {
 }
 
+LIB_OPERATOR_DEF(prefix, LazyUnaryOpr)
+LIB_OPERATOR_DEF(prefix, UnaryOpr)
+
+LIB_OPERATOR_DEF(postfix, LazyUnaryOpr)
+LIB_OPERATOR_DEF(postfix, UnaryOpr)
+
+LIB_OPERATOR_DEF(infix, LazyBinaryOpr)
+LIB_OPERATOR_DEF(infix, BinaryOpr)
+
 std::string Library::str(ExprList args, int idx)
 {
 	return mtl::str(arg(args, idx));
@@ -67,21 +76,6 @@ void Library::getter(const std::string &name, Value val)
 void Library::function(const std::string &func_name, InbuiltFunc &&func)
 {
 	eval->register_func(func_name, std::move(func));
-}
-
-void Library::prefix_operator(TokenType tok, PrefixOpr opr)
-{
-	eval->prefix_op(tok, opr);
-}
-
-void Library::infix_operator(TokenType tok, BinaryOpr opr)
-{
-	eval->binary_op(tok, opr);
-}
-
-void Library::postfix_operator(TokenType tok, PostfixOpr opr)
-{
-	eval->postfix_op(tok, opr);
 }
 
 }

@@ -9,11 +9,21 @@
 #include "structure/Function.h"
 #include "lang/Library.h"
 #include "structure/object/TypeManager.h"
+#include "Token.h"
 #include "ExceptionHandler.h"
 
 #include "util/meta/function_traits.h"
 #include "util/cast.h"
 #include "util/util.h"
+
+#define OPERATOR_DEF(prefix, type, functor) \
+	inline void type##_op(TokenType tok, const functor &opr) \
+	{ \
+		prefix##_##type##_ops.emplace(tok, opr); \
+	}
+
+#define APPLY_UNARY(type) \
+
 
 namespace mtl
 {
@@ -41,11 +51,18 @@ class ExprEvaluator
 		friend class LoopExpr;
 		friend class LibModule;
 
+		enum class OperatorType: uint8_t
+		{
+			UNARY, BINARY
+		};
+
 		std::vector<std::unique_ptr<Library>> libraries;
 
-		PrefixOprMap prefix_ops;
-		BinaryOprMap binary_ops;
-		PostfixOprMap postfix_ops;
+		OperatorMap<LazyUnaryOpr> lazy_prefix_ops, lazy_postfix_ops;
+		OperatorMap<LazyBinaryOpr> lazy_infix_ops;
+		OperatorMap<UnaryOpr> value_prefix_ops, value_postfix_ops;
+		OperatorMap<BinaryOpr> value_infix_ops;
+
 		InbuiltFuncMap inbuilt_funcs;
 		TypeManager type_mgr { *this };
 
@@ -64,14 +81,61 @@ class ExprEvaluator
 			libraries.push_back(std::move(library));
 		}
 
-		Value apply_prefix(TokenType op, ExprPtr rhs);
-		Value apply_binary(ExprPtr &lhs, TokenType op, ExprPtr &rhs);
-		Value apply_postfix(ExprPtr &lhs, TokenType op);
+		/* Main operator application dispatcher */
+		template<OperatorType Optype, typename LM, typename VM>
+		inline Value apply_operator(LM &lazy_ops, VM &val_ops, TokenType op, const ExprPtr &a, const ExprPtr &b)
+		{
+			auto lazy = lazy_ops.find(op);
+			if (lazy != lazy_ops.end()) {
+				if constexpr (Optype == OperatorType::UNARY)
+					return lazy->second(a);
+				else
+					return lazy->second(a, b);
+			}
+
+			Value operand_a = eval(a);
+
+			/* Invoke object operator overload, if any */
+			if (operand_a.is<Object>()) {
+				auto &obj = operand_a.get<Object>();
+				ExprList args;
+				if constexpr (Optype == OperatorType::BINARY)
+					args.push_back(b);
+				return obj.invoke_method(type_mgr, Token::to_string(op), args);
+			}
+
+			if constexpr (Optype == OperatorType::UNARY) {
+				return val_ops.find(op)->second(operand_a);
+			} else {
+				Value rhs = eval(b);
+				return val_ops.find(op)->second(operand_a, rhs);
+			}
+		}
+
+		inline Value apply_prefix(TokenType op, const ExprPtr &rhs)
+		{
+			return apply_operator<OperatorType::UNARY>(lazy_prefix_ops, value_prefix_ops, op, rhs, rhs);
+		}
+
+		inline Value apply_binary(const ExprPtr &lhs, TokenType op, const ExprPtr &rhs)
+		{
+			return apply_operator<OperatorType::BINARY>(lazy_infix_ops, value_infix_ops, op, lhs, rhs);
+		}
+
+		inline Value apply_postfix(TokenType op, const ExprPtr &lhs)
+		{
+			return apply_operator<OperatorType::UNARY>(lazy_postfix_ops, value_postfix_ops, op, lhs, lhs);
+		}
 
 	protected:
-		void prefix_op(TokenType tok, PrefixOpr opr);
-		void binary_op(TokenType tok, BinaryOpr opr);
-		void postfix_op(TokenType tok, PostfixOpr opr);
+		OPERATOR_DEF(lazy, prefix, LazyUnaryOpr)
+		OPERATOR_DEF(value, prefix, UnaryOpr)
+
+		OPERATOR_DEF(lazy, postfix, LazyUnaryOpr)
+		OPERATOR_DEF(value, postfix, UnaryOpr)
+
+		OPERATOR_DEF(lazy, infix, LazyBinaryOpr)
+		OPERATOR_DEF(value, infix, BinaryOpr)
 
 		Value invoke_inbuilt_func(const std::string &name, ExprList args);
 
@@ -89,7 +153,7 @@ class ExprEvaluator
 		}
 
 		Value eval(Expression &expr);
-		inline Value eval(ExprPtr &expr)
+		inline Value eval(const ExprPtr &expr)
 		{
 			return eval(*expr);
 		}

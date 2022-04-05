@@ -5,6 +5,12 @@
 
 #include "../type.h"
 
+#define LIB_OPERATOR_DEF(type, functor) \
+	void Library::type##_operator(TokenType tok, const functor &opr) \
+	{ \
+		eval->type##_op(tok, opr); \
+	}
+
 namespace mtl
 {
 
@@ -30,9 +36,12 @@ class Library
 		void function(const std::string&, InbuiltFunc&&);
 		void getter(const std::string &name, Value);
 
-		void prefix_operator(TokenType, PrefixOpr);
-		void infix_operator(TokenType, BinaryOpr);
-		void postfix_operator(TokenType, PostfixOpr);
+		void prefix_operator(TokenType, const LazyUnaryOpr&);
+		void prefix_operator(TokenType, const UnaryOpr&);
+		void infix_operator(TokenType, const LazyBinaryOpr&);
+		void infix_operator(TokenType, const BinaryOpr&);
+		void postfix_operator(TokenType, const LazyUnaryOpr&);
+		void postfix_operator(TokenType, const UnaryOpr&);
 
 	public:
 		Library(ExprEvaluator *eval);

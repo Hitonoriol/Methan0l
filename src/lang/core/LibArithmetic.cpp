@@ -20,21 +20,22 @@ void LibArithmetic::load()
 			TokenType::SUB, TokenType::MUL,
 			TokenType::DIV
 	};
+
 	for (size_t i = 0; i < std::size(ar_ops); ++i)
-		infix_operator(ar_ops[i], [=](auto lhs, auto rhs) {
+		infix_operator(ar_ops[i], LazyBinaryOpr([=](auto &lhs, auto &rhs) {
 			Value res = calculate(lhs, ar_ops[i], rhs);
 
 			if (Token::is_ref_opr(ar_ops[i]))
 				ref(lhs) = res;
 
 			return res;
-		});
+		}));
 
-	infix_operator(TokenType::PERCENT, [&](ExprPtr lhs, ExprPtr rhs) {
+	infix_operator(TokenType::PERCENT, LazyBinaryOpr([&](ExprPtr lhs, ExprPtr rhs) {
 		return Value(mtl::num(val(lhs)) % mtl::num(val(rhs)));
-	});
+	}));
 
-	prefix_operator(TokenType::MINUS, [this](auto rhs) {
+	prefix_operator(TokenType::MINUS, LazyUnaryOpr([this](auto rhs) {
 		Value rval = val(rhs);
 
 		if (rval.type() == Type::INTEGER)
@@ -43,27 +44,27 @@ void LibArithmetic::load()
 			rval = -rval.as<double>();
 
 		return rval;
-	});
+	}));
 
 	/* Prefix & Postfix increment / decrement */
 	TokenType unary_ar_ops[] = { TokenType::INCREMENT, TokenType::DECREMENT };
 	for (size_t i = 0; i < std::size(unary_ar_ops); ++i) {
-		prefix_operator(unary_ar_ops[i], [=](auto rhs) {
+		prefix_operator(unary_ar_ops[i], LazyUnaryOpr([=](auto rhs) {
 			Value &val = ref(rhs);
 			apply_unary(val, unary_ar_ops[i]);
 			return val;
-		});
+		}));
 
-		postfix_operator(unary_ar_ops[i], [=](auto lhs) {
+		postfix_operator(unary_ar_ops[i], LazyUnaryOpr([=](auto lhs) {
 			Value &val = ref(lhs);
 			Value tmp(val);
 			apply_unary(val, unary_ar_ops[i]);
 			return tmp;
-		});
+		}));
 	}
 }
 
-Value LibArithmetic::calculate(ExprPtr &l, TokenType op, ExprPtr &r)
+Value LibArithmetic::calculate(const ExprPtr &l, TokenType op, const ExprPtr &r)
 {
 	Value lexpr = val(l), rexpr = val(r);
 
@@ -75,7 +76,7 @@ Value LibArithmetic::calculate(ExprPtr &l, TokenType op, ExprPtr &r)
 
 void LibArithmetic::apply_unary(Value &val, TokenType op)
 {
-	const int d = unary_diff(op);
+	const int d = op == TokenType::INCREMENT ? 1 : -1;
 	switch (val.type()) {
 	case Type::INTEGER:
 		val = val.as<dec>() + d;

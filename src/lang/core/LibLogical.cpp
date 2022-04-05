@@ -2,8 +2,8 @@
 
 #include <iterator>
 
-#include "../../structure/Value.h"
-#include "../../Token.h"
+#include "structure/Value.h"
+#include "Token.h"
 
 namespace mtl
 {
@@ -15,15 +15,15 @@ void LibLogical::load()
 			TokenType::AND, TokenType::OR, TokenType::XOR
 	};
 	for (size_t i = 0; i < std::size(log_ops); ++i)
-		infix_operator(log_ops[i], [&, opr = log_ops[i]](auto lhs, auto rhs) {
+		infix_operator(log_ops[i], LazyBinaryOpr([&, opr = log_ops[i]](auto lhs, auto rhs) {
 			return Value(eval_logical(lhs, opr, rhs));
-		});
+		}));
 
 	/* Logical NOT operator */
-	prefix_operator(TokenType::EXCLAMATION, [this](auto rhs) {
+	prefix_operator(TokenType::EXCLAMATION, LazyUnaryOpr([this](auto rhs) {
 		Value rval = val(rhs);
 		return Value(!rval.as<bool>());
-	});
+	}));
 
 	/* Bitwise operators: INT (op) INT */
 	TokenType bit_ops[] = {
@@ -31,15 +31,15 @@ void LibLogical::load()
 			TokenType::SHIFT_L, TokenType::SHIFT_R
 	};
 	for (size_t i = 0; i < std::size(bit_ops); ++i)
-		infix_operator(bit_ops[i], [&, opr = bit_ops[i]](auto lhs, auto rhs) {
+		infix_operator(bit_ops[i], LazyBinaryOpr([&, opr = bit_ops[i]](auto lhs, auto rhs) {
 			Value lexpr = val(lhs), rexpr = val(rhs);
 			return Value(eval_bitwise(lexpr.as<dec>(), opr, rexpr.as<dec>()));
-		});
+		}));
 
 	/* Bitwise NOT */
-	prefix_operator(TokenType::TILDE, [this](auto rhs) {
+	prefix_operator(TokenType::TILDE, LazyUnaryOpr([this](auto rhs) {
 		return Value(~mtl::num(val(rhs)));
-	});
+	}));
 
 	/* Comparison operators: >, <, >=, <= */
 	TokenType cmp_ops[] = {
@@ -47,19 +47,19 @@ void LibLogical::load()
 			TokenType::LESS, TokenType::LESS_OR_EQ
 	};
 	for (size_t i = 0; i < std::size(cmp_ops); ++i)
-		infix_operator(cmp_ops[i], [&, opr = cmp_ops[i]](auto lhs, auto rhs) {
-					Value lval = val(lhs), rval = val(rhs);
-					return Value(eval_arithmetic_comparison(lval.as<double>(), opr, rval.as<double>()));
-				});
+		infix_operator(cmp_ops[i], LazyBinaryOpr([&, opr = cmp_ops[i]](auto lhs, auto rhs) {
+			Value lval = val(lhs), rval = val(rhs);
+			return Value(eval_arithmetic_comparison(lval.as<double>(), opr, rval.as<double>()));
+		}));
 
 	/* Equals operator */
-	infix_operator(TokenType::EQUALS, [&](auto lhs, auto rhs) {
+	infix_operator(TokenType::EQUALS, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		return Value(val(lhs) == val(rhs));
-	});
+	}));
 
-	infix_operator(TokenType::NOT_EQUALS, [&](auto lhs, auto rhs) {
+	infix_operator(TokenType::NOT_EQUALS, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		return Value(val(lhs) != val(rhs));
-	});
+	}));
 }
 
 dec LibLogical::eval_bitwise(dec l, TokenType op, dec r)

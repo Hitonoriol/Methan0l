@@ -112,10 +112,10 @@ void LibString::load()
 void LibString::load_operators()
 {
 	/* String concatenation */
-	infix_operator(TokenType::STRING_CONCAT, [this](auto lhs, auto rhs) {
+	infix_operator(TokenType::STRING_CONCAT, LazyBinaryOpr([this](auto lhs, auto rhs) {
 		auto lexpr = val(lhs), rexpr = val(rhs);
 		return Value(lexpr.to_string(eval) + rexpr.to_string(eval));
-	});
+	}));
 }
 
 /*

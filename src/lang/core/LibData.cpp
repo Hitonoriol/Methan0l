@@ -361,7 +361,7 @@ void LibData::load_container_funcs()
 
 void LibData::load_operators()
 {
-	prefix_operator(TokenType::GLOBAL, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::GLOBAL, LazyUnaryOpr([&](auto rhs) {
 		if_instanceof<IdentifierExpr>(*rhs, [&](auto &idfr) {
 			import_reference(idfr);
 		});
@@ -370,39 +370,39 @@ void LibData::load_operators()
 				import_reference(try_cast<IdentifierExpr>(idfr));
 		});
 		return Value::NO_VALUE;
-	});
+	}));
 
 	/* obj = new: Class(arg1, arg2, ...) */
-	prefix_operator(TokenType::NEW, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::NEW, LazyUnaryOpr([&](ExprPtr rhs) {
 		rhs->assert_type<InvokeExpr>("Invalid `new` expression");
 		auto &ctor_call = try_cast<InvokeExpr>(rhs);
 		std::string type_name = MapParser::key_string(ctor_call.get_lhs());
 		return Value(eval->get_type_mgr().create_object(type_name, ctor_call.arg_list()));
-	});
+	}));
 
 	/* Evaluate and convert to string: $$expr */
-	prefix_operator(TokenType::DOUBLE_DOLLAR, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::DOUBLE_DOLLAR, LazyUnaryOpr([&](auto rhs) {
 		return rhs->evaluate(*eval).to_string(eval);
-	});
+	}));
 
-	prefix_operator(TokenType::NO_EVAL, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::NO_EVAL, LazyUnaryOpr([&](auto rhs) {
 		return Value(rhs);
-	});
+	}));
 
-	prefix_operator(TokenType::HASHCODE, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::HASHCODE, LazyUnaryOpr([&](auto rhs) {
 		return Value(ref(rhs).hash_code());
-	});
+	}));
 
-	infix_operator(TokenType::TYPE_ASSIGN, [&](ExprPtr lhs, ExprPtr rhs) {
+	infix_operator(TokenType::TYPE_ASSIGN, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		return if_not_same(lhs, rhs, true);
-	});
+	}));
 
-	infix_operator(TokenType::TYPE_SAFE, [&](ExprPtr lhs, ExprPtr rhs) {
+	infix_operator(TokenType::TYPE_SAFE, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		if_not_same(lhs, rhs, false);
 		return Value::NO_VALUE;
-	});
+	}));
 
-	prefix_operator(TokenType::OBJECT_COPY, [&](ExprPtr rhs) -> Value {
+	prefix_operator(TokenType::OBJECT_COPY, LazyUnaryOpr([&](auto rhs) -> Value {
 		Value rval = val(rhs);
 		if (rval.is<Object>())
 			return Object::copy(rval.get<Object>());
@@ -416,32 +416,32 @@ void LibData::load_operators()
 		}
 		else
 			throw std::runtime_error("`objcopy` can only be applied on an Object or a Box Unit");
-	});
+	}));
 
-	prefix_operator(TokenType::DEFINE_VALUE, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::DEFINE_VALUE, LazyUnaryOpr([&](auto rhs) {
 		return Value(static_cast<Type>(mtl::num(val(rhs))));
-	});
+	}));
 
 	/* Reference operator */
-	prefix_operator(TokenType::REF, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::REF, LazyUnaryOpr([&](ExprPtr rhs) {
 		rhs->assert_type<IdentifierExpr>("Cannot reference a temporary Value");
 		return Value::ref(eval->referenced_value(rhs));
-	});
+	}));
 
 	/* typeid(val) */
-	prefix_operator(TokenType::TYPE_ID, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::TYPE_ID, LazyUnaryOpr([&](auto rhs) {
 		return val(rhs).type_id();
-	});
+	}));
 
-	prefix_operator(TokenType::TYPE_NAME, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::TYPE_NAME, LazyUnaryOpr([&](auto rhs) {
 		return mtl::str(val(rhs).type_name());
-	});
+	}));
 
 	/* Delete idfr & the Value associated with it */
-	prefix_operator(TokenType::DELETE, [&](ExprPtr rhs) {
+	prefix_operator(TokenType::DELETE, LazyUnaryOpr([&](auto rhs) {
 		eval->scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
 		return Value::NIL;
-	});
+	}));
 }
 
 } /* namespace mtl */

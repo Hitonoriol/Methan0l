@@ -15,18 +15,18 @@ namespace mtl
 void LibIO::load()
 {
 	/* Output Operator */
-	prefix_operator(TokenType::OUT, [&](auto expr) {
+	prefix_operator(TokenType::OUT, LazyUnaryOpr([&](auto expr) {
 		std::cout << val(expr).to_string(eval);
 		return Value::NO_VALUE;
-	});
+	}));
 
-	prefix_operator(TokenType::OUT_NL, [&](auto expr) {
+	prefix_operator(TokenType::OUT_NL, LazyUnaryOpr([&](auto expr) {
 		std::cout << val(expr).to_string(eval) << std::endl;
 		return Value::NO_VALUE;
-	});
+	}));
 
 	/* Input Operator with type deduction */
-	prefix_operator(TokenType::IN, [&](auto idfr) {
+	prefix_operator(TokenType::IN, LazyUnaryOpr([&](auto idfr) {
 		IdentifierExpr &idf = try_cast<IdentifierExpr>(idfr);
 		std::string input;
 		std::cin >> input;
@@ -34,7 +34,7 @@ void LibIO::load()
 		idf.create_if_nil(*eval);
 		ref(idf) = val;
 		return val;
-	});
+	}));
 
 	/* String input function: foo = read_line$() */
 	function("read_line", [&](auto args) {

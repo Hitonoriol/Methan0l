@@ -68,13 +68,14 @@ using ValSet = std::unordered_set<Value>;
 using ArgDef = std::pair<std::string, ExprPtr>;
 using ArgDefList = std::deque<ArgDef>;
 
-using PrefixOpr = std::function<Value(ExprPtr&)>;
-using BinaryOpr = std::function<Value(ExprPtr&, ExprPtr&)>;
-using PostfixOpr = std::function<Value(ExprPtr&)>;
+using LazyUnaryOpr = std::function<Value(const ExprPtr&)>;
+using LazyBinaryOpr = std::function<Value(const ExprPtr&, const ExprPtr&)>;
 
-using PrefixOprMap = std::unordered_map<TokenType, PrefixOpr>;
-using BinaryOprMap = std::unordered_map<TokenType, BinaryOpr>;
-using PostfixOprMap = std::unordered_map<TokenType, PostfixOpr>;
+using BinaryOpr = std::function<Value(Value&, Value&)>;
+using UnaryOpr = std::function<Value(Value&)>;
+
+template<typename O>
+using OperatorMap = std::unordered_map<TokenType, O>;
 
 using InbuiltFunc = std::function<Value(ExprList)>;
 using InbuiltFuncMap = std::unordered_map<std::string, InbuiltFunc>;

@@ -140,32 +140,32 @@ void LibUnit::import(ExprEvaluator *eval, Unit &module)
 void LibUnit::load_operators()
 {
 	/* Prefix return operator */
-	prefix_operator(TokenType::RETURN, [&](auto lhs) {
+	prefix_operator(TokenType::RETURN, LazyUnaryOpr([&](auto lhs) {
 		save_return(lhs);
 		return Value::NO_VALUE;
-	});
+	}));
 
 	/* Postfix return operator */
-	postfix_operator(TokenType::EXCLAMATION, [&](auto lhs) {
+	postfix_operator(TokenType::EXCLAMATION, LazyUnaryOpr([&](auto lhs) {
 		save_return(lhs);
 		return Value::NO_VALUE;
-	});
+	}));
 
 	/* Dereference value */
-	postfix_operator(TokenType::DOUBLE_EXCL, [&](auto lhs) {
+	postfix_operator(TokenType::DOUBLE_EXCL, LazyUnaryOpr([&](auto lhs) {
 		return ref(lhs).get();
-	});
+	}));
 
 	/* Static method invocation: Type@method$(arg1, arg2, ...) */
-	infix_operator(TokenType::AT, [&](auto lhs, auto rhs) {
+	infix_operator(TokenType::AT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		ObjectType &type = eval->get_type_mgr().get_type(ObjectType::get_id(MapParser::key_string(lhs)));
 		InvokeExpr &method_expr = try_cast<InvokeExpr>(rhs);
 		std::string name = MapParser::key_string(method_expr.get_lhs());
 		return type.invoke_static(name, method_expr.arg_list());
-	});
+	}));
 
 	/* Access operator */
-	infix_operator(TokenType::DOT, [&](auto lhs, auto rhs) -> Value {
+	infix_operator(TokenType::DOT, LazyBinaryOpr([&](auto lhs, auto rhs) -> Value {
 		Value lval = val(lhs);
 
 		/* Object field access / method invocation */
@@ -195,11 +195,11 @@ void LibUnit::load_operators()
 
 			return Value::ref(box_value(unit, rhs));
 		}
-	});
+	}));
 
-	infix_operator(TokenType::ARROW_L, [&](auto lhs, auto rhs) -> Value {
+	infix_operator(TokenType::ARROW_L, LazyBinaryOpr([&](auto lhs, auto rhs) -> Value {
 		return invoke_pseudo_method(lhs, rhs);
-	});
+	}));
 }
 
 Value& LibUnit::box_value(Unit &box, ExprPtr expr)

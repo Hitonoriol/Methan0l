@@ -17,7 +17,7 @@ class LibArithmetic: public Library
 		void load() override;
 
 	private:
-		Value calculate(ExprPtr &l, TokenType op, ExprPtr &r);
+		Value calculate(const ExprPtr &l, TokenType op, const ExprPtr &r);
 		template<typename T>
 		T calculate(T l, TokenType op, T r)
 		{
@@ -44,11 +44,6 @@ class LibArithmetic: public Library
 		}
 
 		void apply_unary(Value &val, TokenType op);
-
-		inline int unary_diff(TokenType op)
-		{
-			return op == TokenType::INCREMENT ? 1 : -1;
-		}
 };
 
 } /* namespace mtl */

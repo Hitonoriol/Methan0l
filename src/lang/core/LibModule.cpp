@@ -36,12 +36,12 @@ void LibModule::load()
 		unit.local().clear();
 	});
 
-	prefix_operator(TokenType::USING_MODULE, [&](auto rhs) {
+	prefix_operator(TokenType::USING_MODULE, LazyUnaryOpr([&](auto rhs) {
 		Unit module;
 		load_module(mtl::str(val(rhs)), module);
 		LibUnit::import(eval, module);
 		return Value::NO_VALUE;
-	});
+	}));
 
 }
 
