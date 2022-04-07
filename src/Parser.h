@@ -108,6 +108,7 @@ class Parser
 		void clear();
 
 		Lexer& get_lexer();
+		void dump_queue(size_t len = 15);
 };
 
 } /* namespace mtl */

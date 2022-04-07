@@ -1,8 +1,10 @@
 #include "Parser.h"
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 
+#include "util/containers.h"
 #include "except/except.h"
 
 namespace mtl
@@ -142,7 +144,7 @@ Token Parser::consume()
 	else
 		++peek_pos;
 
-	LOG("[consume token] " << ret)
+	LOG("[" << (peeking() ? "peek" : "consume") << " token] " << ret)
 
 	return ret;
 }
@@ -200,13 +202,17 @@ Token& Parser::look_ahead(size_t n)
 void Parser::peek_mode(bool enable)
 {
 	if (enable)
-		peek_stack.push({ peek_pos, 0 });
-	else {
-		peek_stack.pop();
+		peek_stack.push( { peek_pos, 0 });
+
+	LOG("!!! " << (enable ? "Started" : "Stopped")
+			<< " peeking [Depth: " << peek_stack.size() << ", start pos: " << peek_descriptor().start << "]")
+
+	if (!enable) {
+		peek_pos -= mtl::pop(peek_stack).offset;
 		if (peek_stack.empty())
 			peek_pos = 0;
 	}
-	LOG("!!! " << (enable ? "Started" : "Stopped") << " peeking [" << peek_stack.size() << "]")
+	IFDBG(dump_queue())
 }
 
 bool Parser::peeking()
@@ -232,6 +238,7 @@ void Parser::consume_peeked(PeekPos desc)
 	else
 		throw std::runtime_error("Can't consume peeked expression after modifying the token queue");
 	LOG("Done consuming. First token in queue: " << look_ahead())
+	IFDBG(dump_queue())
 }
 
 int Parser::get_lookahead_precedence(bool prefix)
@@ -264,6 +271,20 @@ void Parser::clear()
 Lexer& Parser::get_lexer()
 {
 	return lexer;
+}
+/*
+ * Preloads `len` tokens into the `read_queue` and prints them to stdout
+ * [For debugging purposes only]
+ */
+void Parser::dump_queue(size_t len)
+{
+	sstream ss;
+	ss << "[Token queue lookahead]" << NLTAB;
+	look_ahead(len);
+	for(size_t i = 0; i < len; ++i)
+		ss << std::setw(3) << i << ": " << read_queue[i] << NL;
+	ss << "..." << UNTAB << NL;
+	out << tab(ss.str());
 }
 
 } /* namespace mtl */
