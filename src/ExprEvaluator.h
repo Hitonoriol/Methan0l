@@ -109,7 +109,7 @@ class ExprEvaluator
 			Value operand_a = Token::is_ref_opr(op) ? Value::ref(referenced_value(a)) : eval(a);
 
 			/* Invoke object operator overload, if any */
-			if (operand_a.is<Object>()) {
+			if (operand_a.get().is<Object>()) {
 				auto &obj = operand_a.get<Object>();
 				ExprList args;
 				if constexpr (Optype == OperatorType::BINARY)

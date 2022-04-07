@@ -351,19 +351,21 @@ class Value
 		template<typename T> inline T& get()
 		{
 			using P = std::shared_ptr<T>;
+			/* Follow `mtl::ValueRef`s if underlying value is a mtl::ref and T is not */
+			if constexpr (!std::is_same<TYPE(T), ValueRef>::value)
+				if (std::holds_alternative<ValueRef>(value))
+					return get<ValueRef>().value().get<T>();
+
+			/* Get a ref to a fallback type */
 			if constexpr (!allowed_type<T>() && !allowed_type<P>())
 				return std::any_cast<T&>(as_any());
 
+			/* Get a ref to a heap-stored object */
 			else if constexpr (is_heap_storable<T>())
 				return *std::get<P>(value);
 
-			else {
-				if constexpr (!std::is_same<TYPE(T), ValueRef>::value)
-					if (std::holds_alternative<ValueRef>(value))
-						return get<ValueRef>().value().get<T>();
-
+			else
 				return std::get<T>(value);
-			}
 		}
 
 		template<typename T>
