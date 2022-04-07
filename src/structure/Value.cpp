@@ -215,6 +215,9 @@ Type Value::type() const
 	else if (is<std::any>())
 		return Type::FALLBACK;
 
+	else if (is<Token>())
+		return Type::TOKEN;
+
 	/* No value / Unknown type */
 	else
 		return Type::NIL;
@@ -313,72 +316,72 @@ std::string Value::to_string(ExprEvaluator *eval)
 	}
 }
 
-dec Value::to_dec()
+dec Value::to_dec() const
 {
 	Type t = type();
 	switch (t) {
 	case Type::DOUBLE:
-		return (dec) get<double>();
+		return (dec) cget<double>();
 
 	case Type::STRING:
-		return std::stol(get<std::string>());
+		return std::stol(cget<std::string>());
 
 	case Type::BOOLEAN:
-		return get<bool>() ? 1 : 0;
+		return cget<bool>() ? 1 : 0;
 
 	case Type::CHAR:
-		return (dec) get<char>();
+		return (dec) cget<char>();
 
 	default:
 		throw InvalidTypeException(t, Type::INTEGER);
 	}
 }
 
-double Value::to_double()
+double Value::to_double() const
 {
 	Type t = type();
 	switch (t) {
 	case Type::STRING:
-		return std::stod(get<std::string>());
+		return std::stod(cget<std::string>());
 
 	case Type::INTEGER:
-		return (double) get<dec>();
+		return (double) cget<dec>();
 
 	case Type::BOOLEAN:
-		return get<bool>() ? 1.0 : 0.0;
+		return cget<bool>() ? 1.0 : 0.0;
 
 	default:
 		throw InvalidTypeException(t, Type::DOUBLE);
 	}
 }
 
-bool Value::to_bool()
+bool Value::to_bool() const
 {
 	Type t = type();
 	switch (t) {
 	case Type::INTEGER:
-		return get<dec>() == 1;
+		return cget<dec>() == 1;
 
 	case Type::STRING:
-		return get<std::string>() == Token::reserved(Word::TRUE);
+		return cget<std::string>() == Token::reserved(Word::TRUE);
 
 	case Type::DOUBLE:
-		return get<double>() == 1.0;
+		return cget<double>() == 1.0;
 
 	default:
 		throw InvalidTypeException(t, Type::BOOLEAN);
 	}
 }
 
-char Value::to_char()
+char Value::to_char() const
 {
 	Type t = type();
 	switch (t) {
 	case Type::STRING:
-		return get<std::string>().front();
+		return cget<std::string>().front();
 
 	case Type::INTEGER:
-		return (char) get<dec>();
+		return (char) cget<dec>();
 
 	default:
 		throw InvalidTypeException(t, Type::CHAR);
@@ -492,7 +495,7 @@ Value Value::from_string(std::string str)
 }
 
 /* If at least one of the operands is of type DOUBLE, operation result should also be DOUBLE */
-bool Value::is_double_op(Value &lhs, Value &rhs)
+bool Value::is_double_op(const Value &lhs, const Value &rhs)
 {
 	return lhs.type() == Type::DOUBLE || rhs.type() == Type::DOUBLE;
 }

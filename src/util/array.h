@@ -24,9 +24,21 @@ inline T find(const A &arr, const T &elem, const T &default_elem)
 }
 
 template<typename A, typename T>
-inline void for_each(const A &arr, const std::function<void(T)> &action)
+inline void for_each(const A &arr, T &&action)
 {
 	std::for_each(std::begin(arr), std::end(arr), action);
+}
+
+template<typename T, typename F>
+inline void for_each(const std::initializer_list<T> list, F &&action)
+{
+	std::for_each(std::begin(list), std::end(list), action);
+}
+
+template<typename T, typename F>
+inline void for_each(F &&action, const std::initializer_list<T> list)
+{
+	std::for_each(std::begin(list), std::end(list), action);
 }
 
 #endif /* SRC_UTIL_ARRAY_H_ */

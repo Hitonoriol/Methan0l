@@ -175,16 +175,20 @@ class Value
 		template<typename T>
 		void set(const T &val)
 		{
+			/* String types */
 			if constexpr (std::is_same<TYPE(T), const char*>::value
 					|| std::is_same<TYPE(T), std::string_view>::value)
 				set(std::string(val));
 
+			/* Decay arrays to pointers */
 			else if constexpr (std::is_array<T>::value)
 				set((typename std::decay<T>::type) val);
 
+			/* Copy the pointer if RHS type is heap-stored */
 			else if constexpr (allowed_type<T>() && is_shared_ptr<T>::value)
 				value = val;
 
+			/* RHS type is heap-storable but is not yet in the heap */
 			else if constexpr (is_heap_storable<T>()) {
 				/* Don't reallocate if this value is already of heap storable type T */
 				if (this->is<std::shared_ptr<T>>())
@@ -201,8 +205,11 @@ class Value
 				else if constexpr (std::is_floating_point<T>::value)
 					value = (double) val;
 
+				/* Fallback type (for interoperability with external modules) */
 				else if constexpr (!allowed_type<T>())
 					value = std::any(val);
+
+				/* Default copy assignment */
 				else
 					value = val;
 			}
@@ -326,7 +333,7 @@ class Value
 		static std::string_view type_name(Type type);
 		std::string_view type_name();
 
-		static bool is_double_op(Value &lhs, Value &rhs);
+		static bool is_double_op(const Value &lhs, const Value &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Value &val);
 		friend bool operator ==(const Value &lhs, const Value &rhs);
 		bool operator !=(const Value &rhs);
@@ -359,41 +366,50 @@ class Value
 			}
 		}
 
+		template<typename T>
+		inline const T& cget() const
+		{
+			return unconst(*this).get<T>();
+		}
+
 		std::string to_string(ExprEvaluator *eval = nullptr);
 		inline std::string str(ExprEvaluator *eval = nullptr) const
 		{
 			return unconst(*this).to_string(eval);
 		}
-		dec to_dec();
-		double to_double();
-		bool to_bool();
-		char to_char();
+		dec to_dec() const;
+		double to_double() const;
+		bool to_bool() const;
+		char to_char() const;
 		void* identity();
 
 		static Value ref(Value &val);
 		static ExprPtr wrapped(const Value &val);
 
 		/* Get current value by copy or convert to specified type */
-		template<typename T> inline T as()
+		template<typename T> inline T as() const
 		{
 			if constexpr (!allowed_type<T>()) {
 				if constexpr (std::is_same<T, udec>::value)
 					return (udec) as<dec>();
 				else if constexpr (std::is_integral<T>::value)
-					return (T) as<dec>();
+					return (T) to_dec();
 				else if constexpr (std::is_floating_point<T>::value)
-					return (T) as<double>();
+					return (T) to_double();
 				else if constexpr (std::is_same<TYPE(T), const char*>::value)
 					return as<std::string>().c_str();
 				else
-					return get<T>();
+					return cget<T>();
 			}
 			else {
 				if (std::holds_alternative<T>(value))
-					return get<T>();
+					return cget<T>();
+
+				else if (std::holds_alternative<ValueRef>(value))
+					return (*cget<ValueRef>().ptr()).as<T>();
 
 				if constexpr (std::is_same<T, std::string>::value)
-					return to_string();
+					return unconst(*this).to_string();
 
 				if constexpr (std::is_same<T, dec>::value)
 					return to_dec();

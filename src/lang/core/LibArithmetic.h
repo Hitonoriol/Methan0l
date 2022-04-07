@@ -17,7 +17,7 @@ class LibArithmetic: public Library
 		void load() override;
 
 	private:
-		Value calculate(const ExprPtr &l, TokenType op, const ExprPtr &r);
+		Value calculate(const Value &l, TokenType op, const Value &r);
 		template<typename T>
 		T calculate(T l, TokenType op, T r)
 		{
