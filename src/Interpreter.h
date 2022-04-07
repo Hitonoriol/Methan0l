@@ -54,6 +54,7 @@ class Interpreter: public ExprEvaluator
 						<< e.what()
 						<< " @ line " << parser.get_lexer().next(true).get_line()
 						<< std::endl;
+				parser.dump_queue();
 			} catch (...) {
 				std::cerr << "[Unknown parsing error]" << std::endl;
 			}
