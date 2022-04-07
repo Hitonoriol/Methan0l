@@ -81,7 +81,20 @@ class ExprEvaluator
 			libraries.push_back(std::move(library));
 		}
 
-		/* Main operator application dispatcher */
+		/*
+		 * Main operator application dispatcher.
+		 * Args:
+		 * 	`lazy_ops`, `val_ops` -- maps of Lazy and Value operators of the same type to perform lookup in.
+		 * 	`op` -- operator to perform lookup for & to apply to the operands
+		 * 	`a`, `b` -- operands. In case of an unary operator the operand is passed twice. (meh)
+		 *
+		 * Notes:
+		 * 	First operand (LHS for postfix and infix, RHS for prefix operators)
+		 * 		is passed by reference (wrapped in mtl::ValueRef)
+		 * 		for reference-operators (compound assignment, ++, --).
+		 *	Also, `operand_a.is<Object>()` check is performed on each operator application,
+		 *		which is kinda bad.
+		 */
 		template<OperatorType Optype, typename LM, typename VM>
 		inline Value apply_operator(LM &lazy_ops, VM &val_ops, TokenType op, const ExprPtr &a, const ExprPtr &b)
 		{
@@ -93,7 +106,7 @@ class ExprEvaluator
 					return lazy->second(a, b);
 			}
 
-			Value operand_a = eval(a);
+			Value operand_a = Token::is_ref_opr(op) ? Value::ref(referenced_value(a)) : eval(a);
 
 			/* Invoke object operator overload, if any */
 			if (operand_a.is<Object>()) {

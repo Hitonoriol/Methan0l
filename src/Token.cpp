@@ -233,7 +233,9 @@ std::string_view Token::bichar_op(TokenType tok)
 bool Token::is_ref_opr(TokenType opr)
 {
 	switch (opr) {
-	case TokenType::DIV:
+		case TokenType::INCREMENT:
+		case TokenType::DECREMENT:
+		case TokenType::DIV:
 		case TokenType::MUL:
 		case TokenType::SUB:
 		case TokenType::ADD:
