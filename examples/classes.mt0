@@ -1,49 +1,87 @@
 <% "Classes" :: newl
 class: Point @(
-	private => $(x, y),
+	private => $(x, y)
 	
-	/* Called automatically on Point.new$(...) invocation. */
+	/* Called automatically on `new: Point(...)` invocation. */
 	construct => func @(x => 0, y => 0) {
 		this.set$(x, y)
-	},
-	
+	}
+
 	set => func @(x, y) {
 		this.x = x
 		this.y = y
 		return: this
-	},
+	}
 
-	get_x => func @() {	this.x! },
-	get_y => func @() {	this.y! },
-	
+	get_x => func @() {		this.x! 	}
+ 
+	get_y => func @() {		this.y! 	}
+
 	add => func @(rhs) {
 		this.x += rhs.x
 		this.y += rhs.y
 		return: this
-	},
+	}
 	
+	sub => func @(rhs) {
+		this.x -= rhs.x
+		this.y -= rhs.y
+		return: this
+	}
+	
+	mul => func @(rhs) {
+		this.x *= rhs.x
+		this.y *= rhs.y
+		return: this
+	}
+	
+	div => func @(rhs) {
+		this.x /= rhs.x
+		this.y /= rhs.y
+		return: this
+	}
+	
+	/* Operator overloads */
+	`+` => @: rhs -> (objcopy: this).add(rhs)
+	`-` => @: rhs -> (objcopy: this).sub(rhs)
+	`*` => @: rhs -> (objcopy: this).mul(rhs)
+	`/` => @: rhs -> (objcopy: this).div(rhs)
+	`+=` => @: rhs -> this.add(rhs)
+	`-=` => @: rhs -> this.sub(rhs)
+	`*=` => @: rhs -> this.mul(rhs)
+	`/=` => @: rhs -> this.div(rhs)
+
 	/* Called automatically when using String-converting operators */
-	to_string => func @() {
-		"(" :: this.x :: ", " :: this.y :: ")"!
-	},
-	
+	to_string => @: () -> "(" :: this.x :: ", " :: this.y :: ")"
+
 	static_method => func @(x) {
-		<% "Static method arg: " :: x
+		<% $"Static method arg: \"{}\"" x
 	}
 )
 
-foo = Point.new(1, 2)
-bar = Point.new(0.5, 0.25)
-empty = Point.new()
+/* Create some test objects */
+foo = new: Point(1, 2)
+bar = new: Point(0.5, 0.25)
+empty = new: Point()
+
+/* Sum as a new object via `objcopy` operator */
 foo_plus_bar = (objcopy: foo).add(bar)
+
+/* Using overloaded operators */
+sum = foo + bar
+diff = foo - bar
 
 <% "* Point foo: " :: foo
 <% "* Point bar: " :: bar
-<% "* foo + bar: " :: foo_plus_bar
 <% "* Empty point: " :: empty
+<% "* foo + bar: " :: foo_plus_bar
+<% $"* Overloaded operators: foo + bar = {}; foo - bar = {}" sum, diff
+<% $"* Overloaded compound assignment: foo *= bar = {}", foo *= bar
 
+<% newl :: "Calling a static method of class Point:"
+Point@static_method("Test")
+
+<% newl :: "class_id() test:"
+/* Type checking via class_id() method -- can be called both from an object & statically */
 id = foo.class_id()
-<% "? Is foo an instance of Point: " :: id == Point@class_id()
-<% "? Is foo an instance of File: " :: id == File@class_id()
-
-Point@static_method(123)
+<% "* Is foo an instance of Point: " :: id == Point@class_id()<% "* Is foo an instance of File: " :: id == File@class_id()
