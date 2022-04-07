@@ -30,6 +30,7 @@ class Lexer
 		uint32_t line = 1, column = 1;
 		Separator cur_sep = Separator::NONE;
 		dec open_blocks = 0;
+		bool token_literal = false;
 
 		std::queue<Token> tokens;
 

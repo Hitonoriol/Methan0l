@@ -137,6 +137,12 @@ Token& Lexer::finalize_token(Token &&tok)
 	tok.set_column(column);
 	tok.set_separator(cur_sep);
 	cur_sep = Separator::NONE;
+	/* If this token is a token literal (e.g. `token`) */
+	if (token_literal) {
+		tok.set_type(TokenType::TOKEN);
+		next_char(); // Skip the second '`'
+		token_literal = false;
+	}
 	return tok;
 }
 
@@ -208,13 +214,9 @@ void Lexer::begin(char chr)
 		save(chr);
 	}
 
-	/* Token literal  */
+	/* Token literal */
 	else if (chr == TokenType::QUOTE_ALT) {
-		/*
-		 * ` is ignored at the beginning of the token,
-		 * 	 but if met when consme()`ing subsequent tokens after begin()
-		 * 	 turns current token into a Token literal (TokenType::TOKEN)
-		 */
+		token_literal = true;
 	}
 
 	/* Punctuator / Compound punctuator token */
@@ -245,14 +247,8 @@ void Lexer::consume()
 {
 	char chr = *cur_chr;
 
-	/* Save Token literal */
-	if (chr == TokenType::QUOTE_ALT) {
-		toktype = TokenType::TOKEN;
-		push();
-	}
-
 	/* Deduce floating point literal */
-	else if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
+	if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
 		if (!std::isdigit(*std::next(cur_chr))) {
 			push();
 			push(chr);
