@@ -13,9 +13,6 @@
 namespace mtl
 {
 
-template<TokenType... tokens>
-using Tokens = StaticList<TokenType, tokens...>;
-
 void LibArithmetic::load()
 {
 	/* Basic operators + compound assignment */
@@ -27,17 +24,19 @@ void LibArithmetic::load()
 			TokenType::ADD, TokenType::SUB,
 			TokenType::MUL, TokenType::DIV,
 
+			/* % %= */
+			TokenType::PERCENT, TokenType::COMP_MOD,
+
 			/* & | ^ << >> */
 			TokenType::BIT_AND, TokenType::BIT_OR, TokenType::BIT_XOR,
-			TokenType::SHIFT_L, TokenType::SHIFT_R>
+			TokenType::SHIFT_L, TokenType::SHIFT_R,
+
+			/* &= |= ^= <<= >>= */
+			TokenType::COMP_AND, TokenType::COMP_OR, TokenType::COMP_XOR,
+			TokenType::COMP_SHIFT_L, TokenType::COMP_SHIFT_R>
 	::for_each([this](auto const &op) {
 		infix_operator(op, bin_operator<op.value>());
 	});
-
-	/* Modulo operator */
-	infix_operator(TokenType::PERCENT, BinaryOpr([&](auto &lhs, auto &rhs) {
-		return mtl::num(lhs) % mtl::num(rhs);
-	}));
 
 	/* Unary minus */
 	prefix_operator(TokenType::MINUS, UnaryOpr([this](Value &rhs) {

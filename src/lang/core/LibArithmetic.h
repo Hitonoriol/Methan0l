@@ -39,23 +39,27 @@ class LibArithmetic: public Library
 				return l / r;
 
 			ELIF (std::is_integral<VT(l)>::value && std::is_integral<VT(r)>::value) {
-				IF (op == TokenType::BIT_OR)
+				IF (op == TokenType::PERCENT || op == TokenType::COMP_MOD)
+					return l % r;
+
+				ELIF (op == TokenType::BIT_OR || op == TokenType::COMP_OR)
 					return l | r;
 
-				ELIF (op == TokenType::BIT_AND)
+				ELIF (op == TokenType::BIT_AND || op == TokenType::COMP_AND)
 					return l & r;
 
-				ELIF (op == TokenType::BIT_XOR)
+				ELIF (op == TokenType::BIT_XOR || op == TokenType::COMP_XOR)
 					return l ^ r;
 
-				ELIF (op == TokenType::SHIFT_L)
+				ELIF (op == TokenType::SHIFT_L || op == TokenType::COMP_SHIFT_L)
 					return l << r;
 
-				ELIF (op == TokenType::SHIFT_R)
+				ELIF (op == TokenType::SHIFT_R || op == TokenType::COMP_SHIFT_R)
 					return l >> r;
 			}
 
-			throw std::runtime_error("Arithmetic error: invalid operand type");
+			throw std::runtime_error("Arithmetic error: invalid operand type ("
+					+ mtl::str(l) + " " + Token::to_string(op) + " " + mtl::str(r) + ")");
 		}
 
 		template <TokenType op>

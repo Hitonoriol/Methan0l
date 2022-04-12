@@ -129,6 +129,12 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_infix_opr(TokenType::SUB, Precedence::COMP_ASSIGNMENT);
 	register_infix_opr(TokenType::MUL, Precedence::COMP_ASSIGNMENT);
 	register_infix_opr(TokenType::DIV, Precedence::COMP_ASSIGNMENT);
+	register_infix_opr(TokenType::COMP_AND, Precedence::COMP_ASSIGNMENT);
+	register_infix_opr(TokenType::COMP_OR, Precedence::COMP_ASSIGNMENT);
+	register_infix_opr(TokenType::COMP_XOR, Precedence::COMP_ASSIGNMENT);
+	register_infix_opr(TokenType::COMP_SHIFT_L, Precedence::COMP_ASSIGNMENT);
+	register_infix_opr(TokenType::COMP_SHIFT_R, Precedence::COMP_ASSIGNMENT);
+	register_infix_opr(TokenType::COMP_MOD, Precedence::COMP_ASSIGNMENT);
 
 	/* Unary Arithmetic oprs */
 	register_prefix_opr(TokenType::MINUS);								// unary -

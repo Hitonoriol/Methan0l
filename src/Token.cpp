@@ -239,6 +239,12 @@ bool Token::is_ref_opr(TokenType opr)
 		case TokenType::MUL:
 		case TokenType::SUB:
 		case TokenType::ADD:
+		case TokenType::COMP_AND:
+		case TokenType::COMP_OR:
+		case TokenType::COMP_XOR:
+		case TokenType::COMP_SHIFT_L:
+		case TokenType::COMP_SHIFT_R:
+		case TokenType::COMP_MOD:
 		return true;
 
 	default:

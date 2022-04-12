@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <map>
 
+#include "util/meta/for_each.h"
+
 namespace mtl
 {
 
@@ -81,6 +83,12 @@ enum class TokenType : uint16_t
 	FUNC_DEF_SHORT_ALT,	// @:
 	DOUBLE_DOLLAR,		// $$
 	LONG_ARROW_RIGHT,	// -->
+	COMP_XOR,			// ^=
+	COMP_OR,			// |=
+	COMP_AND,			// &=
+	COMP_SHIFT_L,		// <<=
+	COMP_SHIFT_R,		// >>=
+	COMP_MOD,			// %=
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -154,6 +162,9 @@ enum class Separator : uint8_t
 	NONE, SPACE, NEWLINE
 };
 
+template<TokenType... tokens>
+using Tokens = StaticList<TokenType, tokens...>;
+
 class Token
 {
 	private:
@@ -172,7 +183,8 @@ class Token
 				":=", "=>", "!=", "+=", "-=",
 				"*=", "/=", "&&", "||", "^^",
 				"**", "!!", "%>", "<%", "#(",
-				"*[", "@:", "$$", "-->"
+				"*[", "@:", "$$", "-->", "^=",
+				"|=", "&=", "<<=", ">>=", "%="
 		};
 
 		static constexpr std::string_view word_ops[] = {
