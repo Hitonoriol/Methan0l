@@ -497,7 +497,7 @@ Value Value::from_string(std::string str)
 /* If at least one of the operands is of type DOUBLE, operation result should also be DOUBLE */
 bool Value::is_double_op(const Value &lhs, const Value &rhs)
 {
-	return lhs.type() == Type::DOUBLE || rhs.type() == Type::DOUBLE;
+	return lhs.is<double>() || rhs.is<double>();
 }
 
 std::string_view Value::type_name(Type type)

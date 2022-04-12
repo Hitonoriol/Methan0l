@@ -13,7 +13,6 @@ class LibLogical: public Library
 		void load() override;
 
 	private:
-		dec eval_bitwise(dec l, TokenType op, dec r);
 		bool eval_logical(const ExprPtr &l, TokenType op, const ExprPtr &r);
 		bool eval_arithmetic_comparison(double l, TokenType op, double r);
 };

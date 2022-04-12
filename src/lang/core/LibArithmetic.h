@@ -3,6 +3,10 @@
 
 #include "../Library.h"
 #include "Token.h"
+#include "structure/Value.h"
+
+#define IF(condition) if constexpr (condition)
+#define ELIF(condition) else IF(condition)
 
 namespace mtl
 {
@@ -17,33 +21,53 @@ class LibArithmetic: public Library
 		void load() override;
 
 	private:
-		Value calculate(const Value &l, TokenType op, const Value &r);
-		template<typename T>
-		T calculate(T l, TokenType op, T r)
+		void apply_unary(Value &val, TokenType op);
+
+		template<TokenType op, typename T>
+		static T apply(T l, T r)
 		{
-			switch (op) {
-			case TokenType::ADD:
-			case TokenType::PLUS:
+			IF (op == TokenType::ADD || op == TokenType::PLUS)
 				return l + r;
 
-			case TokenType::SUB:
-			case TokenType::MINUS:
+			ELIF (op == TokenType::SUB || op == TokenType::MINUS)
 				return l - r;
 
-			case TokenType::MUL:
-			case TokenType::ASTERISK:
+			ELIF (op == TokenType::MUL || op == TokenType::ASTERISK)
 				return l * r;
 
-			case TokenType::DIV:
-			case TokenType::SLASH:
+			ELIF (op == TokenType::DIV || op == TokenType::SLASH)
 				return l / r;
 
-			default:
-				return 0;
+			ELIF (std::is_integral<VT(l)>::value && std::is_integral<VT(r)>::value) {
+				IF (op == TokenType::BIT_OR)
+					return l | r;
+
+				ELIF (op == TokenType::BIT_AND)
+					return l & r;
+
+				ELIF (op == TokenType::BIT_XOR)
+					return l ^ r;
+
+				ELIF (op == TokenType::SHIFT_L)
+					return l << r;
+
+				ELIF (op == TokenType::SHIFT_R)
+					return l >> r;
 			}
+
+			throw std::runtime_error("Arithmetic error: invalid operand type");
 		}
 
-		void apply_unary(Value &val, TokenType op);
+		template <TokenType op>
+		static constexpr BinaryOpr bin_operator()
+		{
+			return BinaryOpr([](Value &lhs, Value &rhs) {
+				if (Value::is_double_op(lhs.get(), rhs))
+					return lhs.get() = apply<op>(lhs.as<double>(), rhs.as<double>());
+
+				return lhs.get() = apply<op>(lhs.as<dec>(), rhs.as<dec>());
+			});
+		}
 };
 
 } /* namespace mtl */

@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "util/array.h"
+#include "util/meta/for_each.h"
 #include "structure/Value.h"
 #include "type.h"
 #include "Token.h"
@@ -12,21 +13,25 @@
 namespace mtl
 {
 
+template<TokenType... tokens>
+using Tokens = StaticList<TokenType, tokens...>;
+
 void LibArithmetic::load()
 {
-	/* Basic arithmetic operators + Compound assignment */
-	for_each({
+	/* Basic operators + compound assignment */
+	Tokens<	/* + - * / */
 			TokenType::PLUS, TokenType::MINUS,
 			TokenType::ASTERISK, TokenType::SLASH,
-			TokenType::ADD,
-			TokenType::SUB, TokenType::MUL,
-			TokenType::DIV
-	},
-	[this](auto op) {
-		infix_operator(op, BinaryOpr([=](auto &lhs, auto &rhs) {
-			Value res = calculate(lhs, op, rhs);
-			return lhs = res;
-		}));
+
+			/* += -= *= /= */
+			TokenType::ADD, TokenType::SUB,
+			TokenType::MUL, TokenType::DIV,
+
+			/* & | ^ << >> */
+			TokenType::BIT_AND, TokenType::BIT_OR, TokenType::BIT_XOR,
+			TokenType::SHIFT_L, TokenType::SHIFT_R>
+	::for_each([this](auto const &op) {
+		infix_operator(op, bin_operator<op.value>());
 	});
 
 	/* Modulo operator */
@@ -54,13 +59,7 @@ void LibArithmetic::load()
 	});
 }
 
-Value LibArithmetic::calculate(const Value &lhs, TokenType op, const Value &rhs)
-{
-	if (Value::is_double_op(lhs, rhs))
-		return calculate(lhs.as<double>(), op, rhs.as<double>());
 
-	return calculate(lhs.as<dec>(), op, rhs.as<dec>());
-}
 
 void LibArithmetic::apply_unary(Value &val, TokenType op)
 {
