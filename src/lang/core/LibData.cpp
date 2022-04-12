@@ -389,8 +389,9 @@ void LibData::load_operators()
 		return Value(rhs);
 	}));
 
-	prefix_operator(TokenType::HASHCODE, LazyUnaryOpr([&](auto rhs) {
-		return Value(ref(rhs).hash_code());
+	/* hashcode: idfr (overloadable) */
+	prefix_operator(TokenType::HASHCODE, UnaryOpr([&](auto &rhs) {
+		return rhs.hash_code();
 	}));
 
 	infix_operator(TokenType::TYPE_ASSIGN, LazyBinaryOpr([&](auto lhs, auto rhs) {
