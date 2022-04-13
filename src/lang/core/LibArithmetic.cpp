@@ -58,8 +58,6 @@ void LibArithmetic::load()
 	});
 }
 
-
-
 void LibArithmetic::apply_unary(Value &val, TokenType op)
 {
 	val.accept([op, &val](auto &n) {

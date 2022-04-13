@@ -77,14 +77,14 @@ std::string indent(std::string &&str)
 	return str;
 }
 
-std::string to_base(udec value, int base)
+std::string to_base(udec value, uint8_t base)
 {
 	if (value == 0)
 		return "0";
 
 	std::string result;
 	while (value != 0) {
-		int digit = value % base;
+		udec digit = value % base;
 		result += (digit > 9 ? 'A' + digit - 10 : digit + '0');
 		value /= base;
 	}
