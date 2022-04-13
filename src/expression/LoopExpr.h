@@ -27,6 +27,8 @@ class LoopExpr: public Expression
 			for (auto &val : container) {
 				elem = unconst(val);
 				evaluator.execute(body_unit, false);
+				if (body_unit.execution_finished())
+					break;
 			}
 			evaluator.leave_scope();
 		}

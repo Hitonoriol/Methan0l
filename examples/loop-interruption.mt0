@@ -1,0 +1,20 @@
+/* Yep. This only became a feature on Apr 13 '22. */
+
+f = @: () {
+	/* Break from imperative foreach */
+	for (i, range(100)) {
+		i > 5 ? return: break
+		<% $"i = {}" i
+	}
+	
+	/* Return from for loop */
+	for (i = 0, i < 100, ++i) {
+		if (i == 10) ? {
+			return: 123
+		}
+		<% $"I drank {} bottles o' moonshine" i
+	}
+	<% "Unreachable"
+}
+
+<% "Function return value: " :: f()

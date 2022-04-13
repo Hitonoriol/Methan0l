@@ -36,18 +36,15 @@ void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 	Unit &loop_proxy = evaluator.tmp_callable(Unit());
 	Unit body_unit =
 			instanceof<UnitExpr>(body.get()) ?
-					try_cast<UnitExpr>(body).get_unit().manage_table(loop_proxy) :
-					Unit(loop_proxy.local());
+					try_cast<UnitExpr>(body).get_unit() :
+					Unit();
 
 	/* For loops to be able to access variables from the upper scope w/o # modfr */
-	loop_proxy.set_weak(true);
+	loop_proxy.expr_block();
+	body_unit.expr_block();
 
-	/* So that the DataTable won't get cleared after the init, each iteration & condition evaluation */
-	body_unit.set_persisent(true);
-	loop_proxy.set_persisent(true);
-
-	/* If this loop has <init> Expr, this is a <for> loop,
-	 * 		else -- this is a <while> loop and has only the <condition> expression */
+	/* If this loop has an `init` Expr, this is a for loop,
+	 * 		else -- this is a while loop and has only the `condition` expression */
 	const bool for_loop = init != nullptr;
 	evaluator.enter_scope(loop_proxy);
 	if (for_loop) {
@@ -57,13 +54,17 @@ void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 		loop_proxy.append(step);
 	}
 
+	Value ret;
 	while (condition->evaluate(evaluator).as<bool>()) {
-		evaluator.execute(body_unit, false);
+		if (!(ret = evaluator.execute(body_unit)).empty() || body_unit.execution_finished())
+			break;
 
 		if (for_loop)
 			evaluator.execute(loop_proxy, false);
 	}
 	evaluator.leave_scope();
+	if (!ret.empty())
+		evaluator.current_unit()->save_return(ret);
 }
 
 void LoopExpr::exec_foreach_loop(ExprEvaluator &evaluator)
@@ -80,11 +81,15 @@ void LoopExpr::exec_foreach_loop(ExprEvaluator &evaluator)
 
 std::ostream& LoopExpr::info(std::ostream &str)
 {
+	bool lforeach = is_foreach(), lfor = is_for();
 	return Expression::info(str
-			<< "{"
-					<< (is_foreach() ? "For-Each" : (init != nullptr ? "For" : "While"))
-					<< " Loop"
-					<< "}");
+					<< (lforeach ? "For-Each" : (lfor ? "For" : "While"))
+					<< " Loop: " << BEG
+					<< (lforeach || lfor ? ("Init: " + init->info() + mtl::str(NL)) : "")
+					<< "Condition: " << condition->info() << NL
+					<< (lfor ? ("Step: " + step->info() + mtl::str(NL)) : "")
+					<< "Body: " << body->info() << NL
+					<< END);
 }
 
 }
