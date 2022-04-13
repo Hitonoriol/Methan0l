@@ -410,7 +410,7 @@ void LibData::load_operators()
 		else if (rval.is<Unit>()) {
 			Value copy(Type::UNIT);
 			Unit &box = copy.get<Unit>();
-			box.set_persisent(true);
+			box.box();
 			box.manage_table(rval.get<Unit>());
 			box.local().copy_managed_map();
 			return copy;

@@ -47,7 +47,7 @@ void LibModule::load()
 
 void LibModule::load_module(const std::string &path, Unit &unit)
 {
-	unit.set_persisent(true);
+	unit.box();
 	std::string name = find_module(path);
 
 	/* Load Methan0l src file */

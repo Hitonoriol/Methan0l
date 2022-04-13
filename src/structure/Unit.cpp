@@ -12,7 +12,7 @@
 namespace mtl
 {
 
-const std::string Unit::RETURN_KEYWORD(Token::reserved(Word::RETURNED));
+const std::string Unit::RETURN_KW(Token::reserved(Word::RETURNED));
 
 Unit::Unit(ExprList expr_list, DataTable data, bool weak) :
 		weak(weak),
@@ -45,13 +45,18 @@ Unit::Unit(const Unit &rhs) : Unit(rhs.expr_list, rhs.local_data, rhs.weak)
 {
 	persistent = rhs.persistent;
 	noreturn = rhs.noreturn;
+	carry_return = rhs.carry_return;
+	finished = rhs.finished;
 }
 
 Unit& Unit::operator=(const Unit &rhs)
 {
+	persistent = rhs.persistent;
+	carry_return = rhs.carry_return;
 	expr_list = rhs.expr_list;
 	local_data = rhs.local_data;
 	noreturn = rhs.noreturn;
+	finished = rhs.finished;
 	return *this;
 }
 
@@ -68,14 +73,14 @@ ExprList& Unit::expressions()
 Value Unit::result()
 {
 	if (has_returned())
-		return local_data.get(RETURN_KEYWORD);
+		return local_data.get(RETURN_KW);
 
 	return Value::NO_VALUE;
 }
 
 void Unit::clear_result()
 {
-	local_data.del(RETURN_KEYWORD);
+	local_data.del(RETURN_KW);
 }
 
 size_t Unit::size() const
@@ -97,22 +102,34 @@ void Unit::call()
 void Unit::begin()
 {
 	/* Don't reset <finished> status if a value has been returned by a child weak Unit */
-	finished = has_returned();
+	finished = has_returned() || break_performed();
 
 	if constexpr (DEBUG)
 		if (finished)
 			std::cout << *this << " <-- Return caused by child Weak Unit" << std::endl;
 }
 
-void Unit::stop()
+void Unit::stop(bool do_break)
 {
 	finished = true;
+	if (do_break)
+		cur_expr = break_it();
+}
+
+bool Unit::break_performed()
+{
+	return cur_expr == break_it();
+}
+
+ExprList::iterator Unit::break_it()
+{
+	return std::next(expr_list.end());
 }
 
 void Unit::save_return(Value value)
 {
 	if (!noreturn) {
-		local_data.set(Unit::RETURN_KEYWORD, value);
+		local_data.set(Unit::RETURN_KW, value);
 		stop();
 	}
 }
@@ -127,29 +144,43 @@ bool Unit::is_persistent() const
 	return persistent;
 }
 
-void Unit::set_persisent(bool val)
+void Unit::box()
+{
+	persistent = noreturn = true;
+}
+
+void Unit::expr_block()
+{
+	weak = carry_return = true;
+}
+
+Unit& Unit::set_persisent(bool val)
 {
 	persistent = val;
+	return *this;
 }
 
-void Unit::set_weak(bool val)
+Unit& Unit::set_weak(bool val)
 {
 	weak = val;
-}
-
-void Unit::set_no_return_carry()
-{
-	weak = persistent = true;
+	return *this;
 }
 
 bool Unit::carries_return() const
 {
-	return weak && !persistent;
+	return carry_return;
 }
 
-void Unit::set_noreturn(bool val)
+Unit& Unit::set_noreturn(bool val)
 {
 	noreturn = val;
+	return *this;
+}
+
+Unit& Unit::set_carry_return(bool val)
+{
+	carry_return = val;
+	return *this;
 }
 
 bool Unit::is_noreturn() const
@@ -159,7 +190,7 @@ bool Unit::is_noreturn() const
 
 bool Unit::has_returned()
 {
-	return local_data.exists(RETURN_KEYWORD);
+	return local_data.exists(RETURN_KW);
 }
 
 bool Unit::execution_finished()

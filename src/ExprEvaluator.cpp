@@ -114,16 +114,29 @@ Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 		unit.reset_execution_state();
 
 	while (unit.has_next_expr()) {
-		current_expr = unit.next_expression();
 		if (unit.execution_finished())
 			break;
 
-		exec(*current_expr);
+		exec(*(current_expr = unit.next_expression()));
 	}
 
-	/* Weak Non-Persistent Units cause their parent units to return */
+	if (force_quit())
+		return Value::NO_VALUE;
+
+	Unit *parent = exec_stack.size() > 1 ? *std::prev(exec_stack.end(), 2) : current_unit();
 	Value returned_val = unit.result();
 	bool carry_return = unit.carries_return();
+
+	/* Handle `break` */
+	if (unit.break_performed()) {
+		/* Propagate `break` to parent return-carrying Units */
+		if (carry_return)
+			for (auto it = std::prev(exec_stack.end(), 2);
+					it != std::prev(exec_stack.begin()); --it) {
+				if ((*it)->carries_return())
+					(*it)->stop(true);
+			}
+	}
 
 	/* `unit` may not exist anymore after the leave_scope() call */
 	if (use_own_scope)
@@ -131,12 +144,8 @@ Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 
 	LOG("Finished executing " << &unit << '\n')
 
-	if (force_quit())
-		return Value::NO_VALUE;
-
 	/* Handle return carry */
-	Unit *parent = current_unit();
-	if (carry_return && &unit != parent && !returned_val.empty()) {
+	if (carry_return && !returned_val.empty()) {
 		LOG("Carrying return from child weak unit: " << &unit << " to: " << *parent)
 		parent->save_return(returned_val);
 	}

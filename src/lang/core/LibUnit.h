@@ -23,7 +23,7 @@ class LibUnit: public Library
 		Value object_dot_operator(Object &obj, ExprPtr rhs);
 		Value invoke_pseudo_method(ExprPtr obj, ExprPtr func);
 		void make_box(Value &unit_val);
-		void save_return(ExprPtr ret, bool by_ref = false);
+		void save_return(ExprPtr ret);
 		Value& box_value(Unit &box, ExprPtr expr);
 };
 

@@ -12,7 +12,7 @@ namespace mtl
 class ConditionParser: public InfixParser
 {
 	private:
-		static constexpr auto make_weak = [](UnitExpr &uexpr) {uexpr.get_unit_ref().set_weak(true);};
+		static constexpr auto make_expr_block = [](UnitExpr &uexpr) {uexpr.get_unit_ref().expr_block();};
 
 	public:
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override
@@ -23,8 +23,8 @@ class ConditionParser: public InfixParser
 							parser.parse(Precedence::CONDITIONAL - 1) :
 							std::make_shared<LiteralExpr>();
 
-			if_instanceof<UnitExpr>(*then_expr, make_weak);
-			if_instanceof<UnitExpr>(*else_expr, make_weak);
+			if_instanceof<UnitExpr>(*then_expr, make_expr_block);
+			if_instanceof<UnitExpr>(*else_expr, make_expr_block);
 			return make_expr<ConditionalExpr>(line(token), lhs, then_expr, else_expr);
 		}
 

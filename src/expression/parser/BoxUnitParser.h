@@ -14,7 +14,7 @@ class BoxUnitParser: public UnitParser
 		{
 			Token unit_def = parser.consume(TokenType::BRACE_L);
 			ExprPtr unit = UnitParser::parse(parser, unit_def);
-			try_cast<UnitExpr>(unit).get_unit_ref().set_persisent(true);
+			try_cast<UnitExpr>(unit).get_unit_ref().box();
 			return unit;
 		}
 };

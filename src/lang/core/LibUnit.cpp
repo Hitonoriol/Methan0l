@@ -210,21 +210,22 @@ Value& LibUnit::box_value(Unit &box, ExprPtr expr)
 	return result;
 }
 
-void LibUnit::save_return(ExprPtr ret, bool by_ref)
+void LibUnit::save_return(ExprPtr ret)
 {
 	Unit *unit = eval->current_unit();
 	if (instanceof<IdentifierExpr>(ret)
-			&& IdentifierExpr::get_name(ret) == Token::reserved(Word::BREAK))
-		unit->stop();
+			&& IdentifierExpr::get_name(ret) == Token::reserved(Word::BREAK)) {
+		unit->stop(true);
+	}
 	else
-		unit->save_return(by_ref ? Value::ref(eval->referenced_value(ret)) : val(ret));
+		unit->save_return(val(ret));
 }
 
 void LibUnit::make_box(Value &unit_val)
 {
 	unit_val.assert_type(Type::UNIT, "make_box$() can only be applied on a Unit");
 	Unit &unit = unit_val.get<Unit>();
-	unit.set_persisent(true);
+	unit.box();
 	eval->execute(unit);
 }
 

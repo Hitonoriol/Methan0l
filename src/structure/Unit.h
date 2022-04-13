@@ -10,18 +10,38 @@ namespace mtl
 class Unit
 {
 	private:
+		/* Unit's execution state */
 		bool finished = false;
-		bool weak;
-		bool persistent = false;
-		bool noreturn = false;
 		ExprList::iterator cur_expr;
+
+		/*
+		 *  Controls this Unit's ability to perform lookups in the upper scopes:
+		 * 		* true - can perform lookups in the upper scopes w/o the `#` prefix
+		 * 		* false - can access only local idfrs w/o the `#` prefix
+		 */
+		bool weak = false;
+
+		/* Whether `local_data` is cleared on execution completion or not */
+		bool persistent = false;
+
+		/*
+		 * Whether this Unit can return a value or not.
+		 * 		if true, `return: ...` operator only stops the Unit's execution
+		 * 		without creating a return value.
+		 */
+		bool noreturn = false;
+
+		/* Whether to carry the return value to the parent Unit (subsequently stopping its execution) or not */
+		bool carry_return = false;
+
+		ExprList::iterator break_it();
 
 	protected:
 		DataTable local_data;
 		ExprList expr_list;
 
 	public:
-		static const std::string RETURN_KEYWORD;
+		static const std::string RETURN_KW;
 
 		Unit(ExprList expr_list, DataTable data, bool weak = false);
 		Unit(ExprList expr_list, bool weak = false);
@@ -43,9 +63,10 @@ class Unit
 			return cur_expr != expr_list.end();
 		}
 
-		inline void reset_execution_state()
+		inline void reset_execution_state(bool undo_break = false)
 		{
-			cur_expr = expr_list.begin();
+			if (!break_performed() || undo_break)
+				cur_expr = expr_list.begin();
 		}
 
 		inline Expression* next_expression()
@@ -55,7 +76,9 @@ class Unit
 
 		void call();
 		void begin();
-		void stop();
+		void stop(bool do_break = false);
+		bool break_performed();
+
 		void save_return(Value value);
 		bool has_returned();
 		bool execution_finished();
@@ -64,14 +87,20 @@ class Unit
 
 		bool is_weak() const;
 		bool is_persistent() const;
-		void set_persisent(bool val);
-		void set_weak(bool val);
-
-		void set_no_return_carry();
 		bool carries_return() const;
-
-		void set_noreturn(bool);
 		bool is_noreturn() const;
+
+		/* Transform this Unit into a Box Unit */
+		void box();
+
+		/* Transform this Unit into an expression block:
+		 * 		make it return-carrying and weak */
+		void expr_block();
+
+		Unit& set_persisent(bool);
+		Unit& set_weak(bool);
+		Unit& set_noreturn(bool);
+		Unit& set_carry_return(bool);
 
 		void clear();
 		void prepend(ExprPtr expr);
