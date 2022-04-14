@@ -107,7 +107,7 @@ class Unit
 		void append(ExprPtr expr);
 
 		size_t size() const;
-		bool empty();
+		bool empty() const;
 
 		virtual std::string to_string();
 		friend bool operator ==(const Unit &lhs, const Unit &rhs);

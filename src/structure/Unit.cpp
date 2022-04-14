@@ -88,7 +88,7 @@ size_t Unit::size() const
 	return expr_list.size();
 }
 
-bool Unit::empty()
+bool Unit::empty() const
 {
 	return expr_list.empty();
 }

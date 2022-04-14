@@ -63,12 +63,14 @@ class Interpreter: public ExprEvaluator
 
 		/* For use in Interactive Mode */
 		void lex(std::string &code);
-		void load();
+		bool load();
+
+		bool load_program(const std::string&);
 
 		Unit load_file(const std::string &path);
-		void load(const Unit &main);
-		void load(std::istream &codestr);
-		void load(std::string &code);
+		bool load(const Unit &main);
+		bool load(std::istream &codestr);
+		bool load(std::string &code);
 
 		Value run();
 

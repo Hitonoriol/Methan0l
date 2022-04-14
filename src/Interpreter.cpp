@@ -48,9 +48,9 @@ void Interpreter::lex(std::string &code)
 	parser.get_lexer().lex(code, true);
 }
 
-void Interpreter::load()
+bool Interpreter::load()
 {
-	try_load([&]() {
+	return try_load([&]() {
 		parser.parse_all();
 		load(parser.result());
 		parser.clear();
@@ -61,6 +61,11 @@ void Interpreter::load()
 void Interpreter::preserve_data(bool val)
 {
 	main.set_persisent(val);
+}
+
+bool Interpreter::load_program(const std::string &path)
+{
+	return load(load_file(path));
 }
 
 Unit Interpreter::load_file(const std::string &path)
@@ -93,19 +98,20 @@ Unit Interpreter::load_unit(std::string &code)
 	return unit;
 }
 
-void Interpreter::load(std::istream &codestr)
+bool Interpreter::load(std::istream &codestr)
 {
-	load(load_unit(codestr));
+	return load(load_unit(codestr));
 }
 
-void Interpreter::load(std::string &code)
+bool Interpreter::load(std::string &code)
 {
-	load(load_unit(code));
+	return load(load_unit(code));
 }
 
-void Interpreter::load(const Unit &main)
+bool Interpreter::load(const Unit &main)
 {
 	load_main(this->main = main);
+	return !main.empty();
 }
 
 Unit& Interpreter::program()
