@@ -54,17 +54,17 @@ void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 		loop_proxy.append(step);
 	}
 
+	evaluator.enter_scope(body_unit);
 	Value ret;
 	while (condition->evaluate(evaluator).as<bool>()) {
-		if (!(ret = evaluator.execute(body_unit)).empty() || body_unit.execution_finished())
+		if (loop_iteration(evaluator, body_unit, ret))
 			break;
 
 		if (for_loop)
 			evaluator.execute(loop_proxy, false);
 	}
-	evaluator.leave_scope();
-	if (!ret.empty())
-		evaluator.current_unit()->save_return(ret);
+	evaluator.leave_scope(); // leave `loop_body`
+	exit_loop(evaluator, ret);
 }
 
 void LoopExpr::exec_foreach_loop(ExprEvaluator &evaluator)

@@ -14,6 +14,23 @@ class LoopExpr: public Expression
 		ExprPtr init, condition, step;
 		ExprPtr body;
 
+		/* Perform one loop iteration
+		 *
+		 * Assigns `loop_body`'s return value to `ret` if a return has occurred.
+		 * returns `true` if loop was interrupted, `false` otherwise.
+		 */
+		static inline bool loop_iteration(ExprEvaluator &eval, Unit &loop_body, Value &ret)
+		{
+			return !(ret = eval.execute(loop_body, false)).empty() || loop_body.execution_finished();
+		}
+
+		static inline void exit_loop(ExprEvaluator &eval, Value &ret)
+		{
+			eval.leave_scope();
+			if (!ret.empty())
+				eval.current_unit()->save_return(ret);
+		}
+
 		void exec_for_loop(ExprEvaluator &evaluator);
 		void exec_foreach_loop(ExprEvaluator &evaluator);
 
@@ -24,13 +41,13 @@ class LoopExpr: public Expression
 			DataTable &local = body_unit.local();
 			evaluator.enter_scope(body_unit);
 			Value &elem = local.get_or_create(as_elem);
+			Value ret;
 			for (auto &val : container) {
 				elem = unconst(val);
-				evaluator.execute(body_unit, false);
-				if (body_unit.execution_finished())
+				if (loop_iteration(evaluator, body_unit, ret))
 					break;
 			}
-			evaluator.leave_scope();
+			exit_loop(evaluator, ret);
 		}
 
 	public:

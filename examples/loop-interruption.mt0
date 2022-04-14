@@ -7,6 +7,18 @@ f = @: () {
 		<% $"i = {}" i
 	}
 	
+	/* Break from while loop */
+	x = 100
+	while (x > 0) {
+		%% --x
+		if (x < 91) ? {
+			%% newl
+			return: break
+		} else: {
+			%% " "
+		}
+	}
+	
 	/* Return from for loop */
 	for (i = 0, i < 100, ++i) {
 		if (i == 10) ? {
