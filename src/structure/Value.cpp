@@ -100,11 +100,10 @@ Value& Value::get()
 	return *this;
 }
 
-/* To provide an appropriate Methan0l `=` operator behavior:
- * 		Value should always be copied, even if heap-stored. */
+/* Deep copy internal `value` contents if they're heap-stored */
 Value Value::copy()
 {
-	accept([&](auto v) {
+	accept([&](auto &v) {
 		if constexpr (is_heap_type<VT(v)>())
 			if constexpr (!std::is_abstract<VT(*v)>::value)
 				value = std::make_shared<VT(*v)>(*v);

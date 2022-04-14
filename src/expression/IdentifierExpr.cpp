@@ -15,7 +15,10 @@ namespace mtl
 
 Value IdentifierExpr::evaluate(ExprEvaluator &eval)
 {
-	return referenced_value(eval);
+	Value &v = referenced_value(eval);
+	if (v.is<ExprPtr>())
+		return v.get<ExprPtr>()->evaluate(eval);
+	return v;
 }
 
 Value& IdentifierExpr::referenced_value(ExprEvaluator &eval, bool follow_refs)

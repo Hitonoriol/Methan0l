@@ -434,12 +434,7 @@ Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 Value& ExprEvaluator::get(const std::string &id, bool global, bool follow_refs)
 {
 	Value &val = scope_lookup(id, global)->get(id);
-	Value &ret = follow_refs ? val.get() : val;
-
-	if (ret.is<ExprPtr>())
-		return DataTable::create_temporary(ret.get<ExprPtr>()->evaluate(*this));
-
-	return ret;
+	return follow_refs ? val.get() : val;
 }
 
 Value ExprEvaluator::eval(Expression &expr)
