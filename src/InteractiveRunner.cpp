@@ -29,36 +29,62 @@ const InteractiveRunner::CommandMap InteractiveRunner::commands
 						std::cout << FULL_VERSION_STR << std::endl;
 					}
 		},
+		{ "info",
+				[](auto &runner)
+					{
+						runner.interpreter().size_info();
+					}
+		},
 		{ "stack",
 				[](auto &runner)
 					{
 						runner.interpreter().dump_stack();
 					}
 		},
-		{ "size_info",
-				[](auto &runner)
-					{
-						runner.interpreter().size_info();
-					}
-		},
-		{ "expressions",
+		{ "program",
 				[](auto &runner)
 					{
 						for (auto &&expr : runner.interpreter().program().expressions())
-							std::cout << "\t" << expr->info() << std::endl;
+							std::cout << expr->info() << std::endl;
 					}
 		},
 		{ "load",
 				[](auto &runner)
 					{
+						auto path = std::move(runner.next_arg());
+						if (runner.load_program(path))
+							out << "Successfully loaded " << std::quoted(path) << "." << NL
+									<< "Press <Enter> to run the loaded Unit." << NL;
+					}
+		},
+		{ "run",
+				[](auto &runner)
+					{
 						auto &mt0 = runner.interpreter();
-						mt0.load(mt0.load_file(runner.next_arg()));
+						if (runner.load_program(runner.next_arg())) {
+							Value args(Type::LIST);
+							auto &list = args.get<ValList>();
+							while (runner.has_args())
+								list.push_back(std::move(runner.next_arg()));
+							mt0.program().local().set(Interpreter::LAUNCH_ARGS, args);
+							mt0.run();
+						}
 					}
 		}
 };
 
 InteractiveRunner::InteractiveRunner(Interpreter &methan0l) : methan0l(methan0l)
 {
+}
+
+bool InteractiveRunner::load_program(const std::string &path)
+{
+	if (methan0l.load_program(path))
+		return true;
+	else {
+		out << "Failed to load " << std::quoted(path) << " (or the file is empty)." << NL;
+		return false;
+	}
 }
 
 void InteractiveRunner::save_arg(const std::string &arg)

@@ -28,9 +28,15 @@ class InteractiveRunner
 
 		void save_arg(const std::string &arg);
 		std::string next_arg();
+		inline bool has_args()
+		{
+			return !arg_queue.empty();
+		}
 
 		bool process_commands(const std::string &cmd);
 		bool load_line(std::string &line);
+
+		bool load_program(const std::string&);
 
 	public:
 		InteractiveRunner(Interpreter&);
