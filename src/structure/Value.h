@@ -407,7 +407,7 @@ class Value
 				if (std::holds_alternative<T>(value))
 					return cget<T>();
 
-				else if (std::holds_alternative<ValueRef>(value))
+				else if (!std::is_same<T, ValueRef>::value && std::holds_alternative<ValueRef>(value))
 					return (*cget<ValueRef>().ptr()).as<T>();
 
 				if constexpr (std::is_same<T, std::string>::value)

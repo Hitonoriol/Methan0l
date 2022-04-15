@@ -174,7 +174,7 @@ void LibData::load_container_funcs()
 			return accumulate(ctr, 1.0, multiplicator);
 	});
 
-	eval->register_func("mean", mtl::member(this, LibData::mean));
+	eval->register_func("mean", mtl::member(this, &LibData::mean));
 
 	/* Root mean square */
 	eval->register_func("rms", [this](Value ctr) {
