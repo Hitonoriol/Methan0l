@@ -23,6 +23,9 @@
 #define LOG(out) DBG{ std::cout << out << std::endl; }
 #define TRACE(out) LOG(__FILE__ << ":" << __LINE__ << "[" << __func__ << "] " << out)
 
+#define IF(condition) if constexpr (condition)
+#define ELIF(condition) else IF(condition)
+
 namespace mtl
 {
 

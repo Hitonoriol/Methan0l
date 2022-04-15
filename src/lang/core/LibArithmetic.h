@@ -5,9 +5,6 @@
 #include "Token.h"
 #include "structure/Value.h"
 
-#define IF(condition) if constexpr (condition)
-#define ELIF(condition) else IF(condition)
-
 namespace mtl
 {
 

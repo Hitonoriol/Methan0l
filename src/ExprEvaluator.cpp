@@ -461,7 +461,8 @@ Value ExprEvaluator::evaluate(AssignExpr &expr)
 	/* Move Value from LHS to RHS idfr */
 	if (expr.is_move_assignment()) {
 		Value lval = eval(lexpr);
-		del(lexpr);
+		if (instanceof<IdentifierExpr>(lexpr))
+			del(lexpr);
 		return Value::ref(referenced_value(rexpr) = lval);
 	}
 

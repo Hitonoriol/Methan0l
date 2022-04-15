@@ -281,7 +281,7 @@ void Parser::dump_queue(size_t len)
 	sstream ss;
 	ss << "[Token queue lookahead]" << NLTAB;
 	look_ahead(len);
-	for(size_t i = 0; i < len; ++i)
+	for(size_t i = 0; i < len && read_queue[i].get_type() != TokenType::END; ++i)
 		ss << std::setw(3) << i << ": " << read_queue[i] << NL;
 	ss << "..." << UNTAB << NL;
 	out << tab(ss.str());
