@@ -43,7 +43,7 @@ release: all lib
 lib: libmethan0l.so
 
 libmethan0l.so: all libclean lib-dirs headers $(LIB_SRC)
-	g++ $(filter-out $(patsubst %.cpp,%.o.pic,$(LIB_EXCLUDE)),$(patsubst %.o,%.o.pic, $(call rwildcard,./src,*.o))) -shared -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME).so
+	g++ $(filter-out $(patsubst %.cpp,%.o.pic,$(LIB_EXCLUDE)),$(call rwildcard,./src,*.o.pic)) -shared -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME).so
 
 %.o.pic: %.cpp
 	$(eval src:=$^)
