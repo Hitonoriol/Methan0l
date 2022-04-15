@@ -126,7 +126,7 @@ enum class TokenType : uint16_t
 	NEW,
 	GLOBAL,
 
-	NONE = 0x300,
+	NONE = 0x500,
 	EXPR_END,
 	LAMBDA_RET,
 	END = 0xFFFF
@@ -187,6 +187,7 @@ class Token
 				"|=", "&=", "<<=", ">>=", "%="
 		};
 
+		/* Words not in `keywords` array can be user-redefined in some contexts */
 		static constexpr std::string_view word_ops[] = {
 				"do", "typeid", "delete", "func", "defbox",
 				"class", "if", "else", "return", "defval",
@@ -205,6 +206,14 @@ class Token
 				"typeobject", "typereference",
 				"typetoken", "typeexpr",
 				"typeset", "typefallback"
+		};
+
+		/* Can't be redefined inside a program, lexed as their corresponding TokenType */
+		static constexpr TokenType keywords[] = {
+			TokenType::DO, TokenType::FOR, TokenType::WHILE,
+			TokenType::FUNC_DEF, TokenType::BOX, TokenType::CLASS,
+			TokenType::IF, TokenType::ELSE, TokenType::SET_DEF,
+			TokenType::TRY, TokenType::CATCH
 		};
 
 		static constexpr TokenType semantic_tokens[] = {
@@ -267,6 +276,7 @@ class Token
 		static char escape_seq(std::string_view seq);
 
 		static bool is_punctuator(char chr);
+		static bool is_keyword(TokenType tok);
 		static bool is_semantic(const TokenType &tok);
 		static bool is_transparent(const TokenType &tok);
 		static bool is_block_begin(TokenType tok);

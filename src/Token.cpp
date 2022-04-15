@@ -178,6 +178,11 @@ bool Token::is_punctuator(char chr)
 	return false;
 }
 
+bool Token::is_keyword(TokenType tok)
+{
+	return contains(keywords, tok);
+}
+
 Word Token::as_reserved(std::string &tokstr)
 {
 	for (size_t i = 0; i < std::size(reserved_words); ++i)

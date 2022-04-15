@@ -59,8 +59,8 @@ void Lexer::deduce_word_op()
 	TokenType opr = Token::as_word_op(tokstr);
 	if (opr == TokenType::NONE)
 		return;
-
-	toktype = opr;
+	else if (match_next_punctuator(TokenType::COLON) || Token::is_keyword(opr))
+		toktype = opr;
 }
 
 void Lexer::push()
@@ -376,6 +376,17 @@ inline bool Lexer::match_prev(TokenType tok)
 inline bool Lexer::match_next(TokenType tok)
 {
 	return *std::next(cur_chr) == tok;
+}
+
+bool Lexer::match_next_punctuator(TokenType tok)
+{
+	for (auto it = cur_chr; it != input_end; ++it) {
+		if (*it == tok)
+			return true;
+		if (Token::is_punctuator(*it))
+			return false;
+	}
+	return false;
 }
 
 inline bool Lexer::unescaped(TokenType tok)

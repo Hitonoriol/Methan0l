@@ -53,6 +53,7 @@ class Lexer
 		bool match_cur(TokenType tok);
 		bool match_prev(TokenType tok);
 		bool match_next(TokenType tok);
+		bool match_next_punctuator(TokenType);
 
 		bool unescaped(TokenType tok);
 		bool escaped(TokenType tok);
