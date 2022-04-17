@@ -54,7 +54,7 @@ bool Interpreter::load()
 		parser.parse_all();
 		load(parser.result());
 		parser.clear();
-		parser.get_lexer().reset();
+		parser.get_lexer().reset(true);
 	});
 }
 
