@@ -109,6 +109,8 @@ class Unit
 		size_t size() const;
 		bool empty() const;
 
+		static Unit from_expression(ExprPtr);
+
 		virtual std::string to_string();
 		friend bool operator ==(const Unit &lhs, const Unit &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Unit &val);

@@ -34,10 +34,7 @@ Value LoopExpr::evaluate(ExprEvaluator &evaluator)
 void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 {
 	Unit &loop_proxy = evaluator.tmp_callable(Unit());
-	Unit body_unit =
-			instanceof<UnitExpr>(body.get()) ?
-					try_cast<UnitExpr>(body).get_unit() :
-					Unit();
+	Unit &body_unit = evaluator.tmp_callable(Unit::from_expression(body));
 
 	/* For loops to be able to access variables from the upper scope w/o # modfr */
 	loop_proxy.expr_block();

@@ -7,6 +7,7 @@
 
 #include "../Token.h"
 #include "expression/Expression.h"
+#include "expression/UnitExpr.h"
 #include "util/string.h"
 
 namespace mtl
@@ -222,6 +223,14 @@ void Unit::prepend(ExprPtr expr)
 void Unit::append(ExprPtr expr)
 {
 	expr_list.push_back(expr);
+}
+
+Unit Unit::from_expression(ExprPtr expr)
+{
+	if (instanceof<UnitExpr>(expr))
+		return try_cast<UnitExpr>(expr).get_unit_ref();
+	else
+		return Unit(expr);
 }
 
 bool operator ==(const Unit &lhs, const Unit &rhs)
