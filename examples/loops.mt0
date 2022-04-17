@@ -13,10 +13,10 @@ some_list = $("first element", 999, -0.123456, false, -1, false, true, "another 
 do $(elem, some_list) -> {
 	e_type = typeid: elem
 	%% "* "
-	if (e_type == type string) ? -> {
+	if (e_type == String) ? -> {
 		elem :: " (Length: " :: size$(elem) :: ")"
 	}
-	else: if (e_type == type int || e_type == type double) ? -> {
+	else: if (e_type == Int || e_type == Float) ? -> {
 		elem :: " is positive: " :: (elem > 0)
 	}
 	else: elem

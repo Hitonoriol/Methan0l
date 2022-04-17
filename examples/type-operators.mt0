@@ -1,6 +1,6 @@
 x = 1
-bool = defval: type boolean
-str = defval: type string
+bool = defval: Boolean
+str = defval: String
 
 print = -> {
 	<% "x = " :: x

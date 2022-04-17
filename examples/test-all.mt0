@@ -1,7 +1,7 @@
 "Loading & Running all examples" :: newl
 start = now()
-this = File.new(get_launch_args()[0]).filename()
-root = File.new("examples")
+this = new: File(get_launch_args()[0]).filename()
+root = new: File("examples")
 if (!root.exists() || !root.is_dir()) ? -> {
 	die("Failed to open examples directory")
 }
@@ -16,7 +16,7 @@ create_title = func @(char, str => "", width => 50) {
 	return: title
 }
 
-tmp = File.new("")
+tmp = new: File("")
 root.for_each(func @(file) {
 	#tmp.set(file)
 	if (#tmp.extension() != ".mt0" || #tmp.filename() == #this) ? -> {

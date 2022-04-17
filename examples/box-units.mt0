@@ -12,10 +12,10 @@ my_box = defbox {
 	reverse = func @(iterable) {
 		@(rev, type => typeid: iterable)
 		
-		if (type == type list) ? -> {
+		if (type == List) ? -> {
 			rev = $()
 		}
-		else: if (type == type string) ? -> {
+		else: if (type == String) ? -> {
 			rev = ""
 		}
 		else: {

@@ -8,7 +8,7 @@ repeat = func @(f) {
 }
 
 "Random number generator" :: newl
-rnd = Random.new$()
+rnd = new: Random()
 
 "Random 64-bit Integer [-100; 100]"
 /* num = rnd.next_int$(min, max)
@@ -32,7 +32,7 @@ repeat$(func@() { (#rnd.next_boolean$(0.25) ? 1 : 0)! })
 
 "Seeded RNG"
 /* Seed can be specified as a ctor arg */
-rnd_b = Random.new$(12345)
+rnd_b = new: Random(12345)
 "[after init] " :: rnd_b.next_int$()
 
 /* RNG can also be re-seeded on the fly: */

@@ -6,11 +6,11 @@
 
 /* Variable assignment */
 foo = 123			/* Integer (signed 64-bit) */
-bar = 456.5			/* Double */
+bar = 456.5			/* Float */
 baz = true			/* Boolean */
 str = "Hello, Methan0l!"	/* String */
 
-/* Algebraic operators, if at least one of the operands in expr is Double, then the eval'd result is also Double */
+/* Algebraic operators, if at least one of the operands in expr is Float, then the eval'd result is also Float */
 calc = ((foo + bar) * (foo / 25.375)) / 10
 %%("Calculation result: " :: calc :: newl)
 

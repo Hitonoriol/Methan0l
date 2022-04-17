@@ -1,6 +1,6 @@
 "Files" :: newl
 
-file = File.new$("examples/file.txt")
+file = new: File("examples/file.txt")
 "Info about \"" :: file.absolute_path$() :: "\":"
 "Exists: " :: file.exists$()
 "Is directory: " :: file.is_dir$()

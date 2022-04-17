@@ -33,7 +33,7 @@ class: Test @(
 	}
 )
 
-obj = Test.new$()
+obj = new: Test()
 
 rec = func @(n) {
 	if (n < 1) ? break!
