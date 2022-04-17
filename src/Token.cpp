@@ -289,7 +289,7 @@ std::string Token::to_string(TokenType tok)
 {
 	const int type = static_cast<int>(tok);
 
-	if (type < PRINTABLE_END)
+	if (type < PRINTABLE_CHARS_END)
 		return str(static_cast<char>(tok));
 
 	else if (type < Token::LITERAL_START)
@@ -307,7 +307,7 @@ std::string Token::to_string(TokenType tok)
 
 std::ostream& operator <<(std::ostream &stream, const Token &val)
 {
-	bool printable = static_cast<int>(val.type) < Token::LITERAL_START;
+	bool printable = static_cast<int>(val.type) < Token::MISC_TOKENS_START;
 	stream << "[";
 
 	if (val.line != 0)

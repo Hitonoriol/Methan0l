@@ -125,6 +125,8 @@ enum class TokenType : uint16_t
 	USING_MODULE,
 	NEW,
 	GLOBAL,
+	ASSERT,
+	INSTANCE_OF,
 
 	NONE = 0x500,
 	EXPR_END,
@@ -191,21 +193,21 @@ class Token
 		static constexpr std::string_view word_ops[] = {
 				"do", "typeid", "delete", "func", "defbox",
 				"class", "if", "else", "return", "defval",
-				"objcopy", "typesafe", "hashcode",
+				"objcopy", "assert_type", "hashcode",
 				"typename", "noeval", "defset", "while", "for",
-				"try", "catch", "using_module", "new", "global"
+				"try", "catch", "using_module", "new", "global",
+				"assert", "instanceof"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
 				"", "nil", "true", "false", ".returned",
 				"newl", "break", "void", "selfinvoke",
 
-				/* Type idfrs (spaces are ignored by Lexer), evaluate to (int)Type enum  */
-				"typenil", "typeint", "typedouble", "typestring", "typeboolean",
-				"typelist", "typeunit", "typemap", "typefunc", "typechar",
-				"typeobject", "typereference",
-				"typetoken", "typeexpr",
-				"typeset", "typefallback"
+				/* Type idfrs */
+				"Nil", "Int", "Float", "String", "Boolean",
+				"List", "Unit", "Map", "Function", "Character",
+				"Object", "Reference", "Token", "Expression", "Set",
+				"Fallback"
 		};
 
 		/* Can't be redefined inside a program, lexed as their corresponding TokenType */
@@ -304,7 +306,7 @@ class Token
 		static const int WORD_OP_START = static_cast<int>(TokenType::DO);
 		static const int BICHAR_OP_START = static_cast<int>(TokenType::SHIFT_L);
 		static const int MISC_TOKENS_START = static_cast<int>(TokenType::NONE);
-		static const int PRINTABLE_END = 0x7F;
+		static const int PRINTABLE_CHARS_END = 0x7F;
 		static const std::string digits, double_digits;
 		static bool contains_all(std::string str, std::string substr);
 

@@ -70,6 +70,7 @@ class LibData: public Library
 		void import_reference(const IdentifierExpr&);
 		void load_operators();
 		void load_container_funcs();
+		bool instanceof(Value &recex, Value &expex);
 
 		/* std::accumulate wrapper for `mtl::Value`s */
 		template<typename T, typename F>

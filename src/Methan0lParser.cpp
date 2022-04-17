@@ -156,7 +156,9 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_word(TokenType::GLOBAL);
 
 	/* Infix word oprs */
-	register_infix_word(TokenType::TYPE_SAFE, Precedence::IO);
+	register_infix_word(TokenType::TYPE_SAFE, Precedence::NO_EVAL);
+	register_infix_word(TokenType::ASSERT, Precedence::NO_EVAL);
+	register_infix_word(TokenType::INSTANCE_OF, Precedence::BIT_SHIFT);
 
 	/* Class / Box field / method access operators */
 	register_infix_opr(TokenType::AT, Precedence::DOT, BinOprType::RIGHT_ASSOC);

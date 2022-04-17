@@ -50,6 +50,18 @@ class Lexer
 		char look_ahead(size_t n = 1);
 		bool try_save_multichar_op(char chr, char next);
 
+		inline bool saving_string()
+		{
+			return toktype == TokenType::STRING
+					|| toktype == TokenType::FORMAT_STRING
+					|| toktype == TokenType::CHAR;
+		}
+
+		inline bool saving_number()
+		{
+			return toktype == TokenType::INTEGER || toktype == TokenType::DOUBLE;
+		}
+
 		bool match_cur(TokenType tok);
 		bool match_prev(TokenType tok);
 		bool match_next(TokenType tok);

@@ -133,7 +133,7 @@ void Lexer::push(char chr)
 
 Token& Lexer::finalize_token(Token &&tok)
 {
-	tok.set_line(line);
+	tok.set_line(cur_sep == Separator::NEWLINE ? line - 1 : line);
 	tok.set_column(column);
 	tok.set_separator(cur_sep);
 	cur_sep = Separator::NONE;
@@ -178,9 +178,6 @@ bool Lexer::try_save_multichar_op(char chr, char next)
 	/* Skip everything inside a block comment */
 	if (multichar_type == TokenType::BLOCK_COMMENT_L) {
 		do {
-			if (*cur_chr == '\n')
-				new_line();
-
 			next_char();
 		} while (*cur_chr != Token::chr(TokenType::ASTERISK) ||
 				*std::next(cur_chr) != Token::chr(TokenType::SLASH));
@@ -247,6 +244,14 @@ void Lexer::consume()
 {
 	char chr = *cur_chr;
 
+	/* Ignore spaces when saving Number literals
+	 * (this allows to separate digits like so: `123 456 789.912 345`)
+	 */
+	if (std::isspace(chr)) {
+		if (saving_number())
+			return;
+	}
+
 	/* Deduce floating point literal */
 	if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
 		if (!std::isdigit(*std::next(cur_chr))) {
@@ -289,9 +294,14 @@ void Lexer::consume()
 		}
 	}
 
+	else if (saving_number() && !std::isdigit(chr)) {
+		push();
+		begin(chr);
+		return;
+	}
+
 	/* Save String / Character literal char */
-	else if (toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING
-			|| toktype == TokenType::CHAR) {
+	else if (saving_string()) {
 		/* Save `\` literally when reading a CHAR & ignore unescaped `\` when reading a STRING */
 		if (toktype == TokenType::CHAR
 				|| (chr != TokenType::BACKSLASH || escaped(TokenType::BACKSLASH)))
@@ -302,6 +312,12 @@ void Lexer::consume()
 				|| (toktype == TokenType::CHAR && unescaped(TokenType::SINGLE_QUOTE)))
 			push();
 
+		return;
+	}
+
+	/* Space acts as a token separator for all tokens except Number & String-like literals */
+	else if (std::isspace(chr)) {
+		push();
 		return;
 	}
 
@@ -320,8 +336,8 @@ void Lexer::consume()
 
 void Lexer::deduce_separator(char chr)
 {
-	if (chr == '\n' || chr == Token::chr(TokenType::SEMICOLON))
-		new_line();
+	if (chr == NL || chr == Token::chr(TokenType::SEMICOLON))
+		cur_sep = Separator::NEWLINE;
 	else if (cur_sep != Separator::NEWLINE && std::isspace(chr))
 		cur_sep = Separator::SPACE;
 }
@@ -345,10 +361,16 @@ void Lexer::consume_and_deduce()
 
 void Lexer::next_char(size_t n)
 {
-	if (has_next()) {
-		cur_chr += n;
-		column += n;
+	if (!has_next())
+		return;
+
+	for (size_t i = 0; i < n; ++i) {
+		++cur_chr;
+		++column;
+		if (*cur_chr == NL)
+			new_line();
 	}
+
 }
 
 void Lexer::new_line()
@@ -407,6 +429,9 @@ void Lexer::lex(std::string &code, bool preserve_state)
 
 	if constexpr (DEBUG)
 		std::cout << "Lexing the input..." << std::endl;
+
+	if (*cur_chr == NL)
+		new_line();
 
 	while (has_next())
 		consume_and_deduce();

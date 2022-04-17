@@ -359,6 +359,13 @@ void LibData::load_container_funcs()
 	});
 }
 
+bool LibData::instanceof(Value &recex, Value &expex)
+{
+	size_t expected = mtl::num(expex);
+	auto received = static_cast<size_t>(recex.type());
+	return expected == received;
+}
+
 void LibData::load_operators()
 {
 	prefix_operator(TokenType::GLOBAL, LazyUnaryOpr([&](auto rhs) {
@@ -398,8 +405,24 @@ void LibData::load_operators()
 		return if_not_same(lhs, rhs, true);
 	}));
 
+	infix_operator(TokenType::INSTANCE_OF, LazyBinaryOpr([&](auto lhs, auto rhs) {
+		Value l = val(lhs), r = val(rhs);
+		return instanceof(l, r);
+	}));
+
 	infix_operator(TokenType::TYPE_SAFE, LazyBinaryOpr([&](auto lhs, auto rhs) {
-		if_not_same(lhs, rhs, false);
+		Value l = val(lhs), r = val(rhs);
+		if (!instanceof(l, r))
+			throw InvalidTypeException(static_cast<Type>(static_cast<size_t>(l.type())),
+					static_cast<Type>(mtl::num(r)), "Type assertion failed:");
+
+		return Value::NO_VALUE;
+	}));
+
+	/* *["Assertion failed"] assert: condition */
+	infix_operator(TokenType::ASSERT, LazyBinaryOpr([&](auto lhs, auto rhs) {
+		if (!bln(val(rhs)))
+			throw std::runtime_error(val(lhs).to_string(eval));
 		return Value::NO_VALUE;
 	}));
 
