@@ -9,7 +9,7 @@
 namespace mtl
 {
 
-LiteralExpr::LiteralExpr(Type val_type, Token token)
+LiteralExpr::LiteralExpr(Type val_type, const Token &token)
 {
 	std::string &tokstr = unconst(token.get_value());
 	auto type = token.get_type();
