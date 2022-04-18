@@ -1,0 +1,83 @@
+/*
+ * A minimal implementation of Methan0l program "baker" that wraps
+ * .mt0 scripts in dynamically (for now) linked binary compiled with g++.
+ *
+ * TODO: Bake module dependencies (if any) along with programs using them.
+ */
+
+using_module: "$:/../modules/system"
+
+args = get_launch_args()
+if (args.size() < 2) ? {
+	<% "Usage: bake.mt0 <path/to/src>"
+	<% "(script extension must be omitted)"
+	exit()
+}
+
+if (!File@exists(args[1] :: ".mt0")) ? {
+	<% "Failed to open " :: args[1] :: ".mt0"
+	exit()
+}
+
+if (exec("g++ --version")[1] != 0) ? {
+	<% "g++ is required to run this script."
+	exit()
+}
+
+lib_name = "libmethan0l.so"
+
+<% $"Baking \"{}.mt0\" into an executable..." args[1]
+
+/*
+ * Script executor string template.
+ * (would be a little better to save the program's intermediate representation instead of raw code)
+ */
+out =
+"
+	#include \"Interpreter.h\"
+	#include \"Runner.h\"
+	#include \"InteractiveRunner.h\"
+	#include <string>
+
+	int main(int argc, char **argv)
+	{
+		std::string_view src = R\"***(
+			{1}
+		)***\";
+		mtl::Interpreter methan0l(argv[0]);
+		std::string program(src);
+		methan0l.load(program);
+		methan0l.run();
+		return 0;
+	}
+"
+
+build_script = "g++ --std=c++17 -O3 -I{2}/methan0l-sdk {3}/{1}-baked.cpp -o {3}/{1} -L{2} -l:{4}"
+
+src = File@read_contents(args[1] :: ".mt0")
+fname = File@filename(args[1])
+baker_dir = new: File("#:/")
+
+baked_program = new: File(baker_dir :: fname)
+baked_program.mkdirs()
+baked_program.absolute_path() -> baked_program
+
+build_script.format(fname, get_rundir(), baked_program, lib_name) -> build_script
+File@write_contents(baked_program :: "/" :: fname :: "-baked.cpp", out.format(src))
+File@write_contents(baked_program :: "/" :: "/bake-" :: fname, build_script)
+
+<% "Prepared baking script and source file." :: newl
+
+<% "Compiling baked .cpp source file..." build_script ""
+result = exec(build_script)
+<% "Compilation log:" result[0]
+
+if (result[1] != 0) ? {
+	<% "Return code: " :: result[1]
+	<% "Compilation failed. Check if .so library and methan0l-sdk directory are in the same location as the interpreter binary."
+} else: {
+	<% "Compilation finished successfully."
+	<% "Copying runtime dependencies..."
+	File@copy_to("$:/" :: lib_name, baked_program :: "/" :: lib_name)
+	<% $"You can find baked executable in \"{}\"." baked_program
+}
