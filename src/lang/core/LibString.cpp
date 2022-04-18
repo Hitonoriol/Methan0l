@@ -126,9 +126,10 @@ void LibString::load_operators()
 void LibString::format(std::string &fmt, const std::vector<std::string> &sargs)
 {
 	size_t last_idx { 0 };
-	std::smatch fmt_match;
+	std::match_results<std::string::iterator> fmt_match;
 	std::string sidx;
-	while (std::regex_search(fmt, fmt_match, string_fmt)) {
+	size_t offset = 0;
+	while (std::regex_search(fmt.begin() + offset, fmt.end(), fmt_match, string_fmt, std::regex_constants::match_prev_avail)) {
 		sidx = fmt_match[1].str();
 		/* No index specified: `{}` */
 		if (sidx.empty())
@@ -136,11 +137,17 @@ void LibString::format(std::string &fmt, const std::vector<std::string> &sargs)
 		else
 			last_idx = std::stoi(sidx);
 
-		if (last_idx > sargs.size())
+		if (last_idx > sargs.size()) {
 			throw std::runtime_error("Invalid format argument index: "
 					+ mtl::str(last_idx));
+		}
 
-		fmt.replace(fmt_match.position(), fmt_match.length(), sargs[last_idx - 1]);
+		offset += fmt_match.position() + sargs[last_idx - 1].length();
+		fmt.replace(offset - sargs[last_idx - 1].length(), fmt_match.length(), sargs[last_idx - 1]);
+		LOG("Match at: " << fmt_match.position() << " (local)"
+				<< ", replacement len: " << sargs[last_idx - 1].length()
+				<< ", current offset: " << offset
+				<< ", fmt len: " << fmt.length())
 	}
 }
 
