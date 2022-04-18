@@ -170,7 +170,7 @@ using Tokens = StaticList<TokenType, tokens...>;
 class Token
 {
 	private:
-		TokenType type;
+		TokenType type = TokenType::NONE;
 		uint32_t line = 0;
 		uint32_t column = 0;
 		std::string value;
@@ -242,7 +242,8 @@ class Token
 
 	public:
 		Token();
-		Token(const Token &rhs);
+		Token(const Token&);
+		Token(Token&&);
 		Token(TokenType type, std::string value = "");
 		Token(char chr);
 		Token(std::string op);

@@ -137,7 +137,7 @@ bool Parser::match(TokenType expected)
 Token Parser::consume()
 {
 	look_ahead();
-	Token &ret = !peeking() ?
+	Token ret = !peeking() ?
 			read_queue.front() : read_queue[peek_descriptor().next()];
 	if (!peeking())
 		read_queue.pop_front();

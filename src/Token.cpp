@@ -50,6 +50,15 @@ Token::Token(const Token &rhs)
 	operator =(rhs);
 }
 
+Token::Token(Token &&rhs)
+{
+	value = std::move(rhs.value);
+	type = rhs.type;
+	line = rhs.line;
+	column = rhs.column;
+	sep = rhs.sep;
+}
+
 /* Punctuator token */
 Token::Token(char chr) : Token(static_cast<TokenType>(chr), std::string(1, chr))
 {
