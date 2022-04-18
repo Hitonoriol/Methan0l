@@ -225,8 +225,11 @@ void File::write_line(Object &obj, const std::string &line)
 std::string File::path(ExprList &args)
 {
 	/* This allows to use all `File` methods statically by providing the `path` as the first argument */
-	if (ObjectType::static_call(args))
-		return path(*INTERPRETER, args[1]->evaluate(eval));
+	if (ObjectType::static_call(args)) {
+		Value p = args[1]->evaluate(eval);
+		args.erase(std::next(args.begin()));
+		return path(*INTERPRETER, p);
+	}
 
 	return str(Object::get_this(args).field(FNAME));
 }
