@@ -113,12 +113,8 @@ Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 	else
 		unit.reset_execution_state();
 
-	while (unit.has_next_expr()) {
-		if (unit.execution_finished())
-			break;
-
+	while (unit.has_next_expr() && !unit.execution_finished())
 		exec(*(current_expr = unit.next_expression()));
-	}
 
 	if (force_quit())
 		return Value::NO_VALUE;
@@ -570,9 +566,9 @@ void ExprEvaluator::assert_true(bool val, const std::string &msg)
 
 void ExprEvaluator::stop()
 {
-	current_unit()->stop();
-	exec_stack.clear();
 	execution_finished = true;
+	for (auto unit : exec_stack)
+		unit->stop();
 }
 
 bool ExprEvaluator::force_quit()
