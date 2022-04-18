@@ -127,6 +127,8 @@ enum class TokenType : uint16_t
 	GLOBAL,
 	ASSERT,
 	INSTANCE_OF,
+	DEREF,
+	IS_REF,
 
 	NONE = 0x500,
 	EXPR_END,
@@ -196,7 +198,7 @@ class Token
 				"objcopy", "assert_type", "hashcode",
 				"typename", "noeval", "defset", "while", "for",
 				"try", "catch", "using_module", "new", "global",
-				"assert", "instanceof"
+				"assert", "instanceof", "unwrap", "is_reference"
 		};
 
 		static constexpr std::string_view reserved_words[] = {

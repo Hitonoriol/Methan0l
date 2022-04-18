@@ -368,6 +368,29 @@ bool LibData::instanceof(Value &recex, Value &expex)
 
 void LibData::load_operators()
 {
+	/* Dereference value, e.g. foo = (x += 123)!!
+	 * without the `!!` operator, a reference to `x` will be assigned to `foo`
+	 */
+	postfix_operator(TokenType::DOUBLE_EXCL, LazyUnaryOpr([&](auto lhs) {
+		return val(lhs);
+	}));
+
+	/* Unwrap a named reference, e.g. x = **y; unwrap: x
+	 * `x` becomes a copy of `y` instead of the reference to its value
+	 */
+	prefix_operator(TokenType::DEREF, LazyUnaryOpr([&](ExprPtr rhs) {
+		rhs->assert_type<IdentifierExpr>("Attempting to unwrap a non-identifier");
+		Value &val = eval->referenced_value(rhs, false);
+		Value copy = val.get();
+		val.clear();
+		val = copy;
+		return Value::ref(val);
+	}));
+
+	prefix_operator(TokenType::IS_REF, LazyUnaryOpr([&](ExprPtr rhs) {
+		return eval->referenced_value(rhs, false).is<ValueRef>();
+	}));
+
 	prefix_operator(TokenType::GLOBAL, LazyUnaryOpr([&](auto rhs) {
 		if_instanceof<IdentifierExpr>(*rhs, [&](auto &idfr) {
 			import_reference(idfr);
@@ -448,7 +471,6 @@ void LibData::load_operators()
 
 	/* Reference operator */
 	prefix_operator(TokenType::REF, LazyUnaryOpr([&](ExprPtr rhs) {
-		rhs->assert_type<IdentifierExpr>("Cannot reference a temporary Value");
 		return Value::ref(eval->referenced_value(rhs));
 	}));
 

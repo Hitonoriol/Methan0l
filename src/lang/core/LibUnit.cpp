@@ -151,11 +151,6 @@ void LibUnit::load_operators()
 		return Value::NO_VALUE;
 	}));
 
-	/* Dereference value */
-	postfix_operator(TokenType::DOUBLE_EXCL, LazyUnaryOpr([&](auto lhs) {
-		return ref(lhs).get();
-	}));
-
 	/* Static method invocation: Type@method$(arg1, arg2, ...) */
 	infix_operator(TokenType::AT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		ObjectType &type = eval->get_type_mgr().get_type(ObjectType::get_id(MapParser::key_string(lhs)));

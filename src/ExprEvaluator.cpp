@@ -394,14 +394,18 @@ Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)
 	else if (!instanceof<BinaryOperatorExpr>(expr))
 		return DataTable::create_temporary(expr->evaluate(*this));
 
-	auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
-	if (dot_expr.get_operator() != TokenType::DOT)
-		throw std::runtime_error("Can't get a reference to a non-dot binary opr");
-
-	ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
-	return instanceof<BinaryOperatorExpr>(lhs) ?
-													referenced_value(lhs) :
-													dot_operator_reference(lhs, rhs);
+	if (BinaryOperatorExpr::is(*expr, TokenType::DOT)) {
+		auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
+		ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
+		return instanceof<BinaryOperatorExpr>(lhs) ?
+														referenced_value(lhs) :
+														dot_operator_reference(lhs, rhs);
+	}
+	else {
+		Value v = eval(*expr);
+		v.assert_type(Type::REFERENCE, "Trying to reference a temporary value");
+		return DataTable::create_temporary(v);
+	}
 }
 
 Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)

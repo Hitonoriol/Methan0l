@@ -94,8 +94,9 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 	/* Return operators */
 	register_postfix_opr(TokenType::EXCLAMATION, Precedence::IO);				// expr!
-	register_postfix_opr(TokenType::DOUBLE_EXCL, Precedence::IO);			// expr!!
 	register_word(TokenType::RETURN, Precedence::IO);					// return: expr
+
+	register_postfix_opr(TokenType::DOUBLE_EXCL);			// expr!!
 
 	/* Logical oprs */
 	register_prefix_opr(TokenType::EXCLAMATION);
@@ -154,6 +155,8 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_word(TokenType::USING_MODULE);
 	register_word(TokenType::NEW);
 	register_word(TokenType::GLOBAL);
+	register_word(TokenType::DEREF);
+	register_word(TokenType::IS_REF);
 
 	/* Infix word oprs */
 	register_infix_word(TokenType::TYPE_SAFE, Precedence::NO_EVAL);

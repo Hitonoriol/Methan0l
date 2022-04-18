@@ -59,14 +59,14 @@ class LibArithmetic: public Library
 					+ mtl::str(l) + " " + Token::to_string(op) + " " + mtl::str(r) + ")");
 		}
 
-		template <TokenType op>
+		template<TokenType op>
 		static constexpr BinaryOpr bin_operator()
 		{
 			return BinaryOpr([](Value &lhs, Value &rhs) {
-				if (Value::is_double_op(lhs.get(), rhs))
-					return lhs.get() = apply<op>(lhs.as<double>(), rhs.as<double>());
-
-				return lhs.get() = apply<op>(lhs.as<dec>(), rhs.as<dec>());
+				if (Value::is_double_op(lhs.get(), rhs.get()))
+					lhs.get() = apply<op>(lhs.as<double>(), rhs.as<double>());
+				lhs.get() = apply<op>(lhs.as<dec>(), rhs.as<dec>());
+				return lhs;
 			});
 		}
 };

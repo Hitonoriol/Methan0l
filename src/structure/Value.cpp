@@ -506,13 +506,13 @@ std::string_view Value::type_name(Type type)
 	return Token::reserved(typew);
 }
 
-std::string_view Value::type_name()
+std::string_view Value::type_name() const
 {
 	Type t = type();
 	if (t != Type::FALLBACK)
 		return type_name(t);
 	else
-		return std::string_view(as_any().type().name());
+		return std::string_view(unconst(*this).as_any().type().name());
 }
 
 Value& Value::operator =(const Value &rhs)

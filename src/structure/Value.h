@@ -331,7 +331,7 @@ class Value
 		static void clear(ValueContainer &pure_val);
 
 		static std::string_view type_name(Type type);
-		std::string_view type_name();
+		std::string_view type_name() const;
 
 		static bool is_double_op(const Value &lhs, const Value &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Value &val);
