@@ -162,7 +162,7 @@ void Interpreter::load_args(int argc, char **argv)
 
 	auto &table = main.local();
 	table.set(LAUNCH_ARGS, list_v);
-	table.set(SCRDIR, std::filesystem::absolute(argv[0]).parent_path().string());
+	table.set(SCRDIR, std::filesystem::absolute(argv[1]).parent_path().string());
 }
 
 void Interpreter::size_info()
