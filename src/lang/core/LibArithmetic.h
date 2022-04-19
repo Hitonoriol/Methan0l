@@ -65,7 +65,8 @@ class LibArithmetic: public Library
 			return BinaryOpr([](Value &lhs, Value &rhs) {
 				if (Value::is_double_op(lhs.get(), rhs.get()))
 					lhs.get() = apply<op>(lhs.as<double>(), rhs.as<double>());
-				lhs.get() = apply<op>(lhs.as<dec>(), rhs.as<dec>());
+				else
+					lhs.get() = apply<op>(lhs.as<dec>(), rhs.as<dec>());
 				return lhs;
 			});
 		}
