@@ -311,7 +311,7 @@ std::string Token::to_string(TokenType tok)
 		return std::string(Token::word_op(tok));
 
 	else
-		return "[Internal Interpreter Token]";
+		return "[Internal Token]";
 }
 
 std::ostream& operator <<(std::ostream &stream, const Token &val)

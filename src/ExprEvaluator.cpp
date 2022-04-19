@@ -592,35 +592,42 @@ Expression* ExprEvaluator::get_current_expr()
 
 void ExprEvaluator::dump_stack()
 {
+	sstream ss;
 	size_t i = 0, depth = exec_stack.size();
-	std::cout << "[Execution Stack | Depth: " << depth << "]" << std::endl;
+	ss << "[Execution Stack | Depth: " << depth << "]" << NLTAB;
 
 	auto top = std::prev(exec_stack.begin());
 	for (auto un = std::prev(exec_stack.end()); un != top; --un) {
-		std::cout << ((i++ > 0) ? "  * " : "--> ");
-		std::cout << **un;
+		ss << ((i++ > 0) ? "  * " : "--> ");
+		ss << **un;
 		if (!(*un)->empty())
-			std::cout << " @ line " << (*un)->expressions().front()->get_line();
+			ss << " @ line " << (*un)->expressions().front()->get_line();
 		if (i == depth)
-			std::cout << " (Main)";
-		std::cout << std::endl;
-		for (auto &val : *(*un)->local().map_ptr()) {
-			Value &v = val.second;
+			ss << " (Main)";
+
+		ss << NL << "Local variables:" << NLTAB;
+		auto &table = *(*un)->local().map_ptr();
+		auto last = table.end();
+		for (auto val = table.begin(); val != table.end(); ++val) {
+			Value &v = val->second;
 			Type type = v.type();
 			const char quote = (type == Type::STRING || type == Type::CHAR ? '"' : '\0');
-			std::cout << '\t'
-					<< "(" << v.use_count() << ") "
+			ss << "(" << v.use_count() << ") "
 					<< "["
 					<< Value::type_name(type)
 					<< " | " << (v.heap_type() ? "heap" : "non-heap");
 
 			if (v.heap_type())
-				std::cout << " 0x" << to_base((udec) v.identity(), 16);
+				ss << " 0x" << to_base((udec) v.identity(), 16);
 
-			std::cout << "] " << val.first << " = " << std::flush;
-			std::cout << quote << v << quote << std::endl;
+			if (std::next(val) == last)
+				ss << UNTAB << UNTAB;
+
+			ss << "] " << val->first << " = " << quote << v << quote << NL;
 		}
+		ss << UNTAB;
 	}
+	out << mtl::tab(ss);
 }
 
 } /* namespace mtl */
