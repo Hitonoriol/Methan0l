@@ -213,7 +213,7 @@ void LibUnit::save_return(ExprPtr ret)
 		unit->stop(true);
 	}
 	else
-		unit->save_return(val(ret));
+		unit->save_return(ret->evaluate(*eval));
 }
 
 void LibUnit::make_box(Value &unit_val)
