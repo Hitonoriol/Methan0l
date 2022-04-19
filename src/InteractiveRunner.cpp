@@ -146,8 +146,11 @@ bool InteractiveRunner::load_line(std::string &line)
 			|| last == TokenType::SEMICOLON
 			|| std::isspace(last));
 
-	if (ready)
+	if (ready) {
 		methan0l.load();
+		methan0l.get_parser().clear();
+		methan0l.get_parser().get_lexer().reset(true);
+	}
 
 	return ready;
 }

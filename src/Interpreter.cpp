@@ -53,8 +53,6 @@ bool Interpreter::load()
 	return try_load([&]() {
 		parser.parse_all();
 		load(parser.result());
-		parser.clear();
-		parser.get_lexer().reset(true);
 	});
 }
 
