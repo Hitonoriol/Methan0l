@@ -5,10 +5,12 @@
 #include "Value.h"
 #include "../util/util.h"
 
+#define UNWRAP_NESTED(vptr) (vptr)->is<ValueRef>() ? (vptr)->get<ValueRef>().val : vptr
+
 namespace mtl
 {
 
-ValueRef::ValueRef(Value *val) : val(val)
+ValueRef::ValueRef(Value *val) : val(UNWRAP_NESTED(val))
 {
 }
 
@@ -16,7 +18,7 @@ ValueRef::ValueRef(Value &val) : ValueRef(&val)
 {
 }
 
-ValueRef::ValueRef() : ValueRef(nullptr)
+ValueRef::ValueRef() : val(nullptr)
 {
 }
 
@@ -32,6 +34,7 @@ ValueRef& ValueRef::operator=(const ValueRef &rhs)
 
 Value& ValueRef::value()
 {
+	LOG("Dereferencing " << this << " -> " << val)
 	if (empty())
 		throw std::runtime_error("Trying to access an empty reference");
 
@@ -50,12 +53,12 @@ void ValueRef::clear()
 
 void ValueRef::reset(Value &val)
 {
-	this->val = &val;
+	this->val = UNWRAP_NESTED(&val);
 }
 
 void ValueRef::reset(Value &&val)
 {
-	this->val = &val;
+	this->val = UNWRAP_NESTED(&val);
 }
 
 bool ValueRef::empty() const

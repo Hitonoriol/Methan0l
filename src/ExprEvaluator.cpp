@@ -384,28 +384,30 @@ Value& ExprEvaluator::get(IdentifierExpr &idfr, bool follow_refs)
 
 Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)
 {
-	if constexpr (DEBUG)
-		out << "? Referencing " << expr->info() << std::endl;
+	LOG("? Referencing " << expr->info())
 
+	/* Reference a named value */
 	if (instanceof<IdentifierExpr>(expr))
 		return get(try_cast<IdentifierExpr>(expr), follow_refs);
+
+	/* Unwrap reference operaor in-place */
 	else if (instanceof<PrefixExpr>(expr) && try_cast<PrefixExpr>(expr).get_operator() == TokenType::REF)
 		return referenced_value(try_cast<PrefixExpr>(expr).get_rhs());
-	else if (!instanceof<BinaryOperatorExpr>(expr))
+
+	/* Create a temporary value and reference it if `expr` is not an access expression */
+	else if (!BinaryOperatorExpr::is(*expr, TokenType::DOT))
 		return DataTable::create_temporary(expr->evaluate(*this));
 
-	if (BinaryOperatorExpr::is(*expr, TokenType::DOT)) {
+	/* Reference an access expression's value */
+	else {
 		auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
 		ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
 		return instanceof<BinaryOperatorExpr>(lhs) ?
 														referenced_value(lhs) :
 														dot_operator_reference(lhs, rhs);
 	}
-	else {
-		Value v = eval(*expr);
-		v.assert_type(Type::REFERENCE, "Trying to reference a temporary value");
-		return DataTable::create_temporary(v);
-	}
+
+	throw std::runtime_error("Reference error");
 }
 
 Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
@@ -613,12 +615,11 @@ void ExprEvaluator::dump_stack()
 			Type type = v.type();
 			const char quote = (type == Type::STRING || type == Type::CHAR ? '"' : '\0');
 			ss << "(" << v.use_count() << ") "
-					<< "["
-					<< Value::type_name(type)
-					<< " | " << (v.heap_type() ? "heap" : "non-heap");
-
-			if (v.heap_type())
-				ss << " 0x" << to_base((udec) v.identity(), 16);
+					<< "[" << Value::type_name(type);
+			if (type == Type::REFERENCE)
+				ss << " -> " << v.get().identity();
+			ss << " | " << (v.heap_type() ? "heap" : "non-heap");
+			ss << " " << v.identity();
 
 			if (std::next(val) == last)
 				ss << UNTAB << UNTAB;

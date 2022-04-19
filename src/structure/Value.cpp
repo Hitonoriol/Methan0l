@@ -95,7 +95,7 @@ Value::~Value()
 Value& Value::get()
 {
 	if (is<ValueRef>())
-		return get<ValueRef>().value().get();
+		return get<ValueRef>().value();
 
 	return *this;
 }
@@ -455,7 +455,10 @@ size_t Value::hash_code() const
 
 Value Value::ref(Value &val)
 {
-	return Value(ValueRef(val));
+	if (val.is<ValueRef>())
+		return ValueRef(val.get<ValueRef>());
+
+	return ValueRef(val);
 }
 
 ExprPtr Value::wrapped(const Value &val)
@@ -517,10 +520,11 @@ std::string_view Value::type_name() const
 
 Value& Value::operator =(const Value &rhs)
 {
-	if (is<ValueRef>())
-		get().value = rhs.value;
-	else
-		value = rhs.value;
+	/* Avoid endless self-referencing */
+	if (rhs.is<ValueRef>() && this == rhs.cget<ValueRef>().ptr())
+		return *this;
+
+	get().value = rhs.value;
 	return *this;
 }
 
