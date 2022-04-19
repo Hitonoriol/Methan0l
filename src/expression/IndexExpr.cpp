@@ -59,7 +59,8 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 		return val;
 
 	default:
-		throw std::runtime_error("Applying index operator on an unsupported type");
+		throw std::runtime_error("Unsupported subscript operator LHS type: "
+				+ mtl::str(Value::type_name(lhs_val_type)));
 	}
 }
 
