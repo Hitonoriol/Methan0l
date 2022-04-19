@@ -455,6 +455,17 @@ void ExprEvaluator::exec(Expression &expr)
 	return expr.execute(*this);
 }
 
+/* Used when assigning to identifiers.
+ * References can only be assigned via explicitly using the `**` operator,
+ * even if RHS expression evaluates to a reference without it. */
+Value ExprEvaluator::unwrap_or_reference(Expression &expr)
+{
+	Value val = expr.evaluate(*this);
+	if (instanceof<PrefixExpr>(&expr) && static_cast<PrefixExpr&>(expr).get_operator() == TokenType::REF)
+		return val;
+	return val.get();
+}
+
 Value ExprEvaluator::evaluate(AssignExpr &expr)
 {
 	ExprPtr lexpr = expr.get_lhs();
@@ -462,14 +473,14 @@ Value ExprEvaluator::evaluate(AssignExpr &expr)
 
 	/* Move Value from LHS to RHS idfr */
 	if (expr.is_move_assignment()) {
-		Value lval = eval(lexpr);
+		Value lval = unwrap_or_reference(*lexpr);
 		if (instanceof<IdentifierExpr>(lexpr))
 			del(lexpr);
 		return Value::ref(referenced_value(rexpr) = lval);
 	}
 
 	/* Copy assignment */
-	Value rhs = eval(rexpr).copy();
+	Value rhs = unwrap_or_reference(*rexpr).copy();
 	if (instanceof<IdentifierExpr>(lexpr.get())) {
 		IdentifierExpr &lhs = try_cast<IdentifierExpr>(lexpr);
 		return Value::ref(lhs.assign(*this, rhs));

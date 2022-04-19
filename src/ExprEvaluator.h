@@ -280,6 +280,8 @@ class ExprEvaluator
 			return call_helper<argc == 0, decltype(f), Container, argc>::engage(*this, f, c);
 		}
 
+		Value unwrap_or_reference(Expression &expr);
+
 	public:
 		ExprEvaluator();
 		ExprEvaluator(Unit &main);
