@@ -38,6 +38,7 @@ class LoopExpr: public Expression
 		{
 			Unit &body_unit = evaluator.tmp_callable(Unit::from_expression(body));
 			body_unit.call();
+			body_unit.expr_block();
 			DataTable &local = body_unit.local();
 			evaluator.enter_scope(body_unit);
 			Value &elem = local.get_or_create(as_elem);
