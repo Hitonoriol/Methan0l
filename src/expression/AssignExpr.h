@@ -10,20 +10,16 @@
 namespace mtl
 {
 
-class AssignExpr: public Expression
+class AssignExpr: public BinaryOperatorExpr
 {
 	private:
-		ExprPtr lhs, rhs;
 		bool move;
 
 	public:
-		AssignExpr(ExprPtr lhs, ExprPtr rhs, bool move = false);
-		Value evaluate(ExprEvaluator &eval);
+		AssignExpr(ExprPtr lhs, Token tok, ExprPtr rhs);
+		Value evaluate(ExprEvaluator &eval) override;
 
 		bool is_move_assignment();
-
-		ExprPtr get_lhs();
-		ExprPtr get_rhs();
 
 		std::ostream& info(std::ostream &str) override;
 };

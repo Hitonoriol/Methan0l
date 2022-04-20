@@ -6,24 +6,15 @@
 namespace mtl
 {
 
-AssignExpr::AssignExpr(ExprPtr lhs, ExprPtr rhs, bool move) :
-		lhs(lhs), rhs(rhs), move(move)
+AssignExpr::AssignExpr(ExprPtr lhs, Token tok, ExprPtr rhs) :
+		BinaryOperatorExpr(lhs, tok, rhs)
 {
+	move = tok == TokenType::ARROW_R;
 }
 
 Value AssignExpr::evaluate(ExprEvaluator &eval)
 {
 	return eval.evaluate(*this);
-}
-
-ExprPtr AssignExpr::get_lhs()
-{
-	return lhs;
-}
-
-ExprPtr AssignExpr::get_rhs()
-{
-	return rhs;
 }
 
 bool AssignExpr::is_move_assignment()
@@ -35,8 +26,8 @@ std::ostream& AssignExpr::info(std::ostream &str)
 {
 	return Expression::info(str
 			<< (move ? "Move" : "Copy") << " Assignment: " << BEG
-					<< "LHS: " << lhs->info() << NL
-					<< "RHS: " << rhs->info()
+					<< "LHS: " << get_lhs()->info() << NL
+					<< "RHS: " << get_rhs()->info()
 					<< END);
 }
 
