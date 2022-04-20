@@ -86,12 +86,17 @@ void Token::assert_type(TokenType type)
 				"Expected: " + to_string(type));
 }
 
-bool Token::operator ==(const Token &rhs)
+bool Token::is_identical(const Token &rhs) const
+{
+	return operator ==(rhs) && line == rhs.line && column == rhs.column;
+}
+
+bool Token::operator ==(const Token &rhs) const
 {
 	return static_cast<int>(type) == static_cast<int>(rhs.type);
 }
 
-bool Token::operator !=(const Token &rhs)
+bool Token::operator !=(const Token &rhs) const
 {
 	return !(*this == rhs);
 }

@@ -270,8 +270,9 @@ class Token
 			return sep == Separator::NEWLINE;
 		}
 
-		bool operator ==(const Token &rhs);
-		bool operator !=(const Token &rhs);
+		bool is_identical(const Token &rhs) const;
+		bool operator ==(const Token &rhs) const;
+		bool operator !=(const Token &rhs) const;
 		bool operator ==(const TokenType &rhs);
 		bool operator !=(const TokenType &rhs);
 

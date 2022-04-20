@@ -225,7 +225,10 @@ PeekPos& Parser::peek_descriptor()
 	return peek_stack.top();
 }
 
-void Parser::consume_peeked(PeekPos desc)
+/* Consume all tokens of expression described by `desc`
+ * up to the specified token `up_to` if it's != `EOF_TOKEN`,
+ * consume the descriptor fully otherwise. */
+void Parser::consume_peeked(PeekPos desc, const Token &up_to)
 {
 	LOG("** Consuming peeked expression @ " << desc.start << "-" << (desc.offset + desc.start))
 	IFDBG(
@@ -233,6 +236,14 @@ void Parser::consume_peeked(PeekPos desc)
 				out << *it << " ";
 			out << std::endl;
 	)
+
+	if (up_to != Token::EOF_TOKEN) {
+		size_t offset = 0;
+		for (auto it = read_queue.begin() + desc.start; it != read_queue.end() && !it->is_identical(up_to); ++it)
+			++offset;
+		desc.offset = offset;
+	}
+
 	if (desc.start <= peek_pos)
 		read_queue.erase(read_queue.begin() + desc.start, read_queue.begin() + desc.start + desc.offset);
 	else

@@ -90,7 +90,7 @@ class Parser
 		ExprPtr parse(int precedence = 0, bool prefix_only = false);
 
 		PeekedExpr peek_parse(int precedence = 0);
-		void consume_peeked(PeekPos);
+		void consume_peeked(PeekPos, const Token &up_to = Token::EOF_TOKEN);
 
 		bool match(TokenType expected);
 		Token consume(TokenType expected);
