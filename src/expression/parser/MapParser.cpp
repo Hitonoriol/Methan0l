@@ -46,12 +46,23 @@ void MapParser::parse(Parser &parser,
 				continue;
 			}
 
-			/* Stop parsing if a binary non-`=>` token is reached */
+			/* Stop parsing if a non-`=>` binary operator is reached */
 			if (!BinaryOperatorExpr::is(*pair_expr, TokenType::KEYVAL)) {
-				collector(key_string(parser.parse(0, true)), LiteralExpr::empty());
-				break;
-			} else
+				auto &binex = try_cast<BinaryOperatorExpr>(pair_expr);
+				/* If LHS of this invalid expression is a valid key-value pair, consume it partially */
+				if (BinaryOperatorExpr::is(*binex.get_lhs(), TokenType::KEYVAL)) {
+					parser.consume_peeked(peeked.descriptor, binex.get_token());
+					pair_expr = binex.get_lhs();
+				}
+				else {
+					/* Otherwise, don't consume peeked expr and reparse it as a prefix expression */
+					collector(key_string(parser.parse(0, true)), LiteralExpr::empty());
+					break;
+				}
+			}
+			else
 				parser.consume_peeked(peeked.descriptor);
+
 
 			/* Collect key-value pair: `key => value_expr` */
 			BinaryOperatorExpr &pair = try_cast<BinaryOperatorExpr>(pair_expr);
