@@ -47,21 +47,14 @@ ExprPtr Parser::parse(int precedence, bool prefix_only)
 	if (Token::is_semantic(token.get_type()))
 		return parse(get_lookahead_precedence(true));
 
-	if constexpr (DEBUG)
-		out << "(^" << nesting_lvl << "|#" << precedence << ") [prefix "
+	LOG("(^" << nesting_lvl << "|#" << precedence << ") [prefix "
 				<< (peeking() ? "peek" : "consume")
-				<< "] " << token << std::endl;
+				<< "] " << token);
 
-	auto prefix_it = prefix_parsers.find(token.get_type());
-	if (prefix_it == prefix_parsers.end())
-		throw std::runtime_error("Unknown prefix token: " + token.to_string());
-
-	auto &prefix = prefix_it->second;
-	ExprPtr lhs = prefix->parse(*this, token);
+	ExprPtr lhs = parse_prefix(token);
 
 	if (prefix_only || match(TokenType::EXPR_END)) {
-		if constexpr (DEBUG)
-			out << "* Forced end of expression reached" << std::endl;
+		LOG("* Forced end of expression reached");
 
 		--nesting_lvl;
 		return lhs;
@@ -71,8 +64,7 @@ ExprPtr Parser::parse(int precedence, bool prefix_only)
 		token = consume();
 		auto &infix = infix_parsers.at(token.get_type());
 		if (!infix->is_compatible(token)) {
-			if constexpr (DEBUG)
-				std::cout << "Infix-incompatible token met: " << token << std::endl;
+			LOG("Infix-incompatible token met: " << token);
 			emplace(token);
 			--nesting_lvl;
 			return lhs;
@@ -81,8 +73,7 @@ ExprPtr Parser::parse(int precedence, bool prefix_only)
 		/* Limit the "stickiness" of infix expressions to only one per `.`'s RHS,
 		 * even if there are more expressions w/ higher prcdc ahead */
 		if (is_parsing_access_opr() && nesting_lvl == access_opr_lvl) {
-			if constexpr (DEBUG)
-				out << "* Stopping infix parsing -- access opr expr" << std::endl;
+			LOG("* Stopping infix parsing -- access opr expr");
 			access_opr_lvl = -1;
 			break;
 		}
@@ -93,6 +84,16 @@ ExprPtr Parser::parse(int precedence, bool prefix_only)
 
 	--nesting_lvl;
 	return lhs;
+}
+
+/* Parse prefix expression where its anchor token `tok` has already been consumed from the queue */
+ExprPtr Parser::parse_prefix(const Token &tok)
+{
+	auto prefix_it = prefix_parsers.find(tok.get_type());
+	if (prefix_it == prefix_parsers.end())
+		throw std::runtime_error("Unknown prefix token: " + tok.to_string());
+
+	return prefix_it->second->parse(*this, tok);
 }
 
 PeekedExpr Parser::peek_parse(int precedence)

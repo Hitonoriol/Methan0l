@@ -88,6 +88,7 @@ class Parser
 
 		void parse_all();
 		ExprPtr parse(int precedence = 0, bool prefix_only = false);
+		ExprPtr parse_prefix(const Token&);
 
 		PeekedExpr peek_parse(int precedence = 0);
 		void consume_peeked(PeekPos, const Token &up_to = Token::EOF_TOKEN);
