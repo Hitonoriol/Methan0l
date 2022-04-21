@@ -15,7 +15,7 @@ if (args.size() < 2) ? {
 }
 
 if (!File@exists(args[1] :: ".mt0")) ? {
-	<% "Failed to open " :: args[1] :: ".mt0"
+	<% "Failed to open \"" :: args[1] :: ".mt0\""
 	exit()
 }
 
@@ -34,20 +34,18 @@ lib_name = "libmethan0l.so"
  */
 out =
 "
-	#include \"Interpreter.h\"
-	#include \"Runner.h\"
-	#include \"InteractiveRunner.h\"
+	#include <Interpreter.h>
 	#include <string>
 
 	int main(int argc, char **argv)
 	{
-		std::string_view src = R\"***(
-			{1}
-		)***\";
 		mtl::Interpreter methan0l(argv[0]);
-		std::string program(src);
+		std::string program(R\"*~MT0!^_#7&_%!-*({1})*~MT0!^_#7&_%!-*\");
 		methan0l.load(program);
-		methan0l.run();
+		methan0l.load_args(argc, argv, 0);
+		auto ret = methan0l.run();
+		if (!ret.empty() && !ret.nil())
+			return ret.as<mtl::dec>();
 		return 0;
 	}
 "
@@ -56,9 +54,8 @@ build_script = "g++ --std=c++17 -O3 -I{2}/methan0l-sdk {3}/{1}-baked.cpp -o {3}/
 
 src = File@read_contents(args[1] :: ".mt0")
 fname = File@filename(args[1])
-baker_dir = new: File("#:/")
 
-baked_program = new: File(baker_dir :: fname)
+baked_program = new: File("#:/" :: fname)
 baked_program.mkdirs()
 baked_program.absolute_path() -> baked_program
 
