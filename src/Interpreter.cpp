@@ -151,10 +151,10 @@ Value Interpreter::run()
 	return ret;
 }
 
-void Interpreter::load_args(int argc, char **argv)
+void Interpreter::load_args(int argc, char **argv, int start_from)
 {
 	ValList list;
-	for (int i = 1; i < argc; ++i)
+	for (int i = start_from; i < argc; ++i)
 		list.push_back(Value(std::string(argv[i])));
 
 	load_args(std::move(list));
@@ -162,7 +162,7 @@ void Interpreter::load_args(int argc, char **argv)
 
 void Interpreter::load_args(ValList &&args)
 {
-	set_env_globals(args[1]);
+	set_env_globals(args[0]);
 	Value list_v(Type::LIST);
 	list_v.get<ValList>() = std::move(args);
 	main.local().set(LAUNCH_ARGS, list_v);

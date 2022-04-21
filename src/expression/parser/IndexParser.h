@@ -28,7 +28,8 @@ namespace mtl
 class IndexParser: public InfixParser
 {
 	public:
-		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override;
+		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token);
+		virtual ~IndexParser() = default;
 
 		int precedence() override
 		{
