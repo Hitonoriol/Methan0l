@@ -314,7 +314,7 @@ class Token
 		static const std::string digits, double_digits;
 		static bool contains_all(std::string str, std::string substr);
 
-		std::string to_string();
+		std::string to_string() const;
 		static std::string to_string(TokenType type);
 		friend std::ostream& operator <<(std::ostream &stream, const Token &val);
 };

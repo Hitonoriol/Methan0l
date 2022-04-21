@@ -292,7 +292,7 @@ bool Token::contains_all(std::string str, std::string substr)
 	return str.find_first_not_of(substr) == std::string::npos;
 }
 
-std::string Token::to_string()
+std::string Token::to_string() const
 {
 	std::ostringstream ss;
 	ss << *this;
