@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../src/expression/parser/ClassParser.cpp \
 ../src/expression/parser/FunctionParser.cpp \
 ../src/expression/parser/GroupParser.cpp \
+../src/expression/parser/IndexParser.cpp \
 ../src/expression/parser/InfixWordOperatorParser.cpp \
 ../src/expression/parser/ListParser.cpp \
 ../src/expression/parser/MapParser.cpp \
@@ -19,6 +20,7 @@ OBJS += \
 ./src/expression/parser/ClassParser.o \
 ./src/expression/parser/FunctionParser.o \
 ./src/expression/parser/GroupParser.o \
+./src/expression/parser/IndexParser.o \
 ./src/expression/parser/InfixWordOperatorParser.o \
 ./src/expression/parser/ListParser.o \
 ./src/expression/parser/MapParser.o \
@@ -30,6 +32,7 @@ CPP_DEPS += \
 ./src/expression/parser/ClassParser.d \
 ./src/expression/parser/FunctionParser.d \
 ./src/expression/parser/GroupParser.d \
+./src/expression/parser/IndexParser.d \
 ./src/expression/parser/InfixWordOperatorParser.d \
 ./src/expression/parser/ListParser.d \
 ./src/expression/parser/MapParser.d \
