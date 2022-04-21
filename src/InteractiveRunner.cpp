@@ -63,14 +63,11 @@ const InteractiveRunner::CommandMap InteractiveRunner::commands
 						auto &mt0 = runner.interpreter();
 						auto path = std::move(runner.next_arg());
 						if (runner.load_program(path)) {
-							Value args(Type::LIST);
-							auto &list = args.get<ValList>();
-							list.push_back(path);
+							ValList args;
+							args.push_back(path);
 							while (runner.has_args())
-								list.push_back(std::move(runner.next_arg()));
-							auto &globals = mt0.program().local();
-							globals.set(Interpreter::LAUNCH_ARGS, args);
-
+								args.push_back(std::move(runner.next_arg()));
+							mt0.load_args(std::move(args));
 							mt0.run();
 						}
 					}

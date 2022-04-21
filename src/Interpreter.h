@@ -75,6 +75,8 @@ class Interpreter: public ExprEvaluator
 		Value run();
 
 		void load_args(int argc, char **argv);
+		void load_args(ValList &&args);
+		void set_env_globals(const std::string &scrpath);
 
 		void preserve_data(bool val);
 		Unit& program();

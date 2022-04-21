@@ -153,14 +153,25 @@ Value Interpreter::run()
 
 void Interpreter::load_args(int argc, char **argv)
 {
-	Value list_v(Type::LIST);
-	auto &list = list_v.get<ValList>();
+	ValList list;
 	for (int i = 1; i < argc; ++i)
 		list.push_back(Value(std::string(argv[i])));
 
+	load_args(std::move(list));
+}
+
+void Interpreter::load_args(ValList &&args)
+{
+	set_env_globals(args[1]);
+	Value list_v(Type::LIST);
+	list_v.get<ValList>() = std::move(args);
+	main.local().set(LAUNCH_ARGS, list_v);
+}
+
+void Interpreter::set_env_globals(const std::string &scrpath)
+{
 	auto &table = main.local();
-	table.set(LAUNCH_ARGS, list_v);
-	table.set(SCRDIR, std::filesystem::absolute(argv[1]).parent_path().string());
+	table.set(SCRDIR, std::filesystem::absolute(scrpath).parent_path().string());
 }
 
 void Interpreter::size_info()
