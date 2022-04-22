@@ -89,6 +89,7 @@ enum class TokenType : uint16_t
 	COMP_SHIFT_L,		// <<=
 	COMP_SHIFT_R,		// >>=
 	COMP_MOD,			// %=
+	DOUBLE_SLASH,		// //
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -188,7 +189,8 @@ class Token
 				"*=", "/=", "&&", "||", "^^",
 				"**", "!!", "%>", "<%", "#(",
 				"*[", "@:", "$$", "-->", "^=",
-				"|=", "&=", "<<=", ">>=", "%="
+				"|=", "&=", "<<=", ">>=", "%=",
+				"//"
 		};
 
 		/* Words not in `keywords` array can be user-redefined in some contexts */
@@ -238,7 +240,7 @@ class Token
 				TokenType::PAREN_R, TokenType::BRACKET_R, TokenType::BRACE_R
 		};
 
-		static const std::unordered_map<std::string_view, char> escape_seqs;
+		static const std::unordered_map<char, char> escape_seqs;
 
 		static TokenType deduce_type(std::string &tokstr);
 
@@ -279,7 +281,7 @@ class Token
 		void assert_type(TokenType type);
 
 		static TokenType get_multichar_op_type(std::string &tokstr);
-		static char escape_seq(std::string_view seq);
+		static char escape_seq(char seq);
 
 		static bool is_punctuator(char chr);
 		static bool is_keyword(TokenType tok);

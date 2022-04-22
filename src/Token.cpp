@@ -25,15 +25,15 @@ const int Token::TYPENAMES_BEG_IDX =
 		std::distance(std::begin(reserved_words),
 				std::find(std::begin(reserved_words), std::end(reserved_words), Token::reserved(Word::T_NIL)));
 
-const std::unordered_map<std::string_view, char> Token::escape_seqs = {
-		{ "\\a", '\a' },
-		{ "\\b", '\b' },
-		{ "\\f", '\f' },
-		{ "\\r", '\r' },
-		{ "\\n", '\n' },
-		{ "\\v", '\v' },
-		{ "\\t", '\t' },
-		{ "\\0", '\0' },
+const std::unordered_map<char, char> Token::escape_seqs = {
+		{ 'a', '\a' },
+		{ 'b', '\b' },
+		{ 'f', '\f' },
+		{ 'r', '\r' },
+		{ 'n', '\n' },
+		{ 'v', '\v' },
+		{ 't', '\t' },
+		{ '0', '\0' },
 };
 
 Token::Token(TokenType type, std::string value) : type(type), value(value)
@@ -179,7 +179,7 @@ TokenType Token::deduce_type(std::string &tokstr)
 	return TokenType::NONE;
 }
 
-char Token::escape_seq(std::string_view seq)
+char Token::escape_seq(char seq)
 {
 	return escape_seqs.at(seq);
 }

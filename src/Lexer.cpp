@@ -77,12 +77,7 @@ void Lexer::push()
 	}
 
 	else if (toktype == TokenType::CHAR) {
-		char bs = Token::chr(TokenType::BACKSLASH);
-		if (tokstr.size() >= 3 && tokstr[1] == bs && tokstr[2] != bs) {
-			if constexpr (DEBUG)
-				out << "Escape sequence \"" << tokstr << "\"" << std::endl;
-			tokstr = str(Token::escape_seq(strip_quotes(tokstr)));
-		}
+		strip_quotes(tokstr);
 	}
 
 	else if (toktype == TokenType::INTEGER && cur_int_literal != IntLiteral::DEC) {
@@ -303,9 +298,13 @@ void Lexer::consume()
 	/* Save String / Character literal char */
 	else if (saving_string()) {
 		/* Save `\` literally when reading a CHAR & ignore unescaped `\` when reading a STRING */
-		if (toktype == TokenType::CHAR
-				|| (chr != TokenType::BACKSLASH || escaped(TokenType::BACKSLASH)))
-			save(chr);
+		if (chr != TokenType::BACKSLASH || escaped(TokenType::BACKSLASH)) {
+			if (match_prev(TokenType::BACKSLASH) && *std::prev(cur_chr, 2) != TokenType::BACKSLASH
+					&& std::isalpha(chr))
+				save(Token::escape_seq(chr));
+			else
+				save(chr);
+		}
 
 		if (((toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING)
 				&& unescaped(TokenType::QUOTE))
