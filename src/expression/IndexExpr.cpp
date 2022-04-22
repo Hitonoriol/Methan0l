@@ -27,11 +27,15 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 	if (idx != nullptr
 			&& instanceof<PrefixExpr>(idx)
 			&& try_cast<PrefixExpr>(idx).get_operator() == TokenType::DO) {
-		val.accept_container([&](auto &container) {
+		/* Create a temporary list handle copy (the list itself isn't copied)
+		 * to the list we're iterating over just in case it's a temporary value. */
+		Value container_v = val;
+		container_v.accept_container([&](auto &container) {
 			Value action = try_cast<PrefixExpr>(idx).get_rhs()->evaluate(evaluator);
 			LibData::for_each(evaluator, container, action.get<Function>());
 		});
-		return val;
+		/* Return a new temporary handle for chaining */
+		return DataTable::create_temporary(val);
 	}
 
 	lhs_val_type = val.type();
