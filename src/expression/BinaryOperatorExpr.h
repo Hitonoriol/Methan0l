@@ -10,7 +10,7 @@ class BinaryOperatorExpr: public Expression
 {
 	private:
 		ExprPtr lhs;
-		Token opr;
+		Token op;
 		ExprPtr rhs;
 
 	public:
@@ -26,7 +26,7 @@ class BinaryOperatorExpr: public Expression
 
 		std::ostream& info(std::ostream &str) override;
 
-		static bool is(Expression&, TokenType);
+		_OP_EXPR_IS(BinaryOperatorExpr)
 };
 
 } /* namespace mtl */

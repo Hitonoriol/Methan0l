@@ -11,6 +11,22 @@
 #include "util/memory.h"
 #include "util/string.h"
 
+/* Operator expression ``type``::is(Expression&, TokenType) definition macro.
+ * returns:
+ * 		- true if `expr` is an instance of ``type`` and
+ * 			TokenType of the operator expression == `op`.
+ * 		- false otherwise */
+
+#define _OP_EXPR_IS(type) \
+		static inline bool is(Expression &expr, TokenType op)\
+		{ \
+			bool match = false; \
+			if_instanceof<type>(expr, [&](auto &obj) { \
+				match = obj.op.get_type() == op; \
+			}); \
+			return match; \
+		}
+
 namespace mtl
 {
 
@@ -39,7 +55,7 @@ class Expression
 		uint32_t get_line();
 
 		virtual std::ostream& info(std::ostream &str);
-		std::string info();
+		virtual std::string info();
 
 		template<typename T>
 		void assert_type(

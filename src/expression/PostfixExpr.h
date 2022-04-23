@@ -23,6 +23,8 @@ class PostfixExpr: public Expression
 		TokenType get_operator();
 
 		std::ostream& info(std::ostream &str) override;
+
+		_OP_EXPR_IS(PostfixExpr)
 };
 
 } /* namespace mtl */

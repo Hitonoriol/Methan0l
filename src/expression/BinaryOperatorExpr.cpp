@@ -11,7 +11,7 @@ namespace mtl
 BinaryOperatorExpr::BinaryOperatorExpr(ExprPtr lhs,
 		Token opr,
 		ExprPtr rhs) :
-		lhs(lhs), opr(opr), rhs(rhs)
+		lhs(lhs), op(opr), rhs(rhs)
 {
 }
 
@@ -23,18 +23,18 @@ Value BinaryOperatorExpr::evaluate(ExprEvaluator &eval)
 void BinaryOperatorExpr::execute(ExprEvaluator &evaluator)
 {
 	Value val = evaluate(evaluator);
-	if (opr == TokenType::STRING_CONCAT)
+	if (op == TokenType::STRING_CONCAT)
 		LiteralExpr::exec_literal(evaluator, val);
 }
 
 TokenType BinaryOperatorExpr::get_operator()
 {
-	return opr.get_type();
+	return op.get_type();
 }
 
 Token BinaryOperatorExpr::get_token()
 {
-	return opr;
+	return op;
 }
 
 ExprPtr& BinaryOperatorExpr::get_lhs()
@@ -50,19 +50,10 @@ ExprPtr& BinaryOperatorExpr::get_rhs()
 std::ostream& BinaryOperatorExpr::info(std::ostream &str)
 {
 	return Expression::info(str
-			<< "Binary Operator: " << opr << " " << BEG
+			<< "Binary Operator: " << op << " " << BEG
 					<< "LHS: " << lhs->info() << NL
 					<< "RHS: " << rhs->info()
 					<< END);
-}
-
-bool BinaryOperatorExpr::is(Expression &expr, TokenType op)
-{
-	bool match = false;
-	if_instanceof<BinaryOperatorExpr>(expr, [&](auto &bin) {
-		match = bin.opr.get_type() == op;
-	});
-	return match;
 }
 
 }

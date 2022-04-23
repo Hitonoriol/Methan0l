@@ -25,6 +25,8 @@ class PrefixExpr: public Expression
 		Value evaluate(ExprEvaluator &eval) override;
 
 		std::ostream& info(std::ostream &str) override;
+
+		_OP_EXPR_IS(PrefixExpr)
 };
 
 } /* namespace mtl */
