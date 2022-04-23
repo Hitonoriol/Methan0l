@@ -1,3 +1,4 @@
+#include <structure/object/Class.h>
 #include "ClassExpr.h"
 
 #include <algorithm>
@@ -8,7 +9,6 @@
 #include "../ExprEvaluator.h"
 #include "../structure/DataTable.h"
 #include "../structure/Function.h"
-#include "../structure/object/ObjectType.h"
 #include "../structure/object/TypeManager.h"
 #include "../structure/Value.h"
 #include "../type.h"
@@ -21,7 +21,7 @@ namespace mtl
 
 void ClassExpr::execute(ExprEvaluator &eval)
 {
-	auto type = std::make_unique<ObjectType>(eval, name);
+	auto type = std::make_unique<Class>(eval, name);
 	ExprMap &def_body = try_cast<MapExpr>(body).raw_ref();
 	for (auto entry : def_body) {
 		const std::string &name = entry.first;

@@ -27,7 +27,7 @@ namespace mtl
 
 namespace fs = std::filesystem;
 
-File::File(ExprEvaluator &eval) : InbuiltType(eval, "File")
+File::File(ExprEvaluator &eval) : InbuiltClass(eval, "File")
 {
 	/* file = new: File("path/to/file.ext") */
 	register_method(std::string(CONSTRUCT), [&](auto args) {
@@ -225,7 +225,7 @@ void File::write_line(Object &obj, const std::string &line)
 std::string File::path(ExprList &args)
 {
 	/* This allows to use all `File` methods statically by providing the `path` as the first argument */
-	if (ObjectType::static_call(args)) {
+	if (Class::static_call(args)) {
 		Value p = args[1]->evaluate(eval);
 		args.erase(std::next(args.begin()));
 		return path(*INTERPRETER, p);

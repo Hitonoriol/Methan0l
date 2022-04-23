@@ -1,18 +1,17 @@
-#include "InbuiltType.h"
-
+#include <structure/object/InbuiltClass.h>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
 
 #include "type.h"
-#include "../Value.h"
+#include "structure/Value.h"
 #include "Object.h"
 
 namespace mtl
 {
 
-InbuiltType::InbuiltType(ExprEvaluator &eval, const std::string &name) : ObjectType(eval, name)
+InbuiltClass::InbuiltClass(ExprEvaluator &eval, const std::string &name) : Class(eval, name)
 {
 	register_method(std::string(CONSTRUCT), [&](auto args) {
 		return Value::NO_VALUE;
@@ -23,7 +22,7 @@ InbuiltType::InbuiltType(ExprEvaluator &eval, const std::string &name) : ObjectT
 	});
 }
 
-InbuiltFunc& InbuiltType::inbuilt_method(const std::string &name)
+InbuiltFunc& InbuiltClass::inbuilt_method(const std::string &name)
 {
 	auto entry = inbuilt_methods.find(name);
 	if (entry == inbuilt_methods.end())
@@ -32,7 +31,7 @@ InbuiltFunc& InbuiltType::inbuilt_method(const std::string &name)
 	return entry->second;
 }
 
-void InbuiltType::register_method(const std::string &name, InbuiltFunc method)
+void InbuiltClass::register_method(const std::string &name, InbuiltFunc method)
 {
 	if (inbuilt_methods.find(name) != inbuilt_methods.end())
 		inbuilt_methods.erase(name);
@@ -40,9 +39,9 @@ void InbuiltType::register_method(const std::string &name, InbuiltFunc method)
 	inbuilt_methods.emplace(name, method);
 }
 
-Value InbuiltType::invoke_method(Object &obj, const std::string &name, ExprList &args)
+Value InbuiltClass::invoke_method(Object &obj, const std::string &name, ExprList &args)
 {
-	Value ret = ObjectType::invoke_method(obj, name, args);
+	Value ret = Class::invoke_method(obj, name, args);
 	if (!ret.empty())
 		return ret;
 

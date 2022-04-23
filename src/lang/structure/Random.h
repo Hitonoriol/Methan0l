@@ -1,12 +1,12 @@
 #ifndef SRC_LANG_STRUCTURE_RANDOM_H_
 #define SRC_LANG_STRUCTURE_RANDOM_H_
 
+#include <structure/object/Class.h>
+#include <structure/object/InbuiltClass.h>
 #include <random>
 #include <type_traits>
 
 #include "../../expression/Expression.h"
-#include "../../structure/object/InbuiltType.h"
-#include "../../structure/object/ObjectType.h"
 
 namespace mtl
 {
@@ -16,7 +16,7 @@ class ExprEvaluator;
 template<typename T>
 using Distr = std::function<T(std::mt19937_64&)>;
 
-class Random: public InbuiltType
+class Random: public InbuiltClass
 {
 	private:
 		static constexpr std::string_view SEED = "seed";

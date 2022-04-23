@@ -153,7 +153,7 @@ void LibUnit::load_operators()
 
 	/* Static method invocation: Type@method$(arg1, arg2, ...) */
 	infix_operator(TokenType::AT, LazyBinaryOpr([&](auto lhs, auto rhs) {
-		ObjectType &type = eval->get_type_mgr().get_type(ObjectType::get_id(MapParser::key_string(lhs)));
+		Class &type = eval->get_type_mgr().get_type(Class::get_id(MapParser::key_string(lhs)));
 		InvokeExpr &method_expr = try_cast<InvokeExpr>(rhs);
 		std::string name = MapParser::key_string(method_expr.get_lhs());
 		return type.invoke_static(name, method_expr.arg_list());

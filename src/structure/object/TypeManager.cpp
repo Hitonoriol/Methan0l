@@ -13,7 +13,7 @@
 namespace mtl
 {
 
-void TypeManager::register_type(std::unique_ptr<ObjectType> &&type)
+void TypeManager::register_type(std::unique_ptr<Class> &&type)
 {
 	if constexpr (DEBUG)
 		out << "! Registering type ["
@@ -23,7 +23,7 @@ void TypeManager::register_type(std::unique_ptr<ObjectType> &&type)
 	types.emplace(type->get_id(), std::move(type));
 }
 
-ObjectType& TypeManager::get_type(size_t id)
+Class& TypeManager::get_type(size_t id)
 {
 	auto entry = types.find(id);
 	if (entry != types.end())
@@ -34,7 +34,7 @@ ObjectType& TypeManager::get_type(size_t id)
 
 Value TypeManager::invoke_method(Object &obj, const std::string &name, Args &args)
 {
-	ObjectType &type = get_type(obj.type_id());
+	Class &type = get_type(obj.type_id());
 
 	if constexpr (DEBUG)
 		std::cout << "Invoking " << obj << "->" << name << std::endl;

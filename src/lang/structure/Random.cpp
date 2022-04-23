@@ -25,7 +25,7 @@ Distr<double> Random::dbl_gen = [](auto &rng) {
 	return dbl_distr(rng);
 };
 
-Random::Random(ExprEvaluator &eval) : InbuiltType(eval, "Random")
+Random::Random(ExprEvaluator &eval) : InbuiltClass(eval, "Random")
 {
 	/* rnd = Random.new$([seed]) */
 	register_method(std::string(CONSTRUCT), [&](auto args) {

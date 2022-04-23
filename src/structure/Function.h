@@ -15,7 +15,7 @@ class ExprEvaluator;
 class Function: public Unit
 {
 	private:
-		friend class ObjectType;
+		friend class Class;
 		static std::string CALL_ARGS;
 
 		size_t argc = 0;

@@ -7,12 +7,12 @@
 #include <sstream>
 #include <variant>
 
-#include "../../expression/LiteralExpr.h"
-#include "../../lang/Library.h"
-#include "../../type.h"
-#include "../../util/util.h"
+#include "expression/LiteralExpr.h"
+#include "lang/Library.h"
+#include "type.h"
+#include "util/util.h"
 #include "TypeManager.h"
-#include "../../ExprEvaluator.h"
+#include "ExprEvaluator.h"
 
 namespace mtl
 {
@@ -21,19 +21,19 @@ Object::Object()
 {
 }
 
-Object::Object(size_t type_hash) : type_hash(type_hash)
+Object::Object(Class* type) : objclass(type)
 {
 }
 
-Object::Object(size_t type_hash, const DataTable &proto_data) :
-		type_hash(type_hash),
+Object::Object(Class* type, const DataTable &proto_data) :
+		objclass(type),
 		data(proto_data)
 {
 	deep_copy();
 }
 
 Object::Object(const Object &rhs) :
-		type_hash(rhs.type_hash),
+		objclass(rhs.objclass),
 		this_instance(rhs.this_instance),
 		data(rhs.data)
 {
@@ -41,7 +41,7 @@ Object::Object(const Object &rhs) :
 
 Object& Object::operator=(const Object &rhs)
 {
-	type_hash = rhs.type_hash;
+	objclass = rhs.objclass;
 	data = rhs.data;
 	this_instance = rhs.this_instance;
 	return *this;
@@ -96,7 +96,7 @@ DataTable& Object::get_data()
 
 size_t Object::type_id() const
 {
-	return type_hash;
+	return objclass->get_id();
 }
 
 uintptr_t Object::id() const
@@ -114,7 +114,7 @@ std::string Object::to_string()
 std::string Object::to_string(ExprEvaluator &eval)
 {
 	ExprList noargs;
-	return str(invoke_method(eval.get_type_mgr(), ObjectType::TO_STRING, noargs));
+	return str(invoke_method(eval.get_type_mgr(), Class::TO_STRING, noargs));
 }
 
 void Object::deep_copy()

@@ -1,5 +1,5 @@
-#ifndef SRC_STRUCTURE_OBJECT_OBJECTTYPE_H_
-#define SRC_STRUCTURE_OBJECT_OBJECTTYPE_H_
+#ifndef SRC_STRUCTURE_OBJECT_CLASS_H_
+#define SRC_STRUCTURE_OBJECT_CLASS_H_
 
 #include <string>
 #include <set>
@@ -21,7 +21,7 @@ using Managed = std::unordered_map<uintptr_t, T>;
 
 class Object;
 
-class ObjectType
+class Class
 {
 	private:
 		size_t id;
@@ -42,8 +42,8 @@ class ObjectType
 		static constexpr std::string_view
 		CONSTRUCT = "construct", TO_STRING = "to_string";
 
-		ObjectType(ExprEvaluator &eval, const std::string &name);
-		virtual ~ObjectType() = default;
+		Class(ExprEvaluator &eval, const std::string &name);
+		virtual ~Class() = default;
 
 		void register_method(const std::string &name, Function method);
 
@@ -63,9 +63,9 @@ class ObjectType
 
 		static size_t get_id(const std::string &type_name);
 
-		friend std::ostream& operator <<(std::ostream &stream, ObjectType &type);
+		friend std::ostream& operator <<(std::ostream &stream, Class &type);
 };
 
 } /* namespace mtl */
 
-#endif /* SRC_STRUCTURE_OBJECT_OBJECTTYPE_H_ */
+#endif /* SRC_STRUCTURE_OBJECT_CLASS_H_ */

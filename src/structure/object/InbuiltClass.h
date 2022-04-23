@@ -1,18 +1,18 @@
-#ifndef SRC_STRUCTURE_OBJECT_INBUILTTYPE_H_
-#define SRC_STRUCTURE_OBJECT_INBUILTTYPE_H_
+#ifndef SRC_STRUCTURE_OBJECT_INBUILTCLASS_H_
+#define SRC_STRUCTURE_OBJECT_INBUILTCLASS_H_
 
-#include "ObjectType.h"
+#include <structure/object/Class.h>
 
 namespace mtl
 {
 
-class InbuiltType: public ObjectType
+class InbuiltClass: public Class
 {
 	private:
 		InbuiltFuncMap inbuilt_methods;
 
 	public:
-		InbuiltType(ExprEvaluator &eval, const std::string &name);
+		InbuiltClass(ExprEvaluator &eval, const std::string &name);
 
 		InbuiltFunc& inbuilt_method(const std::string &name);
 		void register_method(const std::string &name, InbuiltFunc method);
@@ -22,4 +22,4 @@ class InbuiltType: public ObjectType
 
 } /* namespace mtl */
 
-#endif /* SRC_STRUCTURE_OBJECT_INBUILTTYPE_H_ */
+#endif /* SRC_STRUCTURE_OBJECT_INBUILTCLASS_H_ */

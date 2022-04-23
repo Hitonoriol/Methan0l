@@ -1,6 +1,8 @@
 #ifndef SRC_LANG_STRUCTURE_FILE_H_
 #define SRC_LANG_STRUCTURE_FILE_H_
 
+#include <structure/object/Class.h>
+#include <structure/object/InbuiltClass.h>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -8,16 +10,14 @@
 #include <string_view>
 #include <filesystem>
 
-#include "structure/object/InbuiltType.h"
 #include "structure/object/Object.h"
-#include "structure/object/ObjectType.h"
 
 namespace mtl
 {
 
 class ExprEvaluator;
 
-class File: public InbuiltType
+class File: public InbuiltClass
 {
 	private:
 		Managed<std::unique_ptr<std::fstream>> managed_files;

@@ -1,5 +1,4 @@
-#include "ObjectType.h"
-
+#include <structure/object/Class.h>
 #include <array>
 #include <deque>
 #include <iostream>
@@ -21,11 +20,11 @@
 namespace mtl
 {
 
-ObjectType::ObjectType(ExprEvaluator &eval, const std::string &name) :
+Class::Class(ExprEvaluator &eval, const std::string &name) :
 		id(get_id(name)),
 		eval(eval)
 {
-	Object::init_self(static_instance = std::make_shared<LiteralExpr>(Object(id)));
+	Object::init_self(static_instance = std::make_shared<LiteralExpr>(Object(this)));
 
 	/*
 	 * Can be called as a static method:
@@ -39,13 +38,13 @@ ObjectType::ObjectType(ExprEvaluator &eval, const std::string &name) :
 	}));
 }
 
-void ObjectType::register_method(const std::string &name, Function method)
+void Class::register_method(const std::string &name, Function method)
 {
 	method.arg_def.push_front(std::make_pair<std::string, ExprPtr>("this", LiteralExpr::empty()));
 	class_data.set(name, Value(method));
 }
 
-Value ObjectType::invoke_method(Object &obj, const std::string &name, ExprList &args)
+Value Class::invoke_method(Object &obj, const std::string &name, ExprList &args)
 {
 	DataTable &data = get_class_data();
 	Value &field = data.get(name);
@@ -59,56 +58,56 @@ Value ObjectType::invoke_method(Object &obj, const std::string &name, ExprList &
 	return eval.invoke(method, args);
 }
 
-Value ObjectType::invoke_static(const std::string &name, ExprList &args)
+Value Class::invoke_static(const std::string &name, ExprList &args)
 {
 	auto arg_copy = args;
 	arg_copy.push_front(static_instance);
 	return invoke_method(static_instance->raw_ref().get<Object>(), name, arg_copy);
 }
 
-void ObjectType::register_private(std::string name)
+void Class::register_private(std::string name)
 {
 	private_members.emplace(name);
 }
 
-bool ObjectType::is_private(const std::string &name)
+bool Class::is_private(const std::string &name)
 {
 	return private_members.find(name) != private_members.end();
 }
 
-bool ObjectType::static_call(Args &args)
+bool Class::static_call(Args &args)
 {
 	return static_cast<void*>(&Object::get_this(args)) == static_instance->raw_ref().identity();
 }
 
-DataTable& ObjectType::get_class_data()
+DataTable& Class::get_class_data()
 {
 	return class_data;
 }
 
-DataTable& ObjectType::get_object_data()
+DataTable& Class::get_object_data()
 {
 	return proto_object_data;
 }
 
-size_t ObjectType::get_id()
+size_t Class::get_id()
 {
 	return id;
 }
 
-Object ObjectType::create(Args &args)
+Object Class::create(Args &args)
 {
-	Object obj(id, proto_object_data);
+	Object obj(this, proto_object_data);
 	obj.invoke_method(eval.get_type_mgr(), CONSTRUCT, args);
 	return obj;
 }
 
-size_t ObjectType::get_id(const std::string &type_name)
+size_t Class::get_id(const std::string &type_name)
 {
 	return str_hash(type_name);
 }
 
-std::ostream& operator <<(std::ostream &stream, ObjectType &type)
+std::ostream& operator <<(std::ostream &stream, Class &type)
 {
 	return stream << "{Type 0x" << std::hex << type.get_id() << std::dec << "}";
 }

@@ -1,3 +1,4 @@
+#include <structure/object/InbuiltClass.h>
 #include "Interpreter.h"
 
 #include <fstream>
@@ -7,7 +8,6 @@
 #include "lang/Library.h"
 #include "structure/Value.h"
 #include "util/util.h"
-#include "structure/object/InbuiltType.h"
 #include "expression/TryCatchExpr.h"
 #include "util/meta/function_traits.h"
 
@@ -197,8 +197,8 @@ void Interpreter::size_info()
 			<< "* Expression: " << sizeof(Expression) << '\n'
 			<< "* Token: " << sizeof(Token) << '\n'
 			<< "* Library: " << sizeof(Library) << '\n'
-			<< "* ObjectType: " << sizeof(ObjectType) << '\n'
-			<< "* InbuiltType: " << sizeof(InbuiltType) << '\n'
+			<< "* ObjectType: " << sizeof(Class) << '\n'
+			<< "* InbuiltType: " << sizeof(InbuiltClass) << '\n'
 			<< "* InbuiltFunc: " << sizeof(InbuiltFunc) << '\n'
 			<< std::endl;
 }

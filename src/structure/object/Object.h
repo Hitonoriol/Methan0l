@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../DataTable.h"
+#include "structure/DataTable.h"
 
 namespace mtl
 {
@@ -12,13 +12,14 @@ class TypeManager;
 class Function;
 class ExprEvaluator;
 class LiteralExpr;
+class Class;
 
 class Object
 {
 	private:
-		friend class ObjectType;
+		friend class Class;
 
-		size_t type_hash;
+		Class *objclass = nullptr;
 		bool prv_access = false;
 		std::shared_ptr<LiteralExpr> this_instance = nullptr;
 
@@ -29,8 +30,8 @@ class Object
 
 	public:
 		Object();
-		Object(size_t type_hash);
-		Object(size_t type_hash, const DataTable &proto_data);
+		Object(Class*);
+		Object(Class*, const DataTable &proto_data);
 		Object(const Object &rhs);
 		Object& operator=(const Object &rhs);
 

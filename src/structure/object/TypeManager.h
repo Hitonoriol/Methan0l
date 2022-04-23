@@ -1,12 +1,12 @@
 #ifndef SRC_STRUCTURE_OBJECT_TYPEMANAGER_H_
 #define SRC_STRUCTURE_OBJECT_TYPEMANAGER_H_
 
+#include <structure/object/Class.h>
 #include <string>
 #include <unordered_map>
 
 #include "../../lang/Library.h"
 #include "Object.h"
-#include "ObjectType.h"
 
 namespace mtl
 {
@@ -14,13 +14,13 @@ namespace mtl
 class TypeManager
 {
 	private:
-		std::unordered_map<size_t, std::unique_ptr<ObjectType>> types;
+		std::unordered_map<size_t, std::unique_ptr<Class>> types;
 		ExprEvaluator &eval;
 
 	public:
 		TypeManager(ExprEvaluator &eval) : eval(eval) {}
-		ObjectType& get_type(size_t id);
-		void register_type(std::unique_ptr<ObjectType> &&type);
+		Class& get_type(size_t id);
+		void register_type(std::unique_ptr<Class> &&type);
 
 		template<typename T>
 		inline void register_type()
