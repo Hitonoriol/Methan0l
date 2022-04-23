@@ -14,6 +14,8 @@
 #define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
 #define VT(v) TYPE(decltype(v))
 
+#define JOIN(...) __VA_ARGS__
+
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
@@ -23,8 +25,8 @@
 #define LOG(out) DBG{ std::cout << out << std::endl; }
 #define TRACE(out) LOG(__FILE__ << ":" << __LINE__ << "[" << __func__ << "] " << out)
 
-#define IF(condition) if constexpr (condition)
-#define ELIF(condition) else IF(condition)
+#define IF(...) if constexpr (JOIN(__VA_ARGS__))
+#define ELIF(...) else IF(__VA_ARGS__)
 
 namespace mtl
 {
