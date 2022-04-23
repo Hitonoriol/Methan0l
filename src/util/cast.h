@@ -31,8 +31,7 @@ constexpr auto type_name()
 #endif
 	name.remove_prefix(prefix.size());
 	name.remove_suffix(suffix.size());
-	auto begin = name.find("mtl::");
-	return begin == std::string_view::npos ? name : name.substr(begin);
+	return name;
 }
 
 template<typename To, typename From>
