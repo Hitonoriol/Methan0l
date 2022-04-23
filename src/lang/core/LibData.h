@@ -25,6 +25,9 @@ class LibData: public Library
 		}
 		void load() override;
 
+		static Value range(dec start, dec n, dec step = 1, bool inclusive = false);
+		static Value slice(Value &containerv, udec start, udec end, dec step = 1);
+
 		template<typename T>
 		static void for_each(ExprEvaluator &eval, T &container, Function &action)
 		{
