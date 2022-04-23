@@ -90,6 +90,7 @@ enum class TokenType : uint16_t
 	COMP_SHIFT_R,		// >>=
 	COMP_MOD,			// %=
 	DOUBLE_SLASH,		// //
+	DOUBLE_DOT,			// ..
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -190,7 +191,7 @@ class Token
 				"**", "!!", "%>", "<%", "#(",
 				"*[", "@:", "$$", "-->", "^=",
 				"|=", "&=", "<<=", ">>=", "%=",
-				"//"
+				"//", ".."
 		};
 
 		/* Words not in `keywords` array can be user-redefined in some contexts */

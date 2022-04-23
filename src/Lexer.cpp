@@ -251,7 +251,7 @@ void Lexer::consume()
 	if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
 		if (!std::isdigit(*std::next(cur_chr))) {
 			push();
-			push(chr);
+			begin(chr);
 			return;
 		}
 

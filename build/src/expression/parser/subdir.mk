@@ -12,6 +12,7 @@ CPP_SRCS += \
 ../src/expression/parser/InfixWordOperatorParser.cpp \
 ../src/expression/parser/ListParser.cpp \
 ../src/expression/parser/MapParser.cpp \
+../src/expression/parser/RangeParser.cpp \
 ../src/expression/parser/TryCatchParser.cpp \
 ../src/expression/parser/WordOperatorParser.cpp 
 
@@ -24,6 +25,7 @@ OBJS += \
 ./src/expression/parser/InfixWordOperatorParser.o \
 ./src/expression/parser/ListParser.o \
 ./src/expression/parser/MapParser.o \
+./src/expression/parser/RangeParser.o \
 ./src/expression/parser/TryCatchParser.o \
 ./src/expression/parser/WordOperatorParser.o 
 
@@ -36,6 +38,7 @@ CPP_DEPS += \
 ./src/expression/parser/InfixWordOperatorParser.d \
 ./src/expression/parser/ListParser.d \
 ./src/expression/parser/MapParser.d \
+./src/expression/parser/RangeParser.d \
 ./src/expression/parser/TryCatchParser.d \
 ./src/expression/parser/WordOperatorParser.d 
 

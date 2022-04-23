@@ -19,6 +19,7 @@ CPP_SRCS += \
 ../src/expression/MapExpr.cpp \
 ../src/expression/PostfixExpr.cpp \
 ../src/expression/PrefixExpr.cpp \
+../src/expression/RangeExpr.cpp \
 ../src/expression/TryCatchExpr.cpp \
 ../src/expression/UnitExpr.cpp 
 
@@ -38,6 +39,7 @@ OBJS += \
 ./src/expression/MapExpr.o \
 ./src/expression/PostfixExpr.o \
 ./src/expression/PrefixExpr.o \
+./src/expression/RangeExpr.o \
 ./src/expression/TryCatchExpr.o \
 ./src/expression/UnitExpr.o 
 
@@ -57,6 +59,7 @@ CPP_DEPS += \
 ./src/expression/MapExpr.d \
 ./src/expression/PostfixExpr.d \
 ./src/expression/PrefixExpr.d \
+./src/expression/RangeExpr.d \
 ./src/expression/TryCatchExpr.d \
 ./src/expression/UnitExpr.d 
 
