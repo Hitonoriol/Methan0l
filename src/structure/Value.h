@@ -276,6 +276,17 @@ class Value
 		}
 
 		template<typename T>
+		static constexpr bool is_list_type()
+		{
+			IF (is_heap_type<T>()) {
+				using V = VT(*std::declval<T>());
+				return !is_associative<V>::value && !std::is_same<V, ValSet>::value &&
+						(is_container<V>::value || std::is_same<V, std::string>::value);
+			}
+			return false;
+		}
+
+		template<typename T>
 		static constexpr bool numeric()
 		{
 			return std::is_arithmetic<TYPE(T)>::value;
@@ -313,17 +324,33 @@ class Value
 			return std::visit(visitor, value, rhs.value);
 		}
 
+		template<typename F>
+		constexpr void accept_heap(F &&visitor)
+		{
+			std::visit([&](auto &v) {
+				if constexpr (is_heap_type<decltype(v)>())
+					visitor(*v);
+			}, value);
+		}
+
 		template<bool allow_associative = true, typename F>
 		constexpr void accept_container(F &&visitor)
 		{
-			std::visit([&](auto &v) {
-				if constexpr (is_heap_type<decltype(v)>()) {
-					using C = VT(*v);
-					if constexpr (is_container<C>::value
-							&& !(is_associative<C>::value && !allow_associative)) {
-						visitor(*v);
-					}
+			accept_heap([&](auto &v) {
+				using C = VT(v);
+				if constexpr (is_container<C>::value
+						&& !(is_associative<C>::value && !allow_associative)) {
+					visitor(v);
 				}
+			});
+		}
+
+		template<typename F>
+		constexpr void accept_numeric(F &&visitor)
+		{
+			std::visit([&](auto &v) {
+				if constexpr (numeric<VT(v)>() && !std::is_same<VT(v), bool>::value)
+					visitor(v);
 			}, value);
 		}
 
