@@ -16,6 +16,7 @@ namespace mtl
  * Lists & Strings:
  * 	Append a new element: list[] = expr
  * 	Index element: list[expr]
+ * 	Sublist/substring: list[start..end[..step]]
  *
  * Maps:
  * 	Add a new element: map[expr1] = expr2

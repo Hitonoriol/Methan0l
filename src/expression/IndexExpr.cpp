@@ -1,12 +1,14 @@
 #include "IndexExpr.h"
 
 #include <iostream>
+#include <type_traits>
 
 #include "parser/MapParser.h"
 #include "util/hash.h"
 #include "util/meta.h"
 #include "PrefixExpr.h"
 #include "lang/core/LibData.h"
+#include "RangeExpr.h"
 
 namespace mtl
 {
@@ -24,18 +26,26 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 		return val;
 	}
 
-	if (idx != nullptr
-			&& instanceof<PrefixExpr>(idx)
-			&& try_cast<PrefixExpr>(idx).get_operator() == TokenType::DO) {
-		/* Create a temporary list handle copy (the list itself isn't copied)
-		 * to the list we're iterating over just in case it's a temporary value. */
-		Value container_v = val;
-		container_v.accept_container([&](auto &container) {
-			Value action = try_cast<PrefixExpr>(idx).get_rhs()->evaluate(evaluator);
-			LibData::for_each(evaluator, container, action.get<Function>());
-		});
-		/* Return a new temporary handle for chaining */
-		return DataTable::create_temporary(val);
+	if (idx != nullptr) {
+		/* Bracketed for-each */
+		if (PrefixExpr::is(*idx, TokenType::DO)) {
+			/* Create a temporary list handle copy (the list itself isn't copied)
+			 * to the list we're iterating over just in case it's a temporary value. */
+			Value container_v = val;
+			container_v.accept_container([&](auto &container) {
+				Value action = try_cast<PrefixExpr>(idx).get_rhs()->evaluate(evaluator);
+				LibData::for_each(evaluator, container, action.get<Function>());
+			});
+			/* Return a new temporary handle for chaining */
+			return DataTable::create_temporary(val);
+		/* bracketed slice */
+		} else if (instanceof<RangeExpr>(idx)) {
+			auto &range = try_cast<RangeExpr>(idx);
+			auto sliced = LibData::slice(val, range.get_start(evaluator),
+					range.get_end(evaluator),
+					range.has_step() ? range.get_step(evaluator).as<dec>() : 1);
+			return DataTable::create_temporary(sliced);
+		}
 	}
 
 	lhs_val_type = val.type();
