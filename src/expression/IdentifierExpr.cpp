@@ -68,11 +68,6 @@ const std::string& IdentifierExpr::get_name() const
 	return name;
 }
 
-std::string IdentifierExpr::get_name(Expression *expr)
-{
-	return try_cast<IdentifierExpr>(expr).name;
-}
-
 std::ostream& IdentifierExpr::info(std::ostream &str)
 {
 	return Expression::info(str

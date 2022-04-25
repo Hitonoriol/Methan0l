@@ -3,8 +3,8 @@
 
 #include "Expression.h"
 #include "LiteralExpr.h"
-#include "../structure/Unit.h"
-#include "../util/util.h"
+#include "structure/Unit.h"
+#include "util/util.h"
 #include "BinaryOperatorExpr.h"
 
 namespace mtl
@@ -32,8 +32,13 @@ class IdentifierExpr: public Expression
 		const std::string& get_name() const;
 
 		static Value eval_reserved(const std::string &name);
-		static std::string get_name(Expression *expr);
-		inline static std::string get_name(ExprPtr expr)
+
+		inline static const std::string& get_name(Expression *expr)
+		{
+			return try_cast<IdentifierExpr>(expr).name;
+		}
+
+		inline static const std::string& get_name(ExprPtr expr)
 		{
 			return get_name(expr.get());
 		}
