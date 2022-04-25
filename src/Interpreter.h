@@ -82,7 +82,7 @@ class Interpreter: public ExprEvaluator
 		Unit& program();
 		Methan0lParser& get_parser();
 
-		void size_info();
+		void print_info();
 
 		/* Either a std::exception-derived or a Value object can be thrown */
 		template<typename T>

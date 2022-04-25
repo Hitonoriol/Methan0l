@@ -174,33 +174,34 @@ void Interpreter::set_env_globals(const std::string &scrpath)
 	table.set(SCRDIR, std::filesystem::absolute(scrpath).parent_path().string());
 }
 
-void Interpreter::size_info()
+void Interpreter::print_info()
 {
 	out << "Core language structures:\n"
-			<< "* Value: " << sizeof(Value) << '\n'
-			<< "* Reference: " << sizeof(ValueRef) << '\n'
-			<< "* String: " << sizeof(std::string) << '\n'
-			<< "* Unit: " << sizeof(Unit) << '\n'
-			<< "* Function: " << sizeof(Function) << '\n'
-			<< "* Object: " << sizeof(Object) << '\n'
-			<< "* NoValue: " << sizeof(NoValue) << '\n'
-			<< "* Nil: " << sizeof(Nil) << '\n'
-			<< std::endl;
+			<< "* Value: " << sizeof(Value) << NL
+			<< "* Reference: " << sizeof(ValueRef) << NL
+			<< "* Object: " << sizeof(Object) << NL
+			<< "* String: " << sizeof(std::string) << NL
+			<< "* Unit: " << sizeof(Unit) << NL
+			<< "* Function: " << sizeof(Function) << NL
+			<< "* NoValue: " << sizeof(NoValue) << NL
+			<< "* Nil: " << sizeof(Nil) << NL
+			<< NL;
 
 	out << "Containers:\n"
-			<< "* List: " << sizeof(ValList) << '\n'
-			<< "* Map: " << sizeof(ValMap) << '\n'
-			<< std::endl;
+			<< "* DataTable: " << sizeof(DataTable) << NL
+			<< "* List: " << sizeof(ValList) << NL
+			<< "* Map: " << sizeof(ValMap) << NL
+			<< NL;
 
 	out << "Internal structures:\n"
-			<< "* ExprEvaluator: " << sizeof(ExprEvaluator) << '\n'
-			<< "* Expression: " << sizeof(Expression) << '\n'
-			<< "* Token: " << sizeof(Token) << '\n'
-			<< "* Library: " << sizeof(Library) << '\n'
-			<< "* ObjectType: " << sizeof(Class) << '\n'
-			<< "* InbuiltType: " << sizeof(InbuiltClass) << '\n'
-			<< "* InbuiltFunc: " << sizeof(InbuiltFunc) << '\n'
-			<< std::endl;
+			<< "* ExprEvaluator: " << sizeof(ExprEvaluator) << NL
+			<< "* Expression: " << sizeof(Expression) << NL
+			<< "* Token: " << sizeof(Token) << NL
+			<< "* Library: " << sizeof(Library) << NL
+			<< "* Class: " << sizeof(Class) << NL
+			<< "* InbuiltClass: " << sizeof(InbuiltClass) << NL
+			<< "* InbuiltFunc: " << sizeof(InbuiltFunc) << NL
+			<< NL;
 }
 
 } /* namespace mtl */

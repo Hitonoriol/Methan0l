@@ -32,7 +32,7 @@ const InteractiveRunner::CommandMap InteractiveRunner::commands
 		{ "info",
 				[](auto &runner)
 					{
-						runner.interpreter().size_info();
+						runner.interpreter().print_info();
 					}
 		},
 		{ "stack",
