@@ -34,15 +34,12 @@ Class& TypeManager::get_type(size_t id)
 
 Value TypeManager::invoke_method(Object &obj, const std::string &name, Args &args)
 {
-	Class &type = get_type(obj.type_id());
+	Class &type = *obj.get_class();
 
 	if constexpr (DEBUG)
 		std::cout << "Invoking " << obj << "->" << name << std::endl;
 
-	/* First arg of method call is "this" idfr */
-	Args arg_copy = args;
-	obj.inject_this(arg_copy);
-	return type.invoke_method(obj, name, arg_copy);
+	return type.invoke_method(obj, name, args);
 }
 
 Object TypeManager::create_object(size_t type_id, Args &args)

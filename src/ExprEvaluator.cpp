@@ -415,11 +415,7 @@ Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 	Value &lref = referenced_value(lhs);
 	if (lref.object() && instanceof<IdentifierExpr>(rhs.get())) {
 		Object &obj = lref.get<Object>();
-		std::string idfr = IdentifierExpr::get_name(rhs);
-
-		if (!obj.has_prv_access() && type_mgr.get_type(obj.type_id()).is_private(idfr))
-			throw std::runtime_error(
-					"Trying to access a private identifier (" + idfr + ")");
+		auto &idfr = IdentifierExpr::get_name(rhs);
 
 		if constexpr (DEBUG)
 			out << "Accessing object field " << idfr << std::endl;

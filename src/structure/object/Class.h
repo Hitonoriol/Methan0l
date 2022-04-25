@@ -6,8 +6,8 @@
 #include <unordered_map>
 
 
-#include "../../type.h"
-#include "../DataTable.h"
+#include "type.h"
+#include "structure/DataTable.h"
 
 namespace mtl
 {
@@ -33,14 +33,14 @@ class Class
 		/* Data that will be copied into every Object of this Type upon creation */
 		DataTable proto_object_data;
 
-		std::shared_ptr<LiteralExpr> static_instance;
+		std::unique_ptr<Object> static_instance;
 
 	protected:
 		ExprEvaluator &eval;
 
 	public:
 		static constexpr std::string_view
-		CONSTRUCT = "construct", TO_STRING = "to_string";
+		CONSTRUCT = "construct", TO_STRING = "to_string", THIS_ARG = "this";
 
 		Class(ExprEvaluator &eval, const std::string &name);
 		virtual ~Class() = default;
@@ -49,9 +49,6 @@ class Class
 
 		DataTable& get_class_data();
 		DataTable& get_object_data();
-
-		void register_private(std::string name);
-		bool is_private(const std::string &name);
 
 		bool static_call(Args &args);
 

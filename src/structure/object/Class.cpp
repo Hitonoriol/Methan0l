@@ -22,10 +22,9 @@ namespace mtl
 
 Class::Class(ExprEvaluator &eval, const std::string &name) :
 		id(get_id(name)),
+		static_instance(std::make_unique<Object>(this)),
 		eval(eval)
 {
-	Object::init_self(static_instance = std::make_shared<LiteralExpr>(Object(this)));
-
 	/*
 	 * Can be called as a static method:
 	 * 		Class@class_id$()
@@ -40,7 +39,6 @@ Class::Class(ExprEvaluator &eval, const std::string &name) :
 
 void Class::register_method(const std::string &name, Function method)
 {
-	method.arg_def.push_front(std::make_pair<std::string, ExprPtr>("this", LiteralExpr::empty()));
 	class_data.set(name, Value(method));
 }
 
@@ -54,30 +52,20 @@ Value Class::invoke_method(Object &obj, const std::string &name, ExprList &args)
 
 	field.assert_type(Type::FUNCTION, "Trying to invoke a non-function");
 
-	Function method = field.get<Function>();
-	return eval.invoke(method, args);
+	auto &method = eval.tmp_callable(field.get<Function>());
+	method.call(eval, args);
+	method.local().set(mtl::str(THIS_ARG), obj);
+	return eval.execute(method);
 }
 
 Value Class::invoke_static(const std::string &name, ExprList &args)
 {
-	auto arg_copy = args;
-	arg_copy.push_front(static_instance);
-	return invoke_method(static_instance->raw_ref().get<Object>(), name, arg_copy);
-}
-
-void Class::register_private(std::string name)
-{
-	private_members.emplace(name);
-}
-
-bool Class::is_private(const std::string &name)
-{
-	return private_members.find(name) != private_members.end();
+	return invoke_method(*static_instance, name, args);
 }
 
 bool Class::static_call(Args &args)
 {
-	return static_cast<void*>(&Object::get_this(args)) == static_instance->raw_ref().identity();
+	return &Object::get_this(args) == static_instance.get();
 }
 
 DataTable& Class::get_class_data()

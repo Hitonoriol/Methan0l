@@ -16,8 +16,6 @@ class ClassExpr: public Expression
 	std::string name;
 	ExprPtr body;
 
-	static constexpr std::string_view PRV_ENTRY = "private";
-
 	public:
 		ClassExpr(std::string name, ExprPtr body) : name(name), body(body) {}
 

@@ -17,39 +17,43 @@
 namespace mtl
 {
 
+const std::string OBJCLASS(".class"), THIS(".this");
+
 Object::Object()
 {
 }
 
-Object::Object(Class* type) : objclass(type)
+Object::Object(Class* type)
 {
+	def(OBJCLASS) = type;
 }
 
 Object::Object(Class* type, const DataTable &proto_data) :
-		objclass(type),
 		data(proto_data)
 {
 	deep_copy();
+	def(OBJCLASS) = type;
 }
 
 Object::Object(const Object &rhs) :
-		objclass(rhs.objclass),
-		this_instance(rhs.this_instance),
 		data(rhs.data)
 {
 }
 
 Object& Object::operator=(const Object &rhs)
 {
-	objclass = rhs.objclass;
 	data = rhs.data;
-	this_instance = rhs.this_instance;
 	return *this;
 }
 
 Value& Object::field(const std::string &name)
 {
-	return prv_access ? data.get_or_create(name) : data.get(name, true);
+	return data.get(name, true);
+}
+
+Value& Object::def(const std::string &name)
+{
+	return data.get_or_create(name);
 }
 
 Value& Object::field(const std::string_view &name)
@@ -68,11 +72,6 @@ Value Object::invoke_method(TypeManager &mgr, const std::string_view &name,
 	return invoke_method(mgr, std::string(name), args);
 }
 
-void Object::inject_this(Args &args)
-{
-	args.push_front(this_instance);
-}
-
 Value& Object::get_this_v(ExprList &args)
 {
 	LiteralExpr &this_expr = try_cast<LiteralExpr>(args.front());
@@ -84,19 +83,19 @@ Object& Object::get_this(ExprList &args)
 	return get_this_v(args).get<Object>();
 }
 
-bool Object::has_prv_access()
-{
-	return prv_access;
-}
-
 DataTable& Object::get_data()
 {
 	return data;
 }
 
+Class* Object::get_class() const
+{
+	return data.cget(OBJCLASS);
+}
+
 size_t Object::type_id() const
 {
-	return objclass->get_id();
+	return get_class()->get_id();
 }
 
 uintptr_t Object::id() const
@@ -120,7 +119,6 @@ std::string Object::to_string(ExprEvaluator &eval)
 void Object::deep_copy()
 {
 	data.copy_managed_map();
-	init_self(this_instance = std::make_shared<LiteralExpr>(*this));
 }
 
 bool operator ==(const Object &lhs, const Object &rhs)
@@ -133,13 +131,6 @@ std::ostream& operator <<(std::ostream &stream, Object &obj)
 	return stream << "{Object 0x" << std::hex << obj.id()
 			<< " of Type 0x" << std::hex << obj.type_id()
 			<< std::dec << "}";
-}
-
-void Object::init_self(std::shared_ptr<LiteralExpr> &this_instance)
-{
-	Object &ths = this_instance->raw_ref().get<Object>();
-	ths.this_instance = this_instance;
-	ths.prv_access = true;
 }
 
 Object Object::copy(const Object &obj)

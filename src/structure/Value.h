@@ -88,7 +88,6 @@ using VMap = std::shared_ptr<ValMap>;
 using VUnit = std::shared_ptr<Unit>;
 using VFunction = std::shared_ptr<Function>;
 using VInbuiltFunc = std::shared_ptr<InbuiltFunc>;
-using VObject = std::shared_ptr<Object>;
 using VToken = std::shared_ptr<Token>;
 
 struct Nil: public std::monostate
@@ -148,7 +147,7 @@ VList, VSet, VMap,
 VUnit, VFunction, VInbuiltFunc,
 
 /* Custom type objects */
-VObject,
+Object,
 
 /* Raw unevaluated Token */
 VToken,
@@ -457,7 +456,7 @@ class Value
 		}
 
 		template <typename T>
-		operator T ()
+		operator T () const
 		{
 			return as<T>();
 		}

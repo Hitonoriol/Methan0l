@@ -89,6 +89,11 @@ Value& DataTable::get(const std::string &id, bool fail_if_undefined)
 	return nil();
 }
 
+const Value& DataTable::cget(const std::string &id) const
+{
+	return unconst(*this).get(id, true);
+}
+
 bool DataTable::exists(const std::string &id)
 {
 	return map->find(id) != map->end();

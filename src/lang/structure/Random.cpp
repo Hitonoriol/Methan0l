@@ -29,7 +29,6 @@ Random::Random(ExprEvaluator &eval) : InbuiltClass(eval, "Random")
 {
 	/* rnd = Random.new$([seed]) */
 	register_method(std::string(CONSTRUCT), [&](auto args) {
-		register_private(std::string(SEED));
 		Object &obj = Object::get_this(args);
 		managed_rngs.emplace(obj.id(), std::mt19937_64());
 		managed_rng(obj).seed(extract_seed(args));

@@ -19,10 +19,6 @@ class Object
 	private:
 		friend class Class;
 
-		Class *objclass = nullptr;
-		bool prv_access = false;
-		std::shared_ptr<LiteralExpr> this_instance = nullptr;
-
 		void deep_copy();
 
 	protected:
@@ -37,16 +33,16 @@ class Object
 
 		Value& field(const std::string_view &name);
 		Value& field(const std::string &name);
+		Value& def(const std::string &name);
 		Value invoke_method(TypeManager &mgr, const std::string &name, ExprList &args);
 		Value invoke_method(TypeManager &mgr, const std::string_view &name,
 				ExprList &args);
 
-		void inject_this(ExprList &args);
-
 		static Value& get_this_v(ExprList &args);
 		static Object& get_this(ExprList &args);
 
-		bool has_prv_access();
+		Class* get_class() const;
+
 		DataTable& get_data();
 		size_t type_id() const;
 		uintptr_t id() const;

@@ -140,7 +140,7 @@ bool Value::container()
 
 bool Value::object()
 {
-	return is<VObject>();
+	return is<Object>();
 }
 
 bool Value::numeric()
@@ -193,7 +193,7 @@ Type Value::type() const
 	else if (is<VString>())
 		return Type::STRING;
 
-	else if (is<VObject>())
+	else if (is<Object>())
 		return Type::OBJECT;
 
 	else if (is<VUnit>())
