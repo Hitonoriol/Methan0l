@@ -190,14 +190,17 @@ class ExprEvaluator
 		template<typename T>
 		inline T eval(Expression &expr)
 		{
+			/* T, but with `const` and `&` / `&&` stripped */
 			using V = TYPE(T);
 			constexpr bool is_allowed = Value::allowed_or_heap<typename std::remove_pointer<V>::type>();
 			constexpr bool is_convertible = Value::is_convertible<V>();
+			IFDBG(std::cout << "eval<" << type_name<T>() << ">(expr) / V = " << type_name<V>() << std::endl);
+
 			/* Get as unevaluated expression */
 			if constexpr (std::is_same<T, Expression*>::value)
 				return &expr;
 
-			/* Get as mtl::Value by &, *, or = */
+			/* Get as mtl::Value by `&`, `*`, or value */
 			else if constexpr (std::is_same<typename std::remove_pointer<V>::type, Value>::value) {
 				if constexpr (std::is_reference<T>::value)
 					return referenced_value(&expr);
@@ -207,7 +210,7 @@ class ExprEvaluator
 					return eval(expr);
 			}
 
-			/* Get as a & or * to a value of a valid ValueContainer variant type */
+			/* Get as a `&` or `*` to a value of a valid ValueContainer variant alternative */
 			else if constexpr (is_allowed && std::is_reference<T>::value)
 				return referenced_value(&expr).get<V>();
 			else if constexpr (is_allowed && std::is_pointer<T>::value)
@@ -221,7 +224,7 @@ class ExprEvaluator
 
 				IFDBG(std::cout << "any_casting func arg to: " << type_name<T>() << ", " << val << std::endl)
 
-				/* Get a non-const* as const* */
+				/* Get a non-const `*` as const `*` */
 				if constexpr (std::is_pointer<T>::value) {
 					using U = typename std::add_pointer<typename std::remove_const<typename std::remove_pointer<T>::type>::type>::type;
 					IFDBG(std::cout << "U = " << type_name<U>() << std::endl)
@@ -238,12 +241,19 @@ class ExprEvaluator
 					return std::any_cast<T>(any);
 			}
 
-			/* Otherwise -- evaluate and convert to T */
+			/* In case of `&&` -- create a new temporary with evaluation result & return a `&&` to it. */
+			else if constexpr (std::is_rvalue_reference<T>::value) {
+				Value &tmp = DataTable::create_temporary(std::make_any<V>(eval<V>(expr)));
+				return std::move(tmp.get<V>());
+			}
+
+			/* Otherwise -- evaluate and convert to T (return by value) */
 			else {
 				Value val = eval(expr);
-				if constexpr (!is_allowed && is_convertible)
+				/* If T is not in variant's alternative list but is convertible to one of them */
+				if constexpr (!is_allowed && is_convertible) {
 					return val.as<V>();
-				else
+				} else
 					return val.as<T>();
 			}
 		}
