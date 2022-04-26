@@ -11,6 +11,8 @@
 #include "util/memory.h"
 #include "version.h"
 
+#include "util/class_binder.h"
+
 namespace mtl
 {
 
@@ -70,6 +72,12 @@ const InteractiveRunner::CommandMap InteractiveRunner::commands
 							mt0.load_args(std::move(args));
 							mt0.run();
 						}
+					}
+		},
+		{ "test",
+				[](auto &runner)
+					{
+						BinderTest::pair(runner.interpreter());
 					}
 		}
 };

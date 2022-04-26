@@ -26,11 +26,10 @@ class Class
 	private:
 		size_t id;
 
-		/* Methods & fields that are associated with this Type */
+		/* Methods & fields that are associated with this Class */
 		DataTable class_data;
-		std::set<std::string> private_members;
 
-		/* Data that will be copied into every Object of this Type upon creation */
+		/* Data that will be copied into every Object of this Class upon creation */
 		DataTable proto_object_data;
 
 		std::unique_ptr<Object> static_instance;
@@ -40,12 +39,13 @@ class Class
 
 	public:
 		static constexpr std::string_view
-		CONSTRUCT = "construct", TO_STRING = "to_string", THIS_ARG = "this";
+		CONSTRUCT = "construct", TO_STRING = "to_string", THIS_ARG = "this",
+		NATIVE_OBJ = ".o";
 
 		Class(ExprEvaluator &eval, const std::string &name);
 		virtual ~Class() = default;
 
-		void register_method(const std::string &name, Function method);
+		void register_method(const std::string&, Function);
 
 		DataTable& get_class_data();
 		DataTable& get_object_data();
