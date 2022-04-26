@@ -319,6 +319,9 @@ dec Value::to_dec() const
 {
 	Type t = type();
 	switch (t) {
+	case Type::INTEGER:
+		return cget<dec>();
+
 	case Type::DOUBLE:
 		return (dec) cget<double>();
 
@@ -340,6 +343,9 @@ double Value::to_double() const
 {
 	Type t = type();
 	switch (t) {
+	case Type::DOUBLE:
+		return cget<double>();
+
 	case Type::STRING:
 		return std::stod(cget<std::string>());
 
@@ -358,6 +364,9 @@ bool Value::to_bool() const
 {
 	Type t = type();
 	switch (t) {
+	case Type::BOOLEAN:
+		return cget<bool>();
+
 	case Type::INTEGER:
 		return cget<dec>() == 1;
 
@@ -376,6 +385,9 @@ char Value::to_char() const
 {
 	Type t = type();
 	switch (t) {
+	case Type::CHAR:
+		return cget<char>();
+
 	case Type::STRING:
 		return cget<std::string>().front();
 
