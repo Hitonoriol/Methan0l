@@ -12,17 +12,17 @@
 namespace mtl
 {
 
-template<typename T>
+template<typename ...Ts>
 constexpr auto type_name()
 {
 	std::string_view name, prefix, suffix;
 #ifdef __clang__
 	name = __PRETTY_FUNCTION__;
-	prefix = "auto type_name() [T = ";
+	prefix = "auto type_name() [Ts = ";
 	suffix = "]";
 #elif defined(__GNUC__)
 	name = __PRETTY_FUNCTION__;
-	prefix = "constexpr auto type_name() [with T = ";
+	prefix = "constexpr auto type_name() [with Ts = ";
 	suffix = "]";
 #elif defined(_MSC_VER)
 	name = __FUNCSIG__;

@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "expression/LiteralExpr.h"
 #include "type.h"
 #include "structure/Value.h"
 #include "Object.h"
@@ -31,12 +32,13 @@ InbuiltFunc& InbuiltClass::inbuilt_method(const std::string &name)
 	return entry->second;
 }
 
-void InbuiltClass::register_method(const std::string &name, InbuiltFunc method)
+void InbuiltClass::register_method(std::string_view name, InbuiltFunc method)
 {
-	if (inbuilt_methods.find(name) != inbuilt_methods.end())
-		inbuilt_methods.erase(name);
+	auto namestr = mtl::str(name);
+	if (inbuilt_methods.find(namestr) != inbuilt_methods.end())
+		inbuilt_methods.erase(namestr);
 
-	inbuilt_methods.emplace(name, method);
+	inbuilt_methods.emplace(std::move(namestr), method);
 }
 
 Value InbuiltClass::invoke_method(Object &obj, const std::string &name, ExprList &args)
@@ -49,6 +51,11 @@ Value InbuiltClass::invoke_method(Object &obj, const std::string &name, ExprList
 			std::cout << "Trying to invoke inbuilt method..." << std::endl;
 
 	InbuiltFunc method = inbuilt_method(name);
+	if (args.empty() ||
+			!(instanceof<LiteralExpr>(args[0]) &&
+					try_cast<LiteralExpr>(args[0]).raw_ref().is<Object>() &&
+					try_cast<LiteralExpr>(args[0]).raw_ref().get<Object>().get_data().map_ptr() == obj.get_data().map_ptr()))
+		args.push_front(LiteralExpr::create(obj));
 	return method(args);
 }
 

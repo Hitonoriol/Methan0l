@@ -79,7 +79,7 @@ dec Random::extract_seed(ExprList &args)
 	if constexpr (DEBUG)
 		std::cout << "Seeding Random: " << seed << std::endl;
 
-	this_obj.field(SEED) = seed;
+	this_obj.def(SEED) = seed;
 	return seed;
 }
 

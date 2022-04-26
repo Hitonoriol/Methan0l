@@ -199,7 +199,7 @@ File::File(ExprEvaluator &eval) : InbuiltClass(eval, "File")
 
 void File::set_path(ExprList &args)
 {
-	Object::get_this(args).field(FNAME) = path(eval, str(args[1]->evaluate(eval)));
+	Object::get_this(args).def(FNAME) = path(eval, str(args[1]->evaluate(eval)));
 }
 
 void File::reset(std::fstream &file)

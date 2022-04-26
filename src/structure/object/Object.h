@@ -31,9 +31,9 @@ class Object
 		Object(const Object &rhs);
 		Object& operator=(const Object &rhs);
 
-		Value& field(const std::string_view &name);
+		Value& field(std::string_view name);
 		Value& field(const std::string &name);
-		Value& def(const std::string &name);
+		Value& def(std::string_view name);
 		Value invoke_method(TypeManager &mgr, const std::string &name, ExprList &args);
 		Value invoke_method(TypeManager &mgr, const std::string_view &name,
 				ExprList &args);

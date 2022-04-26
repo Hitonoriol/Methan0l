@@ -39,7 +39,7 @@ Class::Class(ExprEvaluator &eval, const std::string &name) :
 
 void Class::register_method(const std::string &name, Function method)
 {
-	class_data.set(name, Value(method));
+	class_data.set(name, method);
 }
 
 Value Class::invoke_method(Object &obj, const std::string &name, ExprList &args)

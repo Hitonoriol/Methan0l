@@ -17,7 +17,7 @@
 namespace mtl
 {
 
-const std::string OBJCLASS(".class"), THIS(".this");
+const std::string OBJCLASS(".class");
 
 Object::Object()
 {
@@ -51,12 +51,12 @@ Value& Object::field(const std::string &name)
 	return data.get(name, true);
 }
 
-Value& Object::def(const std::string &name)
+Value& Object::def(std::string_view name)
 {
-	return data.get_or_create(name);
+	return data.get_or_create(mtl::str(name));
 }
 
-Value& Object::field(const std::string_view &name)
+Value& Object::field(std::string_view name)
 {
 	return field(std::string(name));
 }

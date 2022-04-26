@@ -15,7 +15,7 @@ class InbuiltClass: public Class
 		InbuiltClass(ExprEvaluator &eval, const std::string &name);
 
 		InbuiltFunc& inbuilt_method(const std::string &name);
-		void register_method(const std::string &name, InbuiltFunc method);
+		void register_method(std::string_view, InbuiltFunc);
 
 		Value invoke_method(Object &obj, const std::string &name, ExprList &args) override;
 };

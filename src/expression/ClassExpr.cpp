@@ -26,8 +26,8 @@ void ClassExpr::execute(ExprEvaluator &eval)
 	for (auto &&entry : def_body) {
 		const std::string &name = entry.first;
 		ExprPtr &rhs = entry.second;
+		Value rval = rhs->evaluate(eval);
 
-		Value rval = entry.second->evaluate(eval);
 		switch (rval.type()) {
 		case Type::FUNCTION:
 			type->register_method(name, rval.get<Function>());
