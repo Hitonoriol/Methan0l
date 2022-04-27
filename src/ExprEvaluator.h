@@ -218,11 +218,12 @@ class ExprEvaluator
 
 			/* Get as a value of fallback type (std::any) */
 			else if constexpr (!is_allowed && !is_convertible) {
-				auto &val = referenced_value(&expr).get();
-				auto &any = val.as_any();
+				auto &val = referenced_value(&expr);
+				auto &any = val.is<Object>() ? val.get<Object>().get_native().as_any() : val.as_any();
 				auto &t = any.type();
 
-				IFDBG(std::cout << "any_casting func arg to: " << type_name<T>() << ", " << val << std::endl)
+				IFDBG(std::cout << "any_casting func arg to: "
+						<< type_name<T>() << " [" << t.name() << "]" << std::endl;)
 
 				/* Get a non-const `*` as const `*` */
 				if constexpr (std::is_pointer<T>::value) {
@@ -232,11 +233,15 @@ class ExprEvaluator
 						return std::any_cast<U>(any);
 				}
 
-				/* Get a reference to a const fallback object */
 				using UR = typename std::remove_reference<T>::type;
-				if (t == typeid(UR))
-					return std::any_cast<UR>(any);
 
+				/* If arg is an Object, return its native contents */
+				if (val.is<Object>())
+					return *std::any_cast<std::shared_ptr<UR>>(any);
+
+				/* Get a reference to a (const) fallback object */
+				if (t == typeid(UR))
+					return std::any_cast<UR&>(any);
 				else
 					return std::any_cast<T>(any);
 			}
