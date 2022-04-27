@@ -306,7 +306,7 @@ class Value
 
 		bool heap_type();
 		bool container();
-		bool numeric();
+		bool numeric() const;
 
 		bool empty() const;
 		bool nil() const;
@@ -344,11 +344,12 @@ class Value
 			});
 		}
 
-		template<typename F>
+		template<bool allow_bool = false, typename F>
 		constexpr void accept_numeric(F &&visitor)
 		{
 			std::visit([&](auto &v) {
-				if constexpr (numeric<VT(v)>() && !std::is_same<VT(v), bool>::value)
+				if constexpr (numeric<VT(v)>()
+						&& !(std::is_same<VT(v), bool>::value && !allow_bool))
 					visitor(v);
 			}, value);
 		}
@@ -405,6 +406,15 @@ class Value
 		{
 			return unconst(*this).to_string(eval);
 		}
+
+		template<typename T>
+		T convert_numeric() const
+		{
+			T ret;
+			unconst(*this).accept_numeric<true>([&ret](auto &n) {ret = n;});
+			return ret;
+		}
+
 		dec to_dec() const;
 		double to_double() const;
 		bool to_bool() const;
@@ -417,7 +427,9 @@ class Value
 		/* Get current value by copy or convert to specified type */
 		template<typename T> inline T as() const
 		{
-			if constexpr (!allowed_type<T>()) {
+			/* (1) Conversion to a non-default type or (2) copy of a value behind underlying std::any
+			 * (T & ptr<T> are not variant alternatives) */
+			if constexpr (!allowed_type<T>() && !is_heap_storable<T>()) {
 				if constexpr (std::is_same<T, udec>::value)
 					return (udec) as<dec>();
 				else if constexpr (std::is_integral<T>::value)
@@ -429,26 +441,28 @@ class Value
 				else
 					return cget<T>();
 			}
+			/* (1) Convertion to a valid alternative type or (2) copy of an underlying value of type T */
 			else {
-				if (std::holds_alternative<T>(value))
+				if (is<T>())
 					return cget<T>();
 
+				/* Unwrap ValueRefs */
 				else if (!std::is_same<T, ValueRef>::value && std::holds_alternative<ValueRef>(value))
 					return (*cget<ValueRef>().ptr()).as<T>();
 
 				if constexpr (std::is_same<T, std::string>::value)
 					return unconst(*this).to_string();
 
-				if constexpr (std::is_same<T, dec>::value)
+				else if constexpr (std::is_same<T, dec>::value)
 					return to_dec();
 
-				if constexpr (std::is_same<T, double>::value)
+				else if constexpr (std::is_same<T, double>::value)
 					return to_double();
 
-				if constexpr (std::is_same<T, bool>::value)
+				else if constexpr (std::is_same<T, bool>::value)
 					return to_bool();
 
-				if constexpr (std::is_same<T, char>::value)
+				else if constexpr (std::is_same<T, char>::value)
 					return to_char();
 			}
 

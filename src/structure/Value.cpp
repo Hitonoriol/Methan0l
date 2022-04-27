@@ -143,9 +143,9 @@ bool Value::object()
 	return is<Object>();
 }
 
-bool Value::numeric()
+bool Value::numeric() const
 {
-	return accept([&](auto &v) {return Value::numeric<VT(v)>();});
+	return unconst(*this).accept([&](const auto &v) {return Value::numeric<VT(v)>();});
 }
 
 bool Value::empty() const
@@ -317,47 +317,26 @@ std::string Value::to_string(ExprEvaluator *eval)
 
 dec Value::to_dec() const
 {
-	Type t = type();
-	switch (t) {
-	case Type::INTEGER:
-		return cget<dec>();
+	if (numeric())
+		return convert_numeric<dec>();
 
-	case Type::DOUBLE:
-		return (dec) cget<double>();
-
-	case Type::STRING:
+	else if (is<std::string>())
 		return std::stol(cget<std::string>());
 
-	case Type::BOOLEAN:
-		return cget<bool>() ? 1 : 0;
-
-	case Type::CHAR:
-		return (dec) cget<char>();
-
-	default:
-		throw InvalidTypeException(t, Type::INTEGER);
-	}
+	else
+		throw InvalidTypeException(type(), Type::INTEGER);
 }
 
 double Value::to_double() const
 {
-	Type t = type();
-	switch (t) {
-	case Type::DOUBLE:
-		return cget<double>();
+	if (numeric())
+		return convert_numeric<double>();
 
-	case Type::STRING:
+	else if (is<std::string>())
 		return std::stod(cget<std::string>());
 
-	case Type::INTEGER:
-		return (double) cget<dec>();
-
-	case Type::BOOLEAN:
-		return cget<bool>() ? 1.0 : 0.0;
-
-	default:
-		throw InvalidTypeException(t, Type::DOUBLE);
-	}
+	else
+		throw InvalidTypeException(type(), Type::DOUBLE);
 }
 
 bool Value::to_bool() const
@@ -523,11 +502,12 @@ std::string_view Value::type_name(Type type)
 
 std::string_view Value::type_name() const
 {
-	Type t = type();
-	if (t != Type::FALLBACK)
-		return type_name(t);
-	else
+	if (is<Object>())
+		return cget<Object>().get_class()->get_name();
+	else if (is<std::any>())
 		return std::string_view(unconst(*this).as_any().type().name());
+	else
+		return type_name(type());
 }
 
 Value& Value::operator =(const Value &rhs)
