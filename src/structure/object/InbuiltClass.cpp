@@ -56,6 +56,9 @@ Value InbuiltClass::invoke_method(Object &obj, const std::string &name, ExprList
 					try_cast<LiteralExpr>(args[0]).raw_ref().is<Object>() &&
 					try_cast<LiteralExpr>(args[0]).raw_ref().get<Object>().get_data().map_ptr() == obj.get_data().map_ptr()))
 		args.push_front(LiteralExpr::create(obj));
+	else
+		try_cast<LiteralExpr>(args[0]).raw_ref() = obj;
+
 	return method(args);
 }
 
