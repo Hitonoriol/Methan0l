@@ -7,13 +7,22 @@ namespace mtl
 void BinderTest::pair(ExprEvaluator &eval)
 {
 	auto binder = ClassBinder<std::pair<int, int>>("Pair", eval);
-	auto &pair = binder.get_class();
-	pair.register_method("test", eval.bind_func([&](Object &ths) {
-		auto &p = binder.as_native(ths);
-		out << "Pair: [" << p.first << ", " << p.second << "]" << NL;
-	}));
+
+	/* Bind constructor by signature */
 	binder.bind_constructor<int, int>();
+
+	/* Bind a native method */
+	binder.bind_method("swap", &CLASS(binder)::swap);
+
+	/* Register a custom method */
+	binder.register_method("show", [](Object &obj) {
+		auto &p = OBJECT(binder, obj);
+		out << "Pair: [" << p.first << ", " << p.second << "]" << NL;
+	});
+
 	binder.register_class();
+
+	OUT("Bound a native class: " << type_name<CLASS(binder)>())
 }
 
 }

@@ -41,6 +41,8 @@ class Object
 		static Value& get_this_v(ExprList &args);
 		static Object& get_this(ExprList &args);
 
+		Value& get_native();
+
 		Class* get_class() const;
 
 		DataTable& get_data();

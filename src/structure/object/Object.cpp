@@ -78,6 +78,11 @@ Value& Object::get_this_v(ExprList &args)
 	return this_expr.raw_ref();
 }
 
+Value& Object::get_native()
+{
+	return field(Class::NATIVE_OBJ);
+}
+
 Object& Object::get_this(ExprList &args)
 {
 	return get_this_v(args).get<Object>();

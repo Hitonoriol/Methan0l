@@ -33,6 +33,24 @@ struct Factory: private FactoryImpl<T, Types...>::OptCall
 	using base::make;
 };
 
+/* Bind a native method:
+ * 		`obj->*method(arg1, arg2, ...)`
+ * to a methan0l method call:
+ * 		`method(obj&, arg1, rg2, ...)`
+ */
+#define METHOD_WRAPPER(sig) \
+		template<class C, typename R, typename ...Args> \
+		constexpr auto method(sig) \
+		{ \
+			return [func](C& obj, Args ...args) -> R {return ((&obj)->*func)(args...);}; \
+		}
+
+METHOD_WRAPPER(R(C::*func)(Args...))
+METHOD_WRAPPER(R(C::*func)(Args...)const)
+
+#define CLASS(binder) decltype(binder)::bound_class
+#define OBJECT(binder, obj) decltype(binder)::as_native(obj)
+
 template<class C>
 class ClassBinder
 {
@@ -43,6 +61,7 @@ class ClassBinder
 		ExprEvaluator &eval;
 
 	public:
+		using bound_class = C;
 		ClassBinder(const std::string &name, ExprEvaluator &eval) :
 			clazz(std::make_unique<InbuiltClass>(eval, name)), eval(eval) {}
 
@@ -68,7 +87,19 @@ class ClassBinder
 
 		static inline C& as_native(Object &obj)
 		{
-			return *obj.field(Class::NATIVE_OBJ).get<Obj>();
+			return *obj.get_native().get<Obj>();
+		}
+
+		template<typename F>
+		inline void bind_method(std::string_view name, F &&method)
+		{
+			clazz->register_method(name, eval.bind_func(mtl::method(method)));
+		}
+
+		template<typename F>
+		inline void register_method(std::string_view name, F &&method)
+		{
+			clazz->register_method(name, eval.bind_func(method));
 		}
 
 		inline void register_class()
