@@ -22,6 +22,7 @@ namespace mtl
 
 Class::Class(ExprEvaluator &eval, const std::string &name) :
 		id(get_id(name)),
+		name(name),
 		static_instance(std::make_unique<Object>(this)),
 		eval(eval)
 {
@@ -76,6 +77,11 @@ DataTable& Class::get_class_data()
 DataTable& Class::get_object_data()
 {
 	return proto_object_data;
+}
+
+const std::string& Class::get_name()
+{
+	return name;
 }
 
 size_t Class::get_id()

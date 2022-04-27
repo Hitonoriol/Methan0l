@@ -133,9 +133,8 @@ bool operator ==(const Object &lhs, const Object &rhs)
 
 std::ostream& operator <<(std::ostream &stream, Object &obj)
 {
-	return stream << "{Object 0x" << std::hex << obj.id()
-			<< " of Type 0x" << std::hex << obj.type_id()
-			<< std::dec << "}";
+	return stream << "{Object " << obj.get_data().map_ptr()
+			<< " of class `" << obj.get_class()->get_name() << "`}";
 }
 
 Object Object::copy(const Object &obj)

@@ -25,6 +25,7 @@ class Class
 {
 	private:
 		size_t id;
+		std::string name;
 
 		/* Methods & fields that are associated with this Class */
 		DataTable class_data;
@@ -56,6 +57,7 @@ class Class
 		Value invoke_static(const std::string &name, ExprList &args);
 
 		size_t get_id();
+		const std::string& get_name();
 		virtual Object create(ExprList &args);
 
 		static size_t get_id(const std::string &type_name);
