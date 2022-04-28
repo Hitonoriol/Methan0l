@@ -2,7 +2,6 @@
 #define SRC_LANG_STRUCTURE_RANDOM_H_
 
 #include <structure/object/Class.h>
-#include <structure/object/InbuiltClass.h>
 #include <random>
 #include <type_traits>
 
@@ -16,7 +15,7 @@ class ExprEvaluator;
 template<typename T>
 using Distr = std::function<T(std::mt19937_64&)>;
 
-class Random: public InbuiltClass
+class Random: public Class
 {
 	private:
 		static constexpr std::string_view SEED = "seed";

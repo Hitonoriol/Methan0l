@@ -6,11 +6,11 @@
 #include <unordered_map>
 #include <utility>
 
-#include "../../expression/Expression.h"
-#include "../../ExprEvaluator.h"
-#include "../../structure/object/Object.h"
-#include "../../structure/Value.h"
-#include "../../type.h"
+#include "expression/Expression.h"
+#include "ExprEvaluator.h"
+#include "structure/object/Object.h"
+#include "structure/Value.h"
+#include "type.h"
 
 namespace mtl
 {
@@ -25,10 +25,10 @@ Distr<double> Random::dbl_gen = [](auto &rng) {
 	return dbl_distr(rng);
 };
 
-Random::Random(ExprEvaluator &eval) : InbuiltClass(eval, "Random")
+Random::Random(ExprEvaluator &eval) : Class(eval, "Random")
 {
 	/* rnd = Random.new$([seed]) */
-	register_method(std::string(CONSTRUCT), [&](auto args) {
+	register_method(std::string(CONSTRUCT), [&](Args &args) {
 		Object &obj = Object::get_this(args);
 		managed_rngs.emplace(obj.id(), std::mt19937_64());
 		managed_rng(obj).seed(extract_seed(args));
@@ -36,13 +36,13 @@ Random::Random(ExprEvaluator &eval) : InbuiltClass(eval, "Random")
 	});
 
 	/* rnd.reseed$(seed) */
-	register_method("reseed", [&](auto args) {
+	register_method("reseed", [&](Args &args) {
 		managed_rng(Object::get_this(args)).seed(extract_seed(args));
 		return Value::NO_VALUE;
 	});
 
 	/* rnd.get_seed$() */
-	register_method("get_seed", [&](auto args) {
+	register_method("get_seed", [&](Args &args) {
 		return Object::get_this(args).field(SEED);
 	});
 
@@ -50,7 +50,7 @@ Random::Random(ExprEvaluator &eval) : InbuiltClass(eval, "Random")
 	 * num = rnd.next_int$(max) <-- Int in range [0; max]
 	 * num = rnd.next_int$()	<-- Int in range [INT64_MIN; INT64_MAX]
 	 */
-	register_method("next_int", [&](auto args) {
+	register_method("next_int", [&](Args &args) {
 		return Value(next_int(args));
 	});
 
@@ -58,14 +58,14 @@ Random::Random(ExprEvaluator &eval) : InbuiltClass(eval, "Random")
 	 * num = rnd.next_double$(max)	<-- Double in range [0; max]
 	 * num = rnd.next_double$()		<-- Double in range [0; 1]
 	 */
-	register_method("next_double", [&](auto args) {
+	register_method("next_double", [&](Args &args) {
 		return Value(next_double(args));
 	});
 
 	/* bool = rnd.next_boolean$(probability)	<-- returns true with specified probability in range [0; 1]
 	 * bool = rnd.next_boolean$()				<-- returns true with 50% probability
 	 */
-	register_method("next_boolean", [&](auto args) {
+	register_method("next_boolean", [&](Args &args) {
 		return Value(next_bool(args));
 	});
 }

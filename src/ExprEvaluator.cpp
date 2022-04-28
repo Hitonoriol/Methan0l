@@ -502,6 +502,42 @@ Value ExprEvaluator::evaluate(ListExpr &expr)
 	return list;
 }
 
+Value ExprEvaluator::invoke(const Value &callable, ExprList &args)
+{
+	if (callable.is<InbuiltFunc>())
+		return (callable.cget<InbuiltFunc>())(args);
+	else
+		return invoke(callable.cget<Function>(), args);
+}
+
+Value ExprEvaluator::invoke_method(Object &obj, Value &method, ExprList &args)
+{
+	return method.is<Function>()
+			? invoke_method(obj, method.get<Function>(), args)
+			: invoke_method(obj, method.get<InbuiltFunc>(), args);
+}
+
+Value ExprEvaluator::invoke_method(Object &obj, Function &func, ExprList &args)
+{
+	auto &method = tmp_callable(func);
+	method.call(*this, args);
+	method.local().set(mtl::str(Class::THIS_ARG), obj);
+	return execute(method);
+}
+
+Value ExprEvaluator::invoke_method(Object &obj, InbuiltFunc &method, ExprList &args)
+{
+	//std::shared_ptr<LiteralExpr> objref = nullptr
+	if (args.empty()
+			|| !(instanceof<LiteralExpr>(args[0]) && try_cast<LiteralExpr>(args[0]).raw_ref().is<Object>()
+					&& try_cast<LiteralExpr>(args[0]).raw_ref().get<Object>().get_data().map_ptr() == obj.get_data().map_ptr()))
+		args.push_front(LiteralExpr::create(obj));
+	else
+		try_cast<LiteralExpr>(args[0]).raw_ref() = obj;
+
+	return method(args);
+}
+
 Value ExprEvaluator::evaluate(InvokeExpr &expr)
 {
 	ExprPtr lhs = expr.get_lhs();
@@ -524,12 +560,8 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 	if (ctype == Type::UNIT)
 		return invoke(callable.get<Unit>(), expr.arg_list());
 
-	else if (ctype == Type::FUNCTION) {
-		if (callable.is<InbuiltFunc>())
-			return (callable.get<InbuiltFunc>())(expr.arg_list());
-		else
-			return invoke(callable.get<Function>(), expr.arg_list());
-	}
+	else if (ctype == Type::FUNCTION)
+		return invoke(callable, expr.arg_list());
 
 	else if (instanceof<IdentifierExpr>(lhs) && callable.nil())
 		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list());

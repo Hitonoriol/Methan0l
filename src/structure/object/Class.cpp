@@ -33,30 +33,30 @@ Class::Class(ExprEvaluator &eval, const std::string &name) :
 	 * 	As well as a method of an Object:
 	 * 		obj.class_id$()
 	 */
-	register_method("class_id", Function::create( {
-			Expression::return_val((dec) id)
-	}));
-}
+	register_method("class_id", [&](Args &args) {
+		return id;
+	});
 
-void Class::register_method(const std::string &name, Function method)
-{
-	class_data.set(name, method);
+	/* Default constructor */
+	register_method(std::string(CONSTRUCT), [&](Args &args) {
+		return Value::NO_VALUE;
+	});
+
+	/* Default string conversion */
+	register_method(std::string(TO_STRING), [&](Object &obj) {
+		return obj.to_string();
+	});
 }
 
 Value Class::invoke_method(Object &obj, const std::string &name, ExprList &args)
 {
 	DataTable &data = get_class_data();
-	Value &field = data.get(name);
+	return eval.invoke_method(obj, data.get(name, true), args);
+}
 
-	if (field.nil())
-		return Value::NO_VALUE;
-
-	field.assert_type(Type::FUNCTION, "Trying to invoke a non-function");
-
-	auto &method = eval.tmp_callable(field.get<Function>());
-	method.call(eval, args);
-	method.local().set(mtl::str(THIS_ARG), obj);
-	return eval.execute(method);
+Value Anonymous::invoke_method(Object &obj, const std::string &name, ExprList &args)
+{
+	return eval.invoke_method(obj, obj.field(name), args);
 }
 
 Value Class::invoke_static(const std::string &name, ExprList &args)

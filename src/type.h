@@ -82,7 +82,7 @@ using UnaryOpr = std::function<Value(Value&)>;
 template<typename O>
 using OperatorMap = std::unordered_map<TokenType, O>;
 
-using InbuiltFunc = std::function<Value(ExprList)>;
+using InbuiltFunc = std::function<Value(ExprList&)>;
 using InbuiltFuncMap = std::unordered_map<std::string, InbuiltFunc>;
 
 constexpr std::string_view PROGRAM_EXT = ".mt0";

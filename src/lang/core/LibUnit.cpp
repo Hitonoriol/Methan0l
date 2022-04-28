@@ -19,6 +19,9 @@
 #include "util/util.h"
 #include "util/process.h"
 
+#include "structure/object/Class.h"
+#include "structure/object/Object.h"
+
 namespace mtl
 {
 

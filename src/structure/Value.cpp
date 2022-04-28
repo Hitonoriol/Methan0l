@@ -6,7 +6,6 @@
 #include <type_traits>
 #include <memory>
 
-#include "object/Object.h"
 #include "ValueRef.h"
 #include "type.h"
 #include "util/util.h"
@@ -14,6 +13,9 @@
 #include "util/meta.h"
 #include "util/containers.h"
 #include "expression/LiteralExpr.h"
+
+#include "object/Class.h"
+#include "object/Object.h"
 
 namespace mtl
 {

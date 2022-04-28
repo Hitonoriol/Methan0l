@@ -4,14 +4,25 @@
 #include <stdexcept>
 #include <utility>
 
-#include "../../expression/LiteralExpr.h"
-#include "../../ExprEvaluator.h"
-#include "../DataTable.h"
-#include "../Function.h"
-#include "../Value.h"
+#include "expression/LiteralExpr.h"
+#include "ExprEvaluator.h"
+#include "structure/DataTable.h"
+#include "structure/Function.h"
+#include "structure/Value.h"
+
+#include "structure/object/Class.h"
 
 namespace mtl
 {
+
+TypeManager::TypeManager(ExprEvaluator &eval)
+		: eval(eval), root(new Anonymous(eval))
+{}
+
+TypeManager::~TypeManager()
+{
+	delete root;
+}
 
 void TypeManager::register_type(std::unique_ptr<Class> &&type)
 {
@@ -29,7 +40,10 @@ Class& TypeManager::get_type(size_t id)
 	if (entry != types.end())
 		return *(entry->second);
 
-	throw std::runtime_error("Trying to perform operation on a non-existing Object type");
+	if (id == root->get_id())
+		return *root;
+
+	throw std::runtime_error("Trying to resolve a non-existing class");
 }
 
 Value TypeManager::invoke_method(Object &obj, const std::string &name, Args &args)
@@ -50,6 +64,11 @@ Object TypeManager::create_object(size_t type_id, Args &args)
 Object TypeManager::create_object(const std::string &type_name, Args &args)
 {
 	return create_object(std::hash<std::string> { }(type_name), args);
+}
+
+Class* TypeManager::get_root()
+{
+	return root;
 }
 
 } /* namespace mtl */

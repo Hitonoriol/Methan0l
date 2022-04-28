@@ -2,7 +2,7 @@
 #define SRC_UTIL_CLASS_BINDER_H_
 
 #include "ExprEvaluator.h"
-#include "structure/object/InbuiltClass.h"
+#include "structure/object/Class.h"
 
 #include <memory>
 
@@ -57,13 +57,13 @@ class ClassBinder
 	private:
 		using Obj = std::shared_ptr<C>;
 
-		std::unique_ptr<InbuiltClass> clazz;
+		std::unique_ptr<Class> clazz;
 		ExprEvaluator &eval;
 
 	public:
 		using bound_class = C;
 		ClassBinder(const std::string &name, ExprEvaluator &eval) :
-			clazz(std::make_unique<InbuiltClass>(eval, name)), eval(eval) {}
+			clazz(std::make_unique<Class>(eval, name)), eval(eval) {}
 
 		/*
 		 * Creates a methan0l Class instance with specified constructor
@@ -80,7 +80,7 @@ class ClassBinder
 			}));
 		}
 
-		inline InbuiltClass& get_class()
+		inline Class& get_class()
 		{
 			return *clazz;
 		}

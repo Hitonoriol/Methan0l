@@ -5,17 +5,18 @@
 #include <set>
 #include <unordered_map>
 
-
 #include "type.h"
 #include "structure/DataTable.h"
+#include "structure/Value.h"
+#include "ExprEvaluator.h"
 
 namespace mtl
 {
 
 class LiteralExpr;
 class Function;
-class ExprEvaluator;
 
+/* TODO: Remove this & store object data entirely inside its DataTable */
 template<typename T>
 using Managed = std::unordered_map<uintptr_t, T>;
 
@@ -46,7 +47,15 @@ class Class
 		Class(ExprEvaluator &eval, const std::string &name);
 		virtual ~Class() = default;
 
-		void register_method(const std::string&, Function);
+		template<typename T>
+		void register_method(std::string_view name, T method)
+		{
+			auto n = mtl::str(name);
+			if constexpr (std::is_same<TYPE(T), Function>::value || std::is_same<TYPE(T), InbuiltFunc>::value)
+				class_data.set(std::move(n), method);
+			else
+				class_data.set(std::move(n), eval.bind_func(method));
+		}
 
 		DataTable& get_class_data();
 		DataTable& get_object_data();
@@ -63,6 +72,13 @@ class Class
 		static size_t get_id(const std::string &type_name);
 
 		friend std::ostream& operator <<(std::ostream &stream, Class &type);
+};
+
+class Anonymous: public Class
+{
+	public:
+		Anonymous(ExprEvaluator &eval) : Class(eval, "Anonymous") {}
+		Value invoke_method(Object&, const std::string&, ExprList&) override;
 };
 
 } /* namespace mtl */

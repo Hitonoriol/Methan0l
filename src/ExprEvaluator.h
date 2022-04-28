@@ -315,7 +315,7 @@ class ExprEvaluator
 				};
 			}
 			/* Function accepts the ExprList itself - no binding required */
-			else if constexpr (std::is_same<typename function_traits<F>::argument<0>::type, mtl::Args>::value) {
+			else if constexpr (std::is_same<TYPE(typename function_traits<F>::argument<0>::type), mtl::Args>::value) {
 				return InbuiltFunc(f);
 			}
 			else {
@@ -389,6 +389,12 @@ class ExprEvaluator
 		Value invoke(const Unit &unit, ExprList &args);
 		Value invoke(const Unit &unit);
 		Value invoke(const Function &func, ExprList &args);
+		Value invoke(const Value &callable, ExprList &args);
+
+		Value invoke_method(Object&, Value&, ExprList&);
+		Value invoke_method(Object&, Function&, ExprList&);
+		Value invoke_method(Object&, InbuiltFunc&, ExprList&);
+
 		template<typename T>
 		inline TYPE(T)& tmp_callable(T &&callable)
 		{

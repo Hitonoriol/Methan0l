@@ -2,7 +2,6 @@
 #define SRC_LANG_STRUCTURE_FILE_H_
 
 #include <structure/object/Class.h>
-#include <structure/object/InbuiltClass.h>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -17,7 +16,7 @@ namespace mtl
 
 class ExprEvaluator;
 
-class File: public InbuiltClass
+class File: public Class
 {
 	private:
 		Managed<std::unique_ptr<std::fstream>> managed_files;

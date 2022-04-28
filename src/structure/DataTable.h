@@ -4,10 +4,12 @@
 #include <string>
 #include <unordered_map>
 
-#include "../type.h"
+#include "type.h"
 
 namespace mtl
 {
+
+class ExprEvaluator;
 
 class DataTable
 {
@@ -45,6 +47,8 @@ class DataTable
 		bool empty();
 
 		friend std::ostream& operator <<(std::ostream &stream, DataTable &val);
+
+		static DataTable make(const ValMap&, ExprEvaluator&);
 
 		static Value& create_temporary(Value val);
 

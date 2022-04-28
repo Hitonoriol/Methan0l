@@ -13,6 +13,7 @@
 #include "util/util.h"
 #include "TypeManager.h"
 #include "ExprEvaluator.h"
+#include "structure/object/Class.h"
 
 namespace mtl
 {

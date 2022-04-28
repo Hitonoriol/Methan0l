@@ -1,4 +1,4 @@
-#include <structure/object/InbuiltClass.h>
+#include <structure/object/Class.h>
 #include "Interpreter.h"
 
 #include <fstream>
@@ -199,7 +199,6 @@ void Interpreter::print_info()
 			<< "* Token: " << sizeof(Token) << NL
 			<< "* Library: " << sizeof(Library) << NL
 			<< "* Class: " << sizeof(Class) << NL
-			<< "* InbuiltClass: " << sizeof(InbuiltClass) << NL
 			<< "* InbuiltFunc: " << sizeof(InbuiltFunc) << NL
 			<< NL;
 }
