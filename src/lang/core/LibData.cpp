@@ -20,6 +20,9 @@
 #include "Token.h"
 #include "version.h"
 
+#include "structure/object/Class.h"
+#include "structure/object/Object.h"
+
 namespace mtl
 {
 
@@ -443,12 +446,41 @@ void LibData::load_operators()
 		return Value::NO_VALUE;
 	}));
 
-	/* obj = new: Class(arg1, arg2, ...) */
+	/* Regular constructor invocation:
+	 * 		(1) obj = new: Class(arg1, arg2, ...)
+	 *
+	 * Create an anonymous object:
+	 * 		(2) anon_obj = new: @(x, construct => @: x -> this.x = x)
+	 * (constructor can be defined, too. In this case `new` operator can then be called
+	 * 		with the anonymous object's name: `new: anon_obj(...)`.
+	 * 		As a result the constructor `construct` defined inside of it will be called upon object creation)
+	 *
+	 * Create an instance of anonymous class (anonymous object copy + ctor invocation):
+	 * 		(3) new_anon_obj = new: anon_obj(123)
+	 */
 	prefix_operator(TokenType::NEW, LazyUnaryOpr([&](ExprPtr rhs) {
-		rhs->assert_type<InvokeExpr>("Invalid `new` expression");
-		auto &ctor_call = try_cast<InvokeExpr>(rhs);
-		std::string type_name = MapParser::key_string(ctor_call.get_lhs());
-		return Value(eval->get_type_mgr().create_object(type_name, ctor_call.arg_list()));
+		if (mtl::instanceof<InvokeExpr>(rhs)) {
+			auto &ctor_call = try_cast<InvokeExpr>(rhs);
+			auto lval = val(ctor_call.get_lhs());
+			bool named = mtl::instanceof<IdentifierExpr>(ctor_call.get_lhs());
+			if (named) {
+				auto &mgr = eval->get_type_mgr();
+				auto &type_name = IdentifierExpr::get_name(ctor_call.get_lhs());
+				if (lval.nil()) {
+					return mgr.create_object(type_name, ctor_call.arg_list());
+				} else if (lval.is<Object>()) {
+					Object obj(mgr.get_root(), lval.as<Object>().get_data());
+					obj.invoke_method(mgr, Class::CONSTRUCT, ctor_call.arg_list());
+					return obj;
+				}
+			}
+		} else {
+			auto rval = val(rhs);
+			rval.assert_type(Type::MAP, "Attempting to create an anonymous object out of a wrong value");
+			Object obj(eval->get_type_mgr().get_root(), DataTable::make(rval.get<ValMap>(), *eval));
+			return obj;
+		}
+		throw std::runtime_error("Invalid `new` expression");
 	}));
 
 	/* Evaluate and convert to string: $$expr */
