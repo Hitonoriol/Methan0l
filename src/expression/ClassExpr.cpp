@@ -28,15 +28,12 @@ void ClassExpr::execute(ExprEvaluator &eval)
 		ExprPtr &rhs = entry.second;
 		Value rval = rhs->evaluate(eval);
 
-		switch (rval.type()) {
-		case Type::FUNCTION:
+		if (rval.is<Function>())
 			type->register_method(name, rval.get<Function>());
-			continue;
-
-		default:
+		else if (rval.is<InbuiltFunc>())
+			type->register_method(name, rval.get<InbuiltFunc>());
+		else
 			type->get_object_data().get_or_create(name) = rval;
-			continue;
-		}
 	}
 
 	eval.get_type_mgr().register_type(std::move(type));
