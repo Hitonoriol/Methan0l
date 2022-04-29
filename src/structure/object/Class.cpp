@@ -38,14 +38,33 @@ Class::Class(ExprEvaluator &eval, const std::string &name) :
 	});
 
 	/* Default constructor */
-	register_method(std::string(CONSTRUCT), [&](Args &args) {
+	register_method(CONSTRUCT, [&](Args &args) {
 		return Value::NO_VALUE;
 	});
 
 	/* Default string conversion */
-	register_method(std::string(TO_STRING), [&](Object &obj) {
+	register_method(TO_STRING, [&](Object &obj) {
 		return obj.to_string();
 	});
+
+	/* Get all methods of this class */
+	register_method("get_methods", [&](Object &obj) {
+		return extract_names(class_data);
+	});
+
+	/* Get all fields of object of this class */
+	register_method("get_fields", [&](Object &obj) {
+		return extract_names(obj.get_data());
+	});
+}
+
+Value Class::extract_names(const DataTable &table)
+{
+	Value names(Type::LIST);
+	auto &list = names.get<ValList>();
+	for (auto&& [name, method] : table.managed_map())
+		list.push_back(name);
+	return names;
 }
 
 Value Class::invoke_method(Object &obj, const std::string &name, ExprList &args)

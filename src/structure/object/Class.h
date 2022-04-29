@@ -65,6 +65,8 @@ class Class
 		virtual Value invoke_method(Object &obj, const std::string &name, ExprList &args);
 		Value invoke_static(const std::string &name, ExprList &args);
 
+		Value extract_names(const DataTable&);
+
 		size_t get_id();
 		const std::string& get_name();
 		virtual Object create(ExprList &args);
