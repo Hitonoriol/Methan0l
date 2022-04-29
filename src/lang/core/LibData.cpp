@@ -455,8 +455,8 @@ void LibData::load_operators()
 	 * 		with the anonymous object's name: `new: anon_obj(...)`.
 	 * 		As a result the constructor `construct` defined inside of it will be called upon object creation)
 	 *
-	 * Create an instance of anonymous class (anonymous object copy + ctor invocation):
-	 * 		(3) new_anon_obj = new: anon_obj(123)
+	 * Create an instance of object's class (object copy + ctor invocation):
+	 * 		(3) new_obj = new: anon_obj(123)
 	 */
 	prefix_operator(TokenType::NEW, LazyUnaryOpr([&](ExprPtr rhs) {
 		if (mtl::instanceof<InvokeExpr>(rhs)) {
@@ -469,7 +469,8 @@ void LibData::load_operators()
 				if (lval.nil()) {
 					return mgr.create_object(type_name, ctor_call.arg_list());
 				} else if (lval.is<Object>()) {
-					Object obj(mgr.get_root(), lval.as<Object>().get_data());
+					auto &proto = lval.get<Object>();
+					Object obj(proto.get_class(), proto.get_data());
 					obj.invoke_method(mgr, Class::CONSTRUCT, ctor_call.arg_list());
 					return obj;
 				}
