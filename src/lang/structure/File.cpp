@@ -51,6 +51,14 @@ File::File(ExprEvaluator &eval) : Class(eval, "File")
 		return open(Object::get_this(args));
 	});
 
+	register_method("is_open", [&](Object &obj) {
+		return obj.field(IS_OPEN);
+	});
+
+	register_method("is_eof", [&](Object &obj) {
+		return obj.field(IS_EOF);
+	});
+
 	/* file.close$() */
 	register_method("close", [&](Args &args) {
 		return close(Object::get_this(args));
@@ -149,7 +157,8 @@ File::File(ExprEvaluator &eval) : Class(eval, "File")
 		std::ifstream file(fname);
 		if (!file.is_open())
 			throw std::runtime_error("Failed to open " + fname);
-		Value contents(std::string {std::istreambuf_iterator {file}, {}});
+		Value contents(Type::STRING);
+		contents.get<std::string>() = std::move(std::string {std::istreambuf_iterator {file}, {}});
 		file.close();
 		return contents;
 	});
@@ -232,34 +241,32 @@ std::string File::path(ExprList &args)
 
 bool File::open(Object &obj)
 {
-	auto file = std::make_unique<std::fstream>(str(obj.field(FNAME)));
+	auto file = std::make_shared<std::fstream>(str(obj.field(FNAME)));
 	bool open = file->is_open();
-	if (bln(obj.field(IS_OPEN) = open)) {
-		managed_files.emplace(obj.id(), std::move(file));
-		obj.field(IS_EOF) = false;
+	if (bln(obj.def(IS_OPEN) = open)) {
+		obj.def(FILE) = file;
+		obj.def(IS_EOF) = false;
 	}
 	return open;
 }
 
 bool File::close(Object &obj)
 {
-	size_t id = obj.id();
-	auto file = managed_files.find(id);
-	if (file == managed_files.end())
+	if (!obj.field(IS_OPEN).get<bool>())
 		return false;
 
-	file->second->close();
-	managed_files.erase(id);
+	obj.field(FILE).get<fhandle>()->close();
+	obj.field(FILE).clear();
 	obj.field(IS_OPEN) = false;
 	return true;
 }
 
 std::fstream& File::managed_file(Object &obj)
 {
-	if (!bln(obj.field(IS_OPEN)))
-		throw std::runtime_error("Can't access a non-open file");
+	if (!bln(obj.def(IS_OPEN)))
+		throw std::runtime_error("Accessing an unopened file");
 
-	return *(managed_files.at(obj.id()));
+	return *obj.field(FILE).get<fhandle>();
 }
 
 struct PathPrefix

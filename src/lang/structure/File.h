@@ -19,11 +19,10 @@ class ExprEvaluator;
 class File: public Class
 {
 	private:
-		Managed<std::unique_ptr<std::fstream>> managed_files;
+		using fhandle = std::shared_ptr<std::fstream>;
 
 		static constexpr std::string_view
-		FNAME = "name", IS_OPEN = "is_open", IS_EOF = "eof",
-		WRITEABLE = "write";
+		FNAME = "name", IS_OPEN = ".io", IS_EOF = "eof", FILE = ".f";
 
 		std::fstream &managed_file(Object &obj);
 
