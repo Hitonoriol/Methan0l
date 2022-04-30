@@ -56,6 +56,11 @@ Class::Class(ExprEvaluator &eval, const std::string &name) :
 	register_method("get_fields", [&](Object &obj) {
 		return extract_names(obj.get_data());
 	});
+
+	/* Get method by name */
+	register_method("get_method", [&](Object &obj, const std::string &name) {
+		return class_data.get(name, true);
+	});
 }
 
 Value Class::extract_names(const DataTable &table)
