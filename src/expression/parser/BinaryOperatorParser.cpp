@@ -15,7 +15,7 @@ BinaryOperatorParser::BinaryOperatorParser(int precedence, bool is_right) :
 
 ExprPtr BinaryOperatorParser::parse(Parser &parser, ExprPtr lhs, Token token)
 {
-	if (token.get_type() == TokenType::DOT)
+	if (precedence() == prcdc(Precedence::DOT))
 		parser.parse_access_opr();
 
 	ExprPtr rhs = parser.parse(opr_precedence - (right_assoc ? 1 : 0));
