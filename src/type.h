@@ -19,11 +19,11 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define OUT(seq) out << seq << std::endl;
+#define OUT(...) out << JOIN(__VA_ARGS__) << std::endl;
 #define DBG if constexpr (mtl::DEBUG)
-#define IFDBG(body) DBG { body; }
-#define LOG(out) DBG{ std::cout << out << std::endl; }
-#define TRACE(out) LOG(__FILE__ << ":" << __LINE__ << "[" << __func__ << "] " << out)
+#define IFDBG(...) DBG { JOIN(__VA_ARGS__); }
+#define LOG(...) DBG{ OUT(__VA_ARGS__) }
+#define TRACE(...) LOG("[]" << __FILE__ << ":" << __LINE__ << "] " << JOIN(__VA_ARGS__))
 
 #define IF(...) if constexpr (JOIN(__VA_ARGS__))
 #define ELIF(...) else IF(__VA_ARGS__)
