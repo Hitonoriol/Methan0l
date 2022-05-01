@@ -43,6 +43,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	/* Core syntax constructs */
 	register_parser(TokenType::HASH, new IdentifierParser()); // #foo -- global scope lookup
 	register_parser(TokenType::IDENTIFIER, new IdentifierParser());	// foo -- local scope
+	register_prefix_opr(TokenType::PERCENT, Precedence::PREFIX);
 	register_parser(TokenType::QUESTION, new ConditionParser());// (a && b ? "yep" : "nah")
 
 	/* Assignment */

@@ -16,6 +16,7 @@
 #include "../BinaryOperatorExpr.h"
 #include "../IdentifierExpr.h"
 #include "../LiteralExpr.h"
+#include "../PrefixExpr.h"
 #include "../MapExpr.h"
 
 namespace mtl
@@ -43,6 +44,15 @@ void MapParser::parse(Parser &parser,
 					|| instanceof<LiteralExpr>(pair_expr)) {
 				parser.consume_peeked(peeked.descriptor);
 				collector(key_string(pair_expr), LiteralExpr::empty());
+				continue;
+			}
+
+			/* Capture expression: `%var_name`
+			 * (behaves the same as: var_name => **var_name) */
+			if (PrefixExpr::is(*pair_expr, TokenType::PERCENT)) {
+				auto idfr = try_cast<PrefixExpr>(pair_expr).get_rhs();
+				collector(key_string(idfr), make_expr<PrefixExpr>(0, Token(TokenType::REF), idfr));
+				parser.consume_peeked(peeked.descriptor);
 				continue;
 			}
 
