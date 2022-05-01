@@ -403,11 +403,22 @@ void LibData::load_container_funcs()
 	});
 }
 
-bool LibData::instanceof(Value &recex, Value &expex)
+bool LibData::instanceof(Value &recv, Value &expv)
 {
-	size_t expected = mtl::num(expex);
-	auto received = static_cast<size_t>(recex.type());
+	size_t expected = expv.numeric() ? mtl::num(expv) : expv.type_id();
+	size_t received = recv.type_id();
 	return expected == received;
+}
+
+bool LibData::instanceof(Value &rec, ExprPtr exp)
+{
+	if (mtl::instanceof<IdentifierExpr>(exp)
+			&& Class::get_id(IdentifierExpr::get_name(exp)) == (size_t) rec.type_id())
+		return true;
+	else {
+		auto expv = val(exp);
+		return instanceof(rec, expv);
+	}
 }
 
 void LibData::load_operators()
@@ -503,8 +514,8 @@ void LibData::load_operators()
 	}));
 
 	infix_operator(TokenType::INSTANCE_OF, LazyBinaryOpr([&](auto lhs, auto rhs) {
-		Value l = val(lhs), r = val(rhs);
-		return instanceof(l, r);
+		Value l = val(lhs);
+		return instanceof(l, rhs);
 	}));
 
 	infix_operator(TokenType::TYPE_SAFE, LazyBinaryOpr([&](auto lhs, auto rhs) {
