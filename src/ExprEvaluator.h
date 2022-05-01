@@ -392,8 +392,6 @@ class ExprEvaluator
 		Value invoke(const Value &callable, ExprList &args);
 
 		Value invoke_method(Object&, Value&, ExprList&);
-		Value invoke_method(Object&, Function&, ExprList&);
-		Value invoke_method(Object&, InbuiltFunc&, ExprList&);
 
 		template<typename T>
 		inline TYPE(T)& tmp_callable(T &&callable)

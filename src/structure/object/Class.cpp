@@ -63,12 +63,20 @@ Class::Class(ExprEvaluator &eval, const std::string &name) :
 	});
 }
 
+void Class::register_method(std::string_view name, Function &method)
+{
+	method.arg_def.push_front({std::move(mtl::str(Class::THIS_ARG)), LiteralExpr::empty()});
+	class_data.set(mtl::str(name), method);
+}
+
 Value Class::extract_names(const DataTable &table)
 {
 	Value names(Type::LIST);
 	auto &list = names.get<ValList>();
-	for (auto&& [name, method] : table.managed_map())
-		list.push_back(name);
+	for (auto&& [name, method] : table.managed_map()) {
+		if (name[0] != '.')
+			list.push_back(name);
+	}
 	return names;
 }
 
@@ -90,7 +98,7 @@ Value Class::invoke_static(const std::string &name, ExprList &args)
 
 bool Class::static_call(Args &args)
 {
-	return &Object::get_this(args) == static_instance.get();
+	return Object::get_this(args).id() == static_instance->id();
 }
 
 DataTable& Class::get_class_data()

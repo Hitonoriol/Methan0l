@@ -47,14 +47,16 @@ class Class
 		Class(ExprEvaluator &eval, const std::string &name);
 		virtual ~Class() = default;
 
+		void register_method(std::string_view, Function&);
+
 		template<typename T>
 		void register_method(std::string_view name, T method)
 		{
-			auto n = mtl::str(name);
-			if constexpr (std::is_same<TYPE(T), Function>::value || std::is_same<TYPE(T), InbuiltFunc>::value)
-				class_data.set(std::move(n), method);
+			auto mname = mtl::str(name);
+			if constexpr (std::is_same<TYPE(T), InbuiltFunc>::value)
+				class_data.set(mname, method);
 			else
-				class_data.set(std::move(n), eval.bind_func(method));
+				class_data.set(mname, eval.bind_func(method));
 		}
 
 		DataTable& get_class_data();

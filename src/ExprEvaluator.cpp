@@ -5,6 +5,8 @@
 
 #include "Interpreter.h"
 
+#include "util/benchmark.h"
+
 #include "expression/AssignExpr.h"
 #include "expression/BinaryOperatorExpr.h"
 #include "expression/ConditionalExpr.h"
@@ -103,6 +105,7 @@ const std::string& ExprEvaluator::get_scriptdir()
 
 Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 {
+	BENCHMARK_START
 	LOG('\n' << "Executing " << unit)
 
 	if (use_own_scope)
@@ -146,6 +149,7 @@ Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 		parent->save_return(returned_val);
 	}
 
+	BENCHMARK_END
 	return returned_val;
 }
 
@@ -512,30 +516,11 @@ Value ExprEvaluator::invoke(const Value &callable, ExprList &args)
 
 Value ExprEvaluator::invoke_method(Object &obj, Value &method, ExprList &args)
 {
+	auto argcopy = args;
+	argcopy.push_front(LiteralExpr::create(obj));
 	return method.is<Function>()
-			? invoke_method(obj, method.get<Function>(), args)
-			: invoke_method(obj, method.get<InbuiltFunc>(), args);
-}
-
-Value ExprEvaluator::invoke_method(Object &obj, Function &func, ExprList &args)
-{
-	auto &method = tmp_callable(func);
-	method.call(*this, args);
-	method.local().set(mtl::str(Class::THIS_ARG), obj);
-	return execute(method);
-}
-
-Value ExprEvaluator::invoke_method(Object &obj, InbuiltFunc &method, ExprList &args)
-{
-	//std::shared_ptr<LiteralExpr> objref = nullptr
-	if (args.empty()
-			|| !(instanceof<LiteralExpr>(args[0]) && try_cast<LiteralExpr>(args[0]).raw_ref().is<Object>()
-					&& try_cast<LiteralExpr>(args[0]).raw_ref().get<Object>().get_data().map_ptr() == obj.get_data().map_ptr()))
-		args.push_front(LiteralExpr::create(obj));
-	else
-		try_cast<LiteralExpr>(args[0]).raw_ref() = obj;
-
-	return method(args);
+			? invoke(method.get<Function>(), argcopy)
+			: method.get<InbuiltFunc>()(argcopy);
 }
 
 Value ExprEvaluator::evaluate(InvokeExpr &expr)
