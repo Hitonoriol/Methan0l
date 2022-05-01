@@ -3,40 +3,40 @@ class: Point @(
 	/* Define class fields */
 	x, y
 	
-	/* Called automatically on `new: Point(...)` invocation. */
-	construct => func @(x => 0, y => 0) {
+	/* Constructor, called automatically on `new: Point(...)` invocation */
+	construct => method: x => 0, y => 0 {
 		this.set(x, y)
 	}
 
-	set => func @(x, y) {
+	set => method: x, y {
 		this.x = x
 		this.y = y
 		return: this
 	}
 
-	get_x => func @() {		this.x! 	}
+	get_x => method: () {		this.x! 	}
  
-	get_y => func @() {		this.y! 	}
+	get_y => method: () {		this.y! 	}
 
-	add => func @(rhs) {
+	add => method: rhs {
 		this.x += rhs.x
 		this.y += rhs.y
 		return: this
 	}
 	
-	sub => func @(rhs) {
+	sub => method: rhs {
 		this.x -= rhs.x
 		this.y -= rhs.y
 		return: this
 	}
 	
-	mul => func @(rhs) {
+	mul => method: rhs {
 		this.x *= rhs.x
 		this.y *= rhs.y
 		return: this
 	}
 	
-	div => func @(rhs) {
+	div => method: rhs {
 		this.x /= rhs.x
 		this.y /= rhs.y
 		return: this
@@ -55,10 +55,12 @@ class: Point @(
 	/* Called automatically when using String-converting operators */
 	to_string => @: () -> "(" :: this.x :: ", " :: this.y :: ")"
 
-	static_method => func @(x) {
+	static_method => func: x {
 		<% $"Static method arg: \"{}\"" x
 	}
 )
+
+nl = ""
 
 /* Create some test objects */
 foo = new: Point(1, 2)
@@ -78,11 +80,18 @@ diff = foo - bar
 <% "* foo + bar: " :: foo_plus_bar
 <% $"* Overloaded operators: foo + bar = {}; foo - bar = {}" sum, diff
 <% $"* Overloaded compound assignment: foo *= bar = {}", foo *= bar
+nl
 
-<% newl :: "Calling a static method of class Point:"
+<% "Calling a static method of class Point:"
 Point@static_method("Test")
+nl
 
-<% newl :: "class_id() test:"
+<% "class_id() test:"
 /* Type checking via class_id() method -- can be called both from an object & statically */
 id = foo.class_id()
-<% "* Is foo an instance of Point: " :: id == Point@class_id()<% "* Is foo an instance of File: " :: id == File@class_id()
+<% "* Is foo an instance of Point: " :: id == Point@class_id()<% "* Is foo an instance of File: " :: id == File@class_id()/* This can also be done using the `instanceof` operator */<% $"foo instanceof: Point -> {}" (foo instanceof: Point)<% $"foo instanceof: Int -> {}" (foo instanceof: Int)nl<% "Reflection:"<% "* All methods of `Point`: " :: Point@get_methods()<% "* All fields of `foo`: " :: foo.get_fields()/* Modify object field values by name */foo["x"] = 1337foo["y"] = 7331<% "* foo.get_x() called by name: " :: Point@get_method("get_x")(foo)<% "* foo.y accessed by name: " :: foo["y"]nl<% "Inbuilt class `File` test:"workdir = new: File(".")<% "Absolute name of the current working directory: " :: workdir.absolute_path()dirs = total = 0
+workdir.for_each(@: file, dirs => **dirs, total => **total {
+	++total
+	if (File@is_dir(file)) ? {++dirs}
+})
+<% $"Working directory contains {} files in total, {} of them are directories." total, dirs
