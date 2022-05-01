@@ -9,7 +9,8 @@ namespace mtl
 template<typename Base, typename T>
 inline bool instanceof(T *ptr)
 {
-	return std::is_base_of<Base, T>::value || dynamic_cast<const Base*>(ptr) != nullptr;
+	return (ptr != nullptr)
+			&& (std::is_base_of<Base, T>::value || dynamic_cast<const Base*>(ptr) != nullptr);
 }
 
 template<typename Base, typename T>
