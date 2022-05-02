@@ -282,7 +282,7 @@ std::string Value::to_string(ExprEvaluator *eval)
 
 	case Type::FUNCTION:
 		if (is<InbuiltFunc>())
-			return "Inbuilt function 0x" + to_base(reinterpret_cast<udec>(identity()), 16);
+			return "Native function 0x" + to_base(reinterpret_cast<udec>(identity()), 16);
 		return get<Function>().to_string();
 
 	case Type::OBJECT: {

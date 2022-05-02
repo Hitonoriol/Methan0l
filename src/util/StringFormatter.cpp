@@ -44,21 +44,21 @@ StringFormatter::Modifier StringFormatter::next_modifier(mdf_it &it, mdf_it end)
 
 void StringFormatter::Cell::modify(const Modifier &modifier)
 {
-	switch (static_cast<ModifierType>(modifier.type)) {
+	switch (modifier.type) {
 	case ModifierType::ALIGNMENT:
 		alignment = modifier.value[0];
 		break;
 
 	case ModifierType::WIDTH:
-		width = (size_t) std::stol(modifier.value);
+		width = modifier.get_unsigned();
 		break;
 
 	case ModifierType::FLT_PRECISION:
-		precision = (size_t) std::stol(modifier.value);
+		precision = modifier.get_unsigned();
 		break;
 
 	case ModifierType::ARG_INDEX:
-		value = fmt.get_arg((size_t) std::stol(modifier.value));
+		value = fmt.get_arg(modifier.get_unsigned());
 		break;
 
 	default:

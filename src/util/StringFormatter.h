@@ -53,6 +53,11 @@ class StringFormatter
 			Modifier(ModifierType type, const std::string &value) : type(type), value(value) {}
 			Modifier(const Modifier &rhs) {type = rhs.type; value = rhs.value;}
 
+			inline size_t get_unsigned() const
+			{
+				return (size_t) std::stol(value);
+			}
+
 			inline static ModifierType get_type(char mdf)
 			{
 				if (!contains(modifiers, mdf))
