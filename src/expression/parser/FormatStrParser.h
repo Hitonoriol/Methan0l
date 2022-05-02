@@ -7,7 +7,7 @@
 
 #include "../FormatStrExpr.h"
 #include "../LiteralExpr.h"
-#include <lang/core/LibString.h>
+#include "util/StringFormatter.h"
 
 namespace mtl
 {
@@ -26,7 +26,7 @@ class FormatStrParser: public PrefixParser
 		{
 			parser.match(TokenType::COMMA);
 			ExprList args;
-			if (std::regex_search(token.get_value(), LibString::string_fmt)) {
+			if (StringFormatter::contains_format(token.get_value())) {
 				do {
 					args.push_back(parser.parse());
 				} while (parser.match(TokenType::COMMA));

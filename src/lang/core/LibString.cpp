@@ -9,11 +9,10 @@
 #include "type.h"
 #include "Token.h"
 #include "util/util.h"
+#include "util/StringFormatter.h"
 
 namespace mtl
 {
-
-const std::regex LibString::string_fmt("\\{(.?)\\}");
 
 void LibString::load()
 {
@@ -118,37 +117,11 @@ void LibString::load_operators()
 	}));
 }
 
-/*
- 	 *  `fmt` format: "Text {1}; more text {2}. x = {}..."
-	 *  	Argument indices start from 1;
-	 *  	{} is equivalent to `next argument`
-*/
+
 void LibString::format(std::string &fmt, const std::vector<std::string> &sargs)
 {
-	size_t last_idx { 0 };
-	std::match_results<std::string::iterator> fmt_match;
-	std::string sidx;
-	size_t offset = 0;
-	while (std::regex_search(fmt.begin() + offset, fmt.end(), fmt_match, string_fmt, std::regex_constants::match_prev_avail)) {
-		sidx = fmt_match[1].str();
-		/* No index specified: `{}` */
-		if (sidx.empty())
-			++last_idx;
-		else
-			last_idx = std::stoi(sidx);
-
-		if (last_idx > sargs.size()) {
-			throw std::runtime_error("Invalid format argument index: "
-					+ mtl::str(last_idx));
-		}
-
-		offset += fmt_match.position() + sargs[last_idx - 1].length();
-		fmt.replace(offset - sargs[last_idx - 1].length(), fmt_match.length(), sargs[last_idx - 1]);
-		LOG("Match at: " << fmt_match.position() << " (local)"
-				<< ", replacement len: " << sargs[last_idx - 1].length()
-				<< ", current offset: " << offset
-				<< ", fmt len: " << fmt.length())
-	}
+	StringFormatter formatter(fmt, sargs);
+	formatter.format();
 }
 
 } /* namespace mtl */
