@@ -2,9 +2,21 @@
 #define SRC_UTIL_MEMORY_H_
 
 #include <type_traits>
+#include <memory>
 
 namespace mtl
 {
+
+template<class T>
+class Allocatable
+{
+	public:
+		template<typename ...Args>
+		inline static std::shared_ptr<T> allocate(Args&&...args)
+		{
+			return std::allocate_shared<T>(std::pmr::polymorphic_allocator<T>{}, std::forward<Args>(args)...);
+		}
+};
 
 template<typename Base, typename T>
 inline bool instanceof(T *ptr)
