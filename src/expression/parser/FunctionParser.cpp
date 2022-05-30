@@ -34,7 +34,7 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 	if (!short_form &&
 			/* Parameter list formats: `@(a, b, ...)` or `(a, b, ...)` */
 			!(parser.match(TokenType::MAP_DEF_L) || parser.match(TokenType::PAREN_L)))
-		token.assert_type(TokenType::FUNC_DEF_SHORT);
+		throw std::runtime_error("Invalid function definition expression");
 	/* Otherwise -- parse as a regular form definition (1) */
 
 	ArgDefList args;

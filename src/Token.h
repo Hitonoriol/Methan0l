@@ -78,7 +78,6 @@ enum class TokenType : uint16_t
 	DOUBLE_EXCL,		// !!
 	IN,					// %>
 	OUT_NL,				// <%
-	FUNC_DEF_SHORT,		// #(
 	INFIX_WORD_LHS_L,	// *[
 	FUNC_DEF_SHORT_ALT,	// @:
 	DOUBLE_DOLLAR,		// $$
@@ -132,6 +131,7 @@ enum class TokenType : uint16_t
 	DEREF,
 	IS_REF,
 	METHOD,
+	FUNC_DEF_SHORT,
 
 	NONE = 0x500,
 	EXPR_END,
@@ -189,10 +189,10 @@ class Token
 				"*/", ">=", "<=", "++", "--",
 				":=", "=>", "!=", "+=", "-=",
 				"*=", "/=", "&&", "||", "^^",
-				"**", "!!", "%>", "<%", "#(",
-				"*[", "@:", "$$", "-->", "^=",
-				"|=", "&=", "<<=", ">>=", "%=",
-				"//", ".."
+				"**", "!!", "%>", "<%", "*[",
+				"@:", "$$", "-->", "^=", "|=",
+				"&=", "<<=", ">>=", "%=", "//",
+				".."
 		};
 
 		/* Words not in `keywords` array can be user-redefined in some contexts */
@@ -203,7 +203,7 @@ class Token
 				"typename", "noeval", "defset", "while", "for",
 				"try", "catch", "using_module", "new", "global",
 				"assert", "instanceof", "unwrap", "is_reference",
-				"method"
+				"method", "f"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
@@ -235,8 +235,7 @@ class Token
 
 		static constexpr TokenType block_begin_tokens[] = {
 				TokenType::PAREN_L, TokenType::BRACKET_L, TokenType::BRACE_L,
-				TokenType::MAP_DEF_L, TokenType::LIST_DEF_L, TokenType::INFIX_WORD_LHS_L,
-				TokenType::FUNC_DEF_SHORT
+				TokenType::MAP_DEF_L, TokenType::LIST_DEF_L, TokenType::INFIX_WORD_LHS_L
 		};
 
 		static constexpr TokenType block_end_tokens[] = {
