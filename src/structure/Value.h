@@ -177,7 +177,7 @@ class Value
 			/* String types */
 			if constexpr (std::is_same<TYPE(T), const char*>::value
 					|| std::is_same<TYPE(T), std::string_view>::value)
-				set(std::string(val));
+				set(String(val));
 
 			/* Decay arrays to pointers */
 			else if constexpr (std::is_array<T>::value)
@@ -193,7 +193,7 @@ class Value
 				if (this->is<std::shared_ptr<T>>())
 					get<T>() = val;
 				else
-					value = std::make_shared<T>(val);
+					value = std::allocate_shared<T>(std::pmr::polymorphic_allocator<T>(), val);
 			}
 			else {
 				/* Cast numeric types */

@@ -35,8 +35,11 @@
 namespace mtl
 {
 
+std::unique_ptr<Heap> ExprEvaluator::heap;
+
 ExprEvaluator::ExprEvaluator()
 {
+	init_heap();
 	load_library<LibArithmetic>();
 	load_library<LibLogical>();
 	load_library<LibUnit>();
@@ -48,11 +51,24 @@ ExprEvaluator::ExprEvaluator()
 
 	type_mgr.register_type<File>();
 	type_mgr.register_type<Random>();
+
+	register_func("set_max_mem", [](uint64_t cap){heap->set_max_mem(cap);});
+	register_func("mem_in_use", []{return heap->get_in_use();});
+	register_func("max_mem", []{return heap->get_max_mem();});
+	register_func("mem_info", []{
+		auto in_use = heap->get_in_use(), max = heap->get_max_mem();
+		out << "Heap: " << in_use << "/" << max << "b " <<
+		"(" << ((static_cast<double>(in_use) / max) * 100)  << "% in use)" << NL;
+	});
 }
 
-ExprEvaluator::ExprEvaluator(Unit &main) : ExprEvaluator()
+void ExprEvaluator::init_heap(size_t initial_mem_cap)
 {
-	load_main(main);
+	if (std::pmr::get_default_resource() != std::pmr::new_delete_resource())
+		return;
+
+	heap = Heap::create(initial_mem_cap);
+	std::pmr::set_default_resource(heap.get());
 }
 
 void ExprEvaluator::register_func(const std::string &name, InbuiltFunc &&func)

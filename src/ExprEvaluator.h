@@ -1,6 +1,7 @@
 #ifndef SRC_EXPREVALUATOR_H_
 #define SRC_EXPREVALUATOR_H_
 
+#include <util/Heap.h>
 #include <deque>
 #include <cmath>
 #include <utility>
@@ -56,7 +57,9 @@ class ExprEvaluator
 			UNARY, BINARY
 		};
 
-		std::vector<std::unique_ptr<Library>> libraries;
+		static std::unique_ptr<Heap> heap;
+
+		std::pmr::vector<std::unique_ptr<Library>> libraries;
 
 		OperatorMap<LazyUnaryOpr> lazy_prefix_ops, lazy_postfix_ops;
 		OperatorMap<LazyBinaryOpr> lazy_infix_ops;
@@ -66,12 +69,14 @@ class ExprEvaluator
 		InbuiltFuncMap inbuilt_funcs;
 		TypeManager type_mgr { *this };
 
-		std::deque<Unit*> exec_stack;
-		std::deque<DataTable*> object_stack;
+		std::pmr::deque<Unit*> exec_stack;
+		std::pmr::deque<DataTable*> object_stack;
 		ExceptionHandler exception_handler;
-		std::stack<std::unique_ptr<Unit>> tmp_call_stack;
+		std::stack<std::unique_ptr<Unit>, std::pmr::deque<std::unique_ptr<Unit>>> tmp_call_stack;
 		Expression *current_expr;
 		bool execution_finished = false;
+
+		static void init_heap(size_t initial_mem_cap = DEFAULT_MEM_CAP);
 
 		template<typename T>
 		inline void load_library()
@@ -299,7 +304,6 @@ class ExprEvaluator
 
 	public:
 		ExprEvaluator();
-		ExprEvaluator(Unit &main);
 
 		template<unsigned default_argc = 0, typename F>
 		InbuiltFunc bind_func(F &&f, Value default_args = Value::NO_VALUE)

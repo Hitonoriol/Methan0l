@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "util/memory.h"
 #include "type.h"
 
 namespace mtl
@@ -11,7 +12,7 @@ namespace mtl
 
 class ExprEvaluator;
 
-class DataTable
+class DataTable : public Allocatable<DataMap>
 {
 	private:
 		std::shared_ptr<DataMap> map;

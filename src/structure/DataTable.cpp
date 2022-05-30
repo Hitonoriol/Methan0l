@@ -16,11 +16,11 @@ const std::string DataTable::NIL_IDF(Token::reserved(Word::NIL));
 
 ValList DataTable::temp_queue(16);
 
-DataTable::DataTable() : map(std::make_shared<DataMap>())
+DataTable::DataTable() : map(allocate())
 {
 }
 
-DataTable::DataTable(const DataMap &managed_map) : map(std::make_shared<DataMap>(managed_map))
+DataTable::DataTable(const DataMap &managed_map) : map(allocate(managed_map))
 {
 }
 
@@ -106,7 +106,7 @@ Value& DataTable::nil()
 
 void DataTable::copy_managed_map()
 {
-	map = std::make_shared<DataMap>(*map);
+	map = allocate(*map);
 }
 
 const DataMap& DataTable::managed_map() const

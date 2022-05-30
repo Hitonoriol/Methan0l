@@ -18,11 +18,6 @@ const std::string Interpreter::LAUNCH_ARGS(".argv");
 const std::string Interpreter::SCRDIR(".scrdir");
 const std::string Interpreter::F_LOAD_FILE(".load");
 
-Interpreter::Interpreter() : ExprEvaluator()
-{
-	init_inbuilt_funcs();
-}
-
 Interpreter::Interpreter(const char *path)
 {
 	auto rpath = std::filesystem::absolute(path);
@@ -200,6 +195,7 @@ void Interpreter::print_info()
 			<< "* Library: " << sizeof(Library) << NL
 			<< "* Class: " << sizeof(Class) << NL
 			<< "* InbuiltFunc: " << sizeof(InbuiltFunc) << NL
+			<< "* Allocator: " << sizeof(allocator<Value>) << NL
 			<< NL;
 }
 

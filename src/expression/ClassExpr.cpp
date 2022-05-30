@@ -21,7 +21,7 @@ namespace mtl
 
 void ClassExpr::execute(ExprEvaluator &eval)
 {
-	auto type = std::make_unique<Class>(eval, name);
+	auto type = Class::allocate(eval, name);
 	ExprMap &def_body = try_cast<MapExpr>(body).raw_ref();
 	for (auto &&entry : def_body) {
 		const std::string &name = entry.first;
@@ -36,7 +36,7 @@ void ClassExpr::execute(ExprEvaluator &eval)
 			type->get_object_data().get_or_create(name) = rval;
 	}
 
-	eval.get_type_mgr().register_type(std::move(type));
+	eval.get_type_mgr().register_type(type);
 }
 
 std::ostream& ClassExpr::info(std::ostream &str)

@@ -24,14 +24,14 @@ TypeManager::~TypeManager()
 	delete root;
 }
 
-void TypeManager::register_type(std::unique_ptr<Class> &&type)
+void TypeManager::register_type(std::shared_ptr<Class> type)
 {
 	if constexpr (DEBUG)
 		out << "! Registering type ["
 				<< std::hex << type->get_id() << "] " << std::dec
 				<< type->get_class_data() << std::endl;
 
-	types.emplace(type->get_id(), std::move(type));
+	types.emplace(type->get_id(), type);
 }
 
 Class& TypeManager::get_type(size_t id)

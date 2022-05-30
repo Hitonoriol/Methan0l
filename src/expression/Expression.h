@@ -8,6 +8,7 @@
 #include "structure/Value.h"
 #include "Token.h"
 
+#include "util/debug.h"
 #include "util/memory.h"
 #include "util/string.h"
 
@@ -81,14 +82,13 @@ class Expression
 		static constexpr charr BEG = {'{', NL, TAB, '\0'}, END = {UNTAB, NL, '}', '\0'};
 };
 
-template<typename E, typename ...Args> std::shared_ptr<E> make_expr(uint32_t line,
-		Args &&...args)
+template<typename E, typename ...Args>
+std::shared_ptr<E> make_expr(uint32_t line, Args &&...args)
 {
-	auto expr_ptr = std::make_shared<E>(std::forward<Args>(args)...);
+	auto expr_ptr = std::allocate_shared<E>(std::pmr::polymorphic_allocator<E>{}, std::forward<Args>(args)...);
 	expr_ptr->set_line(line);
 
-	if constexpr (DEBUG)
-		std::cout << "--> " << static_cast<Expression&>(*expr_ptr).info() << std::endl;
+	LOG("--> " << static_cast<Expression&>(*expr_ptr).info());
 
 	return expr_ptr;
 }

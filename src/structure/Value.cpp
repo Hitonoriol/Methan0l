@@ -108,7 +108,7 @@ Value Value::copy()
 	accept([&](auto &v) {
 		if constexpr (is_heap_type<VT(v)>())
 			if constexpr (!std::is_abstract<VT(*v)>::value)
-				value = std::make_shared<VT(*v)>(*v);
+				value = Allocatable<VT(*v)>::allocate(*v);
 	});
 	return *this;
 }
@@ -456,7 +456,7 @@ Value Value::ref(Value &val)
 
 ExprPtr Value::wrapped(const Value &val)
 {
-	return std::make_shared<LiteralExpr>(val);
+	return Allocatable<LiteralExpr>::allocate(val);
 }
 
 void Value::assert_type(Type expected, const std::string &msg)

@@ -39,7 +39,7 @@ class LiteralExpr: public Expression
 		template<typename T>
 		static std::shared_ptr<LiteralExpr> create(T val)
 		{
-			return std::make_shared<LiteralExpr>(val);
+			return make_expr<LiteralExpr>(0, val);
 		}
 
 		static void exec_literal(ExprEvaluator &evaluator, Value &val);

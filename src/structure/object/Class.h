@@ -22,7 +22,7 @@ using Managed = std::unordered_map<uintptr_t, T>;
 
 class Object;
 
-class Class
+class Class : public Allocatable<Class>
 {
 	private:
 		size_t id;

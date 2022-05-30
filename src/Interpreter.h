@@ -5,6 +5,7 @@
 #include <string>
 #include <stdexcept>
 #include <filesystem>
+#include <memory_resource>
 
 #include "Lexer.h"
 #include "Methan0lParser.h"
@@ -29,7 +30,6 @@ class Interpreter: public ExprEvaluator
 		void init_inbuilt_funcs();
 
 	public:
-		Interpreter();
 		Interpreter(const char *runpath);
 		~Interpreter() = default;
 

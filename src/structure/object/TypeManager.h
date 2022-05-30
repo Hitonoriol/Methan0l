@@ -15,7 +15,7 @@ class Anonymous;
 class TypeManager
 {
 	private:
-		std::unordered_map<size_t, std::unique_ptr<Class>> types;
+		std::pmr::unordered_map<size_t, std::shared_ptr<Class>> types;
 		ExprEvaluator &eval;
 		Anonymous *root;
 
@@ -23,12 +23,12 @@ class TypeManager
 		TypeManager(ExprEvaluator &eval);
 		~TypeManager();
 		Class& get_type(size_t id);
-		void register_type(std::unique_ptr<Class> &&type);
+		void register_type(std::shared_ptr<Class> type);
 
 		template<typename T>
 		inline void register_type()
 		{
-			register_type(std::make_unique<T>(eval));
+			register_type(Allocatable<T>::allocate(eval));
 		}
 
 		Value invoke_method(Object &obj, const std::string &name, Args &args);

@@ -41,7 +41,7 @@ std::string Expression::get_name(Expression *expr)
 
 ExprPtr Expression::return_expr(ExprPtr expr)
 {
-	return std::make_shared<PostfixExpr>(expr, TokenType::EXCLAMATION);
+	return make_expr<PostfixExpr>(expr->line, expr, TokenType::EXCLAMATION);
 }
 
 ExprPtr Expression::return_val(Value val)
@@ -59,7 +59,7 @@ std::ostream& Expression::info(std::ostream &str)
 
 std::string Expression::info()
 {
-	std::stringstream ss;
+	sstream ss;
 	info(ss);
 	return tab(ss.str());
 }
