@@ -9,7 +9,7 @@ namespace mtl
 class Runner
 {
 	public:
-		static int run_file(Interpreter&, int argc, char **argv);
+		static int run_file(Interpreter&, int argc, char **argv, int start_from = 1);
 };
 
 } /* namespace mtl */

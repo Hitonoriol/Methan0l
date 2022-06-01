@@ -72,11 +72,11 @@ class ExprEvaluator
 		std::pmr::deque<Unit*> exec_stack;
 		std::pmr::deque<DataTable*> object_stack;
 		ExceptionHandler exception_handler;
-		std::stack<std::unique_ptr<Unit>, std::pmr::deque<std::unique_ptr<Unit>>> tmp_call_stack;
+		std::stack<std::shared_ptr<Unit>, std::pmr::deque<std::shared_ptr<Unit>>> tmp_call_stack;
 		Expression *current_expr;
 		bool execution_finished = false;
 
-		static void init_heap(size_t initial_mem_cap = DEFAULT_MEM_CAP);
+		static void init_heap(size_t initial_mem_cap = HEAP_MEM_CAP);
 
 		template<typename T>
 		inline void load_library()
@@ -400,7 +400,7 @@ class ExprEvaluator
 		template<typename T>
 		inline TYPE(T)& tmp_callable(T &&callable)
 		{
-			tmp_call_stack.push(std::make_unique<TYPE(T)>(callable));
+			tmp_call_stack.push(Allocatable<TYPE(T)>::allocate(callable));
 
 			if constexpr (DEBUG)
 				std::cout << "* Pushing tmp callable "

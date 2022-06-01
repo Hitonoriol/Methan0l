@@ -55,9 +55,11 @@ inline size_t str_length(const std::string &str)
 			[](char c) -> bool {return (c & 0xC0) == 0x80;});
 }
 
-inline void clear(std::stringstream &ss)
+template<class T, class Traits, class Alloc>
+inline void clear(std::basic_stringstream<T, Traits, Alloc> &ss)
 {
-	std::stringstream().swap(ss);
+	if (ss.rdbuf())
+		ss.rdbuf()->pubseekpos(0);
 }
 
 inline bool ends_with(std::string_view str, std::string_view suffix)

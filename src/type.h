@@ -28,10 +28,12 @@ class Value;
 
 using dec = int64_t;
 using udec = uint64_t;
-using String = std::pmr::string;
 
 template<class T>
 using allocator = std::pmr::polymorphic_allocator<T>;
+
+using String = std::pmr::string;
+using StringStream = std::basic_stringstream<char, std::char_traits<char>, String::allocator_type>;
 
 std::string str(Value);
 double dbl(Value);
@@ -39,8 +41,6 @@ dec num(Value);
 udec unum(Value);
 bool bln(Value);
 
-/* Migrate everything to pmr::string before doing this:
- * using sstream = std::basic_stringstream<char, std::char_traits<char>, mtl::allocator<char>>; */
 using sstream = std::stringstream;
 using charr = const char[];
 using cstr = const char*;

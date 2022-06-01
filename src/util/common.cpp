@@ -27,4 +27,9 @@ const std::string FULL_VERSION_STR(
 std::string RUNPATH, RUNDIR;
 Interpreter *INTERPRETER  = nullptr;
 
+bool USE_MONOTONIC_BUFFER = true;
+bool HEAP_LIMITED = true;
+uint64_t HEAP_MEM_CAP = 0x100000;
+uint64_t HEAP_MAX_MEM = 0x2000000;
+
 }

@@ -14,7 +14,7 @@ namespace mtl
 
 const std::string DataTable::NIL_IDF(Token::reserved(Word::NIL));
 
-ValList DataTable::temp_queue(16);
+ValList DataTable::temp_queue{};
 
 DataTable::DataTable() : map(allocate())
 {

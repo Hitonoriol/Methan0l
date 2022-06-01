@@ -177,7 +177,7 @@ class Value
 			/* String types */
 			if constexpr (std::is_same<TYPE(T), const char*>::value
 					|| std::is_same<TYPE(T), std::string_view>::value)
-				set(String(val));
+				set(std::string(val));
 
 			/* Decay arrays to pointers */
 			else if constexpr (std::is_array<T>::value)
