@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
 	mtl::Interpreter methan0l(argv[0]);
 
-	if (argc > 1)
+	if (argc - arg_start > 0)
 		return mtl::Runner::run_file(methan0l, argc, argv, arg_start);
 
 	mtl::InteractiveRunner(methan0l).start();
