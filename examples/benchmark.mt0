@@ -1,34 +1,46 @@
 <% "Methan0l benchmarks" :: newl
 
-start = now$()
+start = now()
+time = 0
+set_max_mem(0x8000000)
 
 <% "Unit execution overhead: " ::
 	{
-		rep = 100 000
+		rep = 1 000 000
 		msec = 0.0
-		do $(i, range$(rep)) -> {msec += measure_time$({})}
+		for (i, range(rep)) msec += measure_time({})
+		#time += msec
 		return: msec / rep
-	}$()
+	}()
 :: "ms"
 
 execution_time = func @(action, times) {
 	tlist = $()
-	do $(i, range$(times)) -> {
-		tlist[] = measure_time$(action$())
+	for (i, range(times)) -> {
+		tlist[] = measure_time(action())
 	}
 	mean = 0.0
-	do $(n, tlist) -> {mean += n}
-	return: mean / tlist.size$()
+	for (n, tlist) {mean += n}
+	#time += mean
+	return: mean / tlist.size()
 }
 
 benchmark = func @(bench_name, action, times => 10) {
-	time = #execution_time$(action, times)
-	<% "* " :: bench_name :: "[x" :: times :: "]: "
-		:: time :: "ms"
+	mem = mem_in_use()
+	<% "\n* " :: bench_name :: ":"
+	%% '\t' :: ">> "; mem_info()
+	time = execution_time(action, times)
+	<% '\t' :: "Mean of " :: times :: " measurements: " :: time :: "ms"
+
+	delete: bench_name; delete: action; delete: times; delete: time
+	if ((leaked = mem_in_use() - mem) > 0) ? {
+		<% '\t' :: "[!] Leaked " :: leaked :: "b of memory"
+	}
 }
 
 class: Test @(
-	foo => func @(n) {
+	n
+	foo => method: n {
 		this.n = n
 	}
 )
@@ -37,29 +49,45 @@ obj = new: Test()
 
 rec = func @(n) {
 	if (n < 1) ? break!
-	#rec(n - 1)
+	rec(n - 1)
 }
-benchmark("Recursion, 1000 calls deep",
-	{#rec(1000)}
-)
 
-benchmark("For loop, 1m iters",
-	{do $(i = 0, i < 1 000 000, ++i) {}})
+benchmark("Recursion, 1000 calls deep",	{
+	rec(1000)
+})
 
-benchmark("For-each loop, 1m iters",
-	{do $(i, range(1 000 000)) {}})
+benchmark("range(1 000 000)",	{
+	range(1 000 000)
+})
 
-benchmark("Functional for-each, 1m iters",
-	{range(1 000 000).for_each(func @(it) {})})
+benchmark("For loop, 1m iters",	{
+	for (i = 0, i < 1 000 000, ++i) {}
+})
 
-benchmark("List mapping, 1m elements",
-	{range(1 000 000).map(func @(n){n + 1!})})
+benchmark("While loop, 1m iters", {
+	i = 0
+	while (i < 1 000 000) { ++i }
+})
 
-benchmark("Pseudo-method call",
-	{123.sqrt()}, 1 000 000)
+benchmark("For-each loop, 1m iters", {
+	for (i, range(1 000 000)) {}
+})
+
+benchmark("Functional for-each, 1m iters", {
+	range(1 000 000).for_each(@: (){})
+})
+
+benchmark("List mapping, 1m elements", {
+	range(1 000 000).map(func @(n){n + 1!})
+})
+
+benchmark("Pseudo-method call",	{
+	123.sqrt()
+}, 1 000 000)
 	
-benchmark("Class method call",
-	{#obj.foo(42)}, 1 000 000)
+benchmark("Class method call", {
+	#obj.foo(42)
+}, 1 000 000)
 
-time_total = (now() - start) / 1000
-<% newl :: "All benchmarks finished. [" :: time_total :: " secs spent]"
+time_total = (now() - start) / 1000.0
+<% newl :: "All benchmarks finished. [" :: time :: " ms spent on tests / " :: time_total :: " secs spent in total]"
