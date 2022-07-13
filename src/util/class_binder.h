@@ -48,8 +48,8 @@ struct Factory: private FactoryImpl<T, Types...>::OptCall
 METHOD_WRAPPER(R(C::*func)(Args...))
 METHOD_WRAPPER(R(C::*func)(Args...)const)
 
-#define CLASS(binder) decltype(binder)::bound_class
-#define OBJECT(binder, obj) decltype(binder)::as_native(obj)
+#define CLASS(binder) std::remove_reference<decltype(binder)>::type::bound_class
+#define OBJECT(binder, obj) std::remove_reference<decltype(binder)>::type::as_native(obj)
 
 template<class C>
 class ClassBinder
@@ -57,13 +57,18 @@ class ClassBinder
 	private:
 		using Obj = std::shared_ptr<C>;
 
-		std::unique_ptr<Class> clazz;
+		std::shared_ptr<Class> clazz;
 		ExprEvaluator &eval;
 
 	public:
 		using bound_class = C;
-		ClassBinder(const std::string &name, ExprEvaluator &eval) :
-			clazz(std::make_unique<Class>(eval, name)), eval(eval) {}
+		ClassBinder(ExprEvaluator &eval, const std::string &name = "") :
+			clazz(Allocatable<Class>::allocate(eval, name)), eval(eval) {}
+
+		inline void set_name(const std::string &name)
+		{
+			clazz->set_name(name);
+		}
 
 		/*
 		 * Creates a methan0l Class instance with specified constructor
@@ -93,24 +98,21 @@ class ClassBinder
 		template<typename F>
 		inline void bind_method(std::string_view name, F &&method)
 		{
+			LOG("Binding native class method: " << name << "[" << type_name<F>() << "]")
 			clazz->register_method(name, eval.bind_func(mtl::method(method)));
 		}
 
 		template<typename F>
 		inline void register_method(std::string_view name, F &&method)
 		{
+			LOG("Registering class method: " << name << "[" << type_name<F>() << "]")
 			clazz->register_method(name, eval.bind_func(method));
 		}
 
 		inline void register_class()
 		{
-			eval.get_type_mgr().register_type(std::move(clazz));
+			eval.get_type_mgr().register_type(clazz);
 		}
-};
-
-struct BinderTest
-{
-	static void pair(ExprEvaluator&);
 };
 
 }

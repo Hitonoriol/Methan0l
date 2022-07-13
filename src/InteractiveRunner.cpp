@@ -73,12 +73,6 @@ const InteractiveRunner::CommandMap InteractiveRunner::commands
 							mt0.run();
 						}
 					}
-		},
-		{ "test",
-				[](auto &runner)
-					{
-						BinderTest::pair(runner.interpreter());
-					}
 		}
 };
 
