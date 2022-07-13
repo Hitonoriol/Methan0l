@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "util/meta/type_traits.h"
 #include "lang/Library.h"
 #include "Object.h"
 
@@ -28,8 +29,17 @@ class TypeManager
 		template<typename T>
 		inline void register_type()
 		{
-			register_type(Allocatable<T>::allocate(eval));
+			/* If T is callable, it must handle the registration itself inside its invocation operator overload
+			 * (+ the registration must not have any state bound to object of T) */
+			IF (is_callable<T>::value) {
+				T registrator(eval);
+				registrator();
+			}
+			else
+				register_type(Allocatable<T>::allocate(eval));
 		}
+
+		void unregister_type(const std::string &name);
 
 		Value invoke_method(Object &obj, const std::string &name, Args &args);
 

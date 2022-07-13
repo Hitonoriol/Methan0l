@@ -34,6 +34,11 @@ void TypeManager::register_type(std::shared_ptr<Class> type)
 	types.emplace(type->get_id(), type);
 }
 
+void TypeManager::unregister_type(const std::string &name)
+{
+	types.erase(Class::get_id(name));
+}
+
 Class& TypeManager::get_type(size_t id)
 {
 	auto entry = types.find(id);

@@ -70,7 +70,14 @@ class Class : public Allocatable<Class>
 		Value extract_names(const DataTable&);
 
 		size_t get_id();
+
 		const std::string& get_name();
+		inline void set_name(const std::string &name)
+		{
+			this->name = name;
+			id = get_id(name);
+		}
+
 		virtual Object create(ExprList &args);
 
 		static size_t get_id(const std::string &type_name);
