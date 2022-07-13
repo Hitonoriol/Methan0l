@@ -13,10 +13,6 @@
 namespace mtl
 {
 
-WordOperatorParser::WordOperatorParser(int prec) : PrefixOperatorParser(prec)
-{
-}
-
 /*
  * operator: expr
  * operator: expr1, expr2, ...
@@ -26,7 +22,7 @@ ExprPtr WordOperatorParser::parse(Parser &parser, Token token)
 {
 	parser.match(TokenType::COLON);
 	ExprPtr rhs = parser.parse();
-	if (parser.match(TokenType::COMMA)) {
+	if (multiple_args && parser.match(TokenType::COMMA)) {
 		ExprList args{rhs};
 		do {
 			args.push_back(parser.parse());

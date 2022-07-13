@@ -157,7 +157,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_word(TokenType::NO_EVAL, Precedence::NO_EVAL);
 	register_word(TokenType::USING_MODULE);
 	register_word(TokenType::NEW);
-	register_word(TokenType::GLOBAL);
+	register_word(TokenType::GLOBAL, Precedence::PREFIX, true);
 	register_word(TokenType::DEREF);
 	register_word(TokenType::IS_REF);
 
@@ -172,9 +172,9 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_infix_opr(TokenType::ARROW_L, Precedence::DOT, BinOprType::RIGHT_ASSOC);
 }
 
-void Methan0lParser::register_word(TokenType wordop, Precedence prec)
+void Methan0lParser::register_word(TokenType wordop, Precedence prec, bool multiarg)
 {
-	register_parser(wordop, new WordOperatorParser(prcdc(prec)));
+	register_parser(wordop, new WordOperatorParser(prcdc(prec), multiarg));
 }
 
 void Methan0lParser::register_infix_word(TokenType wordop, Precedence prec, BinOprType type)

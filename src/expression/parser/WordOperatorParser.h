@@ -8,9 +8,11 @@ namespace mtl
 
 class WordOperatorParser: public PrefixOperatorParser
 {
+	private:
+		bool multiple_args;
 	public:
-		WordOperatorParser() = default;
-		WordOperatorParser(int prec);
+		WordOperatorParser(int prec = prcdc(Precedence::PREFIX), bool accept_multiple_args = false)
+			: PrefixOperatorParser(prec), multiple_args(accept_multiple_args) {}
 		ExprPtr parse(Parser &parser, Token token) override;
 };
 
