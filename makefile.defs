@@ -14,6 +14,7 @@ BIN_NAME = $(addsuffix $(if $(filter $(OS_NAME),Windows),.exe,),methan0l)
 LIB_EXCLUDE = %Methan0l.cpp
 LIB_OBJ = $(call rwildcard,./src,*.o)
 LIB_SRC = $(patsubst %.cpp,%.o.pic,$(filter-out $(LIB_EXCLUDE),$(call rwildcard,../src,*.cpp)))
+LIB_PIC=$(patsubst ../%,./%,$(LIB_SRC))
 LIB_DIR = methan0l-sdk
 LIB_NAME=libmethan0l
 LIB_INC=-I../src
@@ -43,7 +44,7 @@ release: all lib
 lib: libmethan0l.so
 
 libmethan0l.so: all libclean lib-dirs headers $(LIB_SRC)
-	g++ $(filter-out $(patsubst %.cpp,%.o.pic,$(LIB_EXCLUDE)),$(call rwildcard,./src,*.o.pic)) -shared -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME).so
+	g++ $(LIB_PIC) -shared -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME).so
 
 %.o.pic: %.cpp
 	$(eval src:=$^)
@@ -61,4 +62,4 @@ static-lib: all libclean lib-dirs headers
 	ar rvs $(LIB_DIR)/$(LIB_NAME).a  $(call rwildcard,./src,*.o)
 
 libclean:
-	$(RM) $(LIB_DIR)/*
+	$(RM) $(LIB_DIR)/* $(LIB_PIC)
