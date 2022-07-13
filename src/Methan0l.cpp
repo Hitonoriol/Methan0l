@@ -69,8 +69,11 @@ int parse_args(int argc, char **argv)
 		if (arg[0] != '-')
 			break;
 
-		if (is_valid_arg("--max-mem", arg))
+		if (is_valid_arg("--max-mem", arg)) {
 			mtl::HEAP_MAX_MEM = get_numeric_arg(arg);
+			if (mtl::HEAP_MEM_CAP > mtl::HEAP_MAX_MEM)
+				mtl::HEAP_MEM_CAP = mtl::HEAP_MAX_MEM;
+		}
 
 		else if (is_valid_arg("--initial-mem", arg))
 			mtl::HEAP_MEM_CAP = get_numeric_arg(arg);
