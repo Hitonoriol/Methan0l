@@ -9,11 +9,14 @@
 #include <type_traits>
 #include <vector>
 #include <cwchar>
+#include <algorithm>
+#include <cctype>
 
 namespace mtl
 {
 
 constexpr std::string_view TAB_S = "  |  ";
+constexpr std::string_view NUM_CHARS = "-.0123456789";
 
 /* Keeps indentation levels after new line when using `\t` character */
 std::string tab(std::string&&);
@@ -84,6 +87,11 @@ inline bool contains(const std::string &str, const T &needle)
 	if (needle.size() > str.size())
 		return false;
 	return str.find(needle) != std::string::npos;
+}
+
+inline bool is_numeric(const std::string &str)
+{
+	return !str.empty() && str.find_first_not_of(NUM_CHARS) == std::string::npos;
 }
 
 /* Create a "string list" representation of strings provided by <str_supplier> while its return is not empty */

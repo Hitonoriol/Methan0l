@@ -466,29 +466,6 @@ void Value::assert_type(Type expected, const std::string &msg)
 		throw InvalidTypeException(this_type, expected, msg + " [Value: `" + to_string() + "`]");
 }
 
-Value Value::from_string(std::string str)
-{
-	Value value;
-	if (std::isdigit(str[0])) {
-		bool is_dbl = str.find(Token::chr(TokenType::DOT)) != std::string::npos;
-		if (is_dbl)
-			value = std::stod(str);
-		else
-			value = (dec) std::stol(str);
-	}
-
-	else if (str == Token::reserved(Word::TRUE)
-			|| str == Token::reserved(Word::FALSE)) {
-		value = str == Token::reserved(Word::TRUE);
-	}
-
-	else {
-		value = str;
-	}
-
-	return value;
-}
-
 /* If at least one of the operands is of type DOUBLE, operation result should also be DOUBLE */
 bool Value::is_double_op(const Value &lhs, const Value &rhs)
 {

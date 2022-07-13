@@ -365,7 +365,6 @@ class Value
 		friend bool operator ==(const Value &lhs, const Value &rhs);
 		bool operator !=(const Value &rhs);
 
-		static Value from_string(std::string str);
 		Value convert(Type new_val_type);
 
 		inline std::any& as_any()

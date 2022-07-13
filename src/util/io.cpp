@@ -7,6 +7,7 @@ namespace mtl
 {
 
 std::ostream &out = std::cout;
+std::istream &in = std::cin;
 
 std::string read_file(std::istream &file)
 {

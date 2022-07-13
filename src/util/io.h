@@ -8,6 +8,7 @@ namespace mtl
 {
 
 extern std::ostream &out;
+extern std::istream &in;
 
 std::string read_file(const std::string &name);
 std::string read_file(std::istream &file);
