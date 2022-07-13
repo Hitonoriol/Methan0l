@@ -29,8 +29,10 @@
 #include "lang/core/LibModule.h"
 
 #include "lang/lib/LibMath.h"
+
 #include "lang/structure/File.h"
 #include "lang/structure/Random.h"
+#include "lang/structure/Pair.h"
 
 namespace mtl
 {
@@ -51,10 +53,12 @@ ExprEvaluator::ExprEvaluator()
 
 	type_mgr.register_type<File>();
 	type_mgr.register_type<Random>();
+	type_mgr.register_type<Pair>();
 
 	register_func("set_max_mem", [](uint64_t cap){heap->set_max_mem(cap);});
 	register_func("mem_in_use", []{return heap->get_in_use();});
 	register_func("max_mem", []{return heap->get_max_mem();});
+	register_func("enforce_mem_limit", [](bool val){mtl::HEAP_LIMITED = val;});
 	register_func("mem_info", []{
 		auto in_use = heap->get_in_use(), max = heap->get_max_mem();
 		out << "Heap: " << in_use << "/" << max << "b " <<
@@ -422,9 +426,7 @@ Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)
 	else {
 		auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
 		ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
-		return instanceof<BinaryOperatorExpr>(lhs) ?
-														referenced_value(lhs) :
-														dot_operator_reference(lhs, rhs);
+		return dot_operator_reference(lhs, rhs);
 	}
 
 	throw std::runtime_error("Reference error");
@@ -436,10 +438,7 @@ Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
 	if (lref.object() && instanceof<IdentifierExpr>(rhs.get())) {
 		Object &obj = lref.get<Object>();
 		auto &idfr = IdentifierExpr::get_name(rhs);
-
-		if constexpr (DEBUG)
-			out << "Accessing object field " << idfr << std::endl;
-
+		LOG("Accessing object field " << idfr);
 		return obj.field(idfr);
 	}
 	/*
