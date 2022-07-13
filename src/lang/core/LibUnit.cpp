@@ -237,7 +237,7 @@ Value LibUnit::object_dot_operator(Object &obj, ExprPtr rhs)
 		return obj.invoke_method(eval->type_mgr, method_name, method.arg_list());
 	}
 	else
-		return obj.field(IdentifierExpr::get_name(rhs));
+		return Value::ref(obj.field(IdentifierExpr::get_name(rhs)));
 }
 
 /* Pseudo-method invocation, effectively performs transformation:
