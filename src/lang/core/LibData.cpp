@@ -186,7 +186,7 @@ Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 		if (convert)
 			return Value::ref(lval = rval.convert(ltype));
 		else
-			throw InvalidTypeException(rval.type(), ltype);
+			throw InvalidTypeException(rval, ltype);
 	}
 	return convert ? Value::ref(lval = rval) : rval;
 }
@@ -520,8 +520,7 @@ void LibData::load_operators()
 	infix_operator(TokenType::TYPE_SAFE, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		Value l = val(lhs), r = val(rhs);
 		if (!instanceof(l, r))
-			throw InvalidTypeException(static_cast<Type>(static_cast<size_t>(l.type())),
-					static_cast<Type>(mtl::num(r)), "Type assertion failed:");
+			throw InvalidTypeException(l, static_cast<Type>(mtl::num(r)), "Type assertion failed:");
 
 		return Value::NO_VALUE;
 	}));

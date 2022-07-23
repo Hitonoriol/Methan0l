@@ -21,8 +21,8 @@ class Exception {
 enum class Type : uint8_t;
 struct InvalidTypeException: public std::runtime_error
 {
-		InvalidTypeException(Type type, Type expected,
-				const std::string &msg = "Invalid type conversion:");
+		InvalidTypeException(Value received, Type expected);
+		InvalidTypeException(Type type, Type expected, const std::string &msg = "Invalid type conversion:");
 		InvalidTypeException(Type type);
 };
 

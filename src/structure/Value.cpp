@@ -88,9 +88,10 @@ Value::Value(const Value &val) : value(val.value)
 
 Value::~Value()
 {
-	if constexpr (DEBUG) {
-		out << "[x] Destroying (" << use_count() << ") [" << type_name() << "] 0x"
-				<< to_base((udec) identity(), 16) << ":" << (heap_type() ? NL : ' ') << *this << std::endl;
+	DBG {
+		if (!nil() && !empty())
+			LOG("[x] Destroying (" << use_count() << ") [" << type_name() << "] 0x"
+					<< to_base((udec) identity(), 16) << ":" << (heap_type() ? NL : ' ') << *this);
 	}
 }
 
@@ -326,7 +327,7 @@ dec Value::to_dec() const
 		return std::stol(cget<std::string>());
 
 	else
-		throw InvalidTypeException(type(), Type::INTEGER);
+		throw InvalidTypeException(*this, Type::INTEGER);
 }
 
 double Value::to_double() const
@@ -338,7 +339,7 @@ double Value::to_double() const
 		return std::stod(cget<std::string>());
 
 	else
-		throw InvalidTypeException(type(), Type::DOUBLE);
+		throw InvalidTypeException(*this, Type::DOUBLE);
 }
 
 bool Value::to_bool() const
@@ -358,7 +359,7 @@ bool Value::to_bool() const
 		return cget<double>() == 1.0;
 
 	default:
-		throw InvalidTypeException(t, Type::BOOLEAN);
+		throw InvalidTypeException(*this, Type::BOOLEAN);
 	}
 }
 
@@ -376,7 +377,7 @@ char Value::to_char() const
 		return (char) cget<dec>();
 
 	default:
-		throw InvalidTypeException(t, Type::CHAR);
+		throw InvalidTypeException(*this, Type::CHAR);
 	}
 }
 
@@ -429,7 +430,7 @@ Value Value::convert(Type new_val_type)
 		break;
 	}
 
-	throw InvalidTypeException(type(), new_val_type);
+	throw InvalidTypeException(*this, new_val_type);
 }
 
 size_t Value::hash_code() const
