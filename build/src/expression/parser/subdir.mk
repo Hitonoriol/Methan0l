@@ -16,19 +16,6 @@ CPP_SRCS += \
 ../src/expression/parser/TryCatchParser.cpp \
 ../src/expression/parser/WordOperatorParser.cpp 
 
-OBJS += \
-./src/expression/parser/BinaryOperatorParser.o \
-./src/expression/parser/ClassParser.o \
-./src/expression/parser/FunctionParser.o \
-./src/expression/parser/GroupParser.o \
-./src/expression/parser/IndexParser.o \
-./src/expression/parser/InfixWordOperatorParser.o \
-./src/expression/parser/ListParser.o \
-./src/expression/parser/MapParser.o \
-./src/expression/parser/RangeParser.o \
-./src/expression/parser/TryCatchParser.o \
-./src/expression/parser/WordOperatorParser.o 
-
 CPP_DEPS += \
 ./src/expression/parser/BinaryOperatorParser.d \
 ./src/expression/parser/ClassParser.d \
@@ -42,6 +29,19 @@ CPP_DEPS += \
 ./src/expression/parser/TryCatchParser.d \
 ./src/expression/parser/WordOperatorParser.d 
 
+OBJS += \
+./src/expression/parser/BinaryOperatorParser.o \
+./src/expression/parser/ClassParser.o \
+./src/expression/parser/FunctionParser.o \
+./src/expression/parser/GroupParser.o \
+./src/expression/parser/IndexParser.o \
+./src/expression/parser/InfixWordOperatorParser.o \
+./src/expression/parser/ListParser.o \
+./src/expression/parser/MapParser.o \
+./src/expression/parser/RangeParser.o \
+./src/expression/parser/TryCatchParser.o \
+./src/expression/parser/WordOperatorParser.o 
+
 
 # Each subdirectory must supply rules for building sources it contributes
 src/expression/parser/%.o: ../src/expression/parser/%.cpp src/expression/parser/subdir.mk
@@ -51,4 +51,11 @@ src/expression/parser/%.o: ../src/expression/parser/%.cpp src/expression/parser/
 	@echo 'Finished building: $<'
 	@echo ' '
 
+
+clean: clean-src-2f-expression-2f-parser
+
+clean-src-2f-expression-2f-parser:
+	-$(RM) ./src/expression/parser/BinaryOperatorParser.d ./src/expression/parser/BinaryOperatorParser.o ./src/expression/parser/ClassParser.d ./src/expression/parser/ClassParser.o ./src/expression/parser/FunctionParser.d ./src/expression/parser/FunctionParser.o ./src/expression/parser/GroupParser.d ./src/expression/parser/GroupParser.o ./src/expression/parser/IndexParser.d ./src/expression/parser/IndexParser.o ./src/expression/parser/InfixWordOperatorParser.d ./src/expression/parser/InfixWordOperatorParser.o ./src/expression/parser/ListParser.d ./src/expression/parser/ListParser.o ./src/expression/parser/MapParser.d ./src/expression/parser/MapParser.o ./src/expression/parser/RangeParser.d ./src/expression/parser/RangeParser.o ./src/expression/parser/TryCatchParser.d ./src/expression/parser/TryCatchParser.o ./src/expression/parser/WordOperatorParser.d ./src/expression/parser/WordOperatorParser.o
+
+.PHONY: clean-src-2f-expression-2f-parser
 

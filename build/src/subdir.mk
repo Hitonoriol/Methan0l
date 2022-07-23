@@ -16,19 +16,6 @@ CPP_SRCS += \
 ../src/Token.cpp \
 ../src/type.cpp 
 
-OBJS += \
-./src/ExceptionHandler.o \
-./src/ExprEvaluator.o \
-./src/InteractiveRunner.o \
-./src/Interpreter.o \
-./src/Lexer.o \
-./src/Methan0l.o \
-./src/Methan0lParser.o \
-./src/Parser.o \
-./src/Runner.o \
-./src/Token.o \
-./src/type.o 
-
 CPP_DEPS += \
 ./src/ExceptionHandler.d \
 ./src/ExprEvaluator.d \
@@ -42,6 +29,19 @@ CPP_DEPS += \
 ./src/Token.d \
 ./src/type.d 
 
+OBJS += \
+./src/ExceptionHandler.o \
+./src/ExprEvaluator.o \
+./src/InteractiveRunner.o \
+./src/Interpreter.o \
+./src/Lexer.o \
+./src/Methan0l.o \
+./src/Methan0lParser.o \
+./src/Parser.o \
+./src/Runner.o \
+./src/Token.o \
+./src/type.o 
+
 
 # Each subdirectory must supply rules for building sources it contributes
 src/%.o: ../src/%.cpp src/subdir.mk
@@ -51,4 +51,11 @@ src/%.o: ../src/%.cpp src/subdir.mk
 	@echo 'Finished building: $<'
 	@echo ' '
 
+
+clean: clean-src
+
+clean-src:
+	-$(RM) ./src/ExceptionHandler.d ./src/ExceptionHandler.o ./src/ExprEvaluator.d ./src/ExprEvaluator.o ./src/InteractiveRunner.d ./src/InteractiveRunner.o ./src/Interpreter.d ./src/Interpreter.o ./src/Lexer.d ./src/Lexer.o ./src/Methan0l.d ./src/Methan0l.o ./src/Methan0lParser.d ./src/Methan0lParser.o ./src/Parser.d ./src/Parser.o ./src/Runner.d ./src/Runner.o ./src/Token.d ./src/Token.o ./src/type.d ./src/type.o
+
+.PHONY: clean-src
 

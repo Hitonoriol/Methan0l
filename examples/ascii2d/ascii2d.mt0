@@ -1,0 +1,74 @@
+using_module: get_rundir() :: "/modules/ncurses"
+
+screen = initscr()
+
+class: Line @(
+	x0, y0,	x2, y2
+
+	construct => func @(x0, y0, x2, y2) {
+		this.x0 = x0
+		this.y0 = y0
+		this.x2 = x2
+		this.y2 = y2
+	}
+
+	move_by => func @(dx, dy) {
+		this.x0 += dx
+		this.y0 += dy
+		this.x2 += dx
+		this.y2 += dy
+	}
+
+	draw => func @(pixel => '*') {
+		x = this.x0; y = this.y0
+		dx = abs(this.x1 - this.x0)
+		dy = abs(this.y1 - this.y0)
+
+		sx = this.x0 < this.x1 ? 1 : -1
+		sy = this.y0 < this.y1 ? 1 : -1
+		err = dx - dy
+
+		while (true) {
+			mvaddch(y, x, pixel)
+			if (x == x1 && y == y1) ? -> {
+				void!
+			}
+
+			e2 = err * 2
+			if (e2 > -dx) ? {
+				err -= dy
+				x += sx
+			}
+
+			if (e2 < dx) ? {
+				err += dx
+				y += sy
+			}
+		}
+	}
+)
+
+class: Rectangle @(
+	a, b, c, d
+
+	construct => func @(x0, y0, w, h) {
+		this.a = new: Line(x0, y0, x0, y0 + h)
+		this.b = new: Line(x0, y0, x0 + w, y0)
+		this.c = new: Line(x0 + w, y0, x0 + w, y0 + h)
+		this.d = new: Line(x0, y0 + h, x0 + w, y0 + h)
+	}
+
+	move_by => func @(dx, dy) {
+		this.a.move_by(dx, dy)
+		this.b.move_by(dx, dy)
+		this.c.move_by(dx, dy)
+		this.d.move_by(dx, dy)
+	}
+
+	draw => func @(pixel => '*') {
+		this.a.draw(pixel)
+		this.b.draw(pixel)
+		this.c.draw(pixel)
+		this.d.draw(pixel)
+	}
+)

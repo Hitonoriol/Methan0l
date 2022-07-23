@@ -23,26 +23,6 @@ CPP_SRCS += \
 ../src/expression/TryCatchExpr.cpp \
 ../src/expression/UnitExpr.cpp 
 
-OBJS += \
-./src/expression/AssignExpr.o \
-./src/expression/BinaryOperatorExpr.o \
-./src/expression/ClassExpr.o \
-./src/expression/ConditionalExpr.o \
-./src/expression/Expression.o \
-./src/expression/FormatStrExpr.o \
-./src/expression/FunctionExpr.o \
-./src/expression/IdentifierExpr.o \
-./src/expression/IndexExpr.o \
-./src/expression/ListExpr.o \
-./src/expression/LiteralExpr.o \
-./src/expression/LoopExpr.o \
-./src/expression/MapExpr.o \
-./src/expression/PostfixExpr.o \
-./src/expression/PrefixExpr.o \
-./src/expression/RangeExpr.o \
-./src/expression/TryCatchExpr.o \
-./src/expression/UnitExpr.o 
-
 CPP_DEPS += \
 ./src/expression/AssignExpr.d \
 ./src/expression/BinaryOperatorExpr.d \
@@ -63,6 +43,26 @@ CPP_DEPS += \
 ./src/expression/TryCatchExpr.d \
 ./src/expression/UnitExpr.d 
 
+OBJS += \
+./src/expression/AssignExpr.o \
+./src/expression/BinaryOperatorExpr.o \
+./src/expression/ClassExpr.o \
+./src/expression/ConditionalExpr.o \
+./src/expression/Expression.o \
+./src/expression/FormatStrExpr.o \
+./src/expression/FunctionExpr.o \
+./src/expression/IdentifierExpr.o \
+./src/expression/IndexExpr.o \
+./src/expression/ListExpr.o \
+./src/expression/LiteralExpr.o \
+./src/expression/LoopExpr.o \
+./src/expression/MapExpr.o \
+./src/expression/PostfixExpr.o \
+./src/expression/PrefixExpr.o \
+./src/expression/RangeExpr.o \
+./src/expression/TryCatchExpr.o \
+./src/expression/UnitExpr.o 
+
 
 # Each subdirectory must supply rules for building sources it contributes
 src/expression/%.o: ../src/expression/%.cpp src/expression/subdir.mk
@@ -72,4 +72,11 @@ src/expression/%.o: ../src/expression/%.cpp src/expression/subdir.mk
 	@echo 'Finished building: $<'
 	@echo ' '
 
+
+clean: clean-src-2f-expression
+
+clean-src-2f-expression:
+	-$(RM) ./src/expression/AssignExpr.d ./src/expression/AssignExpr.o ./src/expression/BinaryOperatorExpr.d ./src/expression/BinaryOperatorExpr.o ./src/expression/ClassExpr.d ./src/expression/ClassExpr.o ./src/expression/ConditionalExpr.d ./src/expression/ConditionalExpr.o ./src/expression/Expression.d ./src/expression/Expression.o ./src/expression/FormatStrExpr.d ./src/expression/FormatStrExpr.o ./src/expression/FunctionExpr.d ./src/expression/FunctionExpr.o ./src/expression/IdentifierExpr.d ./src/expression/IdentifierExpr.o ./src/expression/IndexExpr.d ./src/expression/IndexExpr.o ./src/expression/ListExpr.d ./src/expression/ListExpr.o ./src/expression/LiteralExpr.d ./src/expression/LiteralExpr.o ./src/expression/LoopExpr.d ./src/expression/LoopExpr.o ./src/expression/MapExpr.d ./src/expression/MapExpr.o ./src/expression/PostfixExpr.d ./src/expression/PostfixExpr.o ./src/expression/PrefixExpr.d ./src/expression/PrefixExpr.o ./src/expression/RangeExpr.d ./src/expression/RangeExpr.o ./src/expression/TryCatchExpr.d ./src/expression/TryCatchExpr.o ./src/expression/UnitExpr.d ./src/expression/UnitExpr.o
+
+.PHONY: clean-src-2f-expression
 
