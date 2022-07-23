@@ -9,7 +9,7 @@ namespace mtl
 AssignExpr::AssignExpr(ExprPtr lhs, Token tok, ExprPtr rhs) :
 		BinaryOperatorExpr(lhs, tok, rhs)
 {
-	move = tok == TokenType::ARROW_R;
+	move = tok == TokenType::ARROW_L;
 }
 
 Value AssignExpr::evaluate(ExprEvaluator &eval)

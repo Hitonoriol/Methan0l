@@ -194,10 +194,6 @@ void LibUnit::load_operators()
 			return Value::ref(box_value(unit, rhs));
 		}
 	}));
-
-	infix_operator(TokenType::ARROW_L, LazyBinaryOpr([&](auto lhs, auto rhs) -> Value {
-		return invoke_pseudo_method(lhs, rhs);
-	}));
 }
 
 Value& LibUnit::box_value(Unit &box, ExprPtr expr)
@@ -216,7 +212,7 @@ void LibUnit::save_return(ExprPtr ret)
 		unit->stop(true);
 	}
 	else
-		unit->save_return(ret->evaluate(*eval));
+		unit->save_return(eval->unwrap_or_reference(*ret));
 }
 
 void LibUnit::make_box(Value &unit_val)

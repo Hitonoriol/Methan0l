@@ -21,10 +21,6 @@ namespace mtl
  */
 class FunctionParser: public PrefixParser
 {
-	private:
-		/* Re-contextualize the `->` token to stop parser from interpreting it as an infix operator */
-		bool lambdize_arrow(Parser &parser);
-
 	public:
 		ExprPtr parse(Parser &parser, Token token) override;
 };

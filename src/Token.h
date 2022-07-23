@@ -135,7 +135,6 @@ enum class TokenType : uint16_t
 
 	NONE = 0x500,
 	EXPR_END,
-	LAMBDA_RET,
 	END = 0xFFFF
 };
 

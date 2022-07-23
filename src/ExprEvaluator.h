@@ -300,8 +300,6 @@ class ExprEvaluator
 			return call_helper<argc == 0, decltype(f), Container, argc>::engage(*this, f, c);
 		}
 
-		Value unwrap_or_reference(Expression &expr);
-
 	public:
 		ExprEvaluator();
 
@@ -427,6 +425,8 @@ class ExprEvaluator
 		{
 			return referenced_value(expr.get(), follow_refs);
 		}
+
+		Value unwrap_or_reference(Expression &expr);
 
 		Value& get(IdentifierExpr &idfr, bool follow_refs = true);
 		Value& get(const std::string &id, bool global, bool follow_refs = true);

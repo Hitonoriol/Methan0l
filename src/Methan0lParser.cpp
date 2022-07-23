@@ -48,7 +48,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 	/* Assignment */
 	register_parser(TokenType::ASSIGN, new AssignParser());				// lhs = rhs
-	alias_infix(TokenType::ASSIGN, TokenType::ARROW_R);					// lhs -> rhs
+	alias_infix(TokenType::ASSIGN, TokenType::ARROW_L);					// lhs <- rhs
 	register_infix_opr(TokenType::TYPE_ASSIGN, Precedence::ASSIGNMENT); // lhs := rhs
 
 	/* Group */
@@ -86,7 +86,6 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 	/* Map definition */
 	register_parser(TokenType::MAP_DEF_L, new MapParser());
-	register_infix_opr(TokenType::KEYVAL, Precedence::ASSIGNMENT);
 
 	/* IO / String oprs */
 	register_prefix_opr(TokenType::OUT_NL, Precedence::IO);				// <% expr

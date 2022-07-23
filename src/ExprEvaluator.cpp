@@ -476,7 +476,7 @@ void ExprEvaluator::exec(Expression &expr)
 Value ExprEvaluator::unwrap_or_reference(Expression &expr)
 {
 	Value val = expr.evaluate(*this);
-	if (instanceof<PrefixExpr>(&expr) && static_cast<PrefixExpr&>(expr).get_operator() == TokenType::REF)
+	if (PrefixExpr::is(expr, TokenType::REF))
 		return val;
 	return val.get();
 }
@@ -486,12 +486,13 @@ Value ExprEvaluator::evaluate(AssignExpr &expr)
 	ExprPtr lexpr = expr.get_lhs();
 	ExprPtr rexpr = expr.get_rhs();
 
-	/* Move Value from LHS to RHS idfr */
+	/* Move (assign w/o copying) value of RHS to LHS
+	 * + if RHS is an identifier, delete it */
 	if (expr.is_move_assignment()) {
-		Value lval = unwrap_or_reference(*lexpr);
-		if (instanceof<IdentifierExpr>(lexpr))
-			del(lexpr);
-		return Value::ref(referenced_value(rexpr) = lval);
+		Value rval = unwrap_or_reference(*rexpr);
+		if (instanceof<IdentifierExpr>(rexpr))
+			del(rexpr);
+		return Value::ref(referenced_value(lexpr) = rval);
 	}
 
 	/* Copy assignment */
