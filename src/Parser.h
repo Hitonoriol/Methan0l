@@ -93,6 +93,11 @@ class Parser
 		PeekedExpr peek_parse(int precedence = 0);
 		void consume_peeked(PeekPos, const Token &up_to = Token::EOF_TOKEN);
 
+		inline bool peek(TokenType expected, size_t n = 0)
+		{
+			return look_ahead(n).get_type() == expected;
+		}
+
 		bool match(TokenType expected);
 		Token consume(TokenType expected);
 		Token consume();

@@ -127,8 +127,7 @@ void Parser::parse_all()
 
 bool Parser::match(TokenType expected)
 {
-	Token &token = look_ahead();
-	if (token.get_type() != expected)
+	if (!peek(expected))
 		return false;
 
 	consume();
