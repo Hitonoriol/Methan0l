@@ -43,8 +43,8 @@ class Unit
 	public:
 		static const std::string RETURN_KW;
 
-		Unit(ExprList expr_list, DataTable data, bool weak = false);
-		Unit(ExprList expr_list, bool weak = false);
+		Unit(const ExprList &expr_list, DataTable data, bool weak = false);
+		Unit(const ExprList &expr_list, bool weak = false);
 		Unit(ExprPtr expr);
 		Unit(DataTable data);
 		Unit();

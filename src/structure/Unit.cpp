@@ -15,16 +15,15 @@ namespace mtl
 
 const std::string Unit::RETURN_KW(Token::reserved(Word::RETURNED));
 
-Unit::Unit(ExprList expr_list, DataTable data, bool weak) :
+Unit::Unit(const ExprList &expr_list, DataTable data, bool weak) :
 		weak(weak),
 		local_data(data),
 		expr_list(expr_list)
 
 {
-
 }
 
-Unit::Unit(ExprList expr_list, bool weak) : Unit(expr_list, DataTable(), weak)
+Unit::Unit(const ExprList &expr_list, bool weak) : Unit(expr_list, DataTable(), weak)
 {
 }
 

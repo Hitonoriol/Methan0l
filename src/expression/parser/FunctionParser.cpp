@@ -30,7 +30,7 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 	MapParser::parse(parser, [&](auto key, auto val) {
 		/* Handles the no-arg case for unparenthesized forms */
 		if (short_form && key == Token::reserved(Word::NIL))
-			return;
+		return;
 
 		args.push_back(std::make_pair(key, val));
 		LOG("* Parsed argdef pair")
@@ -38,12 +38,29 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 
 	ExprPtr body_expr;
 
-	/* Lambda syntax (e.g. func @(...) -> expr) */
-	if (parser.look_ahead().get_type() == TokenType::ARROW_R
-			&& parser.look_ahead(1).get_type() != TokenType::BRACE_L) {
+	/* Lambda syntax (e.g. `f: x, y, ... -> expr`) */
+	if (parser.peek(TokenType::ARROW_R) && !parser.peek(TokenType::BRACE_L, 1)) {
 		parser.consume(TokenType::ARROW_R);
-		ExprList ret { Expression::return_expr(parser.parse()) };
-		body_expr = make_expr<UnitExpr>(line(token), ret, false);
+		body_expr = parser.parse();
+		/*
+		 * Lambdas can contain either
+		 * 	(1) one expression:
+		 * 			`f: x, y, ... -> expr`
+		 * 		In this case expr will be wrapped in a return expression
+		 *
+		 * 	(2) or multiple expressions separated by commas:
+		 * 			`f: x, y, ... -> expr1, expr2, ...`
+		 * 		Here no return expression will be created, making this yet
+		 * 		another form of regular function definition
+		 */
+		ExprList lambda_body {
+				!parser.peek(TokenType::COMMA) ?
+						Expression::return_expr(body_expr) : body_expr };
+
+		while (parser.match(TokenType::COMMA))
+			lambda_body.push_back(parser.parse());
+
+		body_expr = make_expr<UnitExpr>(line(token), lambda_body, false);
 	}
 	else
 		body_expr = parser.parse();
