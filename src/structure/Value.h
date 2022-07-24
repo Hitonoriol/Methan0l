@@ -16,9 +16,9 @@
 #include "util/meta.h"
 #include "util/cast.h"
 
-#define IS_EMPTY(v) std::is_same<decltype(v), NoValue>::value
-#define IS_NIL(v) std::is_same<decltype(v), Nil>::value
-#define NIL_OR_EMPTY(v) IS_EMPTY(v) || IS_NIL(v)
+#define IS_EMPTY(v) std::is_same<VT(v), NoValue>::value
+#define IS_NIL(v) std::is_same<VT(v), Nil>::value
+#define NIL_OR_EMPTY(v) (IS_EMPTY(v) || IS_NIL(v))
 
 #define ARITHMETIC_OP(op) 	template<typename T>\
 							Value operator op (const T &rhs) {\

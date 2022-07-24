@@ -503,11 +503,11 @@ Value& Value::operator =(const Value &rhs)
 bool operator ==(const Value &lhs, const Value &rhs)
 {
 	return std::visit([&](auto &lv, auto &rv) -> bool {
-		if constexpr (!std::is_same<decltype(lv), decltype(rv)>::value)
-			return false;
+		if constexpr (NIL_OR_EMPTY(lv) && NIL_OR_EMPTY(rv))
+			return true;
 
-		else if constexpr (NIL_OR_EMPTY(lv) || NIL_OR_EMPTY(rv))
-			return (IS_NIL(lv) && IS_NIL(rv)) || (IS_EMPTY(lv) && IS_EMPTY(rv));
+		else if constexpr (!std::is_same<decltype(lv), decltype(rv)>::value)
+			return false;
 
 		else if constexpr (std::is_same<VT(lv), ExprPtr>::value && std::is_same<VT(rv), ExprPtr>::value)
 			return lv == rv;
