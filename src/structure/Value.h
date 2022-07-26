@@ -256,6 +256,11 @@ class Value
 		}
 
 		Value& get();
+
+		inline Value& get_ref()
+		{
+			return !is<ValueRef>() ? DataTable::create_temporary(*this) : get<ValueRef>().value();
+		}
 		Type type() const;
 		dec type_id() const;
 		Value copy();

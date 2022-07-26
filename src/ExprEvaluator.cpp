@@ -420,13 +420,13 @@ Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)
 
 	/* Create a temporary value and reference it if `expr` is not an access expression */
 	else if (!BinaryOperatorExpr::is(*expr, TokenType::DOT))
-		return DataTable::create_temporary(expr->evaluate(*this));
+		return expr->evaluate(*this).get_ref();
 
 	/* Reference an access expression's value */
 	else {
 		auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
 		ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
-		return DataTable::create_temporary(apply_binary(lhs, TokenType::DOT, rhs));
+		return apply_binary(lhs, TokenType::DOT, rhs).get_ref();
 	}
 
 	throw std::runtime_error("Reference error");
