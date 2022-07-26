@@ -419,7 +419,6 @@ class ExprEvaluator
 		DataTable* global();
 		DataTable* local_scope();
 
-		Value& dot_operator_reference(ExprPtr lhs, ExprPtr rhs);
 		Value& referenced_value(Expression *expr, bool follow_refs = true);
 		inline Value& referenced_value(ExprPtr expr, bool follow_refs = true)
 		{

@@ -162,7 +162,10 @@ void LibUnit::load_operators()
 		return type.invoke_static(name, method_expr.arg_list());
 	}));
 
-	/* Access operator */
+	/* Access operator
+	 * Nested `.` is parsed as:
+	 * 		(foo.bar).baz
+	 */
 	infix_operator(TokenType::DOT, LazyBinaryOpr([&](auto lhs, auto rhs) -> Value {
 		Value lval = val(lhs);
 
@@ -184,8 +187,7 @@ void LibUnit::load_operators()
 		}
 		/* Box Unit idfr access */
 		else {
-			if constexpr (DEBUG)
-					out << "* Accessing a Box value: " << lval << " / " << rhs->info() << std::endl;
+			LOG("* Accessing a Box value: " << lval << " / " << rhs->info());
 			lval.assert_type(Type::UNIT, "Invalid dot-operator expression");
 			Unit &unit = lval.get<Unit>();
 			if (!unit.is_persistent())

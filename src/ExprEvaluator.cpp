@@ -415,7 +415,7 @@ Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)
 		return get(try_cast<IdentifierExpr>(expr), follow_refs);
 
 	/* Unwrap reference operaor in-place */
-	else if (instanceof<PrefixExpr>(expr) && try_cast<PrefixExpr>(expr).get_operator() == TokenType::REF)
+	else if (PrefixExpr::is(*expr, TokenType::REF))
 		return referenced_value(try_cast<PrefixExpr>(expr).get_rhs());
 
 	/* Create a temporary value and reference it if `expr` is not an access expression */
@@ -426,26 +426,10 @@ Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)
 	else {
 		auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
 		ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
-		return dot_operator_reference(lhs, rhs);
+		return DataTable::create_temporary(apply_binary(lhs, TokenType::DOT, rhs));
 	}
 
 	throw std::runtime_error("Reference error");
-}
-
-Value& ExprEvaluator::dot_operator_reference(ExprPtr lhs, ExprPtr rhs)
-{
-	Value &lref = referenced_value(lhs);
-	if (lref.object() && instanceof<IdentifierExpr>(rhs.get())) {
-		Object &obj = lref.get<Object>();
-		auto &idfr = IdentifierExpr::get_name(rhs);
-		LOG("Accessing object field " << idfr);
-		return obj.field(idfr);
-	}
-	/*
-	if (lref.type() == Type::UNIT)
-		return lref.get<Unit>().local().get(Expression::get_name(rhs));
-	*/
-	return DataTable::create_temporary(apply_binary(lhs, TokenType::DOT, rhs));
 }
 
 Value& ExprEvaluator::get(const std::string &id, bool global, bool follow_refs)
