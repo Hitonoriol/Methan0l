@@ -167,8 +167,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 	/* Class / Box field / method access operators */
 	register_infix_opr(TokenType::AT, Precedence::DOT, BinOprType::RIGHT_ASSOC);
-	register_infix_opr(TokenType::DOT, Precedence::DOT, BinOprType::RIGHT_ASSOC);
-	register_infix_opr(TokenType::ARROW_L, Precedence::DOT, BinOprType::RIGHT_ASSOC);
+	register_infix_opr(TokenType::DOT, Precedence::DOT);
 }
 
 void Methan0lParser::register_word(TokenType wordop, Precedence prec, bool multiarg)
