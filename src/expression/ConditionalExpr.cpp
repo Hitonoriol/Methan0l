@@ -40,15 +40,20 @@ bool ConditionalExpr::is_ifelse_block()
 	return false;
 }
 
+ExprPtr ConditionalExpr::eval_branch(ExprEvaluator &eval)
+{
+	return (condition->evaluate(eval).to_bool() ? then_expr : else_expr);
+}
+
 Value ConditionalExpr::evaluate(ExprEvaluator &eval)
 {
-	return eval.evaluate(*this);
+	bool result = condition->evaluate(eval).to_bool();
+	return eval_branch(eval)->evaluate(eval);
 }
 
 void ConditionalExpr::execute(ExprEvaluator &evaluator)
 {
-	Value val = evaluate(evaluator);
-	LiteralExpr::exec_literal(evaluator, val);
+	eval_branch(evaluator)->execute(evaluator);
 }
 
 std::ostream& ConditionalExpr::info(std::ostream &str)

@@ -489,12 +489,6 @@ Value ExprEvaluator::evaluate(AssignExpr &expr)
 		return Value::ref(referenced_value(lexpr) = rhs);
 }
 
-Value ExprEvaluator::evaluate(ConditionalExpr &expr)
-{
-	bool result = eval(expr.get_condition()).as<bool>();
-	return eval(result ? expr.get_then() : expr.get_else());
-}
-
 Value ExprEvaluator::evaluate(UnitExpr &expr)
 {
 	return eval(expr);

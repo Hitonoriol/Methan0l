@@ -437,7 +437,6 @@ class ExprEvaluator
 		Value evaluate(PostfixExpr &opr);
 		Value evaluate(PrefixExpr &opr);
 		Value evaluate(AssignExpr &expr);
-		Value evaluate(ConditionalExpr &expr);
 		Value evaluate(UnitExpr &expr);
 		Value evaluate(ListExpr &expr);
 		Value evaluate(InvokeExpr &expr);

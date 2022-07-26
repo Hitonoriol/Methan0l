@@ -12,6 +12,8 @@ class ConditionalExpr: public Expression
 	private:
 		ExprPtr condition, then_expr, else_expr;
 
+		ExprPtr eval_branch(ExprEvaluator &eval);
+
 	public:
 		ConditionalExpr(ExprPtr condition, ExprPtr then_expr, ExprPtr else_expr);
 
