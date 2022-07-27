@@ -88,6 +88,8 @@ Unit Interpreter::load_unit(std::string &code)
 
 	Unit unit = parser.result();
 	parser.clear();
+	parser.reset();
+	parser.get_lexer().reset();
 	return unit;
 }
 

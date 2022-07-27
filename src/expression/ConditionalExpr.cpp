@@ -47,7 +47,6 @@ ExprPtr ConditionalExpr::eval_branch(ExprEvaluator &eval)
 
 Value ConditionalExpr::evaluate(ExprEvaluator &eval)
 {
-	bool result = condition->evaluate(eval).to_bool();
 	return eval_branch(eval)->evaluate(eval);
 }
 

@@ -51,6 +51,7 @@ Unit::Unit(const Unit &rhs) : Unit(rhs.expr_list, rhs.local_data, rhs.weak)
 
 Unit& Unit::operator=(const Unit &rhs)
 {
+	weak = rhs.weak;
 	persistent = rhs.persistent;
 	carry_return = rhs.carry_return;
 	expr_list = rhs.expr_list;
