@@ -11,26 +11,10 @@ namespace mtl
 class UnitParser: public PrefixParser
 {
 	public:
-		ExprPtr parse(Parser &parser, Token token) override
-		{
-			ExprList exprs;
+		ExprPtr parse(Parser &parser, Token token) override;
 
-			if constexpr (DEBUG)
-				std::cout << "Parsing unit expr..." << std::endl;
-
-			if (!parser.match(TokenType::BRACE_R)) {
-				do {
-					exprs.push_back(parser.parse());
-				} while (!parser.match(TokenType::BRACE_R));
-			}
-
-			bool weak = token.get_type() == TokenType::ARROW_R;
-
-			if constexpr (DEBUG)
-				std::cout << "Parsed a unit with " << exprs.size() << " exprs" << std::endl;
-
-			return make_expr<UnitExpr>(line(token), exprs, weak);
-		}
+		static ExprPtr parse_ctrl_block(Parser&, bool unwrap_single_exprs = true);
+		static ExprPtr parse_expr_block(Parser&, bool unwrap_single_exprs = false);
 };
 
 } /* namespace mtl */

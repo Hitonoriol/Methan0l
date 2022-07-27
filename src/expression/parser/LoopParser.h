@@ -5,10 +5,10 @@
 #include <stdexcept>
 #include <vector>
 
-#include "../../Parser.h"
-#include "../../type.h"
-#include "../../Token.h"
-#include "../../util/util.h"
+#include "Parser.h"
+#include "type.h"
+#include "Token.h"
+#include "util/util.h"
 #include "../ListExpr.h"
 #include "../LoopExpr.h"
 #include "PrefixParser.h"
@@ -29,7 +29,7 @@ class LoopParser: public PrefixParser
 
 			ExprList loop_params;
 			ListParser::parse(parser, [&](auto expr) {loop_params.push_back(expr);});
-			ExprPtr body = parser.parse();
+			ExprPtr body = UnitParser::parse_ctrl_block(parser, false);
 			size_t size = loop_params.size();
 			uint32_t line = mtl::line(token);
 			bool legacy_loop = token == TokenType::DO;

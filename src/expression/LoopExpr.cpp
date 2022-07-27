@@ -36,13 +36,10 @@ void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 	Unit &loop_proxy = evaluator.tmp_callable(Unit());
 	Unit &body_unit = evaluator.tmp_callable(Unit::from_expression(body));
 
-	/* For loops to be able to access variables from the upper scope w/o # modfr */
-	loop_proxy.expr_block();
-	body_unit.expr_block();
-
 	/* If this loop has an `init` Expr, this is a for loop,
 	 * 		else -- this is a while loop and has only the `condition` expression */
 	const bool for_loop = init != nullptr;
+	loop_proxy.expr_block();
 	evaluator.enter_scope(loop_proxy);
 	if (for_loop) {
 		loop_proxy.append(init);

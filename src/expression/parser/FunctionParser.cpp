@@ -2,6 +2,7 @@
 
 #include <expression/Expression.h>
 #include <expression/parser/MapParser.h>
+#include <expression/parser/UnitParser.h>
 #include "Parser.h"
 #include <type.h>
 #include <Token.h>
@@ -63,7 +64,7 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 		body_expr = make_expr<UnitExpr>(line(token), lambda_body, false);
 	}
 	else
-		body_expr = parser.parse();
+		body_expr = UnitParser::parse_expr_block(parser);
 
 	return make_expr<FunctionExpr>(line(token), args, try_cast<UnitExpr>(body_expr));
 }
