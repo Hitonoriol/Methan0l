@@ -66,7 +66,14 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 	else
 		body_expr = UnitParser::parse_expr_block(parser);
 
-	return make_expr<FunctionExpr>(line(token), args, try_cast<UnitExpr>(body_expr));
+	auto &fbody = try_cast<UnitExpr>(body_expr);
+
+	/* `@:` and `f:` function definition prefixes
+	 * 		make resulting expression a "true" lambda (able to capture variables from upper scopes implicitly) */
+	if (token.get_type() == TokenType::FUNC_DEF_SHORT || token.get_type() == TokenType::FUNC_DEF_SHORT_ALT)
+		fbody.get_unit_ref().set_weak(true);
+
+	return make_expr<FunctionExpr>(line(token), args, fbody);
 }
 
 }

@@ -266,7 +266,6 @@ void LibData::load_container_funcs()
 		if constexpr(DEBUG)
 			std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
 
-		action.set_weak(true);
 		ctr.accept_container([&](auto &container) {
 			for_each(*eval, container, action);
 		});
