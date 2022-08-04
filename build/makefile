@@ -1,79 +1,109 @@
-################################################################################
-# Automatically-generated file. Do not edit!
-################################################################################
+RM := rm -rf
+-include ../makeutils.inc
 
--include ../makefile.init
+BITS=64
 
-RM := del
-
-# All of the sources participating in the build are defined here
--include sources.mk
--include src/util/subdir.mk
--include src/structure/object/subdir.mk
--include src/structure/subdir.mk
--include src/lang/structure/subdir.mk
--include src/lang/lib/subdir.mk
--include src/lang/core/subdir.mk
--include src/lang/subdir.mk
--include src/expression/parser/subdir.mk
--include src/expression/subdir.mk
--include src/except/subdir.mk
--include src/subdir.mk
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(strip $(C++_DEPS)),)
--include $(C++_DEPS)
-endif
-ifneq ($(strip $(CC_DEPS)),)
--include $(CC_DEPS)
-endif
-ifneq ($(strip $(CPP_DEPS)),)
--include $(CPP_DEPS)
-endif
-ifneq ($(strip $(CXX_DEPS)),)
--include $(CXX_DEPS)
-endif
-ifneq ($(strip $(C_DEPS)),)
--include $(C_DEPS)
-endif
-ifneq ($(strip $(C_UPPER_DEPS)),)
--include $(C_UPPER_DEPS)
-endif
+ifeq ($(OS),Windows_NT) 
+    OS_NAME:=Windows
+else
+    OS_NAME:=$(shell sh -c 'uname -s 2>/dev/null || echo Unknown')
 endif
 
--include ../makefile.defs
+SRCS = $(call rwildcard,../src,*.cpp)
+DEPS = $(patsubst ../src/%.cpp,./obj/%.d,$(SRCS))
 
-OPTIONAL_TOOL_DEPS := \
-$(wildcard ../makefile.defs) \
-$(wildcard ../makefile.init) \
-$(wildcard ../makefile.targets) \
+CLI_SRCS = $(call rwildcard,../src/cli,*.cpp)
+CLI_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o,$(CLI_SRCS)))
+LIB_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o.pic,$(filter-out $(CLI_SRCS),$(SRCS))))
+RPATH = -Wl,-rpath,'$$ORIGIN'
+LIB_INCLUDE = include
+LIB_HEADERS = $(patsubst ../src/%,./$(LIB_INCLUDE)/%,$(call rwildcard,../src,*.h))
+LIB_INC = -I../src
 
+CLI_BIN_NAME = $(addsuffix $(if $(filter $(OS_NAME),Windows),.exe,),methan0l)
+LIB_NAME = libmethan0l.so
 
-BUILD_ARTIFACT_NAME := methan0l
-BUILD_ARTIFACT_EXTENSION :=
-BUILD_ARTIFACT_PREFIX :=
-BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
+LINK_STATIC := -lboost_filesystem -lboost_system
+LINK_DYNAMIC :=
 
-# Add inputs and outputs from these tool invocations to the build variables 
+MACROS = -DBITS=$(BITS)
 
-# All Target
-all: main-build
+ifdef NO_STATIC
+	LINK_DYNAMIC+= $(LINK_STATIC)
+	LINK_STATIC=
+endif
 
-# Main-build Target
-main-build: methan0l
+ifneq ($(OS_NAME),Windows)
+	ifeq ($(OS_NAME),Linux)
+		LINK_DYNAMIC+= -ldl
+	endif
+endif
 
-# Tool invocations
-methan0l: $(OBJS) $(USER_OBJS) makefile $(OPTIONAL_TOOL_DEPS)
-	@echo 'Building target: $@'
-	@echo 'Invoking: MinGW C++ Linker'
-	g++ -o "methan0l" $(OBJS) $(USER_OBJS) $(LIBS) -m$(BITS) -Wl,-Bstatic $(LINK_LIBS) -Wl,-Bdynamic $(LINK_DYNAMIC)
-	@echo 'Finished building target: $@'
+.PHONY: all release modules clean lib-clean
+
+all: $(CLI_BIN_NAME)
+
+# Full release tarball: cli binary, interpreter library, headers and modules
+release: all lib-headers modules
+	@echo 'Creating release tarball...'
+	tar -czf methan0l-$(OS_NAME)$(BITS).tar.gz $(CLI_BIN_NAME) $(LIB_INCLUDE) $(LIB_NAME) ../modules ../baker
+	@echo 'Done!'
+
+modules: lib lib-headers
+	@echo 'Building modules...'
+	cd ../modules; make clean; make || true
+	@echo 'Finished building modules'
 	@echo ' '
 
-# Other Targets
-clean:
-	-$(RM) methan0l
+# Interpreter shared library targets
+lib: libmethan0l.so
+
+libmethan0l.so: $(LIB_OBJS)
+	@echo 'Building interpreter library: $@...'
+	g++ $(LIB_OBJS) -shared -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME) $(RPATH)
+	@echo 'Finished building: $@'
+	@echo ' '
+
+obj/%.o.pic: ../src/%.cpp
+	@echo 'Building target: $@ (file: $<)'
+	@mkdir -p $(dir $@)
+	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -m$(BITS) -fPIC -MMD -MT"$@" -o "$@" "$<"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+lib-headers: $(LIB_INCLUDE) $(LIB_HEADERS)
+	@echo 'Finished copying headers'
+	@echo ' '
+
+$(LIB_INCLUDE)/%.h: ../src/%.h
+	@mkdir -p $(dir $@)
+	cp -rf $< $@
+
+$(LIB_INCLUDE):
+	mkdir -p $(LIB_INCLUDE)
+	@echo 'Created header directory: $@'
+
+lib-clean:
+	$(RM) $(LIB_INCLUDE)/* $(LIB_OBJS) $(CLI_OBJS)
+
+# cli targets
+cli: $(CLI_BIN_NAME)
+
+$(CLI_BIN_NAME): lib $(CLI_OBJS)
+	@echo 'Building interpreter cli: $@'
+	g++ -o $(CLI_BIN_NAME) $(CLI_OBJS) -m$(BITS) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic -L./ -l:$(LIB_NAME) $(LINK_DYNAMIC) $(RPATH)
+	@echo 'Finished building interpreter cli: $@'
+	@echo ' '
+
+-include $(DEPS)
+
+obj/%.o: ../src/%.cpp
+	@echo 'Building target: $@, file: $<'
+	@mkdir -p $(dir $@)
+	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -Wall -fmessage-length=0 -m$(BITS) -MMD -MT"$@" -o "$@" "$<"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+clean: lib-clean
+	-$(RM) $(LIB_NAME) $(CLI_BIN_NAME) $(DEPS)
 	-@echo ' '
-
-.PHONY: all clean dependents main-build
-
--include ../makefile.targets
