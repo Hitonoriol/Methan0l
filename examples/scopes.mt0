@@ -1,0 +1,93 @@
+"Visibility scopes" :: newl
+
+/*
+ * All variables in Methan0l are implicitly local.
+ * This means that for any regular unit or function
+ * 	any variable defined outside of its scope is global and is inaccessible
+ *	(1) without the `#` prefix (e.g. `f = func: () -> foo(#x)`, x is a global variable).
+ * 	Alternatively,
+ *	(2) global variables can be imported into the current scope by reference via the `global` operator:
+ 		`global: var`
+ * The word "global" in methan0l is used relatively and just means that
+ *	the variable is out of the current visibility scope.
+ * Global variables can also be captured inside function parameter list definitions
+ * 	after all arguments (similar to default argument definition):
+ * 		`f = func: x, y, %glob1, %glob2, ... { glob1 = x + y; ... }`
+ */
+ "Basic visibility rules"
+ {
+ 	glob = 42
+ 	
+ 	foo = func: () {
+ 		/* If we want to use `glob` from here, we should do so using either (1) or (2) */
+ 		++#glob /* One-time global lookup */
+ 		global: glob /* Global lookup and import by reference, now local `glob` points to the global one. */
+ 		
+ 		<% $"Modified global value: glob = {}" glob
+ 		
+ 		/* Block expressions (conditional operators, loops, try-catch) & lambdas
+ 		 * can access function-local variables without the need of using (1) or (2): */
+ 		x = 123
+ 		if (true) ?
+ 			<% $"x = {}" x
+ 		lambda = @: () -> <% $"I can see x: {}" x
+ 		lambda()
+ 	}
+ 	
+ 	foo()
+ }
+ ""
+ 
+/*
+ * As for classes, object fields can be accessed using `this` reference
+ * 	from within the method definition bodies.
+ * All the other visibility rules are applied without changes.
+ */
+ "Class visibility scopes"
+{
+	some_global_var = "Very important"
+	
+	class: SomeClass @(
+		foo
+		bar
+		
+		construct => method: a, b {
+			this.foo = a
+			this.bar = b
+		}
+		
+		do_stuff => method: ()
+			<% $"foo = `{}`, bar = `{}`, accessing a global variable: `{}`" this.foo, this.bar, #some_global_var
+	)
+	
+	obj = new: SomeClass("text", "more text")
+	obj.do_stuff()
+}
+""
+ 
+ /*
+  * There's also a way to define an explicitly local variable inside of the current scope.
+  * 	`var: name` - creates a local variable `name` and returns a reference to it.
+  * Even though multiple variables with the same name inside nested scopes can be created this way,
+  *	the `#` prefix will be referring only to the first "outer" variable with the given name
+  *	effectively shadowing all the other ones.
+  */
+ "Explicit local variables"
+ {
+ 	x = 123
+ 	if (x == 123) ? {
+ 		<% $"Outer `x`: {}" x
+ 		var: x = "foo"
+ 		<% $"Explicitly local `x`: {}" x
+ 	}
+ 	<% $"Outer `x` is unchanged: {}\n" x
+ 	
+ 	"Variable shadowing"
+ 	-> {
+ 		var: x = "Local 1"
+ 		-> {
+ 			var: x = "Local 2"
+ 			<% $"`x`s visible from here: [local: {}], [global: {}]" x, #x
+ 		}
+ 	}
+ }

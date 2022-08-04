@@ -36,4 +36,11 @@ ExprPtr WordOperatorParser::parse(Parser &parser, Token token)
 	return make_expr<PrefixExpr>(line(token), token.get_type(), rhs);
 }
 
+ExprPtr VarDefParser::parse(Parser &parser, Token token)
+{
+	parser.match(TokenType::COLON);
+	auto rhs = parser.parse_prefix(parser.consume(TokenType::IDENTIFIER));
+	return make_expr<PrefixExpr>(line(token), token.get_type(), rhs);
+}
+
 } /* namespace mtl */

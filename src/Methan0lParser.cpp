@@ -155,10 +155,11 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_word(TokenType::HASHCODE);
 	register_word(TokenType::NO_EVAL, Precedence::NO_EVAL);
 	register_word(TokenType::USING_MODULE);
-	register_word(TokenType::NEW);
+	register_word(TokenType::NEW, Precedence::POSTFIX_INCREMENT);
 	register_word(TokenType::GLOBAL, Precedence::PREFIX, true);
 	register_word(TokenType::DEREF);
 	register_word(TokenType::IS_REF);
+	register_parser(TokenType::VAR, new VarDefParser());
 
 	/* Infix word oprs */
 	register_infix_word(TokenType::TYPE_SAFE, Precedence::NO_EVAL);

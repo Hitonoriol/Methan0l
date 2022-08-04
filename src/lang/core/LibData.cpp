@@ -547,7 +547,7 @@ void LibData::load_operators()
 			throw std::runtime_error("`objcopy` can only be applied on an Object or a Box Unit");
 	}));
 
-	prefix_operator(TokenType::DEFINE_VALUE, LazyUnaryOpr([&](auto rhs) {
+	prefix_operator(TokenType::DEFINE_VALUE, LazyUnaryOpr([&](ExprPtr rhs) {
 		return Value(static_cast<Type>(mtl::num(val(rhs))));
 	}));
 
@@ -556,17 +556,21 @@ void LibData::load_operators()
 		return Value::ref(eval->referenced_value(rhs));
 	}));
 
-	/* typeid(val) */
-	prefix_operator(TokenType::TYPE_ID, LazyUnaryOpr([&](auto rhs) {
+	/* typeid: val */
+	prefix_operator(TokenType::TYPE_ID, LazyUnaryOpr([&](ExprPtr rhs) {
 		return val(rhs).type_id();
 	}));
 
-	prefix_operator(TokenType::TYPE_NAME, LazyUnaryOpr([&](auto rhs) {
+	prefix_operator(TokenType::TYPE_NAME, LazyUnaryOpr([&](ExprPtr rhs) {
 		return mtl::str(val(rhs).type_name());
 	}));
 
+	prefix_operator(TokenType::VAR, LazyUnaryOpr([&](ExprPtr rhs) {
+		return Value::ref(eval->current_unit()->local().get_or_create(IdentifierExpr::get_name(rhs)));
+	}));
+
 	/* Delete idfr & the Value associated with it */
-	prefix_operator(TokenType::DELETE, LazyUnaryOpr([&](auto rhs) {
+	prefix_operator(TokenType::DELETE, LazyUnaryOpr([&](ExprPtr rhs) {
 		eval->scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
 		return Value::NIL;
 	}));

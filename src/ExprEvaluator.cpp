@@ -334,8 +334,8 @@ DataTable* ExprEvaluator::scope_lookup(const std::string &id, bool global)
 		if (weak)
 			out << "* Weak Unit lookup" << std::endl;
 
-	/* Starting from the second last Unit, because the last one is the one being executed */
-	auto start = std::prev(exec_stack.end(), 2);
+	/* Skip current scope when looking up globally */
+	auto start = std::prev(exec_stack.end(), global ? 2 : 1);
 	for (auto scope = start; scope != exec_stack.begin(); --scope) {
 		/* We shouldn't be able to access Function-local idfrs from outer scopes */
 		if (!weak && global && instanceof<Function>(*scope))

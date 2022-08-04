@@ -16,6 +16,14 @@ class WordOperatorParser: public PrefixOperatorParser
 		ExprPtr parse(Parser &parser, Token token) override;
 };
 
+class VarDefParser: public PrefixOperatorParser
+{
+	public:
+		VarDefParser() : PrefixOperatorParser(prcdc(Precedence::HIGHEST)) {}
+		ExprPtr parse(Parser &parser, Token token) override;
+
+};
+
 } /* namespace mtl */
 
 #endif /* SRC_EXPRESSION_PARSER_WORDOPERATORPARSER_H_ */

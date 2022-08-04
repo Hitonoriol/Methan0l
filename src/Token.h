@@ -132,6 +132,7 @@ enum class TokenType : uint16_t
 	IS_REF,
 	METHOD,
 	FUNC_DEF_SHORT,
+	VAR,
 
 	NONE = 0x500,
 	EXPR_END,
@@ -202,11 +203,11 @@ class Token
 				"typename", "noeval", "defset", "while", "for",
 				"try", "catch", "using_module", "new", "global",
 				"assert", "instanceof", "unwrap", "is_reference",
-				"method", "f"
+				"method", "f", "var"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
-				"", "nil", "true", "false", ".returned",
+				"", "nil", "true", "false", ".r",
 				"newl", "break", "void", "selfinvoke",
 
 				/* Type idfrs */
