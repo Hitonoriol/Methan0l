@@ -8,7 +8,7 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define OUT(...) out << JOIN(__VA_ARGS__) << std::endl;
+#define OUT(...) mtl::out << JOIN(__VA_ARGS__) << std::endl;
 #define DBG if constexpr (mtl::DEBUG)
 #define IFDBG(...) DBG { JOIN(__VA_ARGS__); }
 #define LOG(...) DBG{ OUT(__VA_ARGS__) }
