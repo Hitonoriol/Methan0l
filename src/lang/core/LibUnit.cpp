@@ -37,8 +37,7 @@ void LibUnit::load()
 
 	/* sync_work_dir() */
 	function("sync_work_dir", [&](Args args) {
-		Value &scrdir = eval->global()->get(Interpreter::SCRDIR, true);
-		std::filesystem::current_path(scrdir.get<std::string>());
+		std::filesystem::current_path(eval->get_scriptdir());
 		return Value::NO_VALUE;
 	});
 
@@ -56,7 +55,7 @@ void LibUnit::load()
 
 	/* die$(exception) */
 	function("die", [&](Args args) {
-		Value exception = !args.empty() ? arg(args) : "Stopping program execution";
+		Value exception = !args.empty() ? arg(args) : Value("Stopping program execution");
 		throw exception;
 		return Value::NO_VALUE;
 	});

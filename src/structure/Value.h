@@ -261,8 +261,10 @@ class Value
 		{
 			return !is<ValueRef>() ? DataTable::create_temporary(*this) : get<ValueRef>().value();
 		}
+
 		Type type() const;
 		dec type_id() const;
+		dec fallback_type_id() const;
 		Value copy();
 
 		dec use_count();
@@ -477,6 +479,12 @@ class Value
 		operator T () const
 		{
 			return as<T>();
+		}
+
+		template <typename T>
+		operator T& ()
+		{
+			return get<T>();
 		}
 
 		template<typename T>

@@ -24,9 +24,6 @@ const std::string FULL_VERSION_STR(
 		"(#" + str(VERSION_CODE) + ", " + str(BITS) + "-bit, " + BUILD_TIMESTAMP + ")"
 );
 
-std::string RUNPATH, RUNDIR;
-Interpreter *INTERPRETER  = nullptr;
-
 bool USE_MONOTONIC_BUFFER = true;
 bool HEAP_LIMITED = true;
 uint64_t HEAP_MEM_CAP = 0x100000;

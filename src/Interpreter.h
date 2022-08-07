@@ -35,12 +35,12 @@ class Interpreter: public ExprEvaluator
 
 		inline const std::string& get_runpath()
 		{
-			return RUNPATH;
+			return get_env_var(EnvVars::RUNPATH);
 		}
 
 		inline const std::string& get_rundir()
 		{
-			return RUNDIR;
+			return get_env_var(EnvVars::RUNDIR);
 		}
 
 		template<typename T>
@@ -124,8 +124,6 @@ class Interpreter: public ExprEvaluator
 				return true;
 			}
 		}
-
-		static const std::string LAUNCH_ARGS, SCRDIR, F_LOAD_FILE;
 };
 
 } /* namespace mtl */

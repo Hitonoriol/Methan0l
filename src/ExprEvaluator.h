@@ -23,8 +23,8 @@
 		prefix##_##type##_ops.emplace(tok, opr); \
 	}
 
-#define APPLY_UNARY(type) \
-
+#define STRINGS(...) const std::string JOIN(__VA_ARGS__);
+#define STRING_ENUM(name, ...) struct name { static STRINGS(__VA_ARGS__) };
 
 namespace mtl
 {
@@ -43,6 +43,16 @@ class Library;
 class TypeManager;
 class Expression;
 
+STRING_ENUM(EnvVars,
+	RUNPATH, RUNDIR,
+	LAUNCH_ARGS,
+	SCRDIR
+)
+
+STRING_ENUM(CoreFuncs,
+	LOAD_FILE
+)
+
 class ExprEvaluator
 {
 	private:
@@ -58,6 +68,8 @@ class ExprEvaluator
 		};
 
 		static std::unique_ptr<Heap> heap;
+
+		DataTable env_table;
 
 		std::pmr::vector<std::unique_ptr<Library>> libraries;
 
@@ -245,6 +257,7 @@ class ExprEvaluator
 					return *std::any_cast<std::shared_ptr<UR>>(any);
 
 				/* Get a reference to a (const) fallback object */
+				OUT("UR = " << type_name<UR>() << ", T = " << type_name<T>())
 				if (t == typeid(UR))
 					return std::any_cast<UR&>(any);
 				else
@@ -381,6 +394,11 @@ class ExprEvaluator
 			register_func(name, [wrapped = Value(value)]() {return wrapped;});
 		}
 
+		inline void register_env_getter(const std::string &name, const std::string &var_name)
+		{
+			register_func(name, [&]() {return env_table.get(var_name);});
+		}
+
 		Function& current_function();
 		Unit* current_unit();
 		Unit& get_main();
@@ -418,6 +436,14 @@ class ExprEvaluator
 		DataTable* scope_lookup(ExprPtr idfr);
 		DataTable* global();
 		DataTable* local_scope();
+
+		inline DataTable& get_env_table()
+		{
+			return env_table;
+		}
+
+		Value& get_env_var(const std::string&);
+		void set_env_var(const std::string&, Value);
 
 		Value& referenced_value(Expression *expr, bool follow_refs = true);
 		inline Value& referenced_value(ExprPtr expr, bool follow_refs = true)

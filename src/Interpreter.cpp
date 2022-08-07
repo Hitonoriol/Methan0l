@@ -14,28 +14,24 @@
 namespace mtl
 {
 
-const std::string Interpreter::LAUNCH_ARGS(".argv");
-const std::string Interpreter::SCRDIR(".scrdir");
-const std::string Interpreter::F_LOAD_FILE(".load");
-
 Interpreter::Interpreter(const char *path)
 {
-	auto rpath = std::filesystem::absolute(path);
-	RUNPATH = rpath.string();
-	RUNDIR = rpath.parent_path().string();
-	INTERPRETER = this;
 	init_inbuilt_funcs();
+
+	auto rpath = std::filesystem::absolute(path);
+	set_env_var(EnvVars::RUNPATH, rpath.string());
+	set_env_var(EnvVars::RUNDIR, rpath.parent_path().string());
+	register_env_getter("get_runpath", EnvVars::RUNPATH);
+	register_env_getter("get_rundir", EnvVars::RUNDIR);
 }
 
 void Interpreter::init_inbuilt_funcs()
 {
-	register_getter("get_runpath", RUNPATH);
-	register_getter("get_rundir", RUNDIR);
 	register_func("get_launch_args", [&](Args args) {
-		return main.local().get(LAUNCH_ARGS);
+		return main.local().get(EnvVars::LAUNCH_ARGS);
 	});
 
-	register_func(F_LOAD_FILE, member(this, &Interpreter::load_file));
+	register_func(CoreFuncs::LOAD_FILE, MEMBER(&Interpreter::load_file));
 }
 
 void Interpreter::lex(std::string &code)
@@ -162,13 +158,13 @@ void Interpreter::load_args(ValList &&args)
 	set_env_globals(args[0]);
 	Value list_v(Type::LIST);
 	list_v.get<ValList>() = std::move(args);
-	main.local().set(LAUNCH_ARGS, list_v);
+	main.local().set(EnvVars::LAUNCH_ARGS, list_v);
 }
 
 void Interpreter::set_env_globals(const std::string &scrpath)
 {
 	auto &table = main.local();
-	table.set(SCRDIR, std::filesystem::absolute(scrpath).parent_path().string());
+	table.set(EnvVars::SCRDIR, std::filesystem::absolute(scrpath).parent_path().string());
 }
 
 void Interpreter::print_info()

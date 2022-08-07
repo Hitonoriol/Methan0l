@@ -225,15 +225,18 @@ Type Value::type() const
 		return Type::NIL;
 }
 
+dec Value::fallback_type_id() const
+{
+	return std::get<std::any>(value).type().hash_code();
+}
+
 dec Value::type_id() const
 {
 	Type t = type();
 	if (t == Type::OBJECT)
 		return unconst(*this).get<Object>().type_id();
-	else if (t != Type::FALLBACK)
-		return static_cast<dec>(t);
-	else
-		return std::get<std::any>(value).type().hash_code();
+
+	return static_cast<dec>(t);
 }
 
 std::string Value::to_string(ExprEvaluator *eval)

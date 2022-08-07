@@ -52,7 +52,7 @@ void LibModule::load_module(const std::string &path, Unit &unit)
 
 	/* Load Methan0l src file */
 	if (ends_with(name, PROGRAM_EXT)) {
-		auto mv = eval->invoke_inbuilt_func(Interpreter::F_LOAD_FILE, { Value::wrapped(name) });
+		auto mv = eval->invoke_inbuilt_func(CoreFuncs::LOAD_FILE, { Value::wrapped(name) });
 		unit = mv.get<Unit>();
 		return;
 	}

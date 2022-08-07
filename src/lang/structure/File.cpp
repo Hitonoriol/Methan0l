@@ -233,7 +233,7 @@ std::string File::path(ExprList &args)
 	if (Class::static_call(args)) {
 		Value p = args[1]->evaluate(eval);
 		args.erase(std::next(args.begin()));
-		return path(*INTERPRETER, p);
+		return path(eval, p);
 	}
 
 	return str(Object::get_this(args).field(FNAME));
@@ -289,10 +289,10 @@ std::string File::absolute_path(ExprEvaluator &eval, const std::string &pathstr)
 	auto alias = std::string_view(pathstr).substr(0, 2);
 	std::string retpath = pathstr;
 	if (alias == PathPrefix::RUNDIR)
-		replace_all(retpath, alias, RUNDIR);
-	else if (alias == PathPrefix::SCRDIR) {
+		replace_all(retpath, alias, eval.get_env_var(EnvVars::RUNDIR));
+	else if (alias == PathPrefix::SCRDIR)
 		replace_all(retpath, alias, eval.get_scriptdir());
-	} else
+	else
 		retpath = fs::absolute(retpath).string();
 	return retpath;
 }

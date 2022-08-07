@@ -39,6 +39,17 @@ namespace mtl
 
 std::unique_ptr<Heap> ExprEvaluator::heap;
 
+STRINGS(
+	EnvVars::LAUNCH_ARGS(".argv"),
+	EnvVars::SCRDIR(".scrdir"),
+	EnvVars::RUNPATH(".rp"),
+	EnvVars::RUNDIR(".rd")
+)
+
+STRINGS(
+	CoreFuncs::LOAD_FILE(".ld")
+)
+
 ExprEvaluator::ExprEvaluator()
 {
 	init_heap();
@@ -115,12 +126,12 @@ Unit& ExprEvaluator::get_main()
 
 const std::string& ExprEvaluator::get_scriptpath()
 {
-	return global()->get(Interpreter::LAUNCH_ARGS, true).get<ValList>()[0].get<std::string>();
+	return global()->get(EnvVars::LAUNCH_ARGS, true).get<ValList>()[0].get<std::string>();
 }
 
 const std::string& ExprEvaluator::get_scriptdir()
 {
-	return global()->get(Interpreter::SCRDIR, true).get<std::string>();
+	return global()->get(EnvVars::SCRDIR, true).get<std::string>();
 }
 
 Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
@@ -404,6 +415,16 @@ void ExprEvaluator::del(const IdentifierExpr &idfr)
 Value& ExprEvaluator::get(IdentifierExpr &idfr, bool follow_refs)
 {
 	return idfr.referenced_value(*this, follow_refs);
+}
+
+Value& ExprEvaluator::get_env_var(const std::string &name)
+{
+	return env_table.get(name);
+}
+
+void ExprEvaluator::set_env_var(const std::string &name, Value val)
+{
+	env_table.set(name, val);
 }
 
 Value& ExprEvaluator::referenced_value(Expression *expr, bool follow_refs)

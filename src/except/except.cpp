@@ -34,18 +34,13 @@ std::string error_msg(const std::string &msg, Type type, Type expected)
 			+ " but received \"" + str(Value::type_name(type)) + "\"";
 }
 
-ExprEvaluator *eval_ptr()
-{
-	return INTERPRETER;
-}
-
 InvalidTypeException::InvalidTypeException(Type type, Type expected, const std::string &msg) :
 		std::runtime_error(error_msg(msg, type, expected))
 {}
 
 InvalidTypeException::InvalidTypeException(Value received, Type expected) :
 		std::runtime_error(error_msg("Invalid conversion of value `"
-				+ received.to_string(eval_ptr()) + "`:",
+				+ received.to_string() + "`:",
 				received.type(), expected))
 {}
 
