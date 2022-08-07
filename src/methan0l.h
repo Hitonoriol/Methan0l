@@ -8,6 +8,7 @@
 #include <structure/Value.h>
 #include <structure/DataTable.h>
 #include <util/util.h>
+#include <structure/object/NativeClass.h>
 
 #define API extern "C"
 #define INIT_MODULE 		mtl::ExprEvaluator *evaluator = nullptr;\
@@ -20,10 +21,10 @@
 #define LOAD_MODULE INIT_MODULE\
 					API void load()
 
-#define REG_FUNC(name) function( #name, name );
+#define REG_FUNC(name) function(#name, name);
 #define FUNCTION(name) void _register_methan0l_func_##name() { REG_FUNC(name) }
-#define VAR(name) var( #name )
-#define REG_VAR(name) var( #name ) = name;
+#define VAR(name) var(#name)
+#define REG_VAR(name) var(#name) = name;
 
 using Value = mtl::Value;
 
@@ -46,6 +47,12 @@ template<typename F>
 inline void function(const std::string &name, F &&f)
 {
 	evaluator->register_func(name, static_cast<typename std::decay<F>::type>(f));
+}
+
+template<class C>
+inline void native_class()
+{
+	evaluator->get_type_mgr().register_type<C>();
 }
 
 #endif

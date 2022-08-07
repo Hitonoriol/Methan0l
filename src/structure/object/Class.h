@@ -78,6 +78,11 @@ class Class : public Allocatable<Class>
 			id = get_id(name);
 		}
 
+		inline ExprEvaluator& get_evatuator()
+		{
+			return eval;
+		}
+
 		virtual Object create(ExprList &args);
 
 		static size_t get_id(const std::string &type_name);

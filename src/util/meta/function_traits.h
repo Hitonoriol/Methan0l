@@ -50,6 +50,7 @@ F_TRAIT_MEMBER(R(C::*const&)(Args...))
 								}
 MEMBER_WRAPPER(R(C::*func)(Args...))
 MEMBER_WRAPPER(R(C::*func)(Args...)const)
+#define MEMBER(...) mtl::member(this, JOIN(__VA_ARGS__))
 
 // member object pointer
 template<class C, class R>

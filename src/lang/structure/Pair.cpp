@@ -13,35 +13,29 @@
 namespace mtl
 {
 
-void Pair::initialize()
-{
+NATIVE_CLASS_INIT(Pair, {
 	auto &binder = get_binder();
-	binder.set_name("Pair");
 	binder.bind_constructor<Value, Value>();
 
-	binder.bind_method("swap", &CLASS(binder)::swap);
+	binder.bind_method("swap", &THIS_CLASS::swap);
 
-	binder.register_method("swap_contents", [](Object &obj) {
-		auto &p = OBJECT(binder, obj);
+	binder.register_method("swap_contents", METHOD(OBJ) {
+		auto &p = THIS;
 		std::swap(p.first, p.second);
 	});
 
-	binder.register_method("x", [](Object &obj) {
-		return Value::ref(OBJECT(binder, obj).first);
+	binder.register_method("x", METHOD(OBJ) {
+		return Value::ref(THIS.first);
 	});
 
-	binder.register_method("y", [](Object &obj) {
-		return Value::ref(OBJECT(binder, obj).second);
+	binder.register_method("y", METHOD(OBJ) {
+		return Value::ref(THIS.second);
 	});
 
-	binder.register_method("show", [](Object &obj) {
-		auto &p = OBJECT(binder, obj);
-		out << "Pair: [" << p.first << ", " << p.second << "]" << NL;
+	binder.register_method("to_string", METHOD(OBJ) {
+		auto &p = THIS;
+		return std::string("{Pair: [" + p.first.to_string() + ", " + p.second.to_string() + "]}");
 	});
-
-	binder.register_class();
-
-	LOG("Bound a native class: " << type_name<bound_class>() << " [" << binder.get_class().get_name() << "]")
-}
+})
 
 } /* namespace mtl */
