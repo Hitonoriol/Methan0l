@@ -33,7 +33,7 @@ ExprPtr WordOperatorParser::parse(Parser &parser, Token token)
 	if constexpr (DEBUG)
 		out << "Word expr // " << token.to_string() << ": " << rhs->info() << std::endl;
 
-	return make_expr<PrefixExpr>(line(token), token.get_type(), rhs);
+	return make_expr<PrefixExpr>(line(token), word, rhs);
 }
 
 ExprPtr VarDefParser::parse(Parser &parser, Token token)

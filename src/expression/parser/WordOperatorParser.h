@@ -9,10 +9,12 @@ namespace mtl
 class WordOperatorParser: public PrefixOperatorParser
 {
 	private:
+		TokenType word;
 		bool multiple_args;
+
 	public:
-		WordOperatorParser(int prec = prcdc(Precedence::PREFIX), bool accept_multiple_args = false)
-			: PrefixOperatorParser(prec), multiple_args(accept_multiple_args) {}
+		WordOperatorParser(TokenType word, int prec = prcdc(Precedence::PREFIX), bool accept_multiple_args = false)
+			: PrefixOperatorParser(prec), word(word), multiple_args(accept_multiple_args) {}
 		ExprPtr parse(Parser &parser, Token token) override;
 };
 

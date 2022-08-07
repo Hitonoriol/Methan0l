@@ -155,6 +155,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_word(TokenType::HASHCODE);
 	register_word(TokenType::NO_EVAL, Precedence::NO_EVAL);
 	register_word(TokenType::USING_MODULE);
+	alias_prefix(TokenType::USING_MODULE, TokenType::IMPORT_MODULE);
 	register_word(TokenType::NEW, Precedence::POSTFIX_INCREMENT);
 	register_word(TokenType::GLOBAL, Precedence::PREFIX, true);
 	register_word(TokenType::DEREF);
@@ -173,7 +174,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 void Methan0lParser::register_word(TokenType wordop, Precedence prec, bool multiarg)
 {
-	register_parser(wordop, new WordOperatorParser(prcdc(prec), multiarg));
+	register_parser(wordop, new WordOperatorParser(wordop, prcdc(prec), multiarg));
 }
 
 void Methan0lParser::register_infix_word(TokenType wordop, Precedence prec, BinOprType type)
