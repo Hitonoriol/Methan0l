@@ -43,6 +43,8 @@ endif
 
 all: $(CLI_BIN_NAME)
 
+-include $(DEPS)
+
 # Full release tarball: cli binary, interpreter library, headers and modules
 release: all lib-headers modules
 	@echo 'Creating release tarball...'
@@ -67,7 +69,7 @@ libmethan0l.so: $(LIB_OBJS)
 obj/%.o.pic: ../src/%.cpp
 	@echo 'Building target: $@ (file: $<)'
 	@mkdir -p $(dir $@)
-	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -m$(BITS) -fPIC -MMD -MT"$@" -o "$@" "$<"
+	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -m$(BITS) -fPIC -MMD -MP -MF"$(@:%.o.pic=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $@'
 	@echo ' '
 
@@ -95,12 +97,10 @@ $(CLI_BIN_NAME): lib $(CLI_OBJS)
 	@echo 'Finished building interpreter cli: $@'
 	@echo ' '
 
--include $(DEPS)
-
 obj/%.o: ../src/%.cpp
 	@echo 'Building target: $@, file: $<'
 	@mkdir -p $(dir $@)
-	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -Wall -fmessage-length=0 -m$(BITS) -MMD -MT"$@" -o "$@" "$<"
+	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -Wall -fmessage-length=0 -m$(BITS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $@'
 	@echo ' '
 
