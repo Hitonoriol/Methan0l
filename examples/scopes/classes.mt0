@@ -1,0 +1,21 @@
+"Class visibility scopes"
+{
+	some_global_var = "Very important"
+	
+	class: SomeClass @(
+		foo
+		bar
+		
+		construct => method: a, b {
+			this.foo = a
+			this.bar = b
+		}
+		
+		do_stuff => method: ()
+			<% $"foo = `{}`, bar = `{}`, accessing a global variable: `{}`" this.foo, this.bar, #some_global_var
+	)
+	
+	obj = new: SomeClass("text", "more text")
+	obj.do_stuff()
+}
+""

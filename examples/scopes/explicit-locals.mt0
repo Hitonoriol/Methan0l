@@ -1,0 +1,19 @@
+"Explicit local variables"
+{
+	x = 123
+	if (x == 123) ? {
+		<% $"Outer `x`: {}" x
+		var: x = "foo"
+		<% $"Explicitly local `x`: {}" x
+	}
+	<% $"Outer `x` is unchanged: {}\n" x
+	
+	"Variable shadowing"
+	-> {
+		var: x = "Local 1"
+		-> {
+			var: x = "Local 2"
+			<% $"`x`s visible from here: [local: {}], [global: {}]" x, #x
+		}
+	}
+}

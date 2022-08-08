@@ -16,6 +16,7 @@ hyperrefoptions:
 
 papersize: a4
 fontsize: 13pt
+listings-no-page-break: true
 disable-header-and-footer: true
 colorlinks: true
 linkcolor: gray
@@ -165,39 +166,11 @@ Even though multiple variables with the same name inside nested scopes can be cr
 \
 Example:  
 
-```
-"Explicit local variables"
-{
-	x = 123
-	if (x == 123) ? {
-		<% $"Outer `x`: {}" x
-		var: x = "foo"
-		<% $"Explicitly local `x`: {}" x
-	}
-	<% $"Outer `x` is unchanged: {}\n" x
-	
-	"Variable shadowing"
-	-> {
-		var: x = "Local 1"
-		-> {
-			var: x = "Local 2"
-			<% $"`x`s visible from here: [local: {}], [global: {}]" x, #x
-		}
-	}
-}
-```
+@EXEC(cat ../examples/scopes/explicit-locals.mt0)
 
 Output:  
 
-```
-Explicit local variables  
-Outer `x`: 123  
-Explicitly local `x`: foo  
-Outer `x` is unchanged: 123  
- 
-Variable shadowing  
-`x`s visible from here: [local: Local 2], [global: Local 1]  
-```
+@EXEC(../build/methan0l ../examples/scopes/explicit-locals.mt0)
 
 ## Global variables
 
@@ -231,6 +204,14 @@ f = func: x, y, %glob1, %glob2, ... {
 
 As for classes, object fields can be accessed using `this` reference from within the method definition bodies.  
 All the other visibility rules are applied without changes.  
+
+Example:  
+
+@EXEC(cat ../examples/scopes/classes.mt0)
+
+Output:  
+
+@EXEC(../build/methan0l ../examples/scopes/classes.mt0)
 
 ## Function invocation rules
 
@@ -289,32 +270,49 @@ The higher the precedence level is, the tighter the operators are bound to their
 
 ## Assignment operators
 
-**Copy assignment**  
-Any expression's evaluated result can be assigned to an identifier:  
-`dest_expr = expr`  
+### Copy assignment
+
+```
+dest_expr = expr
+```
+
 This effectively creates a **full copy** of the `expr`'s Value. This means that for heap-stored types a new object containing the copy of the `expr`'s Value is created.  
 Copy assignment is evaluated **right-to-left**.  
 
-**Move assignment**  
-`dest_expr <- expr`  
+### Move assignment
+
+```
+dest_expr <- expr
+```
+
 Creates a temporary **partial copy** of `expr`, removes it from the data table (if `expr` is an idfr) and assigns the **partial copy** to `dest_idfr`.  
 Move assignment is evaluated **left-to-right**.  
 
-**Type-keeping assignment**  
-`dest_expr := expr`  
+### Type-keeping assignment
+
+```
+dest_expr := expr
+```
+
 Evaluates `expr` and converts it to the `dest_expr`'s type before assigning to it.  
 Type-keeping assignment is evaluated **right-to-left**.  
 
 ## Input / output operators
 
-**Input** operator: `%> idfr` -- get a value from stdin, deduce its type and assign it to the specified identifier.  
+### Input operator
+
+```
+%> expr
+```
+
+Gets a value from stdin, deduces its type and assigns it to the specified variable / reference.  
 
 **Input** can also be read as a String using `read_line()` function.  
 
-**Output** operators:  
+### Output operators
 
-* `%% expr` -- convert `expr`'s Value to string and print it out to stdout.
-* `<% expr`  -- print with trailing newline.
+* `%% expr` -- convert `expr`'s evaluation result to string and print it out to stdout.
+* `<% expr`  -- print with a trailing newline.  
 
 ## Arithmetic operators
 
@@ -1045,11 +1043,9 @@ methods = SomeClass@get_methods()
 SomeClass@get_method(methods[0])(obj, arg1, arg2)
 ```
 
----
 
-<br>
 
-<h1 class = "unnumbered"> Inbuilt library functions </h1>
+# Inbuilt library functions {.unnumbered}
 
 # Input / output operators & functions `[LibIO]`
 
@@ -1276,13 +1272,11 @@ If `unit` is **non-persistent**, it's executed first and `action` is executed af
 
 * `str.replace(from_str, to_str, [limit])` -- replace `limit` occurrences of `from_str` with `to_str`. If limit is not specified, all occurrences will be replaced.
 
-* `str.insert(pos, substr)` -- insert `substr` after the `pos`'th character of the provided string.
+* `str.insert(pos, substr)` -- insert `substr` after the `pos`'th character of the provided string.  
 
----
 
-<br>
 
-<h1 class = "unnumbered">Inbuilt Classes</h1>
+# Inbuilt Classes {.unnumbered}
 
 # File
 
@@ -1417,13 +1411,11 @@ pair = new: Pair(a, b)
 
 * `a.swap(b)` -- swaps the contents of the pair `a` with the pair `b`
 * `pair.x()`, `pair.y` -- first and second element getters (by reference)
-* `pair.swap_contents()` -- swaps first and second elements
+* `pair.swap_contents()` -- swaps first and second elements  
 
----
 
-<br>
 
-<h1 class = "unnumbered">Inbuilt modules</h1>
+# Inbuilt modules {.unnumbered}
 
 # System
 

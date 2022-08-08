@@ -2,7 +2,8 @@
 
 ## Build requirements
 
-Requires `pandoc`, `texlive-xetex` & `texlive-fonts-extra` to compile into a pdf document.  
+* `pandoc`
+* `texlive-xetex`, `texlive-fonts-extra`
 
 ## How to build
 
