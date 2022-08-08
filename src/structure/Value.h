@@ -390,7 +390,7 @@ class Value
 					return get<ValueRef>().value().get<T>();
 
 			/* Get a ref to a fallback type */
-			if constexpr (!allowed_type<T>() && !allowed_type<P>())
+			if constexpr (!allowed_type<TYPE(T)>() && !allowed_type<P>())
 				return std::any_cast<T&>(as_any());
 
 			/* Get a ref to a heap-stored object */
@@ -484,7 +484,7 @@ class Value
 		template <typename T>
 		operator T& ()
 		{
-			return get<T>();
+			return get<TYPE(T)>();
 		}
 
 		template<typename T>
