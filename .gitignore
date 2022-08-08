@@ -8,3 +8,5 @@ build/methan0l.exe
 *.so
 /build32/
 test.mt0
+*.html
+*.pdf
