@@ -26,6 +26,8 @@ LIB_NAME = libmethan0l.so
 LINK_STATIC := -lboost_filesystem -lboost_system
 LINK_DYNAMIC :=
 
+INSTALL_DIR=/opt/methan0l
+
 MACROS = -DBITS=$(BITS)
 
 ifdef NO_STATIC
@@ -39,9 +41,23 @@ ifneq ($(OS_NAME),Windows)
 	endif
 endif
 
-.PHONY: all release modules clean lib-clean
+.PHONY: all install release modules clean lib-clean
 
 all: $(CLI_BIN_NAME)
+
+install: all lib-headers
+	@if [ "$(OS_NAME)" = "Linux" ]; then \
+	    echo "Installing $(CLI_BIN_NAME)..."; \
+	    mkdir -p $(INSTALL_DIR); \
+	    cp -f $(LIB_NAME) $(INSTALL_DIR) && \
+	    cp -f $(CLI_BIN_NAME) $(INSTALL_DIR) && \
+	    cp -rf ../modules $(INSTALL_DIR) && \
+	    cp -rf $(LIB_INCLUDE) $(INSTALL_DIR) && \
+	    ln -sf $(INSTALL_DIR)/$(CLI_BIN_NAME) /usr/local/bin/$(CLI_BIN_NAME) && \
+	    ln -sf $(INSTALL_DIR)/$(LIB_NAME) /usr/local/lib/$(LIB_NAME) && \
+	    ln -sf $(INSTALL_DIR)/$(LIB_INCLUDE) /usr/local/include/methan0l && \
+	    echo "Installation finished successfully" || echo "Installation failed"; \
+	fi
 
 -include $(DEPS)
 
