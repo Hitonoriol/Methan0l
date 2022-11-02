@@ -38,6 +38,9 @@ class InteractiveRunner
 
 		bool load_program(const std::string&);
 
+		void parse();
+		void run();
+
 	public:
 		InteractiveRunner(Interpreter&);
 		void start();

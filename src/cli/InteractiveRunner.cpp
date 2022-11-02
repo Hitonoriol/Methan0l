@@ -4,13 +4,13 @@
 #include <memory>
 #include <utility>
 
-#include "structure/Unit.h"
 #include "expression/IdentifierExpr.h"
+#include "structure/Unit.h"
 #include "structure/Unit.h"
 #include "type.h"
 #include "util/memory.h"
 #include "version.h"
-
+#include "util/memory.h"
 #include "util/class_binder.h"
 
 namespace mtl
@@ -21,7 +21,7 @@ const InteractiveRunner::CommandMap InteractiveRunner::commands
 		{ "help",
 				[](auto &runner)
 					{
-						for (auto &&[cmd, f] : InteractiveRunner::commands)
+						for (auto&& [cmd, f] : InteractiveRunner::commands)
 							std::cout << "* " << cmd << std::endl;
 					}
 		},
@@ -55,7 +55,8 @@ const InteractiveRunner::CommandMap InteractiveRunner::commands
 					{
 						auto path = std::move(runner.next_arg());
 						if (runner.load_program(path))
-							out << "Successfully loaded " << std::quoted(path) << "." << NL
+							out << "Successfully loaded " << std::quoted(path) << "."
+									<< NL
 									<< "Press <Enter> to run the loaded Unit." << NL;
 					}
 		},
@@ -145,13 +146,32 @@ bool InteractiveRunner::load_line(std::string &line)
 			|| last == TokenType::SEMICOLON
 			|| std::isspace(last));
 
-	if (ready) {
-		methan0l.load();
-		methan0l.get_parser().clear();
-		methan0l.get_parser().get_lexer().reset(true);
-	}
+	if (ready)
+		parse();
 
 	return ready;
+}
+
+void InteractiveRunner::parse()
+{
+	methan0l.load();
+	methan0l.get_parser().clear();
+	methan0l.get_parser().get_lexer().reset(true);
+	auto &main = methan0l.program();
+	/* Wrap single expressions in return expressions */
+	if (main.size() == 1) {
+		auto &expr = main.expressions().front();
+		if (!instanceof<IdentifierExpr>(expr))
+			expr = Expression::return_expr(expr);
+	}
+	main.clear_result();
+}
+
+void InteractiveRunner::run()
+{
+	auto result = methan0l.run();
+	if (result.numeric())
+		std::cout << result << std::endl;
 }
 
 void InteractiveRunner::start()
@@ -172,11 +192,11 @@ void InteractiveRunner::start()
 		/* Force parse all lexed tokens when a single `\` is received */
 		else if (!ready && (line.size() == 1 && line[0] == TokenType::BACKSLASH)) {
 			ready = true;
-			methan0l.load();
+			parse();
 		}
 
 		if (ready)
-			methan0l.run();
+			run();
 	} while (!methan0l.force_quit());
 }
 
