@@ -86,7 +86,9 @@ class ExprEvaluator
 		ExceptionHandler exception_handler;
 		std::stack<std::shared_ptr<Unit>, std::pmr::deque<std::shared_ptr<Unit>>> tmp_call_stack;
 		Expression *current_expr;
-		bool execution_finished = false;
+
+		bool stopped = false;
+		std::pmr::deque<std::function<void(void)>> on_exit_tasks;
 
 		static void init_heap(size_t initial_mem_cap = HEAP_MEM_CAP);
 
@@ -97,6 +99,8 @@ class ExprEvaluator
 			library->load();
 			libraries.push_back(std::move(library));
 		}
+
+		void on_exit();
 
 		/*
 		 * Main operator application dispatcher.
@@ -406,8 +410,8 @@ class ExprEvaluator
 		const std::string& get_scriptdir();
 
 		Value execute(Unit &unit, const bool use_own_scope = true);
-		Value invoke(const Unit &unit, ExprList &args);
 		Value invoke(const Unit &unit);
+		Value invoke(const Unit &unit, ExprList &args);
 		Value invoke(const Function &func, ExprList &args);
 		Value invoke(const Value &callable, ExprList &args);
 
@@ -476,7 +480,7 @@ class ExprEvaluator
 
 		void assert_true(bool, const std::string& = "Assertion failed");
 		void stop();
-		bool force_quit();
+		bool execution_stopped();
 
 		void dump_stack();
 };

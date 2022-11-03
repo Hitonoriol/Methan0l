@@ -20,6 +20,8 @@
 #define IF(...) if constexpr (JOIN(__VA_ARGS__))
 #define ELIF(...) else IF(__VA_ARGS__)
 
+#define HEAP_TYPES(v, ...) if constexpr (mtl::Value::is_heap_type<VT(v)>()) JOIN(__VA_ARGS__)
+
 namespace mtl
 {
 

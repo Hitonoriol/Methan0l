@@ -109,7 +109,7 @@ std::string InteractiveRunner::next_arg()
 /* Format: !!command */
 bool InteractiveRunner::process_commands(const std::string &cmd)
 {
-	if (methan0l.force_quit())
+	if (methan0l.execution_stopped())
 		return false;
 
 	if (cmd.size() < 3
@@ -155,6 +155,7 @@ bool InteractiveRunner::load_line(std::string &line)
 void InteractiveRunner::parse()
 {
 	methan0l.load();
+	methan0l.preserve_data(true);
 	methan0l.get_parser().clear();
 	methan0l.get_parser().get_lexer().reset(true);
 	auto &main = methan0l.program();
@@ -178,7 +179,6 @@ void InteractiveRunner::start()
 {
 	std::cout << FULL_VERSION_STR << " on " << get_os() << ".\n"
 			<< "Use \"" << cmd_prefix << "help\" to view command list." << std::endl;
-	methan0l.preserve_data(true);
 	std::string line;
 	bool ready = true;
 	do {
@@ -197,7 +197,7 @@ void InteractiveRunner::start()
 
 		if (ready)
 			run();
-	} while (!methan0l.force_quit());
+	} while (!methan0l.execution_stopped());
 }
 
 } /* namespace mtl */

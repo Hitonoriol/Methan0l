@@ -63,7 +63,7 @@ void Function::set(const Function &rhs)
  * 				* Defined arguments are stored by reference
  * 				* Excess arguments (if any) are stored as unevaluated expressions
  */
-void Function::call(ExprEvaluator &eval, ExprList &args)
+void Function::call(ExprEvaluator &eval, const ExprList &args)
 {
 	size_t argc = args.size();
 	if (argc < this->argc)

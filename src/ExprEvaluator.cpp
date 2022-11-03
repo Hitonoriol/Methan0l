@@ -40,14 +40,14 @@ namespace mtl
 std::unique_ptr<Heap> ExprEvaluator::heap;
 
 STRINGS(
-	EnvVars::LAUNCH_ARGS(".argv"),
-	EnvVars::SCRDIR(".scrdir"),
-	EnvVars::RUNPATH(".rp"),
-	EnvVars::RUNDIR(".rd")
+		EnvVars::LAUNCH_ARGS(".argv"),
+		EnvVars::SCRDIR(".scrdir"),
+		EnvVars::RUNPATH(".rp"),
+		EnvVars::RUNDIR(".rd")
 )
 
 STRINGS(
-	CoreFuncs::LOAD_FILE(".ld")
+		CoreFuncs::LOAD_FILE(".ld")
 )
 
 ExprEvaluator::ExprEvaluator()
@@ -66,14 +66,27 @@ ExprEvaluator::ExprEvaluator()
 	type_mgr.register_type<Random>();
 	type_mgr.register_type<Pair>();
 
-	register_func("set_max_mem", [](uint64_t cap){heap->set_max_mem(cap);});
-	register_func("mem_in_use", []{return heap->get_in_use();});
-	register_func("max_mem", []{return heap->get_max_mem();});
-	register_func("enforce_mem_limit", [](bool val){mtl::HEAP_LIMITED = val;});
-	register_func("mem_info", []{
+	register_func("set_max_mem", [](uint64_t cap) {heap->set_max_mem(cap);});
+	register_func("mem_in_use", []
+	{
+		return heap->get_in_use();
+	});
+	register_func("max_mem", []
+	{
+		return heap->get_max_mem();
+	});
+	register_func("enforce_mem_limit", [](bool val) {mtl::HEAP_LIMITED = val;});
+	register_func("mem_info", []
+	{
 		auto in_use = heap->get_in_use(), max = heap->get_max_mem();
 		out << "Heap: " << in_use << "/" << max << "b " <<
-		"(" << ((static_cast<double>(in_use) / max) * 100)  << "% in use)" << NL;
+				"(" << ((static_cast<double>(in_use) / max) * 100) << "% in use)" << NL;
+	});
+	register_func("on_exit", [&](Value &callable) {
+		on_exit_tasks.push_back([=]() mutable {
+			Args noargs;
+			invoke(callable, noargs);
+		});
 	});
 }
 
@@ -137,7 +150,7 @@ const std::string& ExprEvaluator::get_scriptdir()
 Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 {
 	BENCHMARK_START
-	LOG('\n' << "Executing " << unit)
+		LOG('\n' << "Executing " << unit)
 
 	if (use_own_scope)
 		enter_scope(unit);
@@ -150,10 +163,12 @@ Value ExprEvaluator::execute(Unit &unit, const bool use_own_scope)
 	while (unit.has_next_expr() && !unit.execution_finished())
 		exec(*(current_expr = unit.next_expression()));
 
-	if (force_quit())
+	if (execution_stopped()) {
 		return Value::NO_VALUE;
+	}
 
-	Unit *parent = exec_stack.size() > 1 ? *std::prev(exec_stack.end(), 2) : current_unit();
+	Unit *parent =
+			exec_stack.size() > 1 ? *std::prev(exec_stack.end(), 2) : current_unit();
 	Value returned_val = unit.result();
 	bool carry_return = unit.carries_return();
 
@@ -273,11 +288,15 @@ void ExprEvaluator::leave_scope()
 
 		pop_tmp_callable();
 		exec_stack.pop_back();
-
-		IFDBG(std::cout << "<< Left scope // depth: " << exec_stack.size() << std::endl);
+		LOG("<< Left scope // depth: " << exec_stack.size());
 	}
-	else
-		IFDBG(out << "? Tmp callable stack depth: " << tmp_call_stack.size() << std::endl);
+	else {
+		LOG("Program finished executing, this should be 0: " << tmp_call_stack.size());
+		/* If the main unit is persistent, exit handlers can only
+		 * be invoked by explicitly calling exit() from the methan0l program. */
+		if (!exec_stack.front()->is_persistent())
+			on_exit();
+	}
 }
 
 void ExprEvaluator::restore_execution_state(size_t depth)
@@ -310,7 +329,8 @@ Unit* ExprEvaluator::current_unit()
 
 Function& ExprEvaluator::current_function()
 {
-	for (auto it = std::prev(exec_stack.end()); it != std::prev(exec_stack.begin()); --it) {
+	for (auto it = std::prev(exec_stack.end()); it != std::prev(exec_stack.begin());
+			--it) {
 		if (instanceof<Function>(*it))
 			return try_cast<Function>(*it);
 	}
@@ -523,10 +543,17 @@ Value ExprEvaluator::evaluate(ListExpr &expr)
 
 Value ExprEvaluator::invoke(const Value &callable, ExprList &args)
 {
-	if (callable.is<InbuiltFunc>())
-		return (callable.cget<InbuiltFunc>())(args);
-	else
-		return invoke(callable.cget<Function>(), args);
+	return unconst(callable).accept([&](auto &c) {
+		HEAP_TYPES(c, {
+			IF (std::is_same_v<VT(*c), InbuiltFunc>)
+				return (*c)(args);
+			ELIF(std::is_same_v<VT(*c), Function>)
+				return invoke(*c, args);
+			ELIF(std::is_same_v<VT(*c), Unit>)
+				return invoke(*c, args);
+		})
+		return Value::NO_VALUE;
+	});
 }
 
 Value ExprEvaluator::invoke_method(Object &obj, Value &method, ExprList &args)
@@ -535,14 +562,16 @@ Value ExprEvaluator::invoke_method(Object &obj, Value &method, ExprList &args)
 	argcopy.push_front(LiteralExpr::create(obj));
 	return method.is<Function>()
 			? invoke(method.get<Function>(), argcopy)
-			: method.get<InbuiltFunc>()(argcopy);
+						:
+				method.get<InbuiltFunc>()(argcopy);
 }
 
 Value ExprEvaluator::evaluate(InvokeExpr &expr)
 {
 	ExprPtr lhs = expr.get_lhs();
 	if (instanceof<IdentifierExpr>(lhs)
-			&& try_cast<IdentifierExpr>(lhs).get_name() == Token::reserved(Word::SELF_INVOKE)) {
+			&& try_cast<IdentifierExpr>(lhs).get_name()
+					== Token::reserved(Word::SELF_INVOKE)) {
 		return invoke(current_function(), expr.arg_list());
 	}
 
@@ -556,14 +585,10 @@ Value ExprEvaluator::evaluate(InvokeExpr &expr)
 	if constexpr (DEBUG)
 		std::cout << "Invoking a callable: " << try_cast<Expression>(&expr).info() << std::endl;
 
-	Type ctype = callable.type();
-	if (ctype == Type::UNIT)
-		return invoke(callable.get<Unit>(), expr.arg_list());
-
-	else if (ctype == Type::FUNCTION)
+	if (!callable.nil())
 		return invoke(callable, expr.arg_list());
 
-	else if (instanceof<IdentifierExpr>(lhs) && callable.nil())
+	else if (instanceof<IdentifierExpr>(lhs))
 		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list());
 
 	throw std::runtime_error("Invalid invocation expression");
@@ -611,14 +636,23 @@ void ExprEvaluator::assert_true(bool val, const std::string &msg)
 
 void ExprEvaluator::stop()
 {
-	execution_finished = true;
+	stopped = true;
 	for (auto unit : exec_stack)
 		unit->stop();
+	on_exit();
 }
 
-bool ExprEvaluator::force_quit()
+bool ExprEvaluator::execution_stopped()
 {
-	return execution_finished;
+	return stopped;
+}
+
+void ExprEvaluator::on_exit()
+{
+	LOG("on_exit()")
+	for (auto &callable : on_exit_tasks)
+		callable();
+	on_exit_tasks.clear();
 }
 
 InbuiltFuncMap& ExprEvaluator::functions()
