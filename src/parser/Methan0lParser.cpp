@@ -57,7 +57,10 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	/* Function invocation
 	 * foo$(arg1, arg2, ...)
 	 * 		or
-	 * foo(arg1, arg2, ...)	*/
+	 * foo(arg1, arg2, ...)
+	 * 		or
+	 * foo(arg1, ..., arg_n): arg_n+1, arg_n+2, ...
+	 */
 	register_parser(TokenType::LIST_DEF_L, new InvokeParser());
 	alias_infix(TokenType::LIST_DEF_L, TokenType::PAREN_L);
 
