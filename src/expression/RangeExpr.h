@@ -35,7 +35,7 @@ class RangeExpr: public Expression
 		inline Value get_step(ExprEvaluator &eval)
 		{
 			if (!has_step())
-				throw std::runtime_error("Range has no step specified");
+				return 1;
 
 			return step->evaluate(eval);
 		}

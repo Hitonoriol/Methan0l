@@ -76,21 +76,23 @@ class LibData: public Library
 		bool instanceof(Value &rec, ExprPtr exp);
 		bool instanceof(Value &rec, Value &exp);
 
-		/* std::accumulate wrapper for `mtl::Value`s */
 		template<typename T, typename F>
 		T accumulate(Value &ctr, T init, F &&operation)
 		{
 			eval->assert_true(ctr.is<ValList>() || ctr.is<ValSet>());
 
-			T sum;
+			T result{};
 			ctr.accept_container([&](auto &v) {
 				if constexpr (!is_associative<VT(v)>::value)
-					sum = std::accumulate(v.begin(),v.end(), init, operation);
+					result = std::accumulate(v.begin(),v.end(), init, operation);
 			});
-			return sum;
+			return result;
 		}
 
-		double mean(Value&);
+		std::pair<size_t, double> accumulate(Value &callable, Args &args, double init, DblBinOperation operation);
+		std::pair<size_t, double> dispatch_accumulate(Args &args, double init, DblBinOperation operation);
+
+		double mean(Args);
 
 		/* Set operation where `args` contains 2 set expressions */
 		template<typename T>

@@ -15,6 +15,7 @@
 #include "expression/ListExpr.h"
 #include "expression/InvokeExpr.h"
 #include "expression/parser/MapParser.h"
+#include "expression/RangeExpr.h"
 #include "interpreter/ExprEvaluator.h"
 #include "structure/Value.h"
 #include "type.h"
@@ -199,48 +200,70 @@ void LibData::import_reference(const IdentifierExpr &idfr) {
 LibData::DblBinOperation LibData::summator = [](double l, Value r) {return l + r.as<double>();};
 LibData::DblBinOperation LibData::multiplicator = [](double l, Value r) {return l * r.as<double>();};
 
-double LibData::mean(Value &ctr)
+double LibData::mean(Args args)
 {
-	double sum = accumulate(ctr, 0.0, summator);
-	double n;
-	ctr.accept_container([&n](auto &v) {n = v.size();});
+	auto [n, sum] = dispatch_accumulate(args, 0.0, summator);
 	return sum / n;
+}
+
+std::pair<size_t, double> LibData::dispatch_accumulate(Args &args, double init, DblBinOperation operation)
+{
+	auto first = arg(args);
+	size_t size = 0;
+	if (first.container()) {
+		first.accept_container([&size](auto &v) {size = v.size();});
+		return std::make_pair(size, accumulate(first, init, operation));
+	}
+	else {
+		args.erase(args.begin());
+		return accumulate(first, args, init, operation);
+	}
+}
+
+std::pair<size_t, double> LibData::accumulate(Value &callable, Args &args, double init, DblBinOperation op)
+{
+	auto &range = try_cast<RangeExpr>(args[0]);
+	auto start = range.get_start(*eval).to_double();
+	auto end = range.get_end(*eval).to_double();
+	auto step = range.get_step(*eval).to_double();
+
+	args.clear();
+	auto x = LiteralExpr::create(0);
+	args.push_back(x);
+	double result = init;
+	for (auto i = start; i < end; i += step) {
+		x->raw_ref() = i;
+		result = op(result, eval->invoke(callable, args));
+	}
+	return std::make_pair(abs((end - start) / step), result);
 }
 
 void LibData::load_container_funcs()
 {
 	/* ------------------ Accumulative container functions ------------------- */
-	eval->register_func("sum", [this](Value ctr) {
-		return accumulate(ctr, 0.0, summator);
+	eval->register_func("sum", [this](Args args) {
+		return dispatch_accumulate(args, 0.0, summator).second;
 	});
 
-	eval->register_func("product", [this](Value ctr) {
-			return accumulate(ctr, 1.0, multiplicator);
+	eval->register_func("product", [this](Args args) {
+		return dispatch_accumulate(args, 1.0, multiplicator).second;
 	});
 
 	eval->register_func("mean", mtl::member(this, &LibData::mean));
 
 	/* Root mean square */
-	eval->register_func("rms", [this](Value ctr) {
-		double n;
-		ctr.accept_container([&n](auto &v) {n = v.size();});
-		double rsum = accumulate(ctr, 0.0, [](double l, Value r) {
+	eval->register_func("rms", [this](Args args) {
+		auto [n, rsum] = dispatch_accumulate(args, 0.0, [](double l, Value r) {
 			return l + r.as<double>() * r.as<double>();
 		});
 		return sqrt(rsum / n);
 	});
 
 	/* Standard deviation */
-	eval->register_func("deviation", [this](Value ctr) {
-		double mean = this->mean(ctr);
-		double dsum = 0, n;
-		ctr.accept_container([&n, &dsum, mean](auto &v) {
-			if constexpr (!is_associative<VT(v)>::value) {
-				n = v.size();
-				std::for_each (v.begin(), v.end(), [&](const Value &elem) {
-					dsum += (unconst(elem).as<double>() - mean) * (unconst(elem).as<double>() - mean);
-				});
-			}
+	eval->register_func("deviation", [this](Args args) {
+		double mean = this->mean(args);
+		auto [n, dsum] = dispatch_accumulate(args, 0.0, [mean](double l, Value r){
+			return l + (r.as<double>() - mean) * (r.as<double>() - mean);
 		});
 		return sqrt(dsum / n);
 	});
