@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <deque>
 
-#include "Interpreter.h"
+#include "interpreter/Interpreter.h"
 
 namespace mtl
 {

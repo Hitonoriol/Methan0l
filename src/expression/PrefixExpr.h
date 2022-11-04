@@ -1,9 +1,9 @@
 #ifndef EXPRESSION_PREFIXEXPR_H_
 #define EXPRESSION_PREFIXEXPR_H_
 
+#include <lexer/Token.h>
 #include <functional>
 
-#include "../Token.h"
 #include "Expression.h"
 
 namespace mtl

@@ -1,14 +1,14 @@
 #ifndef INTERPRETER_H_
 #define INTERPRETER_H_
 
+#include <lexer/Lexer.h>
+#include <parser/Methan0lParser.h>
 #include <iostream>
 #include <string>
 #include <stdexcept>
 #include <filesystem>
 #include <memory_resource>
 
-#include "Lexer.h"
-#include "Methan0lParser.h"
 #include "ExprEvaluator.h"
 #include "expression/AssignExpr.h"
 #include "expression/TryCatchExpr.h"

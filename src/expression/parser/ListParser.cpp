@@ -1,3 +1,5 @@
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include "ListParser.h"
 
 #include <deque>
@@ -5,9 +7,7 @@
 #include <iostream>
 #include <memory>
 
-#include "../../Parser.h"
 #include "../../type.h"
-#include "../../Token.h"
 #include "../Expression.h"
 
 namespace mtl

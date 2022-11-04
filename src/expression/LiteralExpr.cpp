@@ -1,7 +1,7 @@
 #include "LiteralExpr.h"
 
-#include <ExprEvaluator.h>
-#include <Token.h>
+#include <interpreter/ExprEvaluator.h>
+#include <lexer/Token.h>
 #include <memory>
 #include <string>
 #include <string_view>

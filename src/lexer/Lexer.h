@@ -1,6 +1,7 @@
 #ifndef LEXER_H_
 #define LEXER_H_
 
+#include <lexer/Token.h>
 #include <string>
 #include <sstream>
 #include <locale>
@@ -9,7 +10,6 @@
 #include <iterator>
 
 #include "type.h"
-#include "Token.h"
 
 namespace mtl
 {

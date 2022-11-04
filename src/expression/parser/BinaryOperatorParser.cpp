@@ -1,8 +1,8 @@
 #include <expression/Expression.h>
 #include <expression/parser/BinaryOperatorParser.h>
-#include <Parser.h>
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include <type.h>
-#include <Token.h>
 #include <memory>
 
 namespace mtl

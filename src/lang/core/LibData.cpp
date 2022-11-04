@@ -1,3 +1,4 @@
+#include <lexer/Token.h>
 #include "LibData.h"
 
 #include <deque>
@@ -14,10 +15,9 @@
 #include "expression/ListExpr.h"
 #include "expression/InvokeExpr.h"
 #include "expression/parser/MapParser.h"
-#include "ExprEvaluator.h"
+#include "interpreter/ExprEvaluator.h"
 #include "structure/Value.h"
 #include "type.h"
-#include "Token.h"
 #include "version.h"
 
 #include "structure/object/Class.h"

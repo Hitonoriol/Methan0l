@@ -3,9 +3,9 @@
 #include <expression/Expression.h>
 #include <expression/parser/MapParser.h>
 #include <expression/parser/UnitParser.h>
-#include "Parser.h"
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include <type.h>
-#include <Token.h>
 #include <util/cast.h>
 #include <deque>
 #include <iostream>

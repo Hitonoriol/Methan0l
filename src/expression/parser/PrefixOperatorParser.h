@@ -1,7 +1,7 @@
 #ifndef EXPRESSION_PARSER_PREFIXOPERATORPARSER_H_
 #define EXPRESSION_PARSER_PREFIXOPERATORPARSER_H_
 
-#include "../../Parser.h"
+#include <parser/Parser.h>
 #include "PrefixParser.h"
 #include "../PrefixExpr.h"
 #include "precedence.h"

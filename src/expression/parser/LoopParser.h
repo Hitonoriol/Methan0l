@@ -1,13 +1,13 @@
 #ifndef SRC_EXPRESSION_PARSER_LOOPPARSER_H_
 #define SRC_EXPRESSION_PARSER_LOOPPARSER_H_
 
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include <memory>
 #include <stdexcept>
 #include <vector>
 
-#include "Parser.h"
 #include "type.h"
-#include "Token.h"
 #include "util/util.h"
 #include "../ListExpr.h"
 #include "../LoopExpr.h"

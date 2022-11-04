@@ -1,5 +1,4 @@
-#include "Pair.h"
-
+#include <lang/class/Pair.h>
 #include <type.h>
 #include <util/cast.h>
 #include <util/class_binder.h>

@@ -1,9 +1,9 @@
 #include "GroupParser.h"
 
 #include <expression/LiteralExpr.h>
-#include "Parser.h"
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include <type.h>
-#include <Token.h>
 #include <memory>
 #include "util/cast.h"
 

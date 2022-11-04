@@ -1,3 +1,5 @@
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include "MapParser.h"
 
 #include <iostream>
@@ -7,10 +9,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "Parser.h"
 #include "structure/Value.h"
 #include "type.h"
-#include "Token.h"
 #include "util/util.h"
 
 #include "../BinaryOperatorExpr.h"

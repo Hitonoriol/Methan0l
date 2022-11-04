@@ -1,3 +1,6 @@
+#include <lang/class/File.h>
+#include <lang/class/Pair.h>
+#include <lang/class/Random.h>
 #include "ExprEvaluator.h"
 
 #include <iostream>
@@ -30,9 +33,6 @@
 
 #include "lang/lib/LibMath.h"
 
-#include "lang/structure/File.h"
-#include "lang/structure/Random.h"
-#include "lang/structure/Pair.h"
 
 namespace mtl
 {

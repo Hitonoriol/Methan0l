@@ -1,13 +1,12 @@
 #ifndef EXPRESSION_EXPRESSION_H_
 #define EXPRESSION_EXPRESSION_H_
 
+#include <lexer/Token.h>
 #include <iostream>
 
-#include "ExprEvaluator.h"
+#include "interpreter/ExprEvaluator.h"
 #include "type.h"
 #include "structure/Value.h"
-#include "Token.h"
-
 #include "util/debug.h"
 #include "util/memory.h"
 #include "util/string.h"

@@ -1,3 +1,4 @@
+#include <lexer/Token.h>
 #include "LibString.h"
 
 #include <deque>
@@ -7,7 +8,6 @@
 
 #include "structure/Value.h"
 #include "type.h"
-#include "Token.h"
 #include "util/util.h"
 #include "util/StringFormatter.h"
 

@@ -1,8 +1,8 @@
 #ifndef SRC_EXPRESSION_PARSER_MAPPARSER_H_
 #define SRC_EXPRESSION_PARSER_MAPPARSER_H_
 
+#include <lexer/Token.h>
 #include "PrefixParser.h"
-#include "Token.h"
 
 namespace mtl
 {

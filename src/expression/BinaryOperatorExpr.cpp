@@ -1,8 +1,8 @@
+#include <lexer/Token.h>
 #include "BinaryOperatorExpr.h"
 
-#include "../ExprEvaluator.h"
+#include "interpreter/ExprEvaluator.h"
 #include "../type.h"
-#include "Token.h"
 #include "LiteralExpr.h"
 
 namespace mtl

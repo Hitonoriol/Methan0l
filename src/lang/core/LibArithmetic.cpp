@@ -1,3 +1,4 @@
+#include <lexer/Token.h>
 #include "LibArithmetic.h"
 
 #include <iterator>
@@ -8,7 +9,6 @@
 #include "util/meta/for_each.h"
 #include "structure/Value.h"
 #include "type.h"
-#include "Token.h"
 
 namespace mtl
 {

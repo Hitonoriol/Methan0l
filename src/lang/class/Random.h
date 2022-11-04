@@ -1,5 +1,5 @@
-#ifndef SRC_LANG_STRUCTURE_RANDOM_H_
-#define SRC_LANG_STRUCTURE_RANDOM_H_
+#ifndef SRC_LANG_CLASS_RANDOM_H_
+#define SRC_LANG_CLASS_RANDOM_H_
 
 #include <structure/object/Class.h>
 #include <random>
@@ -72,4 +72,4 @@ class Random: public Class
 
 } /* namespace mtl */
 
-#endif /* SRC_LANG_STRUCTURE_RANDOM_H_ */
+#endif /* SRC_LANG_CLASS_RANDOM_H_ */

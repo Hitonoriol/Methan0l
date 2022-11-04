@@ -1,5 +1,4 @@
-#include "Token.h"
-
+#include <lexer/Token.h>
 #include <algorithm>
 #include <iostream>
 #include <sstream>

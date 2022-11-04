@@ -1,5 +1,4 @@
-#include "Random.h"
-
+#include <lang/class/Random.h>
 #include <functional>
 #include <limits>
 #include <string>
@@ -7,7 +6,7 @@
 #include <utility>
 
 #include "expression/Expression.h"
-#include "ExprEvaluator.h"
+#include "interpreter/ExprEvaluator.h"
 #include "structure/object/Object.h"
 #include "structure/Value.h"
 #include "type.h"

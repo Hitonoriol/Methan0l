@@ -1,5 +1,4 @@
-#include "Methan0lParser.h"
-
+#include <parser/Methan0lParser.h>
 #include "expression/parser/AssignParser.h"
 #include "expression/parser/IdentifierParser.h"
 #include "expression/parser/GroupParser.h"

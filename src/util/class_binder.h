@@ -1,7 +1,7 @@
 #ifndef SRC_UTIL_CLASS_BINDER_H_
 #define SRC_UTIL_CLASS_BINDER_H_
 
-#include "ExprEvaluator.h"
+#include "interpreter/ExprEvaluator.h"
 #include "structure/object/Class.h"
 
 #include <memory>

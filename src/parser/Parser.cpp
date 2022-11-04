@@ -1,5 +1,4 @@
-#include "Parser.h"
-
+#include <parser/Parser.h>
 #include <iostream>
 #include <iomanip>
 #include <string>

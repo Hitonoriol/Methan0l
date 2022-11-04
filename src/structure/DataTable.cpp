@@ -1,3 +1,4 @@
+#include <lexer/Token.h>
 #include "DataTable.h"
 
 #include <algorithm>
@@ -6,7 +7,6 @@
 #include <utility>
 
 #include "expression/IdentifierExpr.h"
-#include "Token.h"
 #include "Value.h"
 
 namespace mtl

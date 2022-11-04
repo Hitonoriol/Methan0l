@@ -1,9 +1,9 @@
+#include <lexer/Token.h>
 #include "LibLogical.h"
 
 #include <iterator>
 
 #include "structure/Value.h"
-#include "Token.h"
 #include "util/array.h"
 
 namespace mtl

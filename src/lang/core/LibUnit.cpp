@@ -1,3 +1,4 @@
+#include <lexer/Token.h>
 #include "LibUnit.h"
 
 #include <chrono>
@@ -7,15 +8,14 @@
 #include <thread>
 #include <filesystem>
 
-#include "Interpreter.h"
+#include "interpreter/Interpreter.h"
 #include "expression/IdentifierExpr.h"
 #include "expression/InvokeExpr.h"
 #include "expression/ListExpr.h"
 #include "expression/parser/MapParser.h"
-#include "ExprEvaluator.h"
+#include "interpreter/ExprEvaluator.h"
 #include "structure/Unit.h"
 #include "structure/Value.h"
-#include "Token.h"
 #include "util/util.h"
 #include "util/process.h"
 

@@ -1,9 +1,8 @@
 #include "PostfixExpr.h"
 
-#include <ExprEvaluator.h>
+#include <interpreter/ExprEvaluator.h>
+#include <lexer/Token.h>
 #include <type.h>
-#include <Token.h>
-
 #include <iostream>
 
 

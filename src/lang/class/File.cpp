@@ -1,5 +1,4 @@
-#include "File.h"
-
+#include <lang/class/File.h>
 #include <iterator>
 #include <iostream>
 #include <fstream>
@@ -11,10 +10,10 @@
 #include <utility>
 #include <filesystem>
 
-#include "Interpreter.h"
+#include "interpreter/Interpreter.h"
 #include "expression/LiteralExpr.h"
 #include "expression/Expression.h"
-#include "ExprEvaluator.h"
+#include "interpreter/ExprEvaluator.h"
 #include "structure/Function.h"
 #include "structure/object/Object.h"
 #include "structure/Value.h"

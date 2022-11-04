@@ -1,12 +1,11 @@
 #include "LibModule.h"
-#include "Interpreter.h"
+#include "interpreter/Interpreter.h"
 #include "structure/Value.h"
-#include "ExprEvaluator.h"
+#include "interpreter/ExprEvaluator.h"
 #include "util/util.h"
-#include "lang/structure/File.h"
-
 #include <filesystem>
 #include <boost/dll.hpp>
+#include <lang/class/File.h>
 
 #include "LibUnit.h"
 

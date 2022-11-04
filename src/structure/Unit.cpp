@@ -1,3 +1,4 @@
+#include <lexer/Token.h>
 #include "Value.h"
 
 #include <algorithm>
@@ -5,7 +6,6 @@
 #include <vector>
 #include <sstream>
 
-#include "../Token.h"
 #include "expression/Expression.h"
 #include "expression/UnitExpr.h"
 #include "util/string.h"

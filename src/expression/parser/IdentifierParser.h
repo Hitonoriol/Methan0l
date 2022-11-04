@@ -1,7 +1,7 @@
 #ifndef EXPRESSION_PARSER_IDENTIFIERPARSER_H_
 #define EXPRESSION_PARSER_IDENTIFIERPARSER_H_
 
-#include "../../Parser.h"
+#include <parser/Parser.h>
 #include "../Expression.h"
 #include "../IdentifierExpr.h"
 #include "PrefixParser.h"

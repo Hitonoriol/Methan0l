@@ -1,9 +1,9 @@
+#include <lexer/Token.h>
 #include "Expression.h"
 
 #include <memory>
 #include <string>
 
-#include "Token.h"
 #include "util/util.h"
 #include "util/string.h"
 #include "IdentifierExpr.h"

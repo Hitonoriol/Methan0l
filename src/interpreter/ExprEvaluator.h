@@ -1,6 +1,7 @@
 #ifndef SRC_EXPREVALUATOR_H_
 #define SRC_EXPREVALUATOR_H_
 
+#include <lexer/Token.h>
 #include <util/Heap.h>
 #include <deque>
 #include <cmath>
@@ -10,7 +11,6 @@
 #include "structure/Function.h"
 #include "lang/Library.h"
 #include "structure/object/TypeManager.h"
-#include "Token.h"
 #include "ExceptionHandler.h"
 
 #include "util/meta/function_traits.h"

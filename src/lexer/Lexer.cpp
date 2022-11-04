@@ -1,5 +1,4 @@
-#include "Lexer.h"
-
+#include <lexer/Lexer.h>
 #include <bitset>
 
 #include "util/util.h"

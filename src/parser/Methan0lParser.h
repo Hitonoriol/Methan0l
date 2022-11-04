@@ -1,8 +1,8 @@
 #ifndef METHAN0LPARSER_H_
 #define METHAN0LPARSER_H_
 
-#include "Token.h"
-#include "Parser.h"
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 
 namespace mtl
 {

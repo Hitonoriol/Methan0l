@@ -1,8 +1,8 @@
 #ifndef SRC_LANG_LIBARITHMETIC_H_
 #define SRC_LANG_LIBARITHMETIC_H_
 
+#include <lexer/Token.h>
 #include "../Library.h"
-#include "Token.h"
 #include "structure/Value.h"
 
 namespace mtl

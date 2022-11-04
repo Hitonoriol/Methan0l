@@ -1,12 +1,12 @@
 #ifndef EXPRESSION_PARSER_INFIXPARSER_H_
 #define EXPRESSION_PARSER_INFIXPARSER_H_
 
+#include <lexer/Token.h>
 #include <stdexcept>
 #include <memory>
 
 #include "type.h"
 #include "util/util.h"
-#include "Token.h"
 #include "precedence.h"
 #include "ExprParser.h"
 #include "../IdentifierExpr.h"

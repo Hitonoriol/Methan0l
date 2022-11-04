@@ -1,6 +1,8 @@
 #ifndef PARSER_H_
 #define PARSER_H_
 
+#include <lexer/Lexer.h>
+#include <lexer/Token.h>
 #include <utility>
 #include <vector>
 #include <deque>
@@ -8,8 +10,6 @@
 #include <stdexcept>
 #include <memory>
 
-#include "Token.h"
-#include "Lexer.h"
 #include "expression/Expression.h"
 #include "expression/parser/InfixParser.h"
 #include "expression/parser/PrefixParser.h"

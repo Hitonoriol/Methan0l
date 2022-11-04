@@ -1,5 +1,5 @@
-#ifndef SRC_LANG_STRUCTURE_FILE_H_
-#define SRC_LANG_STRUCTURE_FILE_H_
+#ifndef SRC_LANG_CLASS_FILE_H_
+#define SRC_LANG_CLASS_FILE_H_
 
 #include <structure/object/Class.h>
 #include <fstream>
@@ -46,4 +46,4 @@ class File: public Class
 
 } /* namespace mtl */
 
-#endif /* SRC_LANG_STRUCTURE_FILE_H_ */
+#endif /* SRC_LANG_CLASS_FILE_H_ */

@@ -1,11 +1,10 @@
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include "WordOperatorParser.h"
 
 #include <memory>
 
-#include "Parser.h"
 #include "type.h"
-#include "Token.h"
-
 #include "../Expression.h"
 #include "../ListExpr.h"
 #include "../PrefixExpr.h"

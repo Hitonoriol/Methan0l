@@ -4,9 +4,9 @@
 #include <expression/Expression.h>
 #include <expression/TryCatchExpr.h>
 #include <expression/UnitExpr.h>
-#include <Parser.h>
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include <type.h>
-#include <Token.h>
 #include <algorithm>
 #include <string>
 
