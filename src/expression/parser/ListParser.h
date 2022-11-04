@@ -9,9 +9,16 @@ namespace mtl
 
 class ListParser: public PrefixParser
 {
+	private:
+		TokenType end_token;
+
 	public:
+		ListParser(TokenType end_token) : end_token(end_token) {}
 		ExprPtr parse(Parser &parser, Token token) override;
-		static void parse(Parser &parser, std::function<void(ExprPtr)> collector);
+
+		static void parse(Parser &parser,
+				std::function<void(ExprPtr)> collector,
+				TokenType end_token = TokenType::PAREN_R);
 };
 
 } /* namespace mtl */

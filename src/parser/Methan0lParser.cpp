@@ -61,7 +61,8 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_parser(TokenType::LIST_DEF_L, new InvokeParser());
 	alias_infix(TokenType::LIST_DEF_L, TokenType::PAREN_L);
 
-	register_parser(TokenType::LIST_DEF_L, new ListParser());	// $(expr1, expr2, ...)
+	register_parser(TokenType::LIST_DEF_L, new ListParser(TokenType::PAREN_R));	// $(expr1, expr2, ...)
+	register_parser(TokenType::BRACKET_L, new ListParser(TokenType::BRACKET_R));	// [expr1, expr2, ...]
 	alias_prefix(TokenType::LIST_DEF_L, TokenType::SET_DEF);	// defset $(expr1, expr2, ...)
 	register_parser(TokenType::BRACE_L, new UnitParser());	// {expr1; expr2; expr3}
 	register_parser(TokenType::ARROW_R, new WeakUnitParser());	// ->{expr1; expr2; expr3}
