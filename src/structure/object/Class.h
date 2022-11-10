@@ -28,6 +28,8 @@ class Class : public Allocatable<Class>
 		size_t id;
 		std::string name;
 
+		std::vector<Class*> base;
+
 		/* Methods & fields that are associated with this Class */
 		DataTable class_data;
 
@@ -41,7 +43,8 @@ class Class : public Allocatable<Class>
 
 	public:
 		static constexpr std::string_view
-		CONSTRUCT = "construct", TO_STRING = "to_string", THIS_ARG = "this",
+		CONSTRUCT = "construct", SUPER = "super",
+		TO_STRING = "to_string", THIS_ARG = "this",
 		NATIVE_OBJ = ".o";
 
 		Class(ExprEvaluator &eval, const std::string &name);
@@ -59,8 +62,22 @@ class Class : public Allocatable<Class>
 				class_data.set(mname, eval.bind_func(method));
 		}
 
+		void add_base_class(Class*);
+		const std::vector<Class*>& get_base_classes();
+
 		DataTable& get_class_data();
 		DataTable& get_object_data();
+
+		inline bool equals_or_inherits(Class *clazz)
+		{
+			if (clazz->id == id)
+				return true;
+
+			for (auto &cl : base)
+				if (clazz->id == cl->id)
+					return true;
+			return false;
+		}
 
 		bool static_call(Args &args);
 

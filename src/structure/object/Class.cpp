@@ -65,8 +65,19 @@ Class::Class(ExprEvaluator &eval, const std::string &name) :
 
 void Class::register_method(std::string_view name, Function &method)
 {
-	method.arg_def.push_front({std::move(mtl::str(Class::THIS_ARG)), LiteralExpr::empty()});
+	method.arg_def.push_front( { std::move(mtl::str(Class::THIS_ARG)),
+			LiteralExpr::empty() });
 	class_data.set(mtl::str(name), method);
+}
+
+void Class::add_base_class(Class *base)
+{
+	this->base.push_back(base);
+}
+
+const std::vector<Class*>& Class::get_base_classes()
+{
+	return base;
 }
 
 Value Class::extract_names(const DataTable &table)

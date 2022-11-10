@@ -134,6 +134,9 @@ enum class TokenType : uint16_t
 	FUNC_DEF_SHORT,
 	VAR,
 	IMPORT_MODULE,
+	BASE_CLASS,
+	REQUIRE,
+	INTERFACE,
 
 	NONE = 0x500,
 	EXPR_END,
@@ -204,7 +207,8 @@ class Token
 				"typename", "noeval", "defset", "while", "for",
 				"try", "catch", "using_module", "new", "global",
 				"assert", "instanceof", "unwrap", "is_reference",
-				"method", "f", "var", "import"
+				"method", "f", "var", "import", "base", "require",
+				"interface"
 		};
 
 		static constexpr std::string_view reserved_words[] = {

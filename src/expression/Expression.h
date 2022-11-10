@@ -75,6 +75,8 @@ class Expression
 		static ExprPtr return_expr(ExprPtr expr);
 		static ExprPtr return_val(Value val);
 
+		static void for_one_or_multiple(ExprPtr list_or_single, std::function<void(ExprPtr&)>);
+
 		static std::string info(ExprList&);
 
 		/* Beginning and end of Expression info string */

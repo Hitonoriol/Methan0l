@@ -424,29 +424,24 @@ void LibData::load_container_funcs()
 	});
 }
 
-bool LibData::instanceof(Value &recv, Value &expv)
-{
-	size_t expected = expv.numeric() ? mtl::num(expv) : expv.type_id();
-	size_t received = recv.type_id();
-	return expected == received;
-}
-
 bool LibData::instanceof(Value &rec, ExprPtr exp)
 {
-	if (mtl::instanceof<IdentifierExpr>(exp)
-			&& Class::get_id(IdentifierExpr::get_name(exp)) == (size_t) rec.type_id())
-		return true;
+	auto expv = val(exp);
+	if (rec.object()) {
+		auto clazz = rec.get<Object>().get_class();
+		if (expv.object())
+			return clazz->equals_or_inherits(expv.get<Object>().get_class());
+		else
+			return clazz->equals_or_inherits(&eval->get_type_mgr().get_type(expv.to_string()));
+	}
 	else {
-		auto expv = val(exp);
-		return instanceof(rec, expv);
+		return expv.type_id() == rec.type_id();
 	}
 }
 
 void LibData::load_operators()
 {
-	/* Dereference value, e.g. foo = (x += 123)!!
-	 * without the `!!` operator, a reference to `x` will be assigned to `foo`
-	 */
+	/* Dereference value */
 	postfix_operator(TokenType::DOUBLE_EXCL, LazyUnaryOpr([&](auto lhs) {
 		return val(lhs);
 	}));
@@ -551,6 +546,16 @@ void LibData::load_operators()
 	infix_operator(TokenType::ASSERT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		if (!bln(val(rhs)))
 			throw std::runtime_error(val(lhs).to_string(eval));
+		return Value::NO_VALUE;
+	}));
+
+	/* obj require: [Interface1, Interface2, ...] */
+	infix_operator(TokenType::REQUIRE, LazyBinaryOpr([&](auto lhs, auto rhs) {
+		auto lval = val(lhs);
+		Expression::for_one_or_multiple(rhs, [this, &lval](auto &expr) {
+			if (!instanceof(lval, expr))
+				throw std::runtime_error("Object doesn't implement / inherit required interface(s)");
+		});
 		return Value::NO_VALUE;
 	}));
 

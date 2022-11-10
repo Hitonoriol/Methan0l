@@ -15,11 +15,10 @@ namespace mtl
 /*
  * operator: expr
  * operator: expr1, expr2, ...
- * operator(expr)
  */
 ExprPtr WordOperatorParser::parse(Parser &parser, Token token)
 {
-	parser.match(TokenType::COLON);
+	parser.consume(TokenType::COLON);
 	ExprPtr rhs = parser.parse();
 	if (multiple_args && parser.match(TokenType::COMMA)) {
 		ExprList args{rhs};

@@ -51,6 +51,11 @@ Class& TypeManager::get_type(size_t id)
 	throw std::runtime_error("Trying to resolve a non-existing class");
 }
 
+Class& TypeManager::get_type(const std::string &name)
+{
+	return get_type(Class::get_id(name));
+}
+
 Value TypeManager::invoke_method(Object &obj, const std::string &name, Args &args)
 {
 	Class &type = *obj.get_class();

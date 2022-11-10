@@ -9,6 +9,7 @@
 #include "IdentifierExpr.h"
 #include "InvokeExpr.h"
 #include "LiteralExpr.h"
+#include "ListExpr.h"
 #include "PostfixExpr.h"
 
 namespace mtl
@@ -47,6 +48,17 @@ ExprPtr Expression::return_expr(ExprPtr expr)
 ExprPtr Expression::return_val(Value val)
 {
 	return return_expr(LiteralExpr::create(val));
+}
+
+void Expression::for_one_or_multiple(ExprPtr list_or_single,
+		std::function<void(ExprPtr&)> action)
+{
+	if (!if_instanceof<ListExpr>(*list_or_single, [&action](auto &list) {
+		for (auto &expr : list.raw_list())
+			action(expr);
+	})) {
+		action(list_or_single);
+	}
 }
 
 std::ostream& Expression::info(std::ostream &str)

@@ -74,7 +74,6 @@ class LibData: public Library
 		void load_operators();
 		void load_container_funcs();
 		bool instanceof(Value &rec, ExprPtr exp);
-		bool instanceof(Value &rec, Value &exp);
 
 		template<typename T, typename F>
 		T accumulate(Value &ctr, T init, F &&operation)

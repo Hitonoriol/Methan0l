@@ -14,15 +14,20 @@ class ClassExpr: public Expression
 
 	private:
 	std::string name;
-	ExprPtr body;
+	std::vector<std::string> base;
+	ExprMap body;
+
+	std::shared_ptr<Class> clazz;
 
 	public:
-		ClassExpr(std::string name, ExprPtr body) : name(name), body(body) {}
+		ClassExpr(std::string name, const std::vector<std::string> base, const ExprMap &body)
+			: name(name), base(base), body(body) {}
 
 		void execute(mtl::ExprEvaluator &evaluator) override;
 
 		Value evaluate(ExprEvaluator &evaluator) override
 		{
+			execute(evaluator);
 			return Value::NO_VALUE;
 		}
 

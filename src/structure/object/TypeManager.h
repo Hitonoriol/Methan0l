@@ -23,8 +23,11 @@ class TypeManager
 	public:
 		TypeManager(ExprEvaluator &eval);
 		~TypeManager();
-		Class& get_type(size_t id);
+
 		void register_type(std::shared_ptr<Class> type);
+
+		Class& get_type(size_t id);
+		Class& get_type(const std::string &name);
 
 		template<typename T>
 		inline void register_type()

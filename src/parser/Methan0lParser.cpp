@@ -82,6 +82,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 
 	register_parser(TokenType::BOX, new BoxUnitParser());// box_unit = box {expr1, expr2, ...}
 	register_parser(TokenType::CLASS, new ClassParser()); // class: ClassName = @(private => $(), ...)
+	alias_prefix(TokenType::CLASS, TokenType::INTERFACE);
 	register_parser(TokenType::TRY, new TryCatchParser());
 
 	/* Reference operator */
@@ -169,6 +170,7 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_infix_word(TokenType::TYPE_SAFE, Precedence::NO_EVAL);
 	register_infix_word(TokenType::ASSERT, Precedence::NO_EVAL);
 	register_infix_word(TokenType::INSTANCE_OF, Precedence::BIT_SHIFT);
+	register_infix_word(TokenType::REQUIRE, Precedence::NO_EVAL);
 
 	/* Class / Box field / method access operators */
 	register_infix_opr(TokenType::AT, Precedence::DOT, BinOprType::RIGHT_ASSOC);
