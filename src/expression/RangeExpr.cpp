@@ -1,5 +1,5 @@
 #include "RangeExpr.h"
-#include "lang/core/LibData.h"
+#include "lang/core/Data.h"
 
 namespace mtl
 {
@@ -17,7 +17,7 @@ void RangeExpr::execute(ExprEvaluator &evaluator)
 
 Value RangeExpr::evaluate(ExprEvaluator &evaluator)
 {
-	return LibData::range(start->evaluate(evaluator),
+	return Data::range(start->evaluate(evaluator),
 			end->evaluate(evaluator),
 			has_step() ? step->evaluate(evaluator).as<dec>() : 1,
 			true);

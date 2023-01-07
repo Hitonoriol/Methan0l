@@ -1,7 +1,7 @@
 #ifndef SRC_LANG_LIBLOGICAL_H_
 #define SRC_LANG_LIBLOGICAL_H_
 
-#include "../Library.h"
+#include "lang/Library.h"
 
 namespace mtl
 {
@@ -11,10 +11,6 @@ class LibLogical: public Library
 	public:
 		LibLogical(ExprEvaluator *eval) : Library(eval) {}
 		void load() override;
-
-	private:
-		bool eval_logical(const ExprPtr &l, TokenType op, const ExprPtr &r);
-		bool eval_arithmetic_comparison(double l, TokenType op, double r);
 };
 
 } /* namespace mtl */

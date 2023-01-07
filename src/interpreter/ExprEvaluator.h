@@ -60,7 +60,7 @@ class ExprEvaluator
 		friend class LibUnit;
 		friend class TypeManager;
 		friend class LoopExpr;
-		friend class LibModule;
+		friend class Module;
 
 		enum class OperatorType: uint8_t
 		{

@@ -1,5 +1,5 @@
 #include <expression/FormatStrExpr.h>
-#include <lang/core/LibString.h>
+#include <lang/core/library/LibString.h>
 #include <util/util.h>
 
 namespace mtl

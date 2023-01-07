@@ -1,9 +1,15 @@
 #include "type.h"
 
+#include "expression/Expression.h"
 #include "structure/Value.h"
 
 namespace mtl
 {
+
+Value val(ExprEvaluator &eval, ExprPtr expr)
+{
+	return expr->evaluate(eval).get();
+}
 
 std::string str(Value val)
 {

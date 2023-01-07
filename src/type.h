@@ -37,17 +37,12 @@ using allocator = std::pmr::polymorphic_allocator<T>;
 using String = std::pmr::string;
 using StringStream = std::basic_stringstream<char, std::char_traits<char>, String::allocator_type>;
 
-std::string str(Value);
-double dbl(Value);
-dec num(Value);
-udec unum(Value);
-bool bln(Value);
-
 using sstream = std::stringstream;
 using charr = const char[];
 using cstr = const char*;
 
 class Expression;
+class ExprEvaluator;
 class Object;
 
 const std::string empty_string;
@@ -86,6 +81,13 @@ using InbuiltFuncMap = std::pmr::unordered_map<std::string, InbuiltFunc>;
 constexpr std::string_view PROGRAM_EXT = ".mt0";
 constexpr char NL = '\n', TAB = '\t', UNTAB = '\b';
 constexpr std::string_view NLTAB = "\n\t";
+
+Value val(ExprEvaluator&, ExprPtr);
+std::string str(Value);
+double dbl(Value);
+dec num(Value);
+udec unum(Value);
+bool bln(Value);
 
 }
 

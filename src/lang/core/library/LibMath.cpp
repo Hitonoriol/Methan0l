@@ -1,5 +1,4 @@
-#include "LibMath.h"
-
+#include <lang/core/library/LibMath.h>
 #include <cmath>
 #include <functional>
 

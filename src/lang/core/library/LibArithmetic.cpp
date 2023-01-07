@@ -1,6 +1,5 @@
+#include <lang/core/library/LibArithmetic.h>
 #include <lexer/Token.h>
-#include "LibArithmetic.h"
-
 #include <iterator>
 #include <variant>
 #include <type_traits>

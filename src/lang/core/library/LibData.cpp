@@ -61,7 +61,7 @@ void LibData::load()
 		dec n = args.size() < 2 ? num(args) : num(args, 1);
 		dec step = args.size() == 3 ? num(args, 2) : 1;
 
-		return range(start, n, step);
+		return Data::range(start, n, step);
 	});
 
 	function("purge", [&](Args args) {
@@ -90,51 +90,6 @@ void LibData::load()
 	load_set_funcs();
 	load_container_funcs();
 	load_operators();
-}
-
-auto check_range = [](dec start, dec end, dec step) {
-	if ((end <= start && step > 0) || (end >= start && step < 0)
-			/* Boundless ranges */
-			|| (end > start && step < 0) || (end < start && step > 0) || step == 0)
-		throw std::runtime_error("Invalid range");
-};
-
-auto rng_pos_cond = [](dec i, dec end) {return i < end;};
-auto rng_neg_cond = [](dec i, dec end) {return i > end;};
-
-Value LibData::range(dec start, dec end, dec step, bool inclusive)
-{
-	check_range(start, end, step);
-
-	if (inclusive)
-		end += step > 0 ? 1 : -1;
-
-	auto condition = step > 0 ? rng_pos_cond : rng_neg_cond;
-	Value listv(Type::LIST);
-	ValList &list = listv.get<ValList>();
-	for (dec i = start; condition(i, end); i += step)
-		list.push_back(i);
-	return listv;
-}
-
-Value LibData::slice(Value &containerv, udec start, udec end, dec step)
-{
-	check_range(start, end, step);
-	end += step > 0 ? 1 : -1;
-	Value sliced;
-	containerv.accept([&](auto &ctr) {
-		IF (Value::is_list_type<VT(ctr)>()) {
-			if (end > ctr->size() || start >= ctr->size())
-				throw std::runtime_error("Specified sublist is out of bounds");
-
-			VT(*ctr) slice;
-			auto condition = step > 0 ? rng_pos_cond : rng_neg_cond;
-			for (udec i = start; condition(i, end); i += step)
-				slice.push_back((*ctr)[i]);
-			sliced = slice;
-		}
-	});
-	return sliced;
 }
 
 void LibData::load_set_funcs()
@@ -290,7 +245,7 @@ void LibData::load_container_funcs()
 			std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
 
 		ctr.accept_container([&](auto &container) {
-			for_each(*eval, container, action);
+			Data::for_each(*eval, container, action);
 		});
 
 		if (args.size() > 2)

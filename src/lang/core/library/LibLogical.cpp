@@ -5,6 +5,7 @@
 
 #include "structure/Value.h"
 #include "util/array.h"
+#include "lang/core/Logic.h"
 
 namespace mtl
 {
@@ -14,7 +15,7 @@ void LibLogical::load()
 	/* Lazy logical operators: &&, ||, ^^ */
 	for_each({TokenType::AND, TokenType::OR, TokenType::XOR}, [this](auto op) {
 		infix_operator(op, LazyBinaryOpr([=](auto lhs, auto rhs) {
-			return Value(eval_logical(lhs, op, rhs));
+			return Value(Logic::logical_operation(*eval, lhs, op, rhs));
 		}));
 	});
 
@@ -36,7 +37,7 @@ void LibLogical::load()
 	for (size_t i = 0; i < std::size(cmp_ops); ++i)
 		infix_operator(cmp_ops[i], LazyBinaryOpr([&, opr = cmp_ops[i]](auto lhs, auto rhs) {
 			Value lval = val(lhs), rval = val(rhs);
-			return Value(eval_arithmetic_comparison(lval.as<double>(), opr, rval.as<double>()));
+			return Value(Logic::arithmetic_comparison(lval.as<double>(), opr, rval.as<double>()));
 		}));
 
 	/* Equals operator */
@@ -47,52 +48,6 @@ void LibLogical::load()
 	infix_operator(TokenType::NOT_EQUALS, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		return Value(val(lhs) != val(rhs));
 	}));
-}
-
-bool LibLogical::eval_logical(const ExprPtr &l, TokenType op, const ExprPtr &r)
-{
-	bool lval = bln(val(l));
-	switch (op) {
-	case TokenType::OR: {
-		if (lval)
-			return true;
-
-		return lval || bln(val(r));
-	}
-
-	case TokenType::AND: {
-		if (!lval)
-			return false;
-
-		return lval && bln(val(r));
-	}
-
-	case TokenType::XOR:
-		return lval != bln(val(r));
-
-	default:
-		return false;
-	}
-}
-
-bool LibLogical::eval_arithmetic_comparison(double l, TokenType op, double r)
-{
-	switch (op) {
-	case TokenType::GREATER:
-		return l > r;
-
-	case TokenType::LESS:
-		return l < r;
-
-	case TokenType::GREATER_OR_EQ:
-		return l >= r;
-
-	case TokenType::LESS_OR_EQ:
-		return l <= r;
-
-	default:
-		return false;
-	}
 }
 
 } /* namespace mtl */

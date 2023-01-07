@@ -1,6 +1,3 @@
-#include <lang/class/File.h>
-#include <lang/class/Pair.h>
-#include <lang/class/Random.h>
 #include "ExprEvaluator.h"
 
 #include <iostream>
@@ -23,16 +20,17 @@
 #include "expression/FunctionExpr.h"
 #include "util/util.h"
 
-#include "lang/core/LibIO.h"
-#include "lang/core/LibArithmetic.h"
-#include "lang/core/LibLogical.h"
-#include "lang/core/LibUnit.h"
-#include "lang/core/LibData.h"
-#include "lang/core/LibString.h"
-#include "lang/core/LibModule.h"
-
-#include "lang/lib/LibMath.h"
-
+#include "lang/core/library/LibIO.h"
+#include "lang/core/library/LibLogical.h"
+#include "lang/core/library/LibUnit.h"
+#include "lang/core/library/LibData.h"
+#include "lang/core/library/LibString.h"
+#include "lang/core/library/LibModule.h"
+#include "lang/core/library/LibArithmetic.h"
+#include "lang/core/library/LibMath.h"
+#include "lang/class/File.h"
+#include "lang/class/Pair.h"
+#include "lang/class/Random.h"
 
 namespace mtl
 {

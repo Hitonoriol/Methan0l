@@ -7,7 +7,7 @@
 #include "util/hash.h"
 #include "util/meta.h"
 #include "PrefixExpr.h"
-#include "lang/core/LibData.h"
+#include "lang/core/Data.h"
 #include "RangeExpr.h"
 
 namespace mtl
@@ -34,14 +34,14 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 			Value container_v = val;
 			container_v.accept_container([&](auto &container) {
 				Value action = try_cast<PrefixExpr>(idx).get_rhs()->evaluate(evaluator);
-				LibData::for_each(evaluator, container, action.get<Function>());
+				Data::for_each(evaluator, container, action.get<Function>());
 			});
 			/* Return a new temporary handle for chaining */
 			return DataTable::create_temporary(val);
 		/* bracketed slice */
 		} else if (instanceof<RangeExpr>(idx)) {
 			auto &range = try_cast<RangeExpr>(idx);
-			auto sliced = LibData::slice(val, range.get_start(evaluator),
+			auto sliced = Data::slice(val, range.get_start(evaluator),
 					range.get_end(evaluator),
 					range.has_step() ? range.get_step(evaluator).as<dec>() : 1);
 			return DataTable::create_temporary(sliced);
