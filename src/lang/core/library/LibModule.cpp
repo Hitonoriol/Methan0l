@@ -7,6 +7,7 @@
 #include <boost/dll.hpp>
 #include <lang/class/File.h>
 #include <lang/core/Module.h>
+#include <lang/core/Internal.h>
 
 #include "LibUnit.h"
 
@@ -34,7 +35,7 @@ void LibModule::load()
 	prefix_operator(TokenType::USING_MODULE, LazyUnaryOpr([&](auto rhs) {
 		Unit module;
 		Module::load_module(*eval, mtl::str(val(rhs)), module);
-		LibUnit::import(eval, module);
+		Internal::import(eval, module);
 		return Value::NO_VALUE;
 	}));
 

@@ -18,6 +18,7 @@
 #include "structure/Value.h"
 #include "util/util.h"
 #include "util/process.h"
+#include "lang/core/Internal.h"
 
 #include "structure/object/Class.h"
 #include "structure/object/Object.h"
@@ -65,7 +66,7 @@ void LibUnit::load()
 		Value &module_val = ref(args[0]);
 		module_val.assert_type(Type::UNIT, "import$() can only be applied on a Unit");
 		Unit &module = module_val.get<Unit>();
-		import(eval, module);
+		Internal::import(eval, module);
 		return Value::NO_VALUE;
 	});
 
@@ -126,17 +127,6 @@ void LibUnit::load()
 	});
 
 	load_operators();
-}
-
-void LibUnit::import(ExprEvaluator *eval, Unit &module)
-{
-	DataMap &local_scope = *eval->local_scope()->map_ptr();
-	for (auto &&entry : module.local().managed_map()) {
-		if (entry.second.is<InbuiltFunc>())
-			eval->register_func(entry.first, unconst(entry.second).get<InbuiltFunc>());
-		else
-			local_scope.insert(entry);
-	}
 }
 
 void LibUnit::load_operators()
