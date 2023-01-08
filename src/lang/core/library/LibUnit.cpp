@@ -18,6 +18,7 @@
 #include "structure/Value.h"
 #include "util/util.h"
 #include "util/process.h"
+#include "util/Heap.h"
 #include "lang/core/Internal.h"
 
 #include "structure/object/Class.h"
@@ -28,6 +29,36 @@ namespace mtl
 
 void LibUnit::load()
 {
+	eval->register_func("get_launch_args", [&](Args args) {
+		return static_cast<Interpreter*>(eval)->get_main().local().get(EnvVars::LAUNCH_ARGS);
+	});
+
+	eval->register_func("on_exit", mtl::member(eval, &ExprEvaluator::register_exit_task));
+
+	eval->register_func("set_max_mem", [&](uint64_t cap) {
+		eval->get_heap().set_max_mem(cap);
+	});
+
+	eval->register_func("mem_in_use", [&] {
+		return eval->get_heap().get_in_use();
+	});
+
+	eval->register_func("max_mem", [&] {
+		return eval->get_heap().get_max_mem();
+	});
+
+	eval->register_func("enforce_mem_limit", [&](bool val) {
+		mtl::HEAP_LIMITED = val;
+	});
+
+	eval->register_func("mem_info", [&] {
+		auto &heap = eval->get_heap();
+		auto in_use = heap.get_in_use(), max = heap.get_max_mem();
+		out << "Heap: " << in_use << "/" << max << "b " <<
+				"(" << ((static_cast<double>(in_use) / max) * 100) << "% in use)"
+				<< NL;
+	});
+
 	/* measure_time$(expr) */
 	function("measure_time", [&](Args args) {
 		auto start = std::chrono::high_resolution_clock::now();

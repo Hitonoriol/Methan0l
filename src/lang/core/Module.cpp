@@ -23,8 +23,7 @@ void Module::load_module(ExprEvaluator &eval, const std::string &path, Unit &uni
 
 	/* Load Methan0l src file */
 	if (ends_with(name, PROGRAM_EXT)) {
-		auto mv = eval.invoke(CoreFuncs::LOAD_FILE, name);
-		unit = mv.get<Unit>();
+		unit = static_cast<Interpreter*>(&eval)->load_file(name);
 		return;
 	}
 

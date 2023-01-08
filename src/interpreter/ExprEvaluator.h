@@ -49,10 +49,6 @@ STRING_ENUM(EnvVars,
 	SCRDIR
 )
 
-STRING_ENUM(CoreFuncs,
-	LOAD_FILE
-)
-
 class ExprEvaluator
 {
 	private:
@@ -380,6 +376,8 @@ class ExprEvaluator
 			register_func<N>(name, std::forward<F>(f), list);
 		}
 
+		void register_exit_task(Value&);
+
 		template<typename ...Args>
 		inline Value invoke(const std::string &name, Args ...args)
 		{
@@ -477,6 +475,7 @@ class ExprEvaluator
 
 		TypeManager& get_type_mgr();
 		ExceptionHandler& get_exception_handler();
+		Heap& get_heap();
 
 		void assert_true(bool, const std::string& = "Assertion failed");
 		void stop();

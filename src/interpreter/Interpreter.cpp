@@ -16,22 +16,11 @@ namespace mtl
 
 Interpreter::Interpreter(const char *path)
 {
-	init_inbuilt_funcs();
-
 	auto rpath = std::filesystem::absolute(path);
 	set_env_var(EnvVars::RUNPATH, rpath.string());
 	set_env_var(EnvVars::RUNDIR, rpath.parent_path().string());
 	register_env_getter("get_runpath", EnvVars::RUNPATH);
 	register_env_getter("get_rundir", EnvVars::RUNDIR);
-}
-
-void Interpreter::init_inbuilt_funcs()
-{
-	register_func("get_launch_args", [&](Args args) {
-		return main.local().get(EnvVars::LAUNCH_ARGS);
-	});
-
-	register_func(CoreFuncs::LOAD_FILE, MEMBER(&Interpreter::load_file));
 }
 
 void Interpreter::lex(std::string &code)

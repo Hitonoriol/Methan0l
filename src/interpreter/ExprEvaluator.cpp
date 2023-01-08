@@ -44,10 +44,6 @@ STRINGS(
 		EnvVars::RUNDIR(".rd")
 )
 
-STRINGS(
-		CoreFuncs::LOAD_FILE(".ld")
-)
-
 ExprEvaluator::ExprEvaluator()
 {
 	init_heap();
@@ -63,29 +59,6 @@ ExprEvaluator::ExprEvaluator()
 	type_mgr.register_type<File>();
 	type_mgr.register_type<Random>();
 	type_mgr.register_type<Pair>();
-
-	register_func("set_max_mem", [](uint64_t cap) {heap->set_max_mem(cap);});
-	register_func("mem_in_use", []
-	{
-		return heap->get_in_use();
-	});
-	register_func("max_mem", []
-	{
-		return heap->get_max_mem();
-	});
-	register_func("enforce_mem_limit", [](bool val) {mtl::HEAP_LIMITED = val;});
-	register_func("mem_info", []
-	{
-		auto in_use = heap->get_in_use(), max = heap->get_max_mem();
-		out << "Heap: " << in_use << "/" << max << "b " <<
-				"(" << ((static_cast<double>(in_use) / max) * 100) << "% in use)" << NL;
-	});
-	register_func("on_exit", [&](Value &callable) {
-		on_exit_tasks.push_back([=]() mutable {
-			Args noargs;
-			invoke(callable, noargs);
-		});
-	});
 }
 
 void ExprEvaluator::init_heap(size_t initial_mem_cap)
@@ -626,6 +599,14 @@ ExceptionHandler& ExprEvaluator::get_exception_handler()
 	return exception_handler;
 }
 
+Heap& ExprEvaluator::get_heap()
+{
+	if (heap == nullptr)
+		throw std::runtime_error("Interpreter heap isn't initialized yet.");
+
+	return *heap;
+}
+
 void ExprEvaluator::assert_true(bool val, const std::string &msg)
 {
 	if (!val)
@@ -651,6 +632,14 @@ void ExprEvaluator::on_exit()
 	for (auto &callable : on_exit_tasks)
 		callable();
 	on_exit_tasks.clear();
+}
+
+void ExprEvaluator::register_exit_task(Value &callable)
+{
+	on_exit_tasks.push_back([=]() mutable {
+		Args noargs;
+		invoke(callable, noargs);
+	});
 }
 
 InbuiltFuncMap& ExprEvaluator::functions()

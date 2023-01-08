@@ -27,8 +27,6 @@ class Interpreter: public ExprEvaluator
 		Unit load_unit(std::istream &codestr);
 		Unit load_unit(std::string &code);
 
-		void init_inbuilt_funcs();
-
 	public:
 		Interpreter(const char *runpath);
 		~Interpreter() = default;
