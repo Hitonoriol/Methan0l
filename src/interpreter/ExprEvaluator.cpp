@@ -1,4 +1,3 @@
-#include <lang/core/library/LibInternal.h>
 #include "ExprEvaluator.h"
 
 #include <iostream>
@@ -6,6 +5,7 @@
 
 #include "Interpreter.h"
 
+#include "util/util.h"
 #include "util/benchmark.h"
 
 #include "expression/AssignExpr.h"
@@ -19,8 +19,8 @@
 #include "expression/ListExpr.h"
 #include "expression/IndexExpr.h"
 #include "expression/FunctionExpr.h"
-#include "util/util.h"
 
+#include "lang/Library.h"
 #include "lang/core/library/LibIO.h"
 #include "lang/core/library/LibLogical.h"
 #include "lang/core/library/LibData.h"
@@ -28,6 +28,7 @@
 #include "lang/core/library/LibModule.h"
 #include "lang/core/library/LibArithmetic.h"
 #include "lang/core/library/LibMath.h"
+#include "lang/core/library/LibInternal.h"
 #include "lang/class/File.h"
 #include "lang/class/Pair.h"
 #include "lang/class/Random.h"
@@ -60,6 +61,8 @@ ExprEvaluator::ExprEvaluator()
 	type_mgr.register_type<Random>();
 	type_mgr.register_type<Pair>();
 }
+
+ExprEvaluator::~ExprEvaluator() = default;
 
 void ExprEvaluator::init_heap(size_t initial_mem_cap)
 {

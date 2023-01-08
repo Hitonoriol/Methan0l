@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "util/meta/type_traits.h"
-#include "lang/Library.h"
+#include "util/memory.h"
 #include "Object.h"
 
 namespace mtl

@@ -1,21 +1,20 @@
 #ifndef SRC_EXPREVALUATOR_H_
 #define SRC_EXPREVALUATOR_H_
 
-#include <lexer/Token.h>
-#include <util/Heap.h>
 #include <deque>
 #include <cmath>
 #include <utility>
 #include <type_traits>
 
-#include "structure/Function.h"
-#include "lang/Library.h"
-#include "structure/object/TypeManager.h"
-#include "ExceptionHandler.h"
+#include <util/Heap.h>
+#include <util/meta/function_traits.h>
+#include <util/cast.h>
+#include <util/util.h>
 
-#include "util/meta/function_traits.h"
-#include "util/cast.h"
-#include "util/util.h"
+#include <lexer/Token.h>
+#include <structure/Function.h>
+#include <structure/object/TypeManager.h>
+#include <interpreter/ExceptionHandler.h>
 
 #define OPERATOR_DEF(prefix, type, functor) \
 	inline void type##_op(TokenType tok, const functor &opr) \
@@ -315,6 +314,7 @@ class ExprEvaluator
 
 	public:
 		ExprEvaluator();
+		~ExprEvaluator();
 
 		template<unsigned default_argc = 0, typename F>
 		InbuiltFunc bind_func(F &&f, Value default_args = Value::NO_VALUE)
