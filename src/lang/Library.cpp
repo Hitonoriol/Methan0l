@@ -73,10 +73,5 @@ void Library::getter(const std::string &name, Value val)
 	eval->register_getter(name, val);
 }
 
-void Library::function(const std::string &func_name, InbuiltFunc &&func)
-{
-	eval->register_func(func_name, std::move(func));
-}
-
 }
 /* namespace mtl */

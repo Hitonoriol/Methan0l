@@ -17,14 +17,14 @@ namespace mtl
 void LibModule::load()
 {
 	/* load(path) */
-	eval->register_func("load", [&](std::string path) {
+	function("load", [&](std::string path) {
 		Value module_v(Type::UNIT);
 		Module::load_module(*eval, path, module_v.get<Unit>());
 		return module_v;
 	});
 
 	/* module.unload() */
-	eval->register_func("unload", [&](Unit &unit) {
+	function("unload", [&](Unit &unit) {
 		Value &name_v = unit.local().get(Module::MODULE_NAME);
 		if (name_v.nil())
 			throw std::runtime_error("Trying to unload a non-module");

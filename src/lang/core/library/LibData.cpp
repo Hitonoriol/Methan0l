@@ -196,18 +196,18 @@ std::pair<size_t, double> LibData::accumulate(Value &callable, Args &args, doubl
 void LibData::load_container_funcs()
 {
 	/* ------------------ Accumulative container functions ------------------- */
-	eval->register_func("sum", [this](Args args) {
+	function("sum", [this](Args args) {
 		return dispatch_accumulate(args, 0.0, summator).second;
 	});
 
-	eval->register_func("product", [this](Args args) {
+	function("product", [this](Args args) {
 		return dispatch_accumulate(args, 1.0, multiplicator).second;
 	});
 
-	eval->register_func("mean", mtl::member(this, &LibData::mean));
+	function("mean", mtl::member(this, &LibData::mean));
 
 	/* Root mean square */
-	eval->register_func("rms", [this](Args args) {
+	function("rms", [this](Args args) {
 		auto [n, rsum] = dispatch_accumulate(args, 0.0, [](double l, Value r) {
 			return l + r.as<double>() * r.as<double>();
 		});
@@ -215,7 +215,7 @@ void LibData::load_container_funcs()
 	});
 
 	/* Standard deviation */
-	eval->register_func("deviation", [this](Args args) {
+	function("deviation", [this](Args args) {
 		double mean = this->mean(args);
 		auto [n, dsum] = dispatch_accumulate(args, 0.0, [mean](double l, Value r){
 			return l + (r.as<double>() - mean) * (r.as<double>() - mean);
@@ -223,7 +223,7 @@ void LibData::load_container_funcs()
 		return sqrt(dsum / n);
 	});
 
-	eval->register_func("join", [this](Value ctr) {
+	function("join", [this](Value ctr) {
 		return accumulate(ctr, std::string(""), [this](std::string l, Value r) {
 			return std::move(l) + r.to_string(eval);
 		});
@@ -315,7 +315,7 @@ void LibData::load_container_funcs()
 	});
 
 	/* <Map | List>.size$() */
-	function("size", [this](auto args) {
+	function("size", [this](Args args) {
 		Value val = this->arg(args);
 		int size = 0;
 

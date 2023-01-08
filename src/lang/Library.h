@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../type.h"
+#include <interpreter/ExprEvaluator.h>
 
 #define LIB_OPERATOR_DEF(type, functor) \
 	void Library::type##_operator(TokenType tok, const functor &opr) \
@@ -14,7 +14,6 @@
 namespace mtl
 {
 
-class ExprEvaluator;
 class Value;
 class IdentifierExpr;
 
@@ -33,7 +32,12 @@ class Library
 		Value& ref(IdentifierExpr &idfr);
 		Value arg(ExprList args, int idx = 0);
 
-		void function(const std::string&, InbuiltFunc&&);
+		template<typename T>
+		void function(const std::string &name, T &&callable)
+		{
+			eval->register_func(name, std::move(callable));
+		}
+
 		void getter(const std::string &name, Value);
 
 		void prefix_operator(TokenType, const LazyUnaryOpr&);
@@ -46,7 +50,7 @@ class Library
 	public:
 		Library(ExprEvaluator *eval);
 		Library(const Library&);
-		virtual ~Library() {}
+		virtual ~Library() = default;
 		virtual void load() = 0;
 };
 

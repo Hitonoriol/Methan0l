@@ -62,7 +62,7 @@ void LibIO::load()
 	}));
 
 	/* String input function: foo = read_line$() */
-	function("read_line", [&](auto args) {
+	function("read_line", [&] {
 		Value line(Type::STRING);
 		std::getline(in, line.get<std::string>());
 		return line;

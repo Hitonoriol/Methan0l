@@ -11,7 +11,7 @@ namespace mtl
 
 void LibMath::load()
 {
-	eval->register_func("round", [](double value, int decimal_places) {
+	function("round", [](double value, int decimal_places) {
 		const double multiplier = std::pow(10.0, decimal_places);
 		return std::ceil(value * multiplier) / multiplier;
 	});
