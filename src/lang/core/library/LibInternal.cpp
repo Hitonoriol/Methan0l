@@ -1,6 +1,5 @@
+#include <lang/core/library/LibInternal.h>
 #include <lexer/Token.h>
-#include "LibUnit.h"
-
 #include <chrono>
 #include <deque>
 #include <stdexcept>
@@ -27,7 +26,7 @@
 namespace mtl
 {
 
-void LibUnit::load()
+void LibInternal::load()
 {
 	eval->register_func("get_launch_args", [&](Args args) {
 		return static_cast<Interpreter*>(eval)->get_main().local().get(EnvVars::LAUNCH_ARGS);
@@ -160,7 +159,7 @@ void LibUnit::load()
 	load_operators();
 }
 
-void LibUnit::load_operators()
+void LibInternal::load_operators()
 {
 	/* Prefix return operator */
 	prefix_operator(TokenType::RETURN, LazyUnaryOpr([&](auto lhs) {
@@ -218,7 +217,7 @@ void LibUnit::load_operators()
 	}));
 }
 
-Value& LibUnit::box_value(Unit &box, ExprPtr expr)
+Value& LibInternal::box_value(Unit &box, ExprPtr expr)
 {
 	eval->use(box);
 	Value &result = eval->referenced_value(expr);
@@ -226,7 +225,7 @@ Value& LibUnit::box_value(Unit &box, ExprPtr expr)
 	return result;
 }
 
-void LibUnit::save_return(ExprPtr ret)
+void LibInternal::save_return(ExprPtr ret)
 {
 	Unit *unit = eval->current_unit();
 	if (instanceof<IdentifierExpr>(ret)
@@ -237,7 +236,7 @@ void LibUnit::save_return(ExprPtr ret)
 		unit->save_return(eval->unwrap_or_reference(*ret));
 }
 
-void LibUnit::make_box(Value &unit_val)
+void LibInternal::make_box(Value &unit_val)
 {
 	unit_val.assert_type(Type::UNIT, "make_box$() can only be applied on a Unit");
 	Unit &unit = unit_val.get<Unit>();
@@ -245,7 +244,7 @@ void LibUnit::make_box(Value &unit_val)
 	eval->execute(unit);
 }
 
-Value LibUnit::object_dot_operator(Object &obj, ExprPtr rhs)
+Value LibInternal::object_dot_operator(Object &obj, ExprPtr rhs)
 {
 	LOG("Applying dot opr on: " << obj << " RHS: " << rhs->info())
 
@@ -261,7 +260,7 @@ Value LibUnit::object_dot_operator(Object &obj, ExprPtr rhs)
 /* Pseudo-method invocation, effectively performs transformation:
  * 			value.func$(arg1, arg2, ...) => func$(value, arg1, arg2, ...)
  */
-Value LibUnit::invoke_pseudo_method(ExprPtr obj, ExprPtr func)
+Value LibInternal::invoke_pseudo_method(ExprPtr obj, ExprPtr func)
 {
 	if constexpr (DEBUG)
 		out << "Pseudo-method [" << obj->info() << "] . [" << func->info() << "]" << std::endl;

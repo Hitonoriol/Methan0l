@@ -9,7 +9,7 @@
 #include <lang/core/Module.h>
 #include <lang/core/Internal.h>
 
-#include "LibUnit.h"
+#include <lang/core/Internal.h>
 
 namespace mtl
 {

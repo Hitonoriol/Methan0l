@@ -1,3 +1,4 @@
+#include <lang/core/library/LibInternal.h>
 #include "ExprEvaluator.h"
 
 #include <iostream>
@@ -22,7 +23,6 @@
 
 #include "lang/core/library/LibIO.h"
 #include "lang/core/library/LibLogical.h"
-#include "lang/core/library/LibUnit.h"
 #include "lang/core/library/LibData.h"
 #include "lang/core/library/LibString.h"
 #include "lang/core/library/LibModule.h"
@@ -49,7 +49,7 @@ ExprEvaluator::ExprEvaluator()
 	init_heap();
 	load_library<LibArithmetic>();
 	load_library<LibLogical>();
-	load_library<LibUnit>();
+	load_library<LibInternal>();
 	load_library<LibIO>();
 	load_library<LibString>();
 	load_library<LibMath>();

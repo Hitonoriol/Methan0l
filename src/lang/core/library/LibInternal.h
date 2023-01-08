@@ -9,10 +9,10 @@ namespace mtl
 
 class Unit;
 
-class LibUnit: public Library
+class LibInternal: public Library
 {
 	public:
-		LibUnit(ExprEvaluator *eval) : Library(eval) {}
+		LibInternal(ExprEvaluator *eval) : Library(eval) {}
 		void load() override;
 
 	private:

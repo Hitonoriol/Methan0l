@@ -53,7 +53,7 @@ class ExprEvaluator
 {
 	private:
 		friend class Library;
-		friend class LibUnit;
+		friend class LibInternal;
 		friend class TypeManager;
 		friend class LoopExpr;
 		friend class Module;
