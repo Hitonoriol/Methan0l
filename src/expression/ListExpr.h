@@ -15,7 +15,7 @@ class ListExpr: public Expression
 		bool as_set;
 
 		template<typename T>
-		Value create_and_populate(ExprEvaluator &evaluator)
+		Value create_and_populate(Interpreter &evaluator)
 		{
 			T container;
 			for (auto &expr : exprs)
@@ -26,7 +26,7 @@ class ListExpr: public Expression
 	public:
 		ListExpr(ExprList exprs, bool as_set = false);
 		ExprList& raw_list();
-		Value evaluate(ExprEvaluator &evaluator) override;
+		Value evaluate(Interpreter &evaluator) override;
 		std::ostream& info(std::ostream &str) override;
 };
 

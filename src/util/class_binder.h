@@ -1,7 +1,7 @@
 #ifndef SRC_UTIL_CLASS_BINDER_H_
 #define SRC_UTIL_CLASS_BINDER_H_
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/object/Class.h"
 
 #include <memory>
@@ -58,11 +58,11 @@ class ClassBinder
 		using Obj = std::shared_ptr<C>;
 
 		std::shared_ptr<Class> clazz;
-		ExprEvaluator &eval;
+		Interpreter &eval;
 
 	public:
 		using bound_class = C;
-		ClassBinder(ExprEvaluator &eval, const std::string &name = "") :
+		ClassBinder(Interpreter &eval, const std::string &name = "") :
 			clazz(Allocatable<Class>::allocate(eval, name)), eval(eval) {}
 
 		inline void set_name(const std::string &name)

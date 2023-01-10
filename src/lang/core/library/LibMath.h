@@ -15,7 +15,7 @@ class LibMath: public Library
 				RADIAN = 180.0 / PI;
 
 	public:
-		LibMath(ExprEvaluator *eval) : Library(eval) {}
+		LibMath(Interpreter *eval) : Library(eval) {}
 		void load() override;
 };
 

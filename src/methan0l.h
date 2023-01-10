@@ -4,16 +4,16 @@
 #include <type_traits>
 
 #include <type.h>
-#include <ExprEvaluator.h>
+#include <Interpreter.h>
 #include <structure/Value.h>
 #include <structure/DataTable.h>
 #include <util/util.h>
 #include <structure/object/NativeClass.h>
 
 #define API extern "C"
-#define INIT_MODULE 		mtl::ExprEvaluator *evaluator = nullptr;\
+#define INIT_MODULE 		mtl::Interpreter *evaluator = nullptr;\
 							mtl::DataTable *local_scope = nullptr;\
-							API void init_methan0l_module(mtl::ExprEvaluator* evaluator) {\
+							API void init_methan0l_module(mtl::Interpreter* evaluator) {\
 								::evaluator = evaluator;\
 								local_scope = evaluator->local_scope();\
 							}
@@ -29,7 +29,7 @@
 using Value = mtl::Value;
 
 extern mtl::DataTable *local_scope;
-extern mtl::ExprEvaluator *evaluator;
+extern mtl::Interpreter *evaluator;
 API void load();
 
 inline mtl::Value& var(const std::string &name)

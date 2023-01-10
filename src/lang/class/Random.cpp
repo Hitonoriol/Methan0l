@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "expression/Expression.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/object/Object.h"
 #include "structure/Value.h"
 #include "type.h"
@@ -24,7 +24,7 @@ Distr<double> Random::dbl_gen = [](auto &rng) {
 	return dbl_distr(rng);
 };
 
-Random::Random(ExprEvaluator &eval) : Class(eval, "Random")
+Random::Random(Interpreter &eval) : Class(eval, "Random")
 {
 	/* rnd = Random.new$([seed]) */
 	register_method(std::string(CONSTRUCT), [&](Args &args) {

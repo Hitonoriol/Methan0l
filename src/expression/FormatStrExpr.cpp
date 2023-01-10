@@ -10,7 +10,7 @@ FormatStrExpr::FormatStrExpr(std::string fmt, ExprList args) : fmt(std::move(fmt
 	strip_quotes(fmt);
 }
 
-Value FormatStrExpr::evaluate(ExprEvaluator &evaluator)
+Value FormatStrExpr::evaluate(Interpreter &evaluator)
 {
 	std::string fmt = this->fmt;
 	std::vector<std::string> sargs;

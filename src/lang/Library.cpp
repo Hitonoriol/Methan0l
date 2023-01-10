@@ -1,13 +1,13 @@
 #include "Library.h"
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "../structure/Value.h"
 #include "../type.h"
 
 namespace mtl
 {
 
-Library::Library(ExprEvaluator *eval) : eval(eval)
+Library::Library(Interpreter *eval) : eval(eval)
 {
 }
 

@@ -6,7 +6,7 @@
 #include <string_view>
 #include <utility>
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/DataTable.h"
 #include "structure/Function.h"
 #include "structure/object/TypeManager.h"
@@ -21,7 +21,7 @@
 namespace mtl
 {
 
-void ClassExpr::execute(ExprEvaluator &eval)
+void ClassExpr::execute(Interpreter &eval)
 {
 	if (clazz != nullptr)
 		return;

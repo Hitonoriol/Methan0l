@@ -22,7 +22,7 @@ class PrefixExpr: public Expression
 		TokenType get_operator();
 		ExprPtr get_rhs();
 
-		Value evaluate(ExprEvaluator &eval) override;
+		Value evaluate(Interpreter &eval) override;
 
 		std::ostream& info(std::ostream &str) override;
 

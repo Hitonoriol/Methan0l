@@ -2,7 +2,7 @@
 
 #include <deque>
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "../type.h"
 #include "../structure/Value.h"
 
@@ -18,7 +18,7 @@ ExprList& ListExpr::raw_list()
 	return exprs;
 }
 
-Value ListExpr::evaluate(ExprEvaluator &evaluator)
+Value ListExpr::evaluate(Interpreter &evaluator)
 {
 	return as_set ?
 			create_and_populate<ValSet>(evaluator) :

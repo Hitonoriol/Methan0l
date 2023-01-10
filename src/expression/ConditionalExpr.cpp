@@ -40,17 +40,17 @@ bool ConditionalExpr::is_ifelse_block()
 	return false;
 }
 
-ExprPtr ConditionalExpr::eval_branch(ExprEvaluator &eval)
+ExprPtr ConditionalExpr::eval_branch(Interpreter &eval)
 {
 	return (condition->evaluate(eval).to_bool() ? then_expr : else_expr);
 }
 
-Value ConditionalExpr::evaluate(ExprEvaluator &eval)
+Value ConditionalExpr::evaluate(Interpreter &eval)
 {
 	return eval_branch(eval)->evaluate(eval);
 }
 
-void ConditionalExpr::execute(ExprEvaluator &evaluator)
+void ConditionalExpr::execute(Interpreter &evaluator)
 {
 	eval_branch(evaluator)->execute(evaluator);
 }

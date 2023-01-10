@@ -4,12 +4,12 @@
 namespace mtl
 {
 
-class ExprEvaluator;
+class Interpreter;
 class Unit;
 
 struct Internal
 {
-		static void import(ExprEvaluator *eval, Unit &module);
+		static void import(Interpreter *eval, Unit &module);
 };
 
 } /* namespace mtl */

@@ -42,7 +42,7 @@ using charr = const char[];
 using cstr = const char*;
 
 class Expression;
-class ExprEvaluator;
+class Interpreter;
 class Object;
 
 const std::string empty_string;
@@ -82,7 +82,7 @@ constexpr std::string_view PROGRAM_EXT = ".mt0";
 constexpr char NL = '\n', TAB = '\t', UNTAB = '\b';
 constexpr std::string_view NLTAB = "\n\t";
 
-Value val(ExprEvaluator&, ExprPtr);
+Value val(Interpreter&, ExprPtr);
 std::string str(Value);
 double dbl(Value);
 dec num(Value);

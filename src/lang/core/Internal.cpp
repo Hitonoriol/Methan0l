@@ -1,11 +1,11 @@
 #include <lang/core/Internal.h>
 
-#include <interpreter/ExprEvaluator.h>
+#include <interpreter/Interpreter.h>
 
 namespace mtl
 {
 
-void Internal::import(ExprEvaluator *eval, Unit &module)
+void Internal::import(Interpreter *eval, Unit &module)
 {
 	DataMap &local_scope = *eval->local_scope()->map_ptr();
 	for (auto &&entry : module.local().managed_map()) {

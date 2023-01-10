@@ -15,7 +15,7 @@
 namespace mtl
 {
 
-void Expression::execute(ExprEvaluator &evaluator)
+void Expression::execute(Interpreter &evaluator)
 {
 	evaluate(evaluator);
 }

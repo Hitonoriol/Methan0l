@@ -11,7 +11,7 @@ namespace mtl
 class LibString: public Library
 {
 	public:
-		LibString(ExprEvaluator *eval) : Library(eval) {}
+		LibString(Interpreter *eval) : Library(eval) {}
 		void load() override;
 
 		static void format(std::string &fmt, const std::vector<std::string> &sargs);

@@ -1,6 +1,6 @@
 #include "AssignExpr.h"
 
-#include <interpreter/ExprEvaluator.h>
+#include <interpreter/Interpreter.h>
 #include <iostream>
 
 namespace mtl
@@ -12,7 +12,7 @@ AssignExpr::AssignExpr(ExprPtr lhs, Token tok, ExprPtr rhs) :
 	move = tok == TokenType::ARROW_L;
 }
 
-Value AssignExpr::evaluate(ExprEvaluator &eval)
+Value AssignExpr::evaluate(Interpreter &eval)
 {
 	return eval.evaluate(*this);
 }

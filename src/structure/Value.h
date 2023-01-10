@@ -407,8 +407,8 @@ class Value
 			return unconst(*this).get<T>();
 		}
 
-		std::string to_string(ExprEvaluator *eval = nullptr);
-		inline std::string str(ExprEvaluator *eval = nullptr) const
+		std::string to_string(Interpreter *eval = nullptr);
+		inline std::string str(Interpreter *eval = nullptr) const
 		{
 			return unconst(*this).to_string(eval);
 		}

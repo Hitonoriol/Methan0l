@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "../structure/DataTable.h"
 #include "../structure/Value.h"
 #include "../type.h"
@@ -13,7 +13,7 @@
 namespace mtl
 {
 
-Value IdentifierExpr::evaluate(ExprEvaluator &eval)
+Value IdentifierExpr::evaluate(Interpreter &eval)
 {
 	Value &v = referenced_value(eval);
 	if (v.is<ExprPtr>())
@@ -21,12 +21,12 @@ Value IdentifierExpr::evaluate(ExprEvaluator &eval)
 	return v;
 }
 
-Value& IdentifierExpr::referenced_value(ExprEvaluator &eval, bool follow_refs)
+Value& IdentifierExpr::referenced_value(Interpreter &eval, bool follow_refs)
 {
 	return eval.get(name, global, follow_refs);
 }
 
-Value& IdentifierExpr::assign(ExprEvaluator &eval, Value val)
+Value& IdentifierExpr::assign(Interpreter &eval, Value val)
 {
 	create_if_nil(eval);
 	Value &ref = referenced_value(eval);
@@ -34,14 +34,14 @@ Value& IdentifierExpr::assign(ExprEvaluator &eval, Value val)
 	return ref;
 }
 
-void IdentifierExpr::create_if_nil(ExprEvaluator &eval)
+void IdentifierExpr::create_if_nil(Interpreter &eval)
 {
 	DataTable *scope = eval.scope_lookup(name, global);
 	if (!scope->exists(name))
 		scope->set(name, Value());
 }
 
-void IdentifierExpr::execute(mtl::ExprEvaluator &evaluator)
+void IdentifierExpr::execute(mtl::Interpreter &evaluator)
 {
 	Value val = evaluate(evaluator);
 	LiteralExpr::exec_literal(evaluator, val);

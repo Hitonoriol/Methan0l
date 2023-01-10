@@ -13,7 +13,7 @@
 #include "interpreter/Interpreter.h"
 #include "expression/LiteralExpr.h"
 #include "expression/Expression.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/Function.h"
 #include "structure/object/Object.h"
 #include "structure/Value.h"
@@ -26,7 +26,7 @@ namespace mtl
 
 namespace fs = std::filesystem;
 
-File::File(ExprEvaluator &eval) : Class(eval, "File")
+File::File(Interpreter &eval) : Class(eval, "File")
 {
 	/* file = new: File("path/to/file.ext") */
 	register_method(CONSTRUCT, [&](Args &args) {
@@ -283,7 +283,7 @@ struct PathPrefix
  * Example: `$:/modules/ncurses` becomes: `/path/to/binary/modules/ncurses`
  * Or expands relative paths into absolute ones via the std::filesystem::absolute if no aliases are present in the `pathstr`
  */
-std::string File::absolute_path(ExprEvaluator &eval, const std::string &pathstr)
+std::string File::absolute_path(Interpreter &eval, const std::string &pathstr)
 {
 	auto alias = std::string_view(pathstr).substr(0, 2);
 	std::string retpath = pathstr;
@@ -296,7 +296,7 @@ std::string File::absolute_path(ExprEvaluator &eval, const std::string &pathstr)
 	return retpath;
 }
 
-std::string File::path(ExprEvaluator &eval, const std::string &pathstr)
+std::string File::path(Interpreter &eval, const std::string &pathstr)
 {
 	auto alias = std::string_view(pathstr).substr(0, 2);
 	if (alias == PathPrefix::RUNDIR || alias == PathPrefix::SCRDIR)

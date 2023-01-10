@@ -1,6 +1,6 @@
 #include "PostfixExpr.h"
 
-#include <interpreter/ExprEvaluator.h>
+#include <interpreter/Interpreter.h>
 #include <lexer/Token.h>
 #include <type.h>
 #include <iostream>
@@ -13,7 +13,7 @@ PostfixExpr::PostfixExpr(ExprPtr lhs, Token op) : lhs(lhs), op(op)
 {
 }
 
-Value PostfixExpr::evaluate(ExprEvaluator &evaluator)
+Value PostfixExpr::evaluate(Interpreter &evaluator)
 {
 	return evaluator.evaluate(*this);
 }

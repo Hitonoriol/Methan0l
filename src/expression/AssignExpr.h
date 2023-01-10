@@ -17,7 +17,7 @@ class AssignExpr: public BinaryOperatorExpr
 
 	public:
 		AssignExpr(ExprPtr lhs, Token tok, ExprPtr rhs);
-		Value evaluate(ExprEvaluator &eval) override;
+		Value evaluate(Interpreter &eval) override;
 
 		bool is_move_assignment();
 

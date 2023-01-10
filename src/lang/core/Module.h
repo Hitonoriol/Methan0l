@@ -30,8 +30,8 @@ class Module
 	public:
 		static const std::string MODULE_NAME, MODULE_REFERENCE;
 
-		static std::string find_module(ExprEvaluator&, const std::string &path);
-		static void load_module(ExprEvaluator&, const std::string &path, Unit &unit);
+		static std::string find_module(Interpreter&, const std::string &path);
+		static void load_module(Interpreter&, const std::string &path, Unit &unit);
 };
 
 } /* namespace mtl */

@@ -7,7 +7,7 @@
 #include "../expression/Expression.h"
 #include "../type.h"
 #include "util/global.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 
 namespace mtl
 {

@@ -6,7 +6,7 @@
 namespace mtl
 {
 
-bool Logic::logical_operation(ExprEvaluator &eval, const ExprPtr &l, TokenType op, const ExprPtr &r)
+bool Logic::logical_operation(Interpreter &eval, const ExprPtr &l, TokenType op, const ExprPtr &r)
 {
 	bool lval = bln(val(eval, l));
 	switch (op) {

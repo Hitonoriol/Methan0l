@@ -10,7 +10,7 @@ namespace mtl
 
 class TypeManager;
 class Function;
-class ExprEvaluator;
+class Interpreter;
 class LiteralExpr;
 class Class;
 
@@ -50,7 +50,7 @@ class Object
 		uintptr_t id() const;
 
 		std::string to_string();
-		std::string to_string(ExprEvaluator &eval);
+		std::string to_string(Interpreter &eval);
 
 		friend bool operator ==(const Object &lhs, const Object &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Object &obj);

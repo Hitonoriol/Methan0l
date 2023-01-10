@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "expression/LiteralExpr.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/DataTable.h"
 #include "structure/Function.h"
 #include "structure/Value.h"
@@ -15,7 +15,7 @@
 namespace mtl
 {
 
-TypeManager::TypeManager(ExprEvaluator &eval)
+TypeManager::TypeManager(Interpreter &eval)
 		: eval(eval), root(new Anonymous(eval))
 {}
 

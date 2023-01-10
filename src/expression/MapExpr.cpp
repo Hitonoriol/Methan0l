@@ -4,7 +4,7 @@
 #include <memory>
 #include <utility>
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/DataTable.h"
 #include "structure/Value.h"
 #include "type.h"
@@ -14,7 +14,7 @@
 namespace mtl
 {
 
-Value MapExpr::evaluate(ExprEvaluator &evaluator)
+Value MapExpr::evaluate(Interpreter &evaluator)
 {
 	ValMap map;
 
@@ -24,7 +24,7 @@ Value MapExpr::evaluate(ExprEvaluator &evaluator)
 	return Value(map);
 }
 
-void MapExpr::execute(ExprEvaluator &evaluator)
+void MapExpr::execute(Interpreter &evaluator)
 {
 	ValMap map = evaluate(evaluator).get<ValMap>();
 	DataTable &scope = evaluator.current_unit()->local();

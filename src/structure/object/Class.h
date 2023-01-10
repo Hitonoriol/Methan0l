@@ -8,7 +8,7 @@
 #include "type.h"
 #include "structure/DataTable.h"
 #include "structure/Value.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 
 namespace mtl
 {
@@ -39,7 +39,7 @@ class Class : public Allocatable<Class>
 		std::unique_ptr<Object> static_instance;
 
 	protected:
-		ExprEvaluator &eval;
+		Interpreter &eval;
 
 	public:
 		static constexpr std::string_view
@@ -47,7 +47,7 @@ class Class : public Allocatable<Class>
 		TO_STRING = "to_string", THIS_ARG = "this",
 		NATIVE_OBJ = ".o";
 
-		Class(ExprEvaluator &eval, const std::string &name);
+		Class(Interpreter &eval, const std::string &name);
 		virtual ~Class() = default;
 
 		void register_method(std::string_view, Function&);
@@ -95,7 +95,7 @@ class Class : public Allocatable<Class>
 			id = get_id(name);
 		}
 
-		inline ExprEvaluator& get_evatuator()
+		inline Interpreter& get_evatuator()
 		{
 			return eval;
 		}
@@ -110,7 +110,7 @@ class Class : public Allocatable<Class>
 class Anonymous: public Class
 {
 	public:
-		Anonymous(ExprEvaluator &eval) : Class(eval, "Anonymous") {}
+		Anonymous(Interpreter &eval) : Class(eval, "Anonymous") {}
 		Value invoke_method(Object&, const std::string&, ExprList&) override;
 };
 

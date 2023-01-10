@@ -239,7 +239,7 @@ dec Value::type_id() const
 	return static_cast<dec>(t);
 }
 
-std::string Value::to_string(ExprEvaluator *eval)
+std::string Value::to_string(Interpreter *eval)
 {
 	switch (type()) {
 	case Type::NIL:

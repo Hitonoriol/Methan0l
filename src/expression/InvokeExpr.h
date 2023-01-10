@@ -23,7 +23,7 @@ class InvokeExpr: public Expression
 		{
 		}
 
-		Value evaluate(ExprEvaluator &eval) override
+		Value evaluate(Interpreter &eval) override
 		{
 			return eval.evaluate(*this);
 		}

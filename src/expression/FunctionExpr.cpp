@@ -10,12 +10,12 @@ FunctionExpr::FunctionExpr(ArgDefList argdef, UnitExpr body) : func(argdef, body
 {
 }
 
-Value FunctionExpr::evaluate(ExprEvaluator &evaluator)
+Value FunctionExpr::evaluate(Interpreter &evaluator)
 {
 	return Value(func);
 }
 
-void FunctionExpr::execute(ExprEvaluator &evaluator)
+void FunctionExpr::execute(Interpreter &evaluator)
 {
 	ExprList args;
 	evaluator.invoke(func, args);

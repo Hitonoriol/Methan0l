@@ -1,7 +1,7 @@
 #ifndef SRC_LANG_CORE_DATA_H_
 #define SRC_LANG_CORE_DATA_H_
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "expression/LiteralExpr.h"
 
 namespace mtl
@@ -13,7 +13,7 @@ struct Data
 		static Value slice(Value &containerv, udec start, udec end, dec step = 1);
 
 		template<typename T>
-		static void for_each(ExprEvaluator &eval, T &container, Function &action)
+		static void for_each(Interpreter &eval, T &container, Function &action)
 		{
 			static_assert(is_container<T>::value);
 			if (container.empty())

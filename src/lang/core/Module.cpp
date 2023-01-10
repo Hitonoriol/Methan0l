@@ -2,7 +2,7 @@
 
 #include "interpreter/Interpreter.h"
 #include "structure/Value.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "util/util.h"
 #include <filesystem>
 #include <boost/dll.hpp>
@@ -16,7 +16,7 @@ const std::string
 	Module::MODULE_REFERENCE = ".mref";
 
 
-void Module::load_module(ExprEvaluator &eval, const std::string &path, Unit &unit)
+void Module::load_module(Interpreter &eval, const std::string &path, Unit &unit)
 {
 	unit.box();
 	std::string name = find_module(eval, path);
@@ -33,7 +33,7 @@ void Module::load_module(ExprEvaluator &eval, const std::string &path, Unit &uni
 	if (!module.has(MODULE_ENTRYPOINT))
 		throw std::runtime_error("\"" + name + "\" is not a methan0l module");
 
-	IMPORT<void(ExprEvaluator*)>(module, MODULE_ENTRYPOINT)(&eval);
+	IMPORT<void(Interpreter*)>(module, MODULE_ENTRYPOINT)(&eval);
 	for (std::string &symbol : boost::dll::library_info(name).symbols()) {
 		if (contains(symbol, FUNC_DEF_PREFIX))
 			IMPORT<void(void)>(module, symbol)();
@@ -60,7 +60,7 @@ std::filesystem::path &append(std::filesystem::path &path, std::string_view apx)
 	return append(path, std::string(apx));
 }
 
-std::string Module::find_module(ExprEvaluator &eval, const std::string &path_str)
+std::string Module::find_module(Interpreter &eval, const std::string &path_str)
 {
 	std::filesystem::path path(File::absolute_path(eval, path_str));
 	const bool exists = std::filesystem::exists(path);

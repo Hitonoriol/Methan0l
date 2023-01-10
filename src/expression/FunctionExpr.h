@@ -14,8 +14,8 @@ class FunctionExpr: public Expression
 	public:
 		FunctionExpr(ArgDefList argdef, UnitExpr body);
 
-		Value evaluate(ExprEvaluator &evaluator) override;
-		void execute(ExprEvaluator &evaluator) override;
+		Value evaluate(Interpreter &evaluator) override;
+		void execute(Interpreter &evaluator) override;
 
 		Function get_function();
 		Function& function_ref();

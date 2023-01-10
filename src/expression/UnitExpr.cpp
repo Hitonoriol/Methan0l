@@ -17,7 +17,7 @@ Unit& UnitExpr::get_unit_ref()
 	return unit;
 }
 
-Value UnitExpr::evaluate(ExprEvaluator &evaluator)
+Value UnitExpr::evaluate(Interpreter &evaluator)
 {
 	if (unit.is_persistent() && unit.local().empty())
 		evaluator.invoke(unit);
@@ -25,7 +25,7 @@ Value UnitExpr::evaluate(ExprEvaluator &evaluator)
 	return Value(unit);
 }
 
-void UnitExpr::execute(ExprEvaluator &evaluator)
+void UnitExpr::execute(Interpreter &evaluator)
 {
 	evaluator.invoke(unit);
 }

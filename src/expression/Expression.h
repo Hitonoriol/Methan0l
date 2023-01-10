@@ -4,7 +4,7 @@
 #include <lexer/Token.h>
 #include <iostream>
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "type.h"
 #include "structure/Value.h"
 #include "util/debug.h"
@@ -46,10 +46,10 @@ class Expression
 	public:
 		Expression() = default;
 		virtual ~Expression() = default;
-		virtual Value evaluate(ExprEvaluator &evaluator) = 0;
+		virtual Value evaluate(Interpreter &evaluator) = 0;
 
 		/* called instead of evaluate() for parent-less exprs */
-		virtual void execute(ExprEvaluator &evaluator);
+		virtual void execute(Interpreter &evaluator);
 
 		void set_line(uint32_t line);
 		uint32_t get_line();

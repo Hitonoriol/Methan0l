@@ -157,7 +157,7 @@ std::ostream& operator <<(std::ostream &stream, DataTable &val)
 	return stream << "{Managed map: " << static_cast<void*>(val.map.get()) << "}";
 }
 
-DataTable DataTable::make(const ValMap &vmap, ExprEvaluator &eval)
+DataTable DataTable::make(const ValMap &vmap, Interpreter &eval)
 {
 	DataTable table;
 	table.map->reserve(vmap.size());

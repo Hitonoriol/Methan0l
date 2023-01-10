@@ -28,12 +28,12 @@ class LiteralExpr: public Expression
 
 		bool is_empty();
 
-		Value evaluate(ExprEvaluator &eval);
+		Value evaluate(Interpreter &eval);
 
 		Value raw_value();
 		Value& raw_ref();
 
-		void execute(ExprEvaluator &evaluator) override;
+		void execute(Interpreter &evaluator) override;
 
 		static std::shared_ptr<LiteralExpr> empty();
 		template<typename T>
@@ -42,7 +42,7 @@ class LiteralExpr: public Expression
 			return make_expr<LiteralExpr>(0, val);
 		}
 
-		static void exec_literal(ExprEvaluator &evaluator, Value &val);
+		static void exec_literal(Interpreter &evaluator, Value &val);
 
 		std::ostream& info(std::ostream &str) override;
 };

@@ -1,7 +1,7 @@
 #include <lexer/Token.h>
 #include "BinaryOperatorExpr.h"
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "../type.h"
 #include "LiteralExpr.h"
 
@@ -15,12 +15,12 @@ BinaryOperatorExpr::BinaryOperatorExpr(ExprPtr lhs,
 {
 }
 
-Value BinaryOperatorExpr::evaluate(ExprEvaluator &eval)
+Value BinaryOperatorExpr::evaluate(Interpreter &eval)
 {
 	return eval.evaluate(*this);
 }
 
-void BinaryOperatorExpr::execute(ExprEvaluator &evaluator)
+void BinaryOperatorExpr::execute(Interpreter &evaluator)
 {
 	Value val = evaluate(evaluator);
 	if (op == TokenType::STRING_CONCAT)

@@ -12,7 +12,7 @@
 #include "type.h"
 #include "util/util.h"
 #include "TypeManager.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/object/Class.h"
 
 namespace mtl
@@ -116,7 +116,7 @@ std::string Object::to_string()
 	return ss.str();
 }
 
-std::string Object::to_string(ExprEvaluator &eval)
+std::string Object::to_string(Interpreter &eval)
 {
 	ExprList noargs;
 	return str(invoke_method(eval.get_type_mgr(), Class::TO_STRING, noargs));

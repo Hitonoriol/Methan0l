@@ -9,7 +9,7 @@
 #include "../expression/LiteralExpr.h"
 #include "DataTable.h"
 #include "Value.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "../type.h"
 #include "../util/util.h"
 
@@ -63,7 +63,7 @@ void Function::set(const Function &rhs)
  * 				* Defined arguments are stored by reference
  * 				* Excess arguments (if any) are stored as unevaluated expressions
  */
-void Function::call(ExprEvaluator &eval, const ExprList &args)
+void Function::call(Interpreter &eval, const ExprList &args)
 {
 	size_t argc = args.size();
 	if (argc < this->argc)

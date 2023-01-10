@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "../type.h"
 #include "LiteralExpr.h"
 
@@ -29,7 +29,7 @@ ExprPtr PrefixExpr::get_rhs()
 	return rhs;
 }
 
-Value PrefixExpr::evaluate(ExprEvaluator &eval)
+Value PrefixExpr::evaluate(Interpreter &eval)
 {
 	return eval.evaluate(*this);
 }

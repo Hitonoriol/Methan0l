@@ -1,7 +1,7 @@
 #include <expression/TryCatchExpr.h>
 
 #include "interpreter/ExceptionHandler.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "util/cast.h"
 #include "structure/Unit.h"
 #include "expression/UnitExpr.h"
@@ -17,12 +17,12 @@ TryCatchExpr::TryCatchExpr(ExprPtr try_body, ExprPtr catch_body, std::string &&c
 {
 }
 
-void TryCatchExpr::execute(ExprEvaluator &evaluator)
+void TryCatchExpr::execute(Interpreter &evaluator)
 {
 	evaluate(evaluator);
 }
 
-Value TryCatchExpr::evaluate(ExprEvaluator &evaluator)
+Value TryCatchExpr::evaluate(Interpreter &evaluator)
 {
 	auto &handler = evaluator.get_exception_handler();
 	handler.register_handler(evaluator.stack_depth(), this);
@@ -31,7 +31,7 @@ Value TryCatchExpr::evaluate(ExprEvaluator &evaluator)
 	return result;
 }
 
-void TryCatchExpr::except(ExprEvaluator &evaluator)
+void TryCatchExpr::except(Interpreter &evaluator)
 {
 	auto &handler = evaluator.get_exception_handler();
 	Value exception = handler.current_exception();

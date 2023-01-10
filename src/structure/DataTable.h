@@ -10,7 +10,7 @@
 namespace mtl
 {
 
-class ExprEvaluator;
+class Interpreter;
 
 class DataTable : public Allocatable<DataMap>
 {
@@ -49,7 +49,7 @@ class DataTable : public Allocatable<DataMap>
 
 		friend std::ostream& operator <<(std::ostream &stream, DataTable &val);
 
-		static DataTable make(const ValMap&, ExprEvaluator&);
+		static DataTable make(const ValMap&, Interpreter&);
 
 		static Value& create_temporary(Value val);
 

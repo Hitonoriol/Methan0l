@@ -10,7 +10,7 @@
 namespace mtl
 {
 
-class ExprEvaluator;
+class Interpreter;
 
 template<typename T>
 using Distr = std::function<T(std::mt19937_64&)>;
@@ -66,7 +66,7 @@ class Random: public Class
 		bool next_bool(ExprList &args);
 
 	public:
-		Random(ExprEvaluator &eval);
+		Random(Interpreter &eval);
 		std::mt19937_64& managed_rng(Object &obj);
 };
 

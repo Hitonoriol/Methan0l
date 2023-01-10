@@ -25,11 +25,11 @@ class IndexExpr: public IdentifierExpr
 
 		void clear_container(Value &contval);
 
-		Value& indexed_element(ExprEvaluator &evaluator);
-		Value& indexed_element(ExprEvaluator &evaluator, ValList &list);
-		Value& indexed_element(ExprEvaluator &evaluator, ValMap &map);
-		Value& indexed_element(ExprEvaluator &evaluator, ValSet &set);
-		Value& indexed_element(ExprEvaluator &evaluator, DataTable &table);
+		Value& indexed_element(Interpreter &evaluator);
+		Value& indexed_element(Interpreter &evaluator, ValList &list);
+		Value& indexed_element(Interpreter &evaluator, ValMap &map);
+		Value& indexed_element(Interpreter &evaluator, ValSet &set);
+		Value& indexed_element(Interpreter &evaluator, DataTable &table);
 
 	public:
 		IndexExpr(ExprPtr list_idfr, ExprPtr idx, bool remove, bool insert) :
@@ -37,16 +37,16 @@ class IndexExpr: public IdentifierExpr
 		{
 		}
 
-		Value evaluate(ExprEvaluator &evaluator) override;
-		void execute(mtl::ExprEvaluator &evaluator) override;
+		Value evaluate(Interpreter &evaluator) override;
+		void execute(mtl::Interpreter &evaluator) override;
 
-		Value& assign(ExprEvaluator &eval, Value val) override;
-		Value& referenced_value(ExprEvaluator &eval, bool follow_refs = true) override;
+		Value& assign(Interpreter &eval, Value val) override;
+		Value& referenced_value(Interpreter &eval, bool follow_refs = true) override;
 
 		ExprPtr get_lhs();
 		ExprPtr get_rhs();
 
-		void create_if_nil(ExprEvaluator &eval) override
+		void create_if_nil(Interpreter &eval) override
 		{
 			return;
 		}

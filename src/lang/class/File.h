@@ -14,7 +14,7 @@
 namespace mtl
 {
 
-class ExprEvaluator;
+class Interpreter;
 
 class File: public Class
 {
@@ -37,11 +37,11 @@ class File: public Class
 		void reset(std::fstream &file);
 
 	public:
-		File(ExprEvaluator &eval);
+		File(Interpreter &eval);
 		~File() = default;
 
-		static std::string path(ExprEvaluator&, const std::string&);
-		static std::string absolute_path(ExprEvaluator&, const std::string&);
+		static std::string path(Interpreter&, const std::string&);
+		static std::string absolute_path(Interpreter&, const std::string&);
 };
 
 } /* namespace mtl */

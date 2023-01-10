@@ -15,10 +15,10 @@ class TryCatchExpr: public Expression
 	public:
 		TryCatchExpr(ExprPtr try_body, ExprPtr catch_body, std::string &&catch_as);
 
-		virtual void execute(ExprEvaluator &evaluator) override;
-		virtual Value evaluate(ExprEvaluator &evaluator) override;
+		virtual void execute(Interpreter &evaluator) override;
+		virtual Value evaluate(Interpreter &evaluator) override;
 
-		void except(ExprEvaluator &evaluator);
+		void except(Interpreter &evaluator);
 
 		virtual std::ostream& info(std::ostream &str) override;
 };

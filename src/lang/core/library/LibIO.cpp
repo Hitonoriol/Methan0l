@@ -5,7 +5,7 @@
 #include <string>
 
 #include "expression/IdentifierExpr.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/object/Object.h"
 #include "structure/Value.h"
 

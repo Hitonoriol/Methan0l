@@ -22,7 +22,7 @@ class LibData: public Library
 	public:
 		using DblBinOperation = const std::function<double(double, Value)>;
 
-		LibData(ExprEvaluator *eval) : Library(eval)
+		LibData(Interpreter *eval) : Library(eval)
 		{
 		}
 		void load() override;

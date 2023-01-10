@@ -6,7 +6,7 @@
 namespace mtl
 {
 
-Value val(ExprEvaluator &eval, ExprPtr expr)
+Value val(Interpreter &eval, ExprPtr expr)
 {
 	return expr->evaluate(eval).get();
 }

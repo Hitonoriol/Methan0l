@@ -14,7 +14,7 @@ namespace mtl
 {
 
 /* Get a & to the indexed value depending on the type of the LHS */
-Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
+Value& IndexExpr::indexed_element(Interpreter &evaluator)
 {
 	Value &val =
 			instanceof<IndexExpr>(lhs.get()) ?
@@ -78,7 +78,7 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator)
 	}
 }
 
-Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, DataTable &table)
+Value& IndexExpr::indexed_element(Interpreter &evaluator, DataTable &table)
 {
 	if (append() || insert)
 		throw std::runtime_error("Unsupported operation");
@@ -98,7 +98,7 @@ void IndexExpr::clear_container(Value &contval)
 		contval.accept_container([&](auto &c) {c.clear();});
 }
 
-Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValList &list)
+Value& IndexExpr::indexed_element(Interpreter &evaluator, ValList &list)
 {
 	if (append()) {
 		list.push_back(Value());
@@ -118,7 +118,7 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValList &list)
 	return elem;
 }
 
-Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValSet &set)
+Value& IndexExpr::indexed_element(Interpreter &evaluator, ValSet &set)
 {
 	Value val = idx->evaluate(evaluator);
 
@@ -130,7 +130,7 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValSet &set)
 		return DataTable::create_temporary(set.find(val) != set.end());
 }
 
-Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValMap &map)
+Value& IndexExpr::indexed_element(Interpreter &evaluator, ValMap &map)
 {
 	if (append())
 		throw std::runtime_error("Append operation is not supported by maps");
@@ -144,7 +144,7 @@ Value& IndexExpr::indexed_element(ExprEvaluator &evaluator, ValMap &map)
 	return elem;
 }
 
-Value& IndexExpr::referenced_value(ExprEvaluator &eval, bool follow_refs)
+Value& IndexExpr::referenced_value(Interpreter &eval, bool follow_refs)
 {
 	if (!follow_refs)
 		throw std::runtime_error("follow_refs = false in IndexExpression is pointless");
@@ -153,7 +153,7 @@ Value& IndexExpr::referenced_value(ExprEvaluator &eval, bool follow_refs)
 }
 
 /* Process assignment to the indexed element -- in case of strings has to be done manually */
-Value& IndexExpr::assign(ExprEvaluator &eval, Value val)
+Value& IndexExpr::assign(Interpreter &eval, Value val)
 {
 	if (remove)
 		throw std::runtime_error("Index remove expr can't be used in assignment");
@@ -174,7 +174,7 @@ Value& IndexExpr::assign(ExprEvaluator &eval, Value val)
 	return ref;
 }
 
-Value IndexExpr::evaluate(ExprEvaluator &evaluator)
+Value IndexExpr::evaluate(Interpreter &evaluator)
 {
 	Value &val = referenced_value(evaluator);
 
@@ -185,7 +185,7 @@ Value IndexExpr::evaluate(ExprEvaluator &evaluator)
 	return val;
 }
 
-void IndexExpr::execute(mtl::ExprEvaluator &evaluator)
+void IndexExpr::execute(mtl::Interpreter &evaluator)
 {
 	evaluate(evaluator);
 }

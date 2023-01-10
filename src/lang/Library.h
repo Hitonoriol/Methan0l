@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <interpreter/ExprEvaluator.h>
+#include <interpreter/Interpreter.h>
 
 #define LIB_OPERATOR_DEF(type, functor) \
 	void Library::type##_operator(TokenType tok, const functor &opr) \
@@ -20,7 +20,7 @@ class IdentifierExpr;
 class Library
 {
 	protected:
-		ExprEvaluator *eval = 0;
+		Interpreter *eval = 0;
 
 		std::string str(ExprList args, int idx = 0);
 		double dbl(ExprList args, int idx = 0);
@@ -48,7 +48,7 @@ class Library
 		void postfix_operator(TokenType, const UnaryOpr&);
 
 	public:
-		Library(ExprEvaluator *eval);
+		Library(Interpreter *eval);
 		Library(const Library&);
 		virtual ~Library() = default;
 		virtual void load() = 0;

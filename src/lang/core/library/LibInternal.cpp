@@ -12,7 +12,7 @@
 #include "expression/InvokeExpr.h"
 #include "expression/ListExpr.h"
 #include "expression/parser/MapParser.h"
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/Unit.h"
 #include "structure/Value.h"
 #include "util/util.h"
@@ -32,7 +32,7 @@ void LibInternal::load()
 		return static_cast<Interpreter*>(eval)->get_main().local().get(EnvVars::LAUNCH_ARGS);
 	});
 
-	function("on_exit", mtl::member(eval, &ExprEvaluator::register_exit_task));
+	function("on_exit", mtl::member(eval, &Interpreter::register_exit_task));
 
 	function("set_max_mem", [&](uint64_t cap) {
 		eval->get_heap().set_max_mem(cap);

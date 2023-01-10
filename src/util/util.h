@@ -17,7 +17,7 @@ namespace mtl
 struct Value;
 
 template<typename T>
-inline std::string stringify_container(ExprEvaluator *eval, const T &ctr)
+inline std::string stringify_container(Interpreter *eval, const T &ctr)
 {
 	auto it = ctr.begin(), end = ctr.end();
 	return stringify([&]() {

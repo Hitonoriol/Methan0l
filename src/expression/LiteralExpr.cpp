@@ -1,6 +1,6 @@
 #include "LiteralExpr.h"
 
-#include <interpreter/ExprEvaluator.h>
+#include <interpreter/Interpreter.h>
 #include <lexer/Token.h>
 #include <memory>
 #include <string>
@@ -46,7 +46,7 @@ bool LiteralExpr::is_empty()
 	return value.empty();
 }
 
-Value LiteralExpr::evaluate(ExprEvaluator &eval)
+Value LiteralExpr::evaluate(Interpreter &eval)
 {
 	return Value(value);
 }
@@ -61,7 +61,7 @@ Value& LiteralExpr::raw_ref()
 	return value;
 }
 
-void LiteralExpr::execute(ExprEvaluator &evaluator)
+void LiteralExpr::execute(Interpreter &evaluator)
 {
 	Value evald = evaluate(evaluator);
 	exec_literal(evaluator, evald);
@@ -72,7 +72,7 @@ std::shared_ptr<LiteralExpr> LiteralExpr::empty()
 	return std::make_shared<LiteralExpr>();
 }
 
-void LiteralExpr::exec_literal(ExprEvaluator &evaluator, Value &val)
+void LiteralExpr::exec_literal(Interpreter &evaluator, Value &val)
 {
 	if (val.empty())
 		return;

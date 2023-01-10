@@ -23,9 +23,9 @@ class ClassExpr: public Expression
 		ClassExpr(std::string name, const std::vector<std::string> base, const ExprMap &body)
 			: name(name), base(base), body(body) {}
 
-		void execute(mtl::ExprEvaluator &evaluator) override;
+		void execute(mtl::Interpreter &evaluator) override;
 
-		Value evaluate(ExprEvaluator &evaluator) override
+		Value evaluate(Interpreter &evaluator) override
 		{
 			execute(evaluator);
 			return Value::NO_VALUE;

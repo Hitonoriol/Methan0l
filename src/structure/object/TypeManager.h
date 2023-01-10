@@ -17,11 +17,11 @@ class TypeManager
 {
 	private:
 		std::pmr::unordered_map<size_t, std::shared_ptr<Class>> types;
-		ExprEvaluator &eval;
+		Interpreter &eval;
 		Anonymous *root;
 
 	public:
-		TypeManager(ExprEvaluator &eval);
+		TypeManager(Interpreter &eval);
 		~TypeManager();
 
 		void register_type(std::shared_ptr<Class> type);

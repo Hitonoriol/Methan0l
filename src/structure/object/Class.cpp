@@ -9,7 +9,7 @@
 #include <utility>
 #include <variant>
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "Object.h"
 #include "lang/Library.h"
 #include "expression/LiteralExpr.h"
@@ -20,7 +20,7 @@
 namespace mtl
 {
 
-Class::Class(ExprEvaluator &eval, const std::string &name) :
+Class::Class(Interpreter &eval, const std::string &name) :
 		id(get_id(name)),
 		name(name),
 		static_instance(std::make_unique<Object>(this)),

@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "interpreter/ExprEvaluator.h"
+#include "interpreter/Interpreter.h"
 #include "structure/DataTable.h"
 #include "structure/Unit.h"
 #include "structure/Value.h"
@@ -17,7 +17,7 @@
 namespace mtl
 {
 
-void LoopExpr::execute(ExprEvaluator &evaluator)
+void LoopExpr::execute(Interpreter &evaluator)
 {
 	if (is_foreach())
 		exec_foreach_loop(evaluator);
@@ -25,13 +25,13 @@ void LoopExpr::execute(ExprEvaluator &evaluator)
 		exec_for_loop(evaluator);
 }
 
-Value LoopExpr::evaluate(ExprEvaluator &evaluator)
+Value LoopExpr::evaluate(Interpreter &evaluator)
 {
 	execute(evaluator);
 	return Value::NO_VALUE;
 }
 
-void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
+void LoopExpr::exec_for_loop(Interpreter &evaluator)
 {
 	Unit &loop_proxy = evaluator.tmp_callable(Unit());
 	Unit &body_unit = evaluator.tmp_callable(Unit::from_expression(body));
@@ -61,7 +61,7 @@ void LoopExpr::exec_for_loop(ExprEvaluator &evaluator)
 	exit_loop(evaluator, ret);
 }
 
-void LoopExpr::exec_foreach_loop(ExprEvaluator &evaluator)
+void LoopExpr::exec_foreach_loop(Interpreter &evaluator)
 {
 	init->assert_type<IdentifierExpr>("First argument of foreach expr must be an Identifier");
 	Value listval = condition->evaluate(evaluator);

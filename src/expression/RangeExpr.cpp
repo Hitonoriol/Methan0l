@@ -9,13 +9,13 @@ RangeExpr::RangeExpr(ExprPtr start, ExprPtr end, ExprPtr step) :
 {
 }
 
-void RangeExpr::execute(ExprEvaluator &evaluator)
+void RangeExpr::execute(Interpreter &evaluator)
 {
 	auto val = evaluate(evaluator);
 	out << val << NL;
 }
 
-Value RangeExpr::evaluate(ExprEvaluator &evaluator)
+Value RangeExpr::evaluate(Interpreter &evaluator)
 {
 	return Data::range(start->evaluate(evaluator),
 			end->evaluate(evaluator),

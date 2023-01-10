@@ -12,7 +12,7 @@ class ConditionalExpr: public Expression
 	private:
 		ExprPtr condition, then_expr, else_expr;
 
-		ExprPtr eval_branch(ExprEvaluator &eval);
+		ExprPtr eval_branch(Interpreter &eval);
 
 	public:
 		ConditionalExpr(ExprPtr condition, ExprPtr then_expr, ExprPtr else_expr);
@@ -23,8 +23,8 @@ class ConditionalExpr: public Expression
 
 		bool is_ifelse_block();
 
-		Value evaluate(ExprEvaluator &eval) override;
-		void execute(ExprEvaluator &evaluator) override;
+		Value evaluate(Interpreter &eval) override;
+		void execute(Interpreter &evaluator) override;
 
 		std::ostream& info(std::ostream &str) override;
 };
