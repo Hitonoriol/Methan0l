@@ -11,11 +11,11 @@
 #include <structure/object/NativeClass.h>
 
 #define API extern "C"
-#define INIT_MODULE 		mtl::Interpreter *evaluator = nullptr;\
+#define INIT_MODULE 		mtl::Interpreter *context = nullptr;\
 							mtl::DataTable *local_scope = nullptr;\
-							API void init_methan0l_module(mtl::Interpreter* evaluator) {\
-								::evaluator = evaluator;\
-								local_scope = evaluator->local_scope();\
+							API void init_methan0l_module(mtl::Interpreter* context) {\
+								::context = context;\
+								local_scope = context->local_scope();\
 							}
 
 #define LOAD_MODULE INIT_MODULE\
@@ -29,7 +29,7 @@
 using Value = mtl::Value;
 
 extern mtl::DataTable *local_scope;
-extern mtl::Interpreter *evaluator;
+extern mtl::Interpreter *context;
 API void load();
 
 inline mtl::Value& var(const std::string &name)
@@ -46,13 +46,13 @@ inline T var(const std::string &name)
 template<typename F>
 inline void function(const std::string &name, F &&f)
 {
-	evaluator->register_func(name, static_cast<typename std::decay<F>::type>(f));
+	context->register_func(name, static_cast<typename std::decay<F>::type>(f));
 }
 
 template<class C>
 inline void native_class()
 {
-	evaluator->get_type_mgr().register_type<C>();
+	context->get_type_mgr().register_type<C>();
 }
 
 #endif

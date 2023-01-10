@@ -12,7 +12,7 @@ class Unit;
 class LibInternal: public Library
 {
 	public:
-		LibInternal(Interpreter *eval) : Library(eval) {}
+		LibInternal(Interpreter *context) : Library(context) {}
 		void load() override;
 
 	private:

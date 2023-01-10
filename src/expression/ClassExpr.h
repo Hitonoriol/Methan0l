@@ -23,11 +23,11 @@ class ClassExpr: public Expression
 		ClassExpr(std::string name, const std::vector<std::string> base, const ExprMap &body)
 			: name(name), base(base), body(body) {}
 
-		void execute(mtl::Interpreter &evaluator) override;
+		void execute(mtl::Interpreter &context) override;
 
-		Value evaluate(Interpreter &evaluator) override
+		Value evaluate(Interpreter &context) override
 		{
-			execute(evaluator);
+			execute(context);
 			return Value::NO_VALUE;
 		}
 

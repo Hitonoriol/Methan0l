@@ -32,7 +32,7 @@ class Function: public Unit
 		Function(const Function &rhs);
 		Function& operator=(const Function &rhs);
 
-		void call(Interpreter &eval, const ExprList &args);
+		void call(Interpreter &context, const ExprList &args);
 		const ArgDefList& get_arg_def() const;
 		Value &get_callargs();
 

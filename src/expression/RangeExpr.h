@@ -14,30 +14,30 @@ class RangeExpr: public Expression
 	public:
 		RangeExpr(ExprPtr start, ExprPtr end, ExprPtr step);
 
-		void execute(Interpreter &evaluator) override;
-		Value evaluate(Interpreter &evaluator) override;
+		void execute(Interpreter &context) override;
+		Value evaluate(Interpreter &context) override;
 
 		inline bool has_step()
 		{
 			return step != nullptr;
 		}
 
-		inline Value get_start(Interpreter &eval)
+		inline Value get_start(Interpreter &context)
 		{
-			return start->evaluate(eval);
+			return start->evaluate(context);
 		}
 
-		inline Value get_end(Interpreter &eval)
+		inline Value get_end(Interpreter &context)
 		{
-			return end->evaluate(eval);
+			return end->evaluate(context);
 		}
 
-		inline Value get_step(Interpreter &eval)
+		inline Value get_step(Interpreter &context)
 		{
 			if (!has_step())
 				return 1;
 
-			return step->evaluate(eval);
+			return step->evaluate(context);
 		}
 
 		inline ExprPtr get_start()

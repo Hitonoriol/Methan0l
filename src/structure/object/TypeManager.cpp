@@ -15,8 +15,8 @@
 namespace mtl
 {
 
-TypeManager::TypeManager(Interpreter &eval)
-		: eval(eval), root(new Anonymous(eval))
+TypeManager::TypeManager(Interpreter &context)
+		: context(context), root(new Anonymous(context))
 {}
 
 TypeManager::~TypeManager()

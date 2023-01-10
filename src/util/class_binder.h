@@ -58,12 +58,12 @@ class ClassBinder
 		using Obj = std::shared_ptr<C>;
 
 		std::shared_ptr<Class> clazz;
-		Interpreter &eval;
+		Interpreter &context;
 
 	public:
 		using bound_class = C;
-		ClassBinder(Interpreter &eval, const std::string &name = "") :
-			clazz(Allocatable<Class>::allocate(eval, name)), eval(eval) {}
+		ClassBinder(Interpreter &context, const std::string &name = "") :
+			clazz(Allocatable<Class>::allocate(context, name)), context(context) {}
 
 		inline void set_name(const std::string &name)
 		{
@@ -80,7 +80,7 @@ class ClassBinder
 		inline void bind_constructor()
 		{
 			LOG("Wrapping ctor of " << type_name<C>() << " with sig: " << type_name<Sig...>())
-			clazz->register_method(Class::CONSTRUCT, eval.bind_func([](Object &obj, Sig...args) {
+			clazz->register_method(Class::CONSTRUCT, context.bind_func([](Object &obj, Sig...args) {
 				obj.def(mtl::str(Class::NATIVE_OBJ)) = Factory<C, Sig...>::make(std::forward<Sig>(args)...);
 			}));
 		}
@@ -99,19 +99,19 @@ class ClassBinder
 		inline void bind_method(std::string_view name, F &&method)
 		{
 			LOG("Binding native class method: " << name << "[" << type_name<F>() << "]")
-			clazz->register_method(name, eval.bind_func(mtl::method(method)));
+			clazz->register_method(name, context.bind_func(mtl::method(method)));
 		}
 
 		template<typename F>
 		inline void register_method(std::string_view name, F &&method)
 		{
 			LOG("Registering class method: " << name << "[" << type_name<F>() << "]")
-			clazz->register_method(name, eval.bind_func(method));
+			clazz->register_method(name, context.bind_func(method));
 		}
 
 		inline void register_class()
 		{
-			eval.get_type_mgr().register_type(clazz);
+			context.get_type_mgr().register_type(clazz);
 		}
 };
 

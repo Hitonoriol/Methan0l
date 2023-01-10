@@ -10,12 +10,12 @@ FormatStrExpr::FormatStrExpr(std::string fmt, ExprList args) : fmt(std::move(fmt
 	strip_quotes(fmt);
 }
 
-Value FormatStrExpr::evaluate(Interpreter &evaluator)
+Value FormatStrExpr::evaluate(Interpreter &context)
 {
 	std::string fmt = this->fmt;
 	std::vector<std::string> sargs;
 	for (auto expr : args)
-		sargs.push_back(expr->evaluate(evaluator).to_string(&evaluator));
+		sargs.push_back(expr->evaluate(context).to_string(&context));
 	LibString::format(fmt, sargs);
 	return fmt;
 }

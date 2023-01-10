@@ -46,7 +46,7 @@ bool LiteralExpr::is_empty()
 	return value.empty();
 }
 
-Value LiteralExpr::evaluate(Interpreter &eval)
+Value LiteralExpr::evaluate(Interpreter &context)
 {
 	return Value(value);
 }
@@ -61,10 +61,10 @@ Value& LiteralExpr::raw_ref()
 	return value;
 }
 
-void LiteralExpr::execute(Interpreter &evaluator)
+void LiteralExpr::execute(Interpreter &context)
 {
-	Value evald = evaluate(evaluator);
-	exec_literal(evaluator, evald);
+	Value evald = evaluate(context);
+	exec_literal(context, evald);
 }
 
 std::shared_ptr<LiteralExpr> LiteralExpr::empty()
@@ -72,14 +72,14 @@ std::shared_ptr<LiteralExpr> LiteralExpr::empty()
 	return std::make_shared<LiteralExpr>();
 }
 
-void LiteralExpr::exec_literal(Interpreter &evaluator, Value &val)
+void LiteralExpr::exec_literal(Interpreter &context, Value &val)
 {
 	if (val.empty())
 		return;
 
 	switch (val.type()) {
 	case Type::UNIT: {
-		evaluator.invoke(val.get<Unit>());
+		context.invoke(val.get<Unit>());
 		break;
 	}
 

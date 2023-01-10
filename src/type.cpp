@@ -6,9 +6,9 @@
 namespace mtl
 {
 
-Value val(Interpreter &eval, ExprPtr expr)
+Value val(Interpreter &context, ExprPtr expr)
 {
-	return expr->evaluate(eval).get();
+	return expr->evaluate(context).get();
 }
 
 std::string str(Value val)

@@ -37,7 +37,7 @@ class File: public Class
 		void reset(std::fstream &file);
 
 	public:
-		File(Interpreter &eval);
+		File(Interpreter &context);
 		~File() = default;
 
 		static std::string path(Interpreter&, const std::string&);

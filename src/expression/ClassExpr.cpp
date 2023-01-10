@@ -21,13 +21,13 @@
 namespace mtl
 {
 
-void ClassExpr::execute(Interpreter &eval)
+void ClassExpr::execute(Interpreter &context)
 {
 	if (clazz != nullptr)
 		return;
 
-	clazz = Class::allocate(eval, name);
-	auto &type_mgr = eval.get_type_mgr();
+	clazz = Class::allocate(context, name);
+	auto &type_mgr = context.get_type_mgr();
 	auto &obj_data = clazz->get_object_data();
 
 	if (!base.empty()) {
@@ -48,7 +48,7 @@ void ClassExpr::execute(Interpreter &eval)
 	}
 
 	for (auto& [name, rhs] : body) {
-		Value rval = rhs->evaluate(eval);
+		Value rval = rhs->evaluate(context);
 		if (rval.is<Function>())
 			clazz->register_method(name, rval.get<Function>());
 		else if (rval.is<InbuiltFunc>())

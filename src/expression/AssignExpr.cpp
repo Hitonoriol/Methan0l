@@ -12,9 +12,9 @@ AssignExpr::AssignExpr(ExprPtr lhs, Token tok, ExprPtr rhs) :
 	move = tok == TokenType::ARROW_L;
 }
 
-Value AssignExpr::evaluate(Interpreter &eval)
+Value AssignExpr::evaluate(Interpreter &context)
 {
-	return eval.evaluate(*this);
+	return context.evaluate(*this);
 }
 
 bool AssignExpr::is_move_assignment()

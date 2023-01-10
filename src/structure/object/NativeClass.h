@@ -18,7 +18,7 @@ class NativeClass
 		virtual void initialize() = 0;
 
 	public:
-		NativeClass(Interpreter &eval) : class_binder(eval) {}
+		NativeClass(Interpreter &context) : class_binder(context) {}
 
 		virtual ~NativeClass() = default;
 

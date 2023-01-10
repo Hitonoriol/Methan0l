@@ -16,7 +16,7 @@ class PostfixExpr: public Expression
 	public:
 		PostfixExpr(ExprPtr lhs, Token op);
 
-		Value evaluate(Interpreter &evaluator) override;
+		Value evaluate(Interpreter &context) override;
 
 		ExprPtr& get_lhs();
 		Token get_token();

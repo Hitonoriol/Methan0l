@@ -15,16 +15,16 @@ BinaryOperatorExpr::BinaryOperatorExpr(ExprPtr lhs,
 {
 }
 
-Value BinaryOperatorExpr::evaluate(Interpreter &eval)
+Value BinaryOperatorExpr::evaluate(Interpreter &context)
 {
-	return eval.evaluate(*this);
+	return context.evaluate(*this);
 }
 
-void BinaryOperatorExpr::execute(Interpreter &evaluator)
+void BinaryOperatorExpr::execute(Interpreter &context)
 {
-	Value val = evaluate(evaluator);
+	Value val = evaluate(context);
 	if (op == TokenType::STRING_CONCAT)
-		LiteralExpr::exec_literal(evaluator, val);
+		LiteralExpr::exec_literal(context, val);
 }
 
 TokenType BinaryOperatorExpr::get_operator()

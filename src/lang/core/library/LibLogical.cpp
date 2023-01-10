@@ -15,7 +15,7 @@ void LibLogical::load()
 	/* Lazy logical operators: &&, ||, ^^ */
 	for_each({TokenType::AND, TokenType::OR, TokenType::XOR}, [this](auto op) {
 		infix_operator(op, LazyBinaryOpr([=](auto lhs, auto rhs) {
-			return Value(Logic::logical_operation(*eval, lhs, op, rhs));
+			return Value(Logic::logical_operation(*context, lhs, op, rhs));
 		}));
 	});
 

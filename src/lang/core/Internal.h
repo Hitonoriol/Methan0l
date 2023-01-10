@@ -9,7 +9,7 @@ class Unit;
 
 struct Internal
 {
-		static void import(Interpreter *eval, Unit &module);
+		static void import(Interpreter *context, Unit &module);
 };
 
 } /* namespace mtl */

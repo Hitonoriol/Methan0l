@@ -40,19 +40,19 @@ bool ConditionalExpr::is_ifelse_block()
 	return false;
 }
 
-ExprPtr ConditionalExpr::eval_branch(Interpreter &eval)
+ExprPtr ConditionalExpr::eval_branch(Interpreter &context)
 {
-	return (condition->evaluate(eval).to_bool() ? then_expr : else_expr);
+	return (condition->evaluate(context).to_bool() ? then_expr : else_expr);
 }
 
-Value ConditionalExpr::evaluate(Interpreter &eval)
+Value ConditionalExpr::evaluate(Interpreter &context)
 {
-	return eval_branch(eval)->evaluate(eval);
+	return eval_branch(context)->evaluate(context);
 }
 
-void ConditionalExpr::execute(Interpreter &evaluator)
+void ConditionalExpr::execute(Interpreter &context)
 {
-	eval_branch(evaluator)->execute(evaluator);
+	eval_branch(context)->execute(context);
 }
 
 std::ostream& ConditionalExpr::info(std::ostream &str)

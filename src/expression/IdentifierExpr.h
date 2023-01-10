@@ -20,13 +20,13 @@ class IdentifierExpr: public Expression
 		IdentifierExpr() = default;
 		IdentifierExpr(std::string name, bool global) : name(name), global(global) {}
 
-		Value evaluate(Interpreter &eval) override;
+		Value evaluate(Interpreter &context) override;
 
-		virtual Value& referenced_value(Interpreter &eval, bool follow_refs = true);
-		virtual Value& assign(Interpreter &eval, Value val);
-		virtual void create_if_nil(Interpreter &eval);
+		virtual Value& referenced_value(Interpreter &context, bool follow_refs = true);
+		virtual Value& assign(Interpreter &context, Value val);
+		virtual void create_if_nil(Interpreter &context);
 
-		void execute(Interpreter &evaluator) override;
+		void execute(Interpreter &context) override;
 
 		bool is_global() const;
 		const std::string& get_name() const;

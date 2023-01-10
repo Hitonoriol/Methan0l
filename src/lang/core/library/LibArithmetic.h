@@ -11,7 +11,7 @@ namespace mtl
 class LibArithmetic: public Library
 {
 	public:
-		LibArithmetic(Interpreter *eval) : Library(eval)
+		LibArithmetic(Interpreter *context) : Library(context)
 		{
 		}
 

@@ -29,9 +29,9 @@ ExprPtr PrefixExpr::get_rhs()
 	return rhs;
 }
 
-Value PrefixExpr::evaluate(Interpreter &eval)
+Value PrefixExpr::evaluate(Interpreter &context)
 {
-	return eval.evaluate(*this);
+	return context.evaluate(*this);
 }
 
 std::ostream& PrefixExpr::info(std::ostream &str)

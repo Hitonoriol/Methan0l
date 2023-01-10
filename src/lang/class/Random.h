@@ -30,13 +30,13 @@ class Random: public Class
 		template<typename T>
 		T range_min(ExprList &args)
 		{
-			return args.size() > 2 ? args[1]->evaluate(eval).as<T>() : 0;
+			return args.size() > 2 ? args[1]->evaluate(context).as<T>() : 0;
 		}
 
 		template<typename T>
 		T range_max(ExprList &args)
 		{
-			return args.size() > 1 ? args.back()->evaluate(eval).as<T>() : 0;
+			return args.size() > 1 ? args.back()->evaluate(context).as<T>() : 0;
 		}
 
 		dec next_int(std::mt19937_64 &rng, dec bound);
@@ -66,7 +66,7 @@ class Random: public Class
 		bool next_bool(ExprList &args);
 
 	public:
-		Random(Interpreter &eval);
+		Random(Interpreter &context);
 		std::mt19937_64& managed_rng(Object &obj);
 };
 

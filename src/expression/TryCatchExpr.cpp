@@ -17,29 +17,29 @@ TryCatchExpr::TryCatchExpr(ExprPtr try_body, ExprPtr catch_body, std::string &&c
 {
 }
 
-void TryCatchExpr::execute(Interpreter &evaluator)
+void TryCatchExpr::execute(Interpreter &context)
 {
-	evaluate(evaluator);
+	evaluate(context);
 }
 
-Value TryCatchExpr::evaluate(Interpreter &evaluator)
+Value TryCatchExpr::evaluate(Interpreter &context)
 {
-	auto &handler = evaluator.get_exception_handler();
-	handler.register_handler(evaluator.stack_depth(), this);
-	Value result = evaluator.invoke(try_cast<UnitExpr>(try_body).get_unit_ref());
+	auto &handler = context.get_exception_handler();
+	handler.register_handler(context.stack_depth(), this);
+	Value result = context.invoke(try_cast<UnitExpr>(try_body).get_unit_ref());
 	handler.current_handler();
 	return result;
 }
 
-void TryCatchExpr::except(Interpreter &evaluator)
+void TryCatchExpr::except(Interpreter &context)
 {
-	auto &handler = evaluator.get_exception_handler();
+	auto &handler = context.get_exception_handler();
 	Value exception = handler.current_exception();
 	Unit ctb = try_cast<UnitExpr>(catch_body).get_unit_ref();
 	ctb.local().set(catch_as, exception);
 	if constexpr (DEBUG)
 		out << "Passing exception `" << exception << "` as `" << catch_as << "` to " << ctb << std::endl;
-	evaluator.invoke(ctb);
+	context.invoke(ctb);
 }
 
 std::ostream& TryCatchExpr::info(std::ostream &str)

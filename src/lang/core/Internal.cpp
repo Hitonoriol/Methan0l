@@ -5,12 +5,12 @@
 namespace mtl
 {
 
-void Internal::import(Interpreter *eval, Unit &module)
+void Internal::import(Interpreter *context, Unit &module)
 {
-	DataMap &local_scope = *eval->local_scope()->map_ptr();
+	DataMap &local_scope = *context->local_scope()->map_ptr();
 	for (auto &&entry : module.local().managed_map()) {
 		if (entry.second.is<InbuiltFunc>())
-			eval->register_func(entry.first, unconst(entry.second).get<InbuiltFunc>());
+			context->register_func(entry.first, unconst(entry.second).get<InbuiltFunc>());
 		else
 			local_scope.insert(entry);
 	}

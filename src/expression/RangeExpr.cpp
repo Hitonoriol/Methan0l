@@ -9,17 +9,17 @@ RangeExpr::RangeExpr(ExprPtr start, ExprPtr end, ExprPtr step) :
 {
 }
 
-void RangeExpr::execute(Interpreter &evaluator)
+void RangeExpr::execute(Interpreter &context)
 {
-	auto val = evaluate(evaluator);
+	auto val = evaluate(context);
 	out << val << NL;
 }
 
-Value RangeExpr::evaluate(Interpreter &evaluator)
+Value RangeExpr::evaluate(Interpreter &context)
 {
-	return Data::range(start->evaluate(evaluator),
-			end->evaluate(evaluator),
-			has_step() ? step->evaluate(evaluator).as<dec>() : 1,
+	return Data::range(start->evaluate(context),
+			end->evaluate(context),
+			has_step() ? step->evaluate(context).as<dec>() : 1,
 			true);
 }
 

@@ -18,11 +18,11 @@ ExprList& ListExpr::raw_list()
 	return exprs;
 }
 
-Value ListExpr::evaluate(Interpreter &evaluator)
+Value ListExpr::evaluate(Interpreter &context)
 {
 	return as_set ?
-			create_and_populate<ValSet>(evaluator) :
-			create_and_populate<ValList>(evaluator);
+			create_and_populate<ValSet>(context) :
+			create_and_populate<ValList>(context);
 }
 
 std::ostream& ListExpr::info(std::ostream &str)

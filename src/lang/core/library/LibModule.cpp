@@ -19,7 +19,7 @@ void LibModule::load()
 	/* load(path) */
 	function("load", [&](std::string path) {
 		Value module_v(Type::UNIT);
-		Module::load_module(*eval, path, module_v.get<Unit>());
+		Module::load_module(*context, path, module_v.get<Unit>());
 		return module_v;
 	});
 
@@ -34,8 +34,8 @@ void LibModule::load()
 
 	prefix_operator(TokenType::USING_MODULE, LazyUnaryOpr([&](auto rhs) {
 		Unit module;
-		Module::load_module(*eval, mtl::str(val(rhs)), module);
-		Internal::import(eval, module);
+		Module::load_module(*context, mtl::str(val(rhs)), module);
+		Internal::import(context, module);
 		return Value::NO_VALUE;
 	}));
 

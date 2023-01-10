@@ -15,9 +15,9 @@
 namespace mtl
 {
 
-void Expression::execute(Interpreter &evaluator)
+void Expression::execute(Interpreter &context)
 {
-	evaluate(evaluator);
+	evaluate(context);
 }
 
 void Expression::set_line(uint32_t line)

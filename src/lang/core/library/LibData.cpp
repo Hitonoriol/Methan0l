@@ -38,7 +38,7 @@ void LibData::load()
 
 	/* ref.reset$(new_idfr) */
 	function("reset", [&](Args args) {
-		Value &ref_val = eval->referenced_value(args[0], false);
+		Value &ref_val = context->referenced_value(args[0], false);
 
 		ref_val.assert_type(Type::REFERENCE, "reset$() can only be applied on a reference");
 		args[1]->assert_type<IdentifierExpr>("Can't make a reference to the temp Value of " + args[1]->info());
@@ -49,7 +49,7 @@ void LibData::load()
 	});
 
 	function("get_args", [&](Args args) {
-		return eval->current_function().get_callargs();
+		return context->current_function().get_callargs();
 	});
 
 	/* range$(n)				<-- Returns a list w\ Values in range [0; n - 1]
@@ -65,7 +65,7 @@ void LibData::load()
 	});
 
 	function("purge", [&](Args args) {
-		eval->current_unit()->local().clear();
+		context->current_unit()->local().clear();
 		return Value::NO_VALUE;
 	});
 
@@ -135,7 +135,7 @@ void LibData::load_set_funcs()
 
 Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 {
-	Value &lval = eval->referenced_value(lhs);
+	Value &lval = context->referenced_value(lhs);
 	Type ltype = lval.type();
 	Value rval = val(rhs).get();
 	if (ltype != rval.type()) {
@@ -149,7 +149,7 @@ Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 
 void LibData::import_reference(const IdentifierExpr &idfr) {
 	auto &name = idfr.get_name();
-	eval->local_scope()->set(name, Value::ref(eval->scope_lookup(name, true)->get(name)));
+	context->local_scope()->set(name, Value::ref(context->scope_lookup(name, true)->get(name)));
 }
 
 LibData::DblBinOperation LibData::summator = [](double l, Value r) {return l + r.as<double>();};
@@ -178,9 +178,9 @@ std::pair<size_t, double> LibData::dispatch_accumulate(Args &args, double init, 
 std::pair<size_t, double> LibData::accumulate(Value &callable, Args &args, double init, DblBinOperation op)
 {
 	auto &range = try_cast<RangeExpr>(args[0]);
-	auto start = range.get_start(*eval).to_double();
-	auto end = range.get_end(*eval).to_double();
-	auto step = range.get_step(*eval).to_double();
+	auto start = range.get_start(*context).to_double();
+	auto end = range.get_end(*context).to_double();
+	auto step = range.get_step(*context).to_double();
 
 	args.clear();
 	auto x = LiteralExpr::create(0);
@@ -188,7 +188,7 @@ std::pair<size_t, double> LibData::accumulate(Value &callable, Args &args, doubl
 	double result = init;
 	for (auto i = start; i < end; i += step) {
 		x->raw_ref() = i;
-		result = op(result, eval->invoke(callable, args));
+		result = op(result, context->invoke(callable, args));
 	}
 	return std::make_pair(abs((end - start) / step), result);
 }
@@ -225,7 +225,7 @@ void LibData::load_container_funcs()
 
 	function("join", [this](Value ctr) {
 		return accumulate(ctr, std::string(""), [this](std::string l, Value r) {
-			return std::move(l) + r.to_string(eval);
+			return std::move(l) + r.to_string(context);
 		});
 	});
 	/* ----------------------------------------------------------------------- */
@@ -245,11 +245,11 @@ void LibData::load_container_funcs()
 			std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
 
 		ctr.accept_container([&](auto &container) {
-			Data::for_each(*eval, container, action);
+			Data::for_each(*context, container, action);
 		});
 
 		if (args.size() > 2)
-			args[2]->execute(*eval);
+			args[2]->execute(*context);
 
 		if constexpr (DEBUG)
 			std::cout << "* End of " << ctr.type_name() << " for_each" << std::endl;
@@ -387,7 +387,7 @@ bool LibData::instanceof(Value &rec, ExprPtr exp)
 		if (expv.object())
 			return clazz->equals_or_inherits(expv.get<Object>().get_class());
 		else
-			return clazz->equals_or_inherits(&eval->get_type_mgr().get_type(expv.to_string()));
+			return clazz->equals_or_inherits(&context->get_type_mgr().get_type(expv.to_string()));
 	}
 	else {
 		return expv.type_id() == rec.type_id();
@@ -406,7 +406,7 @@ void LibData::load_operators()
 	 */
 	prefix_operator(TokenType::DEREF, LazyUnaryOpr([&](ExprPtr rhs) {
 		rhs->assert_type<IdentifierExpr>("Attempting to unwrap a non-identifier");
-		Value &val = eval->referenced_value(rhs, false);
+		Value &val = context->referenced_value(rhs, false);
 		Value copy = val.get();
 		val.clear();
 		val = copy;
@@ -414,7 +414,7 @@ void LibData::load_operators()
 	}));
 
 	prefix_operator(TokenType::IS_REF, LazyUnaryOpr([&](ExprPtr rhs) {
-		return eval->referenced_value(rhs, false).is<ValueRef>();
+		return context->referenced_value(rhs, false).is<ValueRef>();
 	}));
 
 	prefix_operator(TokenType::GLOBAL, LazyUnaryOpr([&](auto rhs) {
@@ -446,7 +446,7 @@ void LibData::load_operators()
 			auto lval = val(ctor_call.get_lhs());
 			bool named = mtl::instanceof<IdentifierExpr>(ctor_call.get_lhs());
 			if (named) {
-				auto &mgr = eval->get_type_mgr();
+				auto &mgr = context->get_type_mgr();
 				auto &type_name = IdentifierExpr::get_name(ctor_call.get_lhs());
 				if (lval.nil()) {
 					return mgr.create_object(type_name, ctor_call.arg_list());
@@ -460,7 +460,7 @@ void LibData::load_operators()
 		} else {
 			auto rval = val(rhs);
 			rval.assert_type(Type::MAP, "Attempting to create an anonymous object out of a wrong value");
-			Object obj(eval->get_type_mgr().get_root(), DataTable::make(rval.get<ValMap>(), *eval));
+			Object obj(context->get_type_mgr().get_root(), DataTable::make(rval.get<ValMap>(), *context));
 			return obj;
 		}
 		throw std::runtime_error("Invalid `new` expression");
@@ -468,7 +468,7 @@ void LibData::load_operators()
 
 	/* Evaluate and convert to string: $$expr */
 	prefix_operator(TokenType::DOUBLE_DOLLAR, LazyUnaryOpr([&](auto rhs) {
-		return rhs->evaluate(*eval).to_string(eval);
+		return rhs->evaluate(*context).to_string(context);
 	}));
 
 	prefix_operator(TokenType::NO_EVAL, LazyUnaryOpr([&](auto rhs) {
@@ -500,7 +500,7 @@ void LibData::load_operators()
 	/* *["Assertion failed"] assert: condition */
 	infix_operator(TokenType::ASSERT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		if (!bln(val(rhs)))
-			throw std::runtime_error(val(lhs).to_string(eval));
+			throw std::runtime_error(val(lhs).to_string(context));
 		return Value::NO_VALUE;
 	}));
 
@@ -536,7 +536,7 @@ void LibData::load_operators()
 
 	/* Reference operator */
 	prefix_operator(TokenType::REF, LazyUnaryOpr([&](ExprPtr rhs) {
-		return Value::ref(eval->referenced_value(rhs));
+		return Value::ref(context->referenced_value(rhs));
 	}));
 
 	/* typeid: val */
@@ -549,12 +549,12 @@ void LibData::load_operators()
 	}));
 
 	prefix_operator(TokenType::VAR, LazyUnaryOpr([&](ExprPtr rhs) {
-		return Value::ref(eval->current_unit()->local().get_or_create(IdentifierExpr::get_name(rhs)));
+		return Value::ref(context->current_unit()->local().get_or_create(IdentifierExpr::get_name(rhs)));
 	}));
 
 	/* Delete idfr & the Value associated with it */
 	prefix_operator(TokenType::DELETE, LazyUnaryOpr([&](ExprPtr rhs) {
-		eval->scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
+		context->scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
 		return Value::NIL;
 	}));
 }

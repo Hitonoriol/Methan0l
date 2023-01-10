@@ -17,11 +17,11 @@ class TypeManager
 {
 	private:
 		std::pmr::unordered_map<size_t, std::shared_ptr<Class>> types;
-		Interpreter &eval;
+		Interpreter &context;
 		Anonymous *root;
 
 	public:
-		TypeManager(Interpreter &eval);
+		TypeManager(Interpreter &context);
 		~TypeManager();
 
 		void register_type(std::shared_ptr<Class> type);
@@ -35,11 +35,11 @@ class TypeManager
 			/* If T is callable, it must handle the registration itself inside its invocation operator overload
 			 * (+ the registration must not have any state bound to object of T) */
 			IF (is_callable<T>::value) {
-				T registrator(eval);
+				T registrator(context);
 				registrator();
 			}
 			else
-				register_type(Allocatable<T>::allocate(eval));
+				register_type(Allocatable<T>::allocate(context));
 		}
 
 		void unregister_type(const std::string &name);

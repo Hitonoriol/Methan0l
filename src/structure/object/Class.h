@@ -39,7 +39,7 @@ class Class : public Allocatable<Class>
 		std::unique_ptr<Object> static_instance;
 
 	protected:
-		Interpreter &eval;
+		Interpreter &context;
 
 	public:
 		static constexpr std::string_view
@@ -47,7 +47,7 @@ class Class : public Allocatable<Class>
 		TO_STRING = "to_string", THIS_ARG = "this",
 		NATIVE_OBJ = ".o";
 
-		Class(Interpreter &eval, const std::string &name);
+		Class(Interpreter &context, const std::string &name);
 		virtual ~Class() = default;
 
 		void register_method(std::string_view, Function&);
@@ -59,7 +59,7 @@ class Class : public Allocatable<Class>
 			if constexpr (std::is_same<TYPE(T), InbuiltFunc>::value)
 				class_data.set(mname, method);
 			else
-				class_data.set(mname, eval.bind_func(method));
+				class_data.set(mname, context.bind_func(method));
 		}
 
 		void add_base_class(Class*);
@@ -97,7 +97,7 @@ class Class : public Allocatable<Class>
 
 		inline Interpreter& get_evatuator()
 		{
-			return eval;
+			return context;
 		}
 
 		virtual Object create(ExprList &args);
@@ -110,7 +110,7 @@ class Class : public Allocatable<Class>
 class Anonymous: public Class
 {
 	public:
-		Anonymous(Interpreter &eval) : Class(eval, "Anonymous") {}
+		Anonymous(Interpreter &context) : Class(context, "Anonymous") {}
 		Value invoke_method(Object&, const std::string&, ExprList&) override;
 };
 

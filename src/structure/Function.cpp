@@ -63,7 +63,7 @@ void Function::set(const Function &rhs)
  * 				* Defined arguments are stored by reference
  * 				* Excess arguments (if any) are stored as unevaluated expressions
  */
-void Function::call(Interpreter &eval, const ExprList &args)
+void Function::call(Interpreter &context, const ExprList &args)
 {
 	size_t argc = args.size();
 	if (argc < this->argc)
@@ -77,7 +77,7 @@ void Function::call(Interpreter &eval, const ExprList &args)
 	new_table();
 
 	if constexpr (DEBUG)
-		eval.dump_stack();
+		context.dump_stack();
 
 	auto &table = local();
 	Value callargs_v(Type::LIST);
@@ -87,8 +87,8 @@ void Function::call(Interpreter &eval, const ExprList &args)
 		const bool non_default = argc > i;
 		std::string arg_name = arg_def[i].first;
 		Value arg_val = non_default ?
-										args[i]->evaluate(eval) :
-										arg_def[i].second->evaluate(eval);
+										args[i]->evaluate(context) :
+										arg_def[i].second->evaluate(context);
 		callargs.push_back(Value::ref(table.set(arg_name, arg_val)));
 	}
 

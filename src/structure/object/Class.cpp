@@ -20,11 +20,11 @@
 namespace mtl
 {
 
-Class::Class(Interpreter &eval, const std::string &name) :
+Class::Class(Interpreter &context, const std::string &name) :
 		id(get_id(name)),
 		name(name),
 		static_instance(std::make_unique<Object>(this)),
-		eval(eval)
+		context(context)
 {
 	/*
 	 * Can be called as a static method:
@@ -94,12 +94,12 @@ Value Class::extract_names(const DataTable &table)
 Value Class::invoke_method(Object &obj, const std::string &name, ExprList &args)
 {
 	DataTable &data = get_class_data();
-	return eval.invoke_method(obj, data.get(name, true), args);
+	return context.invoke_method(obj, data.get(name, true), args);
 }
 
 Value Anonymous::invoke_method(Object &obj, const std::string &name, ExprList &args)
 {
-	return eval.invoke_method(obj, obj.field(name), args);
+	return context.invoke_method(obj, obj.field(name), args);
 }
 
 Value Class::invoke_static(const std::string &name, ExprList &args)
@@ -135,7 +135,7 @@ size_t Class::get_id()
 Object Class::create(Args &args)
 {
 	Object obj(this, proto_object_data);
-	obj.invoke_method(eval.get_type_mgr(), CONSTRUCT, args);
+	obj.invoke_method(context.get_type_mgr(), CONSTRUCT, args);
 	return obj;
 }
 

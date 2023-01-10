@@ -239,14 +239,14 @@ dec Value::type_id() const
 	return static_cast<dec>(t);
 }
 
-std::string Value::to_string(Interpreter *eval)
+std::string Value::to_string(Interpreter *context)
 {
 	switch (type()) {
 	case Type::NIL:
 		return std::string(Token::reserved(Word::NIL));
 
 	case Type::REFERENCE:
-		return get().to_string(eval);
+		return get().to_string(context);
 
 	case Type::STRING:
 		return get<std::string>();
@@ -265,17 +265,17 @@ std::string Value::to_string(Interpreter *eval)
 				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE));
 
 	case Type::LIST:
-		return stringify_container(eval, get<ValList>());
+		return stringify_container(context, get<ValList>());
 
 	case Type::SET:
-		return stringify_container(eval, get<ValSet>());
+		return stringify_container(context, get<ValSet>());
 
 	case Type::MAP: {
 		ValMap &map = get<ValMap>();
 		auto it = map.begin(), end = map.end();
 		return stringify([&]() {
 			if (it == end) return empty_string;
-			std::string str = "{" + unconst(it->first).to_string(eval) + ": " + it->second.to_string(eval) + "}";
+			std::string str = "{" + unconst(it->first).to_string(context) + ": " + it->second.to_string(context) + "}";
 			it++;
 			return str;
 		});
@@ -292,10 +292,10 @@ std::string Value::to_string(Interpreter *eval)
 	case Type::OBJECT: {
 		Object &obj = get<Object>();
 		std::stringstream ss;
-		ss << (eval == nullptr ? obj.to_string() : obj.to_string(*eval));
+		ss << (context == nullptr ? obj.to_string() : obj.to_string(*context));
 
 		if constexpr (DEBUG) {
-			if (eval == nullptr) {
+			if (context == nullptr) {
 				ss << "\n\t\t" << "Object data " << obj.get_data() << std::endl;
 				for (auto &entry : *obj.get_data().map_ptr())
 					ss << "\t\t\t" << entry.first << " = " << entry.second << std::endl;
@@ -310,7 +310,7 @@ std::string Value::to_string(Interpreter *eval)
 
 	case Type::EXPRESSION: {
 		auto &expr = *get<ExprPtr>();
-		return (eval == nullptr ? expr.info() : expr.evaluate(*eval).to_string(eval));
+		return (context == nullptr ? expr.info() : expr.evaluate(*context).to_string(context));
 	}
 
 	default: {

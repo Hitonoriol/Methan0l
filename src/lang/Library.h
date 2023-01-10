@@ -8,7 +8,7 @@
 #define LIB_OPERATOR_DEF(type, functor) \
 	void Library::type##_operator(TokenType tok, const functor &opr) \
 	{ \
-		eval->type##_op(tok, opr); \
+		context->type##_op(tok, opr); \
 	}
 
 namespace mtl
@@ -20,7 +20,7 @@ class IdentifierExpr;
 class Library
 {
 	protected:
-		Interpreter *eval = 0;
+		Interpreter *context = 0;
 
 		std::string str(ExprList args, int idx = 0);
 		double dbl(ExprList args, int idx = 0);
@@ -35,7 +35,7 @@ class Library
 		template<typename T>
 		void function(const std::string &name, T &&callable)
 		{
-			eval->register_func(name, std::move(callable));
+			context->register_func(name, std::move(callable));
 		}
 
 		void getter(const std::string &name, Value);
@@ -48,7 +48,7 @@ class Library
 		void postfix_operator(TokenType, const UnaryOpr&);
 
 	public:
-		Library(Interpreter *eval);
+		Library(Interpreter *context);
 		Library(const Library&);
 		virtual ~Library() = default;
 		virtual void load() = 0;

@@ -29,21 +29,21 @@ namespace mtl
 void LibInternal::load()
 {
 	function("get_launch_args", [&](Args args) {
-		return static_cast<Interpreter*>(eval)->get_main().local().get(EnvVars::LAUNCH_ARGS);
+		return static_cast<Interpreter*>(context)->get_main().local().get(EnvVars::LAUNCH_ARGS);
 	});
 
-	function("on_exit", mtl::member(eval, &Interpreter::register_exit_task));
+	function("on_exit", mtl::member(context, &Interpreter::register_exit_task));
 
 	function("set_max_mem", [&](uint64_t cap) {
-		eval->get_heap().set_max_mem(cap);
+		context->get_heap().set_max_mem(cap);
 	});
 
 	function("mem_in_use", [&] {
-		return eval->get_heap().get_in_use();
+		return context->get_heap().get_in_use();
 	});
 
 	function("max_mem", [&] {
-		return eval->get_heap().get_max_mem();
+		return context->get_heap().get_max_mem();
 	});
 
 	function("enforce_mem_limit", [&](bool val) {
@@ -51,7 +51,7 @@ void LibInternal::load()
 	});
 
 	function("mem_info", [&] {
-		auto &heap = eval->get_heap();
+		auto &heap = context->get_heap();
 		auto in_use = heap.get_in_use(), max = heap.get_max_mem();
 		out << "Heap: " << in_use << "/" << max << "b " <<
 				"(" << ((static_cast<double>(in_use) / max) * 100) << "% in use)"
@@ -61,14 +61,14 @@ void LibInternal::load()
 	/* measure_time$(expr) */
 	function("measure_time", [&](Args args) {
 		auto start = std::chrono::high_resolution_clock::now();
-		args.front()->execute(*eval);
+		args.front()->execute(*context);
 		auto end = std::chrono::high_resolution_clock::now();
 		return Value(std::chrono::duration<double, std::milli>(end - start).count());
 	});
 
 	/* sync_work_dir() */
 	function("sync_work_dir", [&](Args args) {
-		std::filesystem::current_path(eval->get_scriptdir());
+		std::filesystem::current_path(context->get_scriptdir());
 		return Value::NO_VALUE;
 	});
 
@@ -96,7 +96,7 @@ void LibInternal::load()
 		Value &module_val = ref(args[0]);
 		module_val.assert_type(Type::UNIT, "import$() can only be applied on a Unit");
 		Unit &module = module_val.get<Unit>();
-		Internal::import(eval, module);
+		Internal::import(context, module);
 		return Value::NO_VALUE;
 	});
 
@@ -118,13 +118,13 @@ void LibInternal::load()
 	});
 
 	function("is_main_unit", [&](Args args) {
-		return Value(&eval->get_main() == eval->current_unit());
+		return Value(&context->get_main() == context->current_unit());
 	});
 
 	/* unit.value$("idfr_name")
 		 * value$("idfr_name") -- get idfr's Value from Main Unit */
 	function("value", [&](Args args) {
-		Unit &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : eval->get_main();
+		Unit &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : context->get_main();
 		std::string idfr_name = mtl::str(val(args.back()));
 		Value &val = unit.local().get(idfr_name);
 		return Value::ref(val);
@@ -143,16 +143,16 @@ void LibInternal::load()
 		/* If this Unit is not persistent, execute it, save its state and only then execute <action_to_exec> */
 		if (!unit.is_persistent()) {
 			unit.set_persisent(true);
-			eval->invoke(unit);
+			context->invoke(unit);
 			unit.set_persisent(false);
 		}
 
-		return eval->invoke(action);
+		return context->invoke(action);
 	});
 
 	/* Stop program execution */
 	function("exit", [&](Args args) {
-		eval->stop();
+		context->stop();
 		return Value::NO_VALUE;
 	});
 
@@ -175,7 +175,7 @@ void LibInternal::load_operators()
 
 	/* Static method invocation: Type@method$(arg1, arg2, ...) */
 	infix_operator(TokenType::AT, LazyBinaryOpr([&](auto lhs, auto rhs) {
-		Class &type = eval->get_type_mgr().get_type(Class::get_id(MapParser::key_string(lhs)));
+		Class &type = context->get_type_mgr().get_type(Class::get_id(MapParser::key_string(lhs)));
 		InvokeExpr &method_expr = try_cast<InvokeExpr>(rhs);
 		std::string name = MapParser::key_string(method_expr.get_lhs());
 		return type.invoke_static(name, method_expr.arg_list());
@@ -196,9 +196,9 @@ void LibInternal::load_operators()
 		else if (instanceof<InvokeExpr>(rhs)) {
 			if (lval.type() == Type::UNIT && lval.get<Unit>().is_persistent()
 					&& lval.get<Unit>().local().exists(Expression::get_name(rhs))) {
-				eval->use(lval.get<Unit>());
-				Value ret = eval->evaluate(try_cast<InvokeExpr>(rhs));
-				eval->unuse();
+				context->use(lval.get<Unit>());
+				Value ret = context->evaluate(try_cast<InvokeExpr>(rhs));
+				context->unuse();
 				return ret;
 			} else {
 				return invoke_pseudo_method(lhs, rhs);
@@ -219,21 +219,21 @@ void LibInternal::load_operators()
 
 Value& LibInternal::box_value(Unit &box, ExprPtr expr)
 {
-	eval->use(box);
-	Value &result = eval->referenced_value(expr);
-	eval->unuse();
+	context->use(box);
+	Value &result = context->referenced_value(expr);
+	context->unuse();
 	return result;
 }
 
 void LibInternal::save_return(ExprPtr ret)
 {
-	Unit *unit = eval->current_unit();
+	Unit *unit = context->current_unit();
 	if (instanceof<IdentifierExpr>(ret)
 			&& IdentifierExpr::get_name(ret) == Token::reserved(Word::BREAK)) {
 		unit->stop(true);
 	}
 	else
-		unit->save_return(eval->unwrap_or_reference(*ret));
+		unit->save_return(context->unwrap_or_reference(*ret));
 }
 
 void LibInternal::make_box(Value &unit_val)
@@ -241,7 +241,7 @@ void LibInternal::make_box(Value &unit_val)
 	unit_val.assert_type(Type::UNIT, "make_box$() can only be applied on a Unit");
 	Unit &unit = unit_val.get<Unit>();
 	unit.box();
-	eval->execute(unit);
+	context->execute(unit);
 }
 
 Value LibInternal::object_dot_operator(Object &obj, ExprPtr rhs)
@@ -251,7 +251,7 @@ Value LibInternal::object_dot_operator(Object &obj, ExprPtr rhs)
 	if (instanceof<InvokeExpr>(rhs.get())) {
 		InvokeExpr &method = try_cast<InvokeExpr>(rhs);
 		auto &method_name = try_cast<IdentifierExpr>(method.get_lhs()).get_name();
-		return obj.invoke_method(eval->type_mgr, method_name, method.arg_list());
+		return obj.invoke_method(context->type_mgr, method_name, method.arg_list());
 	}
 	else
 		return Value::ref(obj.field(IdentifierExpr::get_name(rhs)));
@@ -267,7 +267,7 @@ Value LibInternal::invoke_pseudo_method(ExprPtr obj, ExprPtr func)
 
 	InvokeExpr method = try_cast<InvokeExpr>(func);
 	method.arg_list().push_front(obj);
-	return eval->evaluate(method);
+	return context->evaluate(method);
 }
 
 } /* namespace mtl */

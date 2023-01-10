@@ -17,8 +17,8 @@ class UnitExpr: public Expression
 		Unit get_unit();
 		Unit& get_unit_ref();
 
-		Value evaluate(Interpreter &evaluator) override;
-		void execute(Interpreter &evaluator) override;
+		Value evaluate(Interpreter &context) override;
+		void execute(Interpreter &context) override;
 
 		std::ostream& info(std::ostream &str) override;
 };

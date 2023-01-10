@@ -16,10 +16,10 @@ class MapExpr: public Expression
 		{
 		}
 
-		Value evaluate(Interpreter &evaluator) override;
+		Value evaluate(Interpreter &context) override;
 
 		/* Map execution works as a local idfr init list */
-		void execute(Interpreter &evaluator) override;
+		void execute(Interpreter &context) override;
 
 		ExprMap raw_map()
 		{

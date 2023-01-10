@@ -6,26 +6,26 @@
 namespace mtl
 {
 
-bool Logic::logical_operation(Interpreter &eval, const ExprPtr &l, TokenType op, const ExprPtr &r)
+bool Logic::logical_operation(Interpreter &context, const ExprPtr &l, TokenType op, const ExprPtr &r)
 {
-	bool lval = bln(val(eval, l));
+	bool lval = bln(val(context, l));
 	switch (op) {
 	case TokenType::OR: {
 		if (lval)
 			return true;
 
-		return lval || bln(val(eval, r));
+		return lval || bln(val(context, r));
 	}
 
 	case TokenType::AND: {
 		if (!lval)
 			return false;
 
-		return lval && bln(val(eval, r));
+		return lval && bln(val(context, r));
 	}
 
 	case TokenType::XOR:
-		return lval != bln(val(eval, r));
+		return lval != bln(val(context, r));
 
 	default:
 		return false;

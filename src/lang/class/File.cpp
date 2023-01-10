@@ -26,7 +26,7 @@ namespace mtl
 
 namespace fs = std::filesystem;
 
-File::File(Interpreter &eval) : Class(eval, "File")
+File::File(Interpreter &context) : Class(context, "File")
 {
 	/* file = new: File("path/to/file.ext") */
 	register_method(CONSTRUCT, [&](Args &args) {
@@ -66,7 +66,7 @@ File::File(Interpreter &eval) : Class(eval, "File")
 	/* file.for_each$(action) */
 	register_method("for_each", [&](Args &args) {
 		std::string root_path = path(args);
-		Value func = args[1]->evaluate(eval);
+		Value func = args[1]->evaluate(context);
 		Function &action = func.get<Function>();
 
 		if (!fs::is_directory(root_path))
@@ -76,7 +76,7 @@ File::File(Interpreter &eval) : Class(eval, "File")
 		ExprList action_args {path};
 		for(auto& entry: fs::recursive_directory_iterator(root_path)) {
 			path->raw_ref() = entry.path().string();
-			eval.invoke(action, action_args);
+			context.invoke(action, action_args);
 		}
 
 		return Value::NO_VALUE;
@@ -94,7 +94,7 @@ File::File(Interpreter &eval) : Class(eval, "File")
 
 	/* file.absolute_path$() */
 	register_method("absolute_path", [&](Args &args) {
-		return absolute_path(eval, path(args));
+		return absolute_path(context, path(args));
 	});
 
 	/* file.path$() */
@@ -125,21 +125,21 @@ File::File(Interpreter &eval) : Class(eval, "File")
 	/* file.equivalent$(path) */
 	register_method("equivalent", [&](Args &args) {
 		std::string file = path(args);
-		std::string rhs = str(args[1]->evaluate(eval));
+		std::string rhs = str(args[1]->evaluate(context));
 		return fs::equivalent(file, rhs);
 	});
 
 	/* file.copy_to$(dest_path) */
 	register_method("copy_to", [&](Args &args) {
 		std::string from = path(args);
-		std::string to = str(args[1]->evaluate(eval));
+		std::string to = str(args[1]->evaluate(context));
 		fs::copy(from, to);
 		return Value::NO_VALUE;
 	});
 
 	/* file.rename$(new_path) */
 	register_method("rename", [&](Args &args) {
-		fs::rename(path(args), str(args[1]->evaluate(eval)));
+		fs::rename(path(args), str(args[1]->evaluate(context)));
 		return Value::NO_VALUE;
 	});
 
@@ -166,7 +166,7 @@ File::File(Interpreter &eval) : Class(eval, "File")
 	register_method("write_contents", [&](Args &args) {
 		auto fname = path(args);
 		std::ofstream file(fname, std::ios::trunc);
-		file << str(args[1]->evaluate(eval));
+		file << str(args[1]->evaluate(context));
 		file.close();
 		return Value::NO_VALUE;
 	});
@@ -178,7 +178,7 @@ File::File(Interpreter &eval) : Class(eval, "File")
 
 	/* file.write_line$(expr) */
 	register_method("write_line", [&](Args &args) {
-		write_line(Object::get_this(args), str(args[1]->evaluate(eval)));
+		write_line(Object::get_this(args), str(args[1]->evaluate(context)));
 		return Value::NO_VALUE;
 	});
 
@@ -203,7 +203,7 @@ File::File(Interpreter &eval) : Class(eval, "File")
 
 void File::set_path(ExprList &args)
 {
-	Object::get_this(args).def(FNAME) = path(eval, mtl::str(args[1]->evaluate(eval)));
+	Object::get_this(args).def(FNAME) = path(context, mtl::str(args[1]->evaluate(context)));
 }
 
 void File::reset(std::fstream &file)
@@ -230,9 +230,9 @@ std::string File::path(ExprList &args)
 {
 	/* This allows to use all `File` methods statically by providing the `path` as the first argument */
 	if (Class::static_call(args)) {
-		Value p = args[1]->evaluate(eval);
+		Value p = args[1]->evaluate(context);
 		args.erase(std::next(args.begin()));
-		return path(eval, p);
+		return path(context, p);
 	}
 
 	return str(Object::get_this(args).field(FNAME));
@@ -283,24 +283,24 @@ struct PathPrefix
  * Example: `$:/modules/ncurses` becomes: `/path/to/binary/modules/ncurses`
  * Or expands relative paths into absolute ones via the std::filesystem::absolute if no aliases are present in the `pathstr`
  */
-std::string File::absolute_path(Interpreter &eval, const std::string &pathstr)
+std::string File::absolute_path(Interpreter &context, const std::string &pathstr)
 {
 	auto alias = std::string_view(pathstr).substr(0, 2);
 	std::string retpath = pathstr;
 	if (alias == PathPrefix::RUNDIR)
-		replace_all(retpath, alias, eval.get_env_var(EnvVars::RUNDIR));
+		replace_all(retpath, alias, context.get_env_var(EnvVars::RUNDIR));
 	else if (alias == PathPrefix::SCRDIR)
-		replace_all(retpath, alias, eval.get_scriptdir());
+		replace_all(retpath, alias, context.get_scriptdir());
 	else
 		retpath = fs::absolute(retpath).string();
 	return retpath;
 }
 
-std::string File::path(Interpreter &eval, const std::string &pathstr)
+std::string File::path(Interpreter &context, const std::string &pathstr)
 {
 	auto alias = std::string_view(pathstr).substr(0, 2);
 	if (alias == PathPrefix::RUNDIR || alias == PathPrefix::SCRDIR)
-		return absolute_path(eval, pathstr);
+		return absolute_path(context, pathstr);
 	return pathstr;
 }
 

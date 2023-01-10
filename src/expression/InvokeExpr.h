@@ -23,9 +23,9 @@ class InvokeExpr: public Expression
 		{
 		}
 
-		Value evaluate(Interpreter &eval) override
+		Value evaluate(Interpreter &context) override
 		{
-			return eval.evaluate(*this);
+			return context.evaluate(*this);
 		}
 
 		ExprPtr get_lhs()

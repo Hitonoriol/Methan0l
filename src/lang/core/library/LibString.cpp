@@ -22,7 +22,7 @@ void LibString::load()
 		std::vector<std::string> sargs;
 		sargs.reserve(args.size() - 1);
 		for (auto it = ++args.begin(); it != args.end(); ++it)
-			sargs.push_back(val(*it).to_string(eval));
+			sargs.push_back(val(*it).to_string(context));
 
 		format(fmt, sargs);
 		return Value(fmt);
@@ -30,7 +30,7 @@ void LibString::load()
 
 	/* str.repeat$(times) */
 	function("repeat", [&](Args args) {
-		std::string str = arg(args).to_string(eval);
+		std::string str = arg(args).to_string(context);
 		dec times = arg(args, 1).get<dec>();
 		std::ostringstream ss;
 		std::fill_n(std::ostream_iterator<std::string>(ss), times, str);
@@ -113,7 +113,7 @@ void LibString::load_operators()
 	/* String concatenation */
 	infix_operator(TokenType::STRING_CONCAT, LazyBinaryOpr([this](auto lhs, auto rhs) {
 		auto lexpr = val(lhs), rexpr = val(rhs);
-		return Value(lexpr.to_string(eval) + rexpr.to_string(eval));
+		return Value(lexpr.to_string(context) + rexpr.to_string(context));
 	}));
 }
 

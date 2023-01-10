@@ -16,8 +16,8 @@ class BinaryOperatorExpr: public Expression
 	public:
 		BinaryOperatorExpr(ExprPtr lhs, Token opr, ExprPtr rhs);
 
-		Value evaluate(Interpreter &eval) override;
-		void execute(Interpreter &evaluator) override;
+		Value evaluate(Interpreter &context) override;
+		void execute(Interpreter &context) override;
 
 		TokenType get_operator();
 		Token get_token();

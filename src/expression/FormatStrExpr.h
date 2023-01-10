@@ -15,7 +15,7 @@ class FormatStrExpr: public Expression
 	public:
 		FormatStrExpr(std::string fmt, ExprList args);
 
-		Value evaluate(Interpreter &evaluator) override;
+		Value evaluate(Interpreter &context) override;
 		std::ostream& info(std::ostream &str) override;
 };
 

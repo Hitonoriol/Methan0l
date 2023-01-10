@@ -19,36 +19,36 @@ class LoopExpr: public Expression
 		 * Assigns `loop_body`'s return value to `ret` if a return has occurred.
 		 * returns `true` if loop was interrupted, `false` otherwise.
 		 */
-		static inline bool loop_iteration(Interpreter &eval, Unit &loop_body, Value &ret)
+		static inline bool loop_iteration(Interpreter &context, Unit &loop_body, Value &ret)
 		{
-			return !(ret = eval.execute(loop_body, false)).empty() || loop_body.execution_finished();
+			return !(ret = context.execute(loop_body, false)).empty() || loop_body.execution_finished();
 		}
 
-		static inline void exit_loop(Interpreter &eval, Value &ret)
+		static inline void exit_loop(Interpreter &context, Value &ret)
 		{
-			eval.leave_scope();
+			context.leave_scope();
 			if (!ret.empty())
-				eval.current_unit()->save_return(ret);
+				context.current_unit()->save_return(ret);
 		}
 
-		void exec_for_loop(Interpreter &evaluator);
-		void exec_foreach_loop(Interpreter &evaluator);
+		void exec_for_loop(Interpreter &context);
+		void exec_foreach_loop(Interpreter &context);
 
-		template<typename T> void for_each(Interpreter &evaluator, T &container, const std::string &as_elem)
+		template<typename T> void for_each(Interpreter &context, T &container, const std::string &as_elem)
 		{
-			Unit &body_unit = evaluator.tmp_callable(Unit::from_expression(body));
+			Unit &body_unit = context.tmp_callable(Unit::from_expression(body));
 			body_unit.call();
 			body_unit.expr_block();
 			DataTable &local = body_unit.local();
-			evaluator.enter_scope(body_unit);
+			context.enter_scope(body_unit);
 			Value &elem = local.get_or_create(as_elem);
 			Value ret;
 			for (auto &val : container) {
 				elem = unconst(val);
-				if (loop_iteration(evaluator, body_unit, ret))
+				if (loop_iteration(context, body_unit, ret))
 					break;
 			}
-			exit_loop(evaluator, ret);
+			exit_loop(context, ret);
 		}
 
 	public:
@@ -73,7 +73,7 @@ class LoopExpr: public Expression
 		{
 		}
 
-		Value evaluate(Interpreter &evaluator) override;
+		Value evaluate(Interpreter &context) override;
 
 		ExprPtr get_init()
 		{
@@ -110,7 +110,7 @@ class LoopExpr: public Expression
 			return !is_foreach() && !is_while();
 		}
 
-		void execute(Interpreter &evaluator) override;
+		void execute(Interpreter &context) override;
 
 		std::ostream& info(std::ostream &str) override;
 };

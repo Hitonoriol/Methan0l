@@ -292,10 +292,10 @@ class Interpreter
 				unsigned N, unsigned ...I>
 		struct call_helper
 		{
-				static auto engage(Interpreter &evaluator, Functor &&f, const Container &c)
+				static auto engage(Interpreter &context, Functor &&f, const Container &c)
 				{
 					return call_helper<sizeof...(I) + 1 == N, Functor, Container,
-							N, I..., sizeof...(I)>::engage(evaluator, f, c);
+							N, I..., sizeof...(I)>::engage(context, f, c);
 				}
 		};
 
@@ -303,13 +303,13 @@ class Interpreter
 				unsigned N, unsigned ...I>
 		struct call_helper<true, Functor, Container, N, I...>
 		{
-				static auto engage(Interpreter &evaluator, Functor &&f, const Container &c)
+				static auto engage(Interpreter &context, Functor &&f, const Container &c)
 				{
 					if (c.size() < N)
 						throw std::runtime_error("Too few arguments: "
 								+ str(c.size()) + " received, " + str(N) + " expected");
 
-					return std::invoke(f, evaluator.eval<typename function_traits<Functor>::template argument<I>::type>(*c.at(I))...);
+					return std::invoke(f, context.eval<typename function_traits<Functor>::template argument<I>::type>(*c.at(I))...);
 				}
 		};
 

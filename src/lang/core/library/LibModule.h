@@ -12,7 +12,7 @@ class Unit;
 class LibModule: public Library
 {
 	public:
-		LibModule(Interpreter *eval) : Library(eval) {}
+		LibModule(Interpreter *context) : Library(context) {}
 		virtual void load() override;
 };
 

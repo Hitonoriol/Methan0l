@@ -9,7 +9,7 @@ namespace mtl
 class LibLogical: public Library
 {
 	public:
-		LibLogical(Interpreter *eval) : Library(eval) {}
+		LibLogical(Interpreter *context) : Library(context) {}
 		void load() override;
 };
 

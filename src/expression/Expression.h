@@ -46,10 +46,10 @@ class Expression
 	public:
 		Expression() = default;
 		virtual ~Expression() = default;
-		virtual Value evaluate(Interpreter &evaluator) = 0;
+		virtual Value evaluate(Interpreter &context) = 0;
 
 		/* called instead of evaluate() for parent-less exprs */
-		virtual void execute(Interpreter &evaluator);
+		virtual void execute(Interpreter &context);
 
 		void set_line(uint32_t line);
 		uint32_t get_line();

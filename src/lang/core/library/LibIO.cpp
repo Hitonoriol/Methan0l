@@ -39,24 +39,24 @@ void LibIO::load()
 {
 	/* Output Operator */
 	prefix_operator(TokenType::OUT, LazyUnaryOpr([&](auto expr) {
-		out << val(expr).to_string(eval);
+		out << val(expr).to_string(context);
 		return Value::NO_VALUE;
 	}));
 
 	prefix_operator(TokenType::OUT_NL, LazyUnaryOpr([&](auto expr) {
-		out << val(expr).to_string(eval) << std::endl;
+		out << val(expr).to_string(context) << std::endl;
 		return Value::NO_VALUE;
 	}));
 
 	/* Input Operator with type deduction */
 	prefix_operator(TokenType::IN, LazyUnaryOpr([&](auto rhs) {
 		if_instanceof<IdentifierExpr>(*rhs, [&](auto &named){
-			named.create_if_nil(*eval);
+			named.create_if_nil(*context);
 		});
 
 		std::string input;
 		std::getline(in, input);
-		Value &var = eval->referenced_value(rhs);
+		Value &var = context->referenced_value(rhs);
 		var = parse_value(input);
 		return var;
 	}));

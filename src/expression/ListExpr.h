@@ -15,18 +15,18 @@ class ListExpr: public Expression
 		bool as_set;
 
 		template<typename T>
-		Value create_and_populate(Interpreter &evaluator)
+		Value create_and_populate(Interpreter &context)
 		{
 			T container;
 			for (auto &expr : exprs)
-				insert(container, expr->evaluate(evaluator));
+				insert(container, expr->evaluate(context));
 			return Value(container);
 		}
 
 	public:
 		ListExpr(ExprList exprs, bool as_set = false);
 		ExprList& raw_list();
-		Value evaluate(Interpreter &evaluator) override;
+		Value evaluate(Interpreter &context) override;
 		std::ostream& info(std::ostream &str) override;
 };
 

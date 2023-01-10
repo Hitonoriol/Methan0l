@@ -17,17 +17,17 @@ Unit& UnitExpr::get_unit_ref()
 	return unit;
 }
 
-Value UnitExpr::evaluate(Interpreter &evaluator)
+Value UnitExpr::evaluate(Interpreter &context)
 {
 	if (unit.is_persistent() && unit.local().empty())
-		evaluator.invoke(unit);
+		context.invoke(unit);
 
 	return Value(unit);
 }
 
-void UnitExpr::execute(Interpreter &evaluator)
+void UnitExpr::execute(Interpreter &context)
 {
-	evaluator.invoke(unit);
+	context.invoke(unit);
 }
 
 std::ostream& UnitExpr::info(std::ostream &str)

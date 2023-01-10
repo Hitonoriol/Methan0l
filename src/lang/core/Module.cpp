@@ -16,24 +16,24 @@ const std::string
 	Module::MODULE_REFERENCE = ".mref";
 
 
-void Module::load_module(Interpreter &eval, const std::string &path, Unit &unit)
+void Module::load_module(Interpreter &context, const std::string &path, Unit &unit)
 {
 	unit.box();
-	std::string name = find_module(eval, path);
+	std::string name = find_module(context, path);
 
 	/* Load Methan0l src file */
 	if (ends_with(name, PROGRAM_EXT)) {
-		unit = static_cast<Interpreter*>(&eval)->load_file(name);
+		unit = static_cast<Interpreter*>(&context)->load_file(name);
 		return;
 	}
 
 	boost::dll::shared_library module(name);
 	auto &module_scope = unit.local();
-	eval.enter_scope(unit);
+	context.enter_scope(unit);
 	if (!module.has(MODULE_ENTRYPOINT))
 		throw std::runtime_error("\"" + name + "\" is not a methan0l module");
 
-	IMPORT<void(Interpreter*)>(module, MODULE_ENTRYPOINT)(&eval);
+	IMPORT<void(Interpreter*)>(module, MODULE_ENTRYPOINT)(&context);
 	for (std::string &symbol : boost::dll::library_info(name).symbols()) {
 		if (contains(symbol, FUNC_DEF_PREFIX))
 			IMPORT<void(void)>(module, symbol)();
@@ -43,7 +43,7 @@ void Module::load_module(Interpreter &eval, const std::string &path, Unit &unit)
 	if (module.has(MODULE_MAIN))
 		IMPORT<void(void)>(module, MODULE_MAIN)();
 
-	eval.leave_scope();
+	context.leave_scope();
 	if (module.is_loaded())
 		module_scope.set(MODULE_REFERENCE, module);
 	else
@@ -60,15 +60,15 @@ std::filesystem::path &append(std::filesystem::path &path, std::string_view apx)
 	return append(path, std::string(apx));
 }
 
-std::string Module::find_module(Interpreter &eval, const std::string &path_str)
+std::string Module::find_module(Interpreter &context, const std::string &path_str)
 {
-	std::filesystem::path path(File::absolute_path(eval, path_str));
+	std::filesystem::path path(File::absolute_path(context, path_str));
 	const bool exists = std::filesystem::exists(path);
 	if (exists) {
 		if (!std::filesystem::is_directory(path))
 			return path_str;
 		else
-			return find_module(eval, append(path, "/" + path.filename().string()).string());
+			return find_module(context, append(path, "/" + path.filename().string()).string());
 	}
 
 	if (!exists && !path.has_extension()) {

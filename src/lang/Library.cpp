@@ -7,11 +7,11 @@
 namespace mtl
 {
 
-Library::Library(Interpreter *eval) : eval(eval)
+Library::Library(Interpreter *context) : context(context)
 {
 }
 
-Library::Library(const Library &rhs) : eval(rhs.eval)
+Library::Library(const Library &rhs) : context(rhs.context)
 {
 }
 
@@ -46,17 +46,17 @@ udec Library::unum(ExprList args, int idx)
 
 Value Library::val(ExprPtr expr)
 {
-	return eval->eval(expr).get();
+	return context->eval(expr).get();
 }
 
 Value& Library::ref(ExprPtr idfr)
 {
-	return eval->referenced_value(idfr);
+	return context->referenced_value(idfr);
 }
 
 Value& Library::ref(IdentifierExpr &idfr)
 {
-	return eval->get(idfr);
+	return context->get(idfr);
 }
 
 Value Library::arg(ExprList args, int idx)
@@ -65,12 +65,12 @@ Value Library::arg(ExprList args, int idx)
 		throw std::runtime_error("Trying to access argument #" + std::to_string(idx) +
 				" (only " + std::to_string(args.size()) + " argument(s) provided)");
 
-	return eval->eval(args[idx]);
+	return context->eval(args[idx]);
 }
 
 void Library::getter(const std::string &name, Value val)
 {
-	eval->register_getter(name, val);
+	context->register_getter(name, val);
 }
 
 }

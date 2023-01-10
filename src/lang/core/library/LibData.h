@@ -22,7 +22,7 @@ class LibData: public Library
 	public:
 		using DblBinOperation = const std::function<double(double, Value)>;
 
-		LibData(Interpreter *eval) : Library(eval)
+		LibData(Interpreter *context) : Library(context)
 		{
 		}
 		void load() override;
@@ -39,7 +39,7 @@ class LibData: public Library
 		template<typename T, typename F>
 		T accumulate(Value &ctr, T init, F &&operation)
 		{
-			eval->assert_true(ctr.is<ValList>() || ctr.is<ValSet>());
+			context->assert_true(ctr.is<ValList>() || ctr.is<ValSet>());
 
 			T result{};
 			ctr.accept_container([&](auto &v) {
@@ -90,7 +90,7 @@ class LibData: public Library
 
 			for (auto &val : container) {
 				arg.raw_ref() = val;
-				Value new_val = eval->invoke(mapper, map_args);
+				Value new_val = context->invoke(mapper, map_args);
 				if (!new_val.empty())
 					insert(mapped, new_val);
 			}

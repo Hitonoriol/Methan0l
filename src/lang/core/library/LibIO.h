@@ -9,7 +9,7 @@ namespace mtl
 class LibIO: public Library
 {
 	public:
-		LibIO(Interpreter *eval) : Library(eval) {}
+		LibIO(Interpreter *context) : Library(context) {}
 		void load() override;
 };
 

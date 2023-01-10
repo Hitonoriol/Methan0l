@@ -13,7 +13,7 @@ struct Data
 		static Value slice(Value &containerv, udec start, udec end, dec step = 1);
 
 		template<typename T>
-		static void for_each(Interpreter &eval, T &container, Function &action)
+		static void for_each(Interpreter &context, T &container, Function &action)
 		{
 			static_assert(is_container<T>::value);
 			if (container.empty())
@@ -31,7 +31,7 @@ struct Data
 
 					valref.reset(unconst(elem));
 					elem_expr->raw_ref() = valref;
-					eval.invoke(action, action_args);
+					context.invoke(action, action_args);
 				}
 			}
 			/* Map */
@@ -45,7 +45,7 @@ struct Data
 					key->raw_ref() = entry.first;
 					valref.reset(entry.second);
 					val->raw_ref() = valref;
-					eval.invoke(action, action_args);
+					context.invoke(action, action_args);
 				}
 			}
 		}

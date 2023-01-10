@@ -13,38 +13,38 @@
 namespace mtl
 {
 
-Value IdentifierExpr::evaluate(Interpreter &eval)
+Value IdentifierExpr::evaluate(Interpreter &context)
 {
-	Value &v = referenced_value(eval);
+	Value &v = referenced_value(context);
 	if (v.is<ExprPtr>())
-		return v.get<ExprPtr>()->evaluate(eval);
+		return v.get<ExprPtr>()->evaluate(context);
 	return v;
 }
 
-Value& IdentifierExpr::referenced_value(Interpreter &eval, bool follow_refs)
+Value& IdentifierExpr::referenced_value(Interpreter &context, bool follow_refs)
 {
-	return eval.get(name, global, follow_refs);
+	return context.get(name, global, follow_refs);
 }
 
-Value& IdentifierExpr::assign(Interpreter &eval, Value val)
+Value& IdentifierExpr::assign(Interpreter &context, Value val)
 {
-	create_if_nil(eval);
-	Value &ref = referenced_value(eval);
+	create_if_nil(context);
+	Value &ref = referenced_value(context);
 	ref = val;
 	return ref;
 }
 
-void IdentifierExpr::create_if_nil(Interpreter &eval)
+void IdentifierExpr::create_if_nil(Interpreter &context)
 {
-	DataTable *scope = eval.scope_lookup(name, global);
+	DataTable *scope = context.scope_lookup(name, global);
 	if (!scope->exists(name))
 		scope->set(name, Value());
 }
 
-void IdentifierExpr::execute(mtl::Interpreter &evaluator)
+void IdentifierExpr::execute(mtl::Interpreter &context)
 {
-	Value val = evaluate(evaluator);
-	LiteralExpr::exec_literal(evaluator, val);
+	Value val = evaluate(context);
+	LiteralExpr::exec_literal(context, val);
 }
 
 Value IdentifierExpr::eval_reserved(const std::string &name)

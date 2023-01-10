@@ -25,11 +25,11 @@ class IndexExpr: public IdentifierExpr
 
 		void clear_container(Value &contval);
 
-		Value& indexed_element(Interpreter &evaluator);
-		Value& indexed_element(Interpreter &evaluator, ValList &list);
-		Value& indexed_element(Interpreter &evaluator, ValMap &map);
-		Value& indexed_element(Interpreter &evaluator, ValSet &set);
-		Value& indexed_element(Interpreter &evaluator, DataTable &table);
+		Value& indexed_element(Interpreter &context);
+		Value& indexed_element(Interpreter &context, ValList &list);
+		Value& indexed_element(Interpreter &context, ValMap &map);
+		Value& indexed_element(Interpreter &context, ValSet &set);
+		Value& indexed_element(Interpreter &context, DataTable &table);
 
 	public:
 		IndexExpr(ExprPtr list_idfr, ExprPtr idx, bool remove, bool insert) :
@@ -37,16 +37,16 @@ class IndexExpr: public IdentifierExpr
 		{
 		}
 
-		Value evaluate(Interpreter &evaluator) override;
-		void execute(mtl::Interpreter &evaluator) override;
+		Value evaluate(Interpreter &context) override;
+		void execute(mtl::Interpreter &context) override;
 
-		Value& assign(Interpreter &eval, Value val) override;
-		Value& referenced_value(Interpreter &eval, bool follow_refs = true) override;
+		Value& assign(Interpreter &context, Value val) override;
+		Value& referenced_value(Interpreter &context, bool follow_refs = true) override;
 
 		ExprPtr get_lhs();
 		ExprPtr get_rhs();
 
-		void create_if_nil(Interpreter &eval) override
+		void create_if_nil(Interpreter &context) override
 		{
 			return;
 		}

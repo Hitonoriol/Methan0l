@@ -24,7 +24,7 @@ Distr<double> Random::dbl_gen = [](auto &rng) {
 	return dbl_distr(rng);
 };
 
-Random::Random(Interpreter &eval) : Class(eval, "Random")
+Random::Random(Interpreter &context) : Class(context, "Random")
 {
 	/* rnd = Random.new$([seed]) */
 	register_method(std::string(CONSTRUCT), [&](Args &args) {
@@ -71,7 +71,7 @@ Random::Random(Interpreter &eval) : Class(eval, "Random")
 
 dec Random::extract_seed(ExprList &args)
 {
-	Value seed_val = args.size() > 1 ? args[1]->evaluate(eval) : Value::NIL;
+	Value seed_val = args.size() > 1 ? args[1]->evaluate(context) : Value::NIL;
 	Object &this_obj = Object::get_this(args);
 	dec seed = seed_val.nil() ? rand_dev() : seed_val.as<dec>();
 
@@ -84,7 +84,7 @@ dec Random::extract_seed(ExprList &args)
 
 bool Random::next_bool(ExprList &args)
 {
-	double prob = args.size() > 1 ? dbl(args[1]->evaluate(eval)) : 0.5;
+	double prob = args.size() > 1 ? dbl(args[1]->evaluate(context)) : 0.5;
 	return dbl_distr(managed_rng(Object::get_this(args))) < prob;
 }
 

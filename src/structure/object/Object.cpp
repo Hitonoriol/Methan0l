@@ -116,10 +116,10 @@ std::string Object::to_string()
 	return ss.str();
 }
 
-std::string Object::to_string(Interpreter &eval)
+std::string Object::to_string(Interpreter &context)
 {
 	ExprList noargs;
-	return str(invoke_method(eval.get_type_mgr(), Class::TO_STRING, noargs));
+	return str(invoke_method(context.get_type_mgr(), Class::TO_STRING, noargs));
 }
 
 void Object::deep_copy()

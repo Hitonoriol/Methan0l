@@ -157,12 +157,12 @@ std::ostream& operator <<(std::ostream &stream, DataTable &val)
 	return stream << "{Managed map: " << static_cast<void*>(val.map.get()) << "}";
 }
 
-DataTable DataTable::make(const ValMap &vmap, Interpreter &eval)
+DataTable DataTable::make(const ValMap &vmap, Interpreter &context)
 {
 	DataTable table;
 	table.map->reserve(vmap.size());
 	for (auto &&[key, val] : vmap) {
-		table.map->emplace(std::move(unconst(key).to_string(&eval)), val);
+		table.map->emplace(std::move(unconst(key).to_string(&context)), val);
 	}
 	return table;
 }
