@@ -10,6 +10,7 @@
 #include "cast.h"
 #include "string.h"
 #include "debug.h"
+#include "filesystem.h"
 
 namespace mtl
 {

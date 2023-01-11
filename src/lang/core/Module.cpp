@@ -50,16 +50,6 @@ void Module::load_module(Interpreter &context, const std::string &path, Unit &un
 		throw std::runtime_error("Couldn't load module " + name);
 }
 
-std::filesystem::path &append(std::filesystem::path &path, const std::string &apx)
-{
-	return path.assign(path.string() + apx).make_preferred();
-}
-
-std::filesystem::path &append(std::filesystem::path &path, std::string_view apx)
-{
-	return append(path, std::string(apx));
-}
-
 std::string Module::find_module(Interpreter &context, const std::string &path_str)
 {
 	std::filesystem::path path(File::absolute_path(context, path_str));
