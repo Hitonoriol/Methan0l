@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <memory>
+#include <filesystem>
+#include <boost/dll.hpp>
 
 #include "util/util.h"
 #include "util/benchmark.h"
@@ -21,14 +23,7 @@
 #include "expression/TryCatchExpr.h"
 
 #include "lang/Library.h"
-#include "lang/core/library/LibIO.h"
-#include "lang/core/library/LibLogical.h"
-#include "lang/core/library/LibData.h"
-#include "lang/core/library/LibString.h"
-#include "lang/core/library/LibModule.h"
-#include "lang/core/library/LibArithmetic.h"
-#include "lang/core/library/LibMath.h"
-#include "lang/core/library/LibInternal.h"
+#include "lang/core/Module.h"
 #include "lang/class/File.h"
 #include "lang/class/Pair.h"
 #include "lang/class/Random.h"
@@ -48,31 +43,51 @@ STRINGS(
 Interpreter::Interpreter() : parser(std::make_unique<Methan0lParser>())
 {
 	init_heap();
-	load_library<LibArithmetic>();
-	load_library<LibLogical>();
-	load_library<LibInternal>();
-	load_library<LibIO>();
-	load_library<LibString>();
-	load_library<LibMath>();
-	load_library<LibData>();
-	load_library<LibModule>();
-
-	type_mgr.register_type<File>();
-	type_mgr.register_type<Random>();
-	type_mgr.register_type<Pair>();
-
-	register_env_getter("get_runpath", EnvVars::RUNPATH);
-	register_env_getter("get_rundir", EnvVars::RUNDIR);
 }
 
 Interpreter::Interpreter(const char *path) : Interpreter()
 {
-	auto rpath = std::filesystem::absolute(path);
+	set_runpath(path);
+	load_libraries();
+}
+
+Interpreter::~Interpreter() = default;
+
+void Interpreter::set_runpath(std::string_view runpath)
+{
+	auto rpath = std::filesystem::absolute(runpath);
 	set_env_var(EnvVars::RUNPATH, rpath.string());
 	set_env_var(EnvVars::RUNDIR, rpath.parent_path().string());
 }
 
-Interpreter::~Interpreter() = default;
+void Interpreter::load_libraries()
+{
+	namespace fs = std::filesystem;
+	auto libdir = fs::path(get_rundir());
+	append(libdir, "/" + std::string(LIBRARY_PATH));
+	for(auto& entry: fs::directory_iterator(libdir)) {
+		auto &path = entry.path();
+		if (path.extension() != LIBRARY_EXT)
+			continue;
+
+		try {
+			boost::dll::shared_library lib(path.string());
+			if (lib.is_loaded()) {
+				auto loader = boost::dll::import_symbol<library_loader>(lib, LIB_LOADER_SYMBOL);
+				loader(*this, lib);
+			} else
+				std::cerr << "Couldn't access library file: " << path << NL;
+		} catch (std::exception &e) {
+			std::cerr << "Error while loading " << path << ": " << e.what() << NL;
+		}
+	}
+}
+
+void Interpreter::load_library(std::shared_ptr<Library> lib)
+{
+	lib->load();
+	libraries.push_back(lib);
+}
 
 void Interpreter::init_heap(size_t initial_mem_cap)
 {

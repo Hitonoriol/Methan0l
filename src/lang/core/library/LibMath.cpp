@@ -9,6 +9,8 @@
 namespace mtl
 {
 
+METHAN0L_LIBRARY(LibMath)
+
 void LibMath::load()
 {
 	function("round", [](double value, int decimal_places) {

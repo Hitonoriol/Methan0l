@@ -10,6 +10,8 @@
 namespace mtl
 {
 
+METHAN0L_LIBRARY(LibLogical)
+
 void LibLogical::load()
 {
 	/* Lazy logical operators: &&, ||, ^^ */

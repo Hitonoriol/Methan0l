@@ -12,7 +12,7 @@ class Unit;
 class LibInternal: public Library
 {
 	public:
-		LibInternal(Interpreter *context) : Library(context) {}
+		using Library::Library;
 		void load() override;
 
 	private:

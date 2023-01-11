@@ -1,0 +1,17 @@
+#include <lang/core/library/LibUtil.h>
+
+#include <lang/class/Random.h>
+#include <lang/class/File.h>
+
+namespace mtl
+{
+
+METHAN0L_LIBRARY(LibUtil)
+
+void LibUtil::load()
+{
+	context->register_class<Random>();
+	context->register_class<File>();
+}
+
+} /* namespace mtl */

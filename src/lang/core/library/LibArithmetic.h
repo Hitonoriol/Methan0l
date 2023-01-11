@@ -11,10 +11,7 @@ namespace mtl
 class LibArithmetic: public Library
 {
 	public:
-		LibArithmetic(Interpreter *context) : Library(context)
-		{
-		}
-
+		using Library::Library;
 		void load() override;
 
 	private:

@@ -12,7 +12,7 @@ class Unit;
 class LibModule: public Library
 {
 	public:
-		LibModule(Interpreter *context) : Library(context) {}
+		using Library::Library;
 		virtual void load() override;
 };
 

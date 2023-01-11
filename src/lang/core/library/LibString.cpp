@@ -14,6 +14,8 @@
 namespace mtl
 {
 
+METHAN0L_LIBRARY(LibString)
+
 void LibString::load()
 {
 	/* str.format$(arg1, arg2, ...) */

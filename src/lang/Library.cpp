@@ -7,7 +7,8 @@
 namespace mtl
 {
 
-Library::Library(Interpreter *context) : context(context)
+Library::Library(Interpreter *context, const boost::dll::shared_library &dll)
+		: context(context), dll(dll)
 {
 }
 

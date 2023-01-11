@@ -27,6 +27,8 @@
 namespace mtl
 {
 
+METHAN0L_LIBRARY(LibData)
+
 void LibData::load()
 {
 	getter("get_os_name", mtl::str(get_os()));

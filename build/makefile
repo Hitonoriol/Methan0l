@@ -12,6 +12,12 @@ endif
 SRCS = $(call rwildcard,../src,*.cpp)
 DEPS = $(patsubst ../src/%.cpp,./obj/%.d,$(SRCS))
 
+STDLIB_PATH = lang/core/library
+STDLIB_SRCS = $(call rwildcard,../src/$(STDLIB_PATH),*.cpp)
+STDLIB_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o.pic,$(STDLIB_SRCS)))
+STDLIB_BINS = $(patsubst ./obj/$(STDLIB_PATH)/%.o.pic,./libraries/%.so,$(STDLIB_OBJS))
+SRCS:=$(filter-out $(STDLIB_SRCS),$(SRCS))
+
 CLI_SRCS = $(call rwildcard,../src/cli,*.cpp)
 CLI_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o,$(CLI_SRCS)))
 LIB_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o.pic,$(filter-out $(CLI_SRCS),$(SRCS))))
@@ -64,7 +70,7 @@ install: all lib-headers
 # Full release tarball: cli binary, interpreter library, headers and modules
 release: all lib-headers modules
 	@echo 'Creating release tarball...'
-	tar -czf methan0l-$(OS_NAME)$(BITS).tar.gz $(CLI_BIN_NAME) $(LIB_INCLUDE) $(LIB_NAME) ../modules ../baker
+	tar -czf methan0l-$(OS_NAME)$(BITS).tar.gz $(CLI_BIN_NAME) $(LIB_INCLUDE) $(LIB_NAME) modules libraries ../baker
 	@echo 'Done!'
 
 modules: lib lib-headers
@@ -99,15 +105,27 @@ $(LIB_INCLUDE)/%.h: ../src/%.h
 
 $(LIB_INCLUDE):
 	mkdir -p $(LIB_INCLUDE)
-	@echo 'Created header directory: $@'
+	mkdir -p ./libraries
+	mkdir -p ./modules
 
 lib-clean:
 	$(RM) $(LIB_INCLUDE)/* $(LIB_OBJS) $(CLI_OBJS)
 
+# Methan0l core library targets
+stdlib: lib lib-headers $(STDLIB_BINS)
+	@echo 'Finished building methan0l core libraries'
+	@echo ' '
+
+./libraries/%.so: lib obj/$(STDLIB_PATH)/%.o.pic
+	@echo 'Building library: $@'
+	g++ $(word 2,$^) -shared -L./ -l:$(LIB_NAME) -o $@ $(RPATH)
+	@echo 'Finished building core library: $@'
+	@echo ' '
+
 # cli targets
 cli: $(CLI_BIN_NAME)
 
-$(CLI_BIN_NAME): lib $(CLI_OBJS)
+$(CLI_BIN_NAME): lib stdlib $(CLI_OBJS)
 	@echo 'Building interpreter cli: $@'
 	g++ -o $(CLI_BIN_NAME) $(CLI_OBJS) -m$(BITS) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic -L./ -l:$(LIB_NAME) $(LINK_DYNAMIC) $(RPATH)
 	@echo 'Finished building interpreter cli: $@'

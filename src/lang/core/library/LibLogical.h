@@ -9,7 +9,7 @@ namespace mtl
 class LibLogical: public Library
 {
 	public:
-		LibLogical(Interpreter *context) : Library(context) {}
+		using Library::Library;
 		void load() override;
 };
 

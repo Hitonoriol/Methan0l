@@ -59,6 +59,9 @@ class Interpreter
 		friend class LoopExpr;
 		friend class Module;
 
+		static constexpr std::string_view LIBRARY_PATH = "libraries";
+		static constexpr std::string_view LIBRARY_EXT = ".so";
+
 		enum class OperatorType: uint8_t
 		{
 			UNARY, BINARY
@@ -68,7 +71,7 @@ class Interpreter
 
 		DataTable env_table;
 
-		std::pmr::vector<std::unique_ptr<Library>> libraries;
+		std::pmr::vector<std::shared_ptr<Library>> libraries;
 
 		OperatorMap<LazyUnaryOpr> lazy_prefix_ops, lazy_postfix_ops;
 		OperatorMap<LazyBinaryOpr> lazy_infix_ops;
@@ -94,14 +97,7 @@ class Interpreter
 		Unit load_unit(std::string &code);
 
 		static void init_heap(size_t initial_mem_cap = HEAP_MEM_CAP);
-
-		template<typename T>
-		inline void load_library()
-		{
-			auto library = std::make_unique<T>(this);
-			library->load();
-			libraries.push_back(std::move(library));
-		}
+		void load_libraries();
 
 		void on_exit();
 
@@ -327,6 +323,15 @@ class Interpreter
 		Interpreter();
 		Interpreter(const char *runpath);
 		~Interpreter();
+
+		void set_runpath(std::string_view runpath);
+		void load_library(std::shared_ptr<Library>);
+
+		template<typename T>
+		inline void register_class()
+		{
+			type_mgr.register_type<T>();
+		}
 
 		template<unsigned default_argc = 0, typename F>
 		InbuiltFunc bind_func(F &&f, Value default_args = Value::NO_VALUE)

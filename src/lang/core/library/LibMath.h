@@ -15,7 +15,7 @@ class LibMath: public Library
 				RADIAN = 180.0 / PI;
 
 	public:
-		LibMath(Interpreter *context) : Library(context) {}
+		using Library::Library;
 		void load() override;
 };
 

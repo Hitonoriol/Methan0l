@@ -2,6 +2,8 @@
 #define SRC_LANG_LIBRARY_H_
 
 #include <string>
+#include <memory>
+#include <boost/dll.hpp>
 
 #include <interpreter/Interpreter.h>
 
@@ -11,8 +13,20 @@
 		context->type##_op(tok, opr); \
 	}
 
+#define LIB_LOADER_SYMBOL "load"
+
+#define METHAN0L_LIBRARY(name) \
+		extern "C" void load(mtl::Interpreter &context, const boost::dll::shared_library &dll) { \
+			auto lib = std::make_shared<name>(&context, dll); \
+			context.load_library(lib); \
+		}
+
+#define METHANOL_LIBRARY(name) METHAN0L_LIBRARY(name)
+
 namespace mtl
 {
+
+using library_loader = void(Interpreter&, const boost::dll::shared_library&);
 
 class Value;
 class IdentifierExpr;
@@ -21,6 +35,7 @@ class Library
 {
 	protected:
 		Interpreter *context = 0;
+		boost::dll::shared_library dll;
 
 		std::string str(ExprList args, int idx = 0);
 		double dbl(ExprList args, int idx = 0);
@@ -48,7 +63,7 @@ class Library
 		void postfix_operator(TokenType, const UnaryOpr&);
 
 	public:
-		Library(Interpreter *context);
+		Library(Interpreter *context, const boost::dll::shared_library&);
 		Library(const Library&);
 		virtual ~Library() = default;
 		virtual void load() = 0;

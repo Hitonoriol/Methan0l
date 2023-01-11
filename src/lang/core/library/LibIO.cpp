@@ -12,6 +12,8 @@
 namespace mtl
 {
 
+METHAN0L_LIBRARY(LibIO)
+
 Value parse_value(const std::string &str)
 {
 	Value value;

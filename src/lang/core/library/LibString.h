@@ -11,7 +11,7 @@ namespace mtl
 class LibString: public Library
 {
 	public:
-		LibString(Interpreter *context) : Library(context) {}
+		using Library::Library;
 		void load() override;
 
 		static void format(std::string &fmt, const std::vector<std::string> &sargs);

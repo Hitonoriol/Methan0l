@@ -14,6 +14,8 @@
 namespace mtl
 {
 
+METHAN0L_LIBRARY(LibModule)
+
 void LibModule::load()
 {
 	/* load(path) */

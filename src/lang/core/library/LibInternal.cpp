@@ -26,8 +26,13 @@
 namespace mtl
 {
 
+METHAN0L_LIBRARY(LibInternal)
+
 void LibInternal::load()
 {
+	context->register_env_getter("get_runpath", EnvVars::RUNPATH);
+	context->register_env_getter("get_rundir", EnvVars::RUNDIR);
+
 	function("get_launch_args", [&](Args args) {
 		return static_cast<Interpreter*>(context)->get_main().local().get(EnvVars::LAUNCH_ARGS);
 	});

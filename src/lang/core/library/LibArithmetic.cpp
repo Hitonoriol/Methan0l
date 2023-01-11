@@ -12,6 +12,8 @@
 namespace mtl
 {
 
+METHAN0L_LIBRARY(LibArithmetic)
+
 void LibArithmetic::load()
 {
 	/* Basic operators + compound assignment */
