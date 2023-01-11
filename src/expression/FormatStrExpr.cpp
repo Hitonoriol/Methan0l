@@ -1,5 +1,5 @@
 #include <expression/FormatStrExpr.h>
-#include <lang/core/library/LibString.h>
+#include <util/StringFormatter.h>
 #include <util/util.h>
 
 namespace mtl
@@ -16,7 +16,8 @@ Value FormatStrExpr::evaluate(Interpreter &context)
 	std::vector<std::string> sargs;
 	for (auto expr : args)
 		sargs.push_back(expr->evaluate(context).to_string(&context));
-	LibString::format(fmt, sargs);
+	StringFormatter formatter(fmt, sargs);
+	formatter.format();
 	return fmt;
 }
 
