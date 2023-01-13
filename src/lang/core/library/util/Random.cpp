@@ -1,4 +1,5 @@
-#include <lang/class/Random.h>
+#include <lang/core/library/util/Random.h>
+
 #include <functional>
 #include <limits>
 #include <string>

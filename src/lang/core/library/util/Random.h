@@ -1,11 +1,10 @@
 #ifndef SRC_LANG_CLASS_RANDOM_H_
 #define SRC_LANG_CLASS_RANDOM_H_
 
-#include <structure/object/Class.h>
 #include <random>
 #include <type_traits>
 
-#include "../../expression/Expression.h"
+#include <structure/object/Class.h>
 
 namespace mtl
 {

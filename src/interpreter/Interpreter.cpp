@@ -24,9 +24,7 @@
 
 #include "lang/Library.h"
 #include "lang/core/Module.h"
-#include "lang/class/File.h"
-#include "lang/class/Pair.h"
-#include "lang/class/Random.h"
+#include "structure/object/Class.h"
 
 namespace mtl
 {

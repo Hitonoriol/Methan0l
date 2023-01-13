@@ -1,6 +1,6 @@
 #include <lang/core/library/LibUtil.h>
 
-#include <lang/class/Random.h>
+#include <lang/core/library/util/Random.h>
 #include <lang/class/File.h>
 
 namespace mtl

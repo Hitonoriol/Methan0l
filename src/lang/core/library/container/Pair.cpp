@@ -1,4 +1,5 @@
-#include <lang/class/Pair.h>
+#include <lang/core/library/container/Pair.h>
+
 #include <type.h>
 #include <util/cast.h>
 #include <util/class_binder.h>
@@ -15,7 +16,6 @@ namespace mtl
 NATIVE_CLASS_INIT(Pair, {
 	auto &binder = get_binder();
 	binder.bind_constructor<Value, Value>();
-
 	binder.bind_method("swap", &THIS_CLASS::swap);
 
 	binder.register_method("swap_contents", METHOD(OBJ) {
