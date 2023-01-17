@@ -29,7 +29,7 @@
 namespace mtl
 {
 
-class Methan0lParser;
+class Parser;
 class AssignExpr;
 class IdentifierExpr;
 class ConditionalExpr;
@@ -90,7 +90,7 @@ class Interpreter
 		bool stopped = false;
 		std::pmr::deque<std::function<void(void)>> on_exit_tasks;
 
-		std::unique_ptr<Methan0lParser> parser;
+		std::unique_ptr<Parser> parser;
 		Unit main;
 
 		Unit load_unit(std::istream &codestr);
@@ -576,7 +576,7 @@ class Interpreter
 
 		void preserve_data(bool val);
 		Unit& program();
-		Methan0lParser& get_parser();
+		Parser& get_parser();
 
 		void print_info();
 };

@@ -793,7 +793,7 @@ Unit& Interpreter::program()
 	return main;
 }
 
-Methan0lParser& Interpreter::get_parser()
+Parser& Interpreter::get_parser()
 {
 	return *parser;
 }
