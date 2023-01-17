@@ -17,7 +17,7 @@ void RangeExpr::execute(Interpreter &context)
 
 Value RangeExpr::evaluate(Interpreter &context)
 {
-	return Data::range(start->evaluate(context),
+	return core::range(start->evaluate(context),
 			end->evaluate(context),
 			has_step() ? step->evaluate(context).as<dec>() : 1,
 			true);

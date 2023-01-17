@@ -101,7 +101,7 @@ void LibInternal::load()
 		Value &module_val = ref(args[0]);
 		module_val.assert_type(Type::UNIT, "import$() can only be applied on a Unit");
 		Unit &module = module_val.get<Unit>();
-		Internal::import(context, module);
+		core::import(context, module);
 		return Value::NO_VALUE;
 	});
 

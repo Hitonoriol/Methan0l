@@ -78,7 +78,10 @@ using OperatorMap = std::pmr::unordered_map<TokenType, O>;
 using InbuiltFunc = std::function<Value(ExprList&)>;
 using InbuiltFuncMap = std::pmr::unordered_map<std::string, InbuiltFunc>;
 
-constexpr std::string_view PROGRAM_EXT = ".mt0";
+constexpr std::string_view
+	PROGRAM_EXT = ".mt0",
+	LIBRARY_EXT = ".so";
+
 constexpr char NL = '\n', TAB = '\t', UNTAB = '\b';
 constexpr std::string_view NLTAB = "\n\t";
 

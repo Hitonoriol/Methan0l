@@ -7,10 +7,12 @@ namespace mtl
 class Interpreter;
 class Unit;
 
-struct Internal
+}
+
+namespace mtl::core
 {
-		static void import(Interpreter *context, Unit &module);
-};
+
+void import(Interpreter *context, Unit &module);
 
 } /* namespace mtl */
 

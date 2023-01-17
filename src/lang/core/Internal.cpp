@@ -2,10 +2,10 @@
 
 #include <interpreter/Interpreter.h>
 
-namespace mtl
+namespace mtl::core
 {
 
-void Internal::import(Interpreter *context, Unit &module)
+void import(Interpreter *context, Unit &module)
 {
 	DataMap &local_scope = *context->local_scope()->map_ptr();
 	for (auto &&entry : module.local().managed_map()) {

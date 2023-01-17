@@ -34,14 +34,14 @@ Value& IndexExpr::indexed_element(Interpreter &context)
 			Value container_v = val;
 			container_v.accept_container([&](auto &container) {
 				Value action = try_cast<PrefixExpr>(idx).get_rhs()->evaluate(context);
-				Data::for_each(context, container, action.get<Function>());
+				core::for_each(context, container, action.get<Function>());
 			});
 			/* Return a new temporary handle for chaining */
 			return DataTable::create_temporary(val);
 		/* bracketed slice */
 		} else if (instanceof<RangeExpr>(idx)) {
 			auto &range = try_cast<RangeExpr>(idx);
-			auto sliced = Data::slice(val, range.get_start(context),
+			auto sliced = core::slice(val, range.get_start(context),
 					range.get_end(context),
 					range.has_step() ? range.get_step(context).as<dec>() : 1);
 			return DataTable::create_temporary(sliced);

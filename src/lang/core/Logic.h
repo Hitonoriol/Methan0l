@@ -3,14 +3,11 @@
 
 #include "type.h"
 
-namespace mtl
+namespace mtl::core
 {
 
-struct Logic
-{
-		static bool logical_operation(Interpreter&, const ExprPtr &l, TokenType op, const ExprPtr &r);
-		static bool arithmetic_comparison(double l, TokenType op, double r);
-};
+bool logical_operation(Interpreter&, const ExprPtr &l, TokenType op, const ExprPtr &r);
+bool arithmetic_comparison(double l, TokenType op, double r);
 
 } /* namespace mtl */
 

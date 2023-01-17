@@ -60,7 +60,6 @@ class Interpreter
 		friend class Module;
 
 		static constexpr std::string_view LIBRARY_PATH = "libraries";
-		static constexpr std::string_view LIBRARY_EXT = ".so";
 
 		enum class OperatorType: uint8_t
 		{
@@ -172,8 +171,6 @@ class Interpreter
 
 		Value invoke_inbuilt_func(const std::string &name, ExprList args);
 
-		void enter_scope(Unit &unit);
-		void leave_scope();
 		void restore_execution_state(size_t depth);
 		inline void pop_tmp_callable()
 		{
@@ -417,6 +414,9 @@ class Interpreter
 		{
 			register_func(name, [&]() {return env_table.get(var_name);});
 		}
+
+		void enter_scope(Unit &unit);
+		void leave_scope();
 
 		Function& current_function();
 		Unit* current_unit();

@@ -63,7 +63,7 @@ void LibData::load()
 		dec n = args.size() < 2 ? num(args) : num(args, 1);
 		dec step = args.size() == 3 ? num(args, 2) : 1;
 
-		return Data::range(start, n, step);
+		return core::range(start, n, step);
 	});
 
 	function("purge", [&](Args args) {
@@ -247,7 +247,7 @@ void LibData::load_container_funcs()
 			std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
 
 		ctr.accept_container([&](auto &container) {
-			Data::for_each(*context, container, action);
+			core::for_each(*context, container, action);
 		});
 
 		if (args.size() > 2)

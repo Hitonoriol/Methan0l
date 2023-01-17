@@ -3,10 +3,10 @@
 #include <lexer/Token.h>
 #include <structure/Value.h>
 
-namespace mtl
+namespace mtl::core
 {
 
-bool Logic::logical_operation(Interpreter &context, const ExprPtr &l, TokenType op, const ExprPtr &r)
+bool logical_operation(Interpreter &context, const ExprPtr &l, TokenType op, const ExprPtr &r)
 {
 	bool lval = bln(val(context, l));
 	switch (op) {
@@ -32,7 +32,7 @@ bool Logic::logical_operation(Interpreter &context, const ExprPtr &l, TokenType 
 	}
 }
 
-bool Logic::arithmetic_comparison(double l, TokenType op, double r)
+bool arithmetic_comparison(double l, TokenType op, double r)
 {
 	switch (op) {
 	case TokenType::GREATER:

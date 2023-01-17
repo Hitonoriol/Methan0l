@@ -1,6 +1,6 @@
 #include <lang/core/Data.h>
 
-namespace mtl
+namespace mtl::core
 {
 
 auto check_range = [](dec start, dec end, dec step) {
@@ -13,7 +13,7 @@ auto check_range = [](dec start, dec end, dec step) {
 auto rng_pos_cond = [](dec i, dec end) {return i < end;};
 auto rng_neg_cond = [](dec i, dec end) {return i > end;};
 
-Value Data::range(dec start, dec end, dec step, bool inclusive)
+Value range(dec start, dec end, dec step, bool inclusive)
 {
 	check_range(start, end, step);
 
@@ -28,7 +28,7 @@ Value Data::range(dec start, dec end, dec step, bool inclusive)
 	return listv;
 }
 
-Value Data::slice(Value &containerv, udec start, udec end, dec step)
+Value slice(Value &containerv, udec start, udec end, dec step)
 {
 	check_range(start, end, step);
 	end += step > 0 ? 1 : -1;

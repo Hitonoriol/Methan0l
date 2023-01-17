@@ -17,7 +17,7 @@ void LibLogical::load()
 	/* Lazy logical operators: &&, ||, ^^ */
 	for_each({TokenType::AND, TokenType::OR, TokenType::XOR}, [this](auto op) {
 		infix_operator(op, LazyBinaryOpr([=](auto lhs, auto rhs) {
-			return Value(Logic::logical_operation(*context, lhs, op, rhs));
+			return Value(core::logical_operation(*context, lhs, op, rhs));
 		}));
 	});
 
@@ -39,7 +39,7 @@ void LibLogical::load()
 	for (size_t i = 0; i < std::size(cmp_ops); ++i)
 		infix_operator(cmp_ops[i], LazyBinaryOpr([&, opr = cmp_ops[i]](auto lhs, auto rhs) {
 			Value lval = val(lhs), rval = val(rhs);
-			return Value(Logic::arithmetic_comparison(lval.as<double>(), opr, rval.as<double>()));
+			return Value(core::arithmetic_comparison(lval.as<double>(), opr, rval.as<double>()));
 		}));
 
 	/* Equals operator */

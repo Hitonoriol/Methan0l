@@ -17,22 +17,27 @@ namespace mtl
 
 class Unit;
 
-class Module
+}
+
+namespace mtl::core
 {
-	private:
-		static constexpr const char
-		*MODULE_ENTRYPOINT = "init_methan0l_module",
-		*MODULE_MAIN = "load";
 
-		static constexpr std::string_view
-		MODULE_EXT = ".so", FUNC_DEF_PREFIX = "_register_methan0l_func_";
+struct ModuleSymbols
+{
+	static constexpr const char
+		*ENTRYPOINT = "init_methan0l_module",
+		*MAIN = "load";
 
-	public:
-		static const std::string MODULE_NAME, MODULE_REFERENCE;
+	static constexpr std::string_view
+		FUNC_DEF_PREFIX = "_register_methan0l_func_";
 
-		static std::string find_module(Interpreter&, const std::string &path);
-		static void load_module(Interpreter&, const std::string &path, Unit &unit);
+	static const std::string
+		NAME_FIELD,
+		REFERENCE_FIELD;
 };
+
+std::string find_module(Interpreter&, const std::string &path);
+void load_module(Interpreter&, const std::string &path, Unit &unit);
 
 } /* namespace mtl */
 
