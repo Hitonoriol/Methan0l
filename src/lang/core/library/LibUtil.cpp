@@ -1,7 +1,7 @@
 #include <lang/core/library/LibUtil.h>
 
 #include <lang/core/library/util/Random.h>
-#include <lang/class/File.h>
+#include <lang/core/library/util/File.h>
 
 namespace mtl
 {

@@ -1,4 +1,5 @@
-#include <lang/class/File.h>
+#include "File.h"
+
 #include <iterator>
 #include <iostream>
 #include <fstream>
@@ -10,6 +11,9 @@
 #include <utility>
 #include <filesystem>
 
+#include "type.h"
+#include "util/util.h"
+#include "util/global.h"
 #include "interpreter/Interpreter.h"
 #include "expression/LiteralExpr.h"
 #include "expression/Expression.h"
@@ -17,9 +21,7 @@
 #include "structure/Function.h"
 #include "structure/object/Object.h"
 #include "structure/Value.h"
-#include "type.h"
-#include "util/util.h"
-#include "util/global.h"
+#include "lang/core/File.h"
 
 namespace mtl
 {
@@ -94,7 +96,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.absolute_path$() */
 	register_method("absolute_path", [&](Args &args) {
-		return absolute_path(context, path(args));
+		return core::absolute_path(context, path(args));
 	});
 
 	/* file.path$() */
@@ -203,7 +205,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 void File::set_path(ExprList &args)
 {
-	Object::get_this(args).def(FNAME) = path(context, mtl::str(args[1]->evaluate(context)));
+	Object::get_this(args).def(FNAME) = core::path(context, mtl::str(args[1]->evaluate(context)));
 }
 
 void File::reset(std::fstream &file)
@@ -232,7 +234,7 @@ std::string File::path(ExprList &args)
 	if (Class::static_call(args)) {
 		Value p = args[1]->evaluate(context);
 		args.erase(std::next(args.begin()));
-		return path(context, p);
+		return core::path(context, p);
 	}
 
 	return str(Object::get_this(args).field(FNAME));
@@ -266,42 +268,6 @@ std::fstream& File::managed_file(Object &obj)
 		throw std::runtime_error("Accessing an unopened file");
 
 	return *obj.field(FILE).get<fhandle>();
-}
-
-struct PathPrefix
-{
-	static constexpr std::string_view
-		RUNDIR = "$:",
-		SCRDIR = "#:";
-};
-
-/*
- * Expands `path aliases`:
- * 		`$:` - expands into interpreter run directory
- * 		`#:` - expands into script run directory
- * And prepends the result to the rest of the `pathstr`
- * Example: `$:/modules/ncurses` becomes: `/path/to/binary/modules/ncurses`
- * Or expands relative paths into absolute ones via the std::filesystem::absolute if no aliases are present in the `pathstr`
- */
-std::string File::absolute_path(Interpreter &context, const std::string &pathstr)
-{
-	auto alias = std::string_view(pathstr).substr(0, 2);
-	std::string retpath = pathstr;
-	if (alias == PathPrefix::RUNDIR)
-		replace_all(retpath, alias, context.get_env_var(EnvVars::RUNDIR));
-	else if (alias == PathPrefix::SCRDIR)
-		replace_all(retpath, alias, context.get_scriptdir());
-	else
-		retpath = fs::absolute(retpath).string();
-	return retpath;
-}
-
-std::string File::path(Interpreter &context, const std::string &pathstr)
-{
-	auto alias = std::string_view(pathstr).substr(0, 2);
-	if (alias == PathPrefix::RUNDIR || alias == PathPrefix::SCRDIR)
-		return absolute_path(context, pathstr);
-	return pathstr;
 }
 
 } /* namespace mtl */

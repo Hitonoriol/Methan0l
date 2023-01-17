@@ -6,7 +6,7 @@
 #include "util/util.h"
 #include <filesystem>
 #include <boost/dll.hpp>
-#include <lang/class/File.h>
+#include <lang/core/File.h>
 
 namespace mtl
 {
@@ -52,7 +52,7 @@ void Module::load_module(Interpreter &context, const std::string &path, Unit &un
 
 std::string Module::find_module(Interpreter &context, const std::string &path_str)
 {
-	std::filesystem::path path(File::absolute_path(context, path_str));
+	std::filesystem::path path(core::absolute_path(context, path_str));
 	const bool exists = std::filesystem::exists(path);
 	if (exists) {
 		if (!std::filesystem::is_directory(path))

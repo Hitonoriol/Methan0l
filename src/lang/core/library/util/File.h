@@ -39,9 +39,6 @@ class File: public Class
 	public:
 		File(Interpreter &context);
 		~File() = default;
-
-		static std::string path(Interpreter&, const std::string&);
-		static std::string absolute_path(Interpreter&, const std::string&);
 };
 
 } /* namespace mtl */
