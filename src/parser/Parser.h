@@ -35,6 +35,11 @@ struct PeekedExpr
 	PeekedExpr(PeekPos desc, ExprPtr expr) : descriptor(desc), expression(expr) {}
 };
 
+enum class BinOprType
+{
+	RIGHT_ASSOC, LEFT_ASSOC
+};
+
 class Parser
 {
 	private:
@@ -77,15 +82,35 @@ class Parser
 	protected:
 		Lexer lexer;
 
+	public:
+		Parser(const Lexer &lexer);
+		Parser(const Parser&);
+		Parser& operator=(const Parser&);
+		virtual ~Parser() = default;
+
 		void register_parser(TokenType token, InfixParser *parser);
 		void register_parser(TokenType token, PrefixParser *parser);
 		void alias_infix(TokenType registered_tok, TokenType alias);
 		void alias_prefix(TokenType registered_tok, TokenType alias);
 
-	public:
-		Parser(const Lexer &lexer);
-		~Parser() = default;
+		void register_prefix_opr(TokenType token,
+				Precedence precedence = Precedence::PREFIX);
 
+		void register_infix_opr(TokenType token, Precedence precedence,
+				BinOprType type = BinOprType::LEFT_ASSOC);
+
+		void register_postfix_opr(TokenType token,
+				Precedence precedence = Precedence::POSTFIX);
+
+		void register_literal_parser(TokenType token, Type val_type);
+
+		void register_word(TokenType wordop, Precedence prec = Precedence::PREFIX,
+				bool multiarg = false);
+
+		void register_infix_word(TokenType wordop, Precedence prec,
+				BinOprType type = BinOprType::LEFT_ASSOC);
+
+		void load(std::string &code);
 		void parse_all();
 		ExprPtr parse(int precedence = 0, bool prefix_only = false);
 		ExprPtr parse_prefix(const Token&);

@@ -177,42 +177,4 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_infix_opr(TokenType::DOT, Precedence::DOT);
 }
 
-void Methan0lParser::register_word(TokenType wordop, Precedence prec, bool multiarg)
-{
-	register_parser(wordop, new WordOperatorParser(wordop, prcdc(prec), multiarg));
-}
-
-void Methan0lParser::register_infix_word(TokenType wordop, Precedence prec, BinOprType type)
-{
-	register_parser(wordop, new InfixWordOperatorParser(prcdc(prec), type == BinOprType::RIGHT_ASSOC));
-}
-
-void Methan0lParser::register_literal_parser(TokenType token, Type val_type)
-{
-	register_parser(token, new LiteralParser(val_type));
-}
-
-void Methan0lParser::register_prefix_opr(TokenType token, Precedence precedence)
-{
-	register_parser(token, new PrefixOperatorParser(prcdc(precedence)));
-}
-
-void Methan0lParser::register_postfix_opr(TokenType token, Precedence precedence)
-{
-	register_parser(token, new PostfixExprParser(prcdc(precedence)));
-}
-
-void Methan0lParser::register_infix_opr(TokenType token, Precedence precedence,
-		BinOprType type)
-{
-	register_parser(token,
-			new BinaryOperatorParser(prcdc(precedence), type == BinOprType::RIGHT_ASSOC));
-}
-
-void Methan0lParser::load(std::string &code)
-{
-	lexer.lex(code);
-	parse_all();
-}
-
 } /* namespace mtl */

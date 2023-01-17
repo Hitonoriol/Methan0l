@@ -3,6 +3,11 @@
 #include <iomanip>
 #include <string>
 
+#include "expression/parser/WordOperatorParser.h"
+#include "expression/parser/InfixWordOperatorParser.h"
+#include "expression/parser/LiteralParser.h"
+#include "expression/parser/PostfixExprParser.h"
+
 #include "util/containers.h"
 #include "except/except.h"
 
@@ -10,7 +15,20 @@ namespace mtl
 {
 
 Parser::Parser(const Lexer &lexer) : lexer(lexer)
+{}
+
+Parser::Parser(const Parser &rhs)
+	: infix_parsers(rhs.infix_parsers), prefix_parsers(rhs.prefix_parsers),
+	  root_unit(rhs.root_unit), lexer(rhs.lexer)
+{}
+
+Parser& Parser::operator=(const Parser &rhs)
 {
+	infix_parsers = rhs.infix_parsers;
+	prefix_parsers = rhs.prefix_parsers;
+	root_unit = rhs.root_unit;
+	lexer = rhs.lexer;
+	return *this;
 }
 
 void Parser::register_parser(TokenType token, InfixParser *parser)
@@ -37,6 +55,38 @@ void Parser::alias_infix(TokenType registered_tok, TokenType alias)
 void Parser::alias_prefix(TokenType registered_tok, TokenType alias)
 {
 	prefix_parsers.emplace(alias, prefix_parsers.at(registered_tok));
+}
+
+void Parser::register_word(TokenType wordop, Precedence prec, bool multiarg)
+{
+	register_parser(wordop, new WordOperatorParser(wordop, prcdc(prec), multiarg));
+}
+
+void Parser::register_infix_word(TokenType wordop, Precedence prec, BinOprType type)
+{
+	register_parser(wordop, new InfixWordOperatorParser(prcdc(prec), type == BinOprType::RIGHT_ASSOC));
+}
+
+void Parser::register_literal_parser(TokenType token, Type val_type)
+{
+	register_parser(token, new LiteralParser(val_type));
+}
+
+void Parser::register_prefix_opr(TokenType token, Precedence precedence)
+{
+	register_parser(token, new PrefixOperatorParser(prcdc(precedence)));
+}
+
+void Parser::register_postfix_opr(TokenType token, Precedence precedence)
+{
+	register_parser(token, new PostfixExprParser(prcdc(precedence)));
+}
+
+void Parser::register_infix_opr(TokenType token, Precedence precedence,
+		BinOprType type)
+{
+	register_parser(token,
+			new BinaryOperatorParser(prcdc(precedence), type == BinOprType::RIGHT_ASSOC));
 }
 
 ExprPtr Parser::parse(int precedence, bool prefix_only)
@@ -122,6 +172,12 @@ void Parser::parse_all()
 
 	if constexpr (DEBUG)
 		std::cout << "\n* Parsing complete. Expressions parsed: " << expression_queue.size() << std::endl;
+}
+
+void Parser::load(std::string &code)
+{
+	lexer.lex(code);
+	parse_all();
 }
 
 bool Parser::match(TokenType expected)
