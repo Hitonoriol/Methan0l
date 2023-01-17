@@ -6,8 +6,14 @@
 namespace mtl
 {
 
-Lexer::Lexer() : tokens()
+Lexer::Lexer() : tokens() {}
+
+Lexer::Lexer(const Lexer &rhs) : tokens(rhs.tokens) {}
+
+Lexer& Lexer::operator=(const Lexer &rhs)
 {
+	tokens = rhs.tokens;
+	return *this;
 }
 
 udec bin_to_int(const std::string &binstr)

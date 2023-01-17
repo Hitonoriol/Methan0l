@@ -75,6 +75,8 @@ class Lexer
 
 	public:
 		Lexer();
+		Lexer(const Lexer&);
+		Lexer& operator=(const Lexer&);
 		~Lexer() = default;
 		void lex(std::string &code, bool preserve_state = false);
 
