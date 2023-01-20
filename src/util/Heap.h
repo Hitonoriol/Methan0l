@@ -9,18 +9,21 @@
 namespace mtl
 {
 
-class Heap: public std::pmr::unsynchronized_pool_resource
+class Heap: public std::pmr::memory_resource
 {
 	private:
 		std::unique_ptr<std::pmr::memory_resource> upstream;
+		std::pmr::unsynchronized_pool_resource pool;
 		uint64_t in_use = 0, max_mem = HEAP_MAX_MEM;
 
 		void* do_allocate(std::size_t __bytes, std::size_t __alignment) override;
 		void do_deallocate(void *__p, std::size_t __bytes, std::size_t __alignment) override;
+		bool do_is_equal(const std::pmr::memory_resource &__other) const noexcept override;
 
 	public:
-		Heap(std::pmr::memory_resource *upstream);
+		Heap();
 		Heap(std::unique_ptr<std::pmr::memory_resource> upstream);
+		~Heap();
 
 		inline uint64_t get_in_use()
 		{
