@@ -13,12 +13,11 @@
 		context->type##_op(tok, opr); \
 	}
 
-#define LIB_LOADER_SYMBOL "load"
+#define LIB_LOADER_SYMBOL load_methan0l_library
 
 #define METHAN0L_LIBRARY(name) \
-		extern "C" void load(mtl::Interpreter &context, const boost::dll::shared_library &dll) { \
-			auto lib = std::make_shared<name>(&context, dll); \
-			context.load_library(lib); \
+		extern "C" std::shared_ptr<Library> LIB_LOADER_SYMBOL(mtl::Interpreter &context) { \
+			return std::make_shared<name>(&context); \
 		}
 
 #define METHANOL_LIBRARY(name) METHAN0L_LIBRARY(name)
@@ -26,16 +25,16 @@
 namespace mtl
 {
 
-using library_loader = void(Interpreter&, const boost::dll::shared_library&);
-
 class Value;
 class IdentifierExpr;
+class LibraryHandle;
+
+using library_loader = std::shared_ptr<Library>(Interpreter&);
 
 class Library
 {
 	protected:
 		Interpreter *context = 0;
-		boost::dll::shared_library dll;
 
 		std::string str(ExprList args, int idx = 0);
 		double dbl(ExprList args, int idx = 0);
@@ -63,10 +62,23 @@ class Library
 		void postfix_operator(TokenType, const UnaryOpr&);
 
 	public:
-		Library(Interpreter *context, const boost::dll::shared_library&);
+		Library(Interpreter *context);
 		Library(const Library&);
-		virtual ~Library() = default;
+		virtual ~Library();
 		virtual void load() = 0;
+};
+
+/* Shouldn't be used for libraries with dependents */
+struct LibraryHandle
+{
+	boost::dll::shared_library dll;
+	std::shared_ptr<Library> library;
+
+	LibraryHandle(std::shared_ptr<Library> library)
+		: library(library) {}
+
+	LibraryHandle(std::shared_ptr<Library> library, boost::dll::shared_library dll)
+		: dll(dll), library(library) {}
 };
 
 } /* namespace mtl */

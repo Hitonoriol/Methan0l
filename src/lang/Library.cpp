@@ -7,14 +7,13 @@
 namespace mtl
 {
 
-Library::Library(Interpreter *context, const boost::dll::shared_library &dll)
-		: context(context), dll(dll)
-{
-}
+Library::Library(Interpreter *context)
+	: context(context) {}
 
-Library::Library(const Library &rhs) : context(rhs.context)
-{
-}
+Library::Library(const Library &rhs)
+	: context(rhs.context) {}
+
+Library::~Library() = default;
 
 LIB_OPERATOR_DEF(prefix, LazyUnaryOpr)
 LIB_OPERATOR_DEF(prefix, UnaryOpr)

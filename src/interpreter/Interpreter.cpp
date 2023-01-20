@@ -49,7 +49,10 @@ Interpreter::Interpreter(const char *path) : Interpreter()
 	load_libraries();
 }
 
-Interpreter::~Interpreter() = default;
+Interpreter::~Interpreter()
+{
+	on_exit();
+}
 
 void Interpreter::set_runpath(std::string_view runpath)
 {
@@ -69,15 +72,27 @@ void Interpreter::load_libraries()
 			continue;
 
 		try {
-			boost::dll::shared_library lib(path.string());
-			if (lib.is_loaded()) {
-				auto loader = boost::dll::import_symbol<library_loader>(lib, LIB_LOADER_SYMBOL);
-				loader(*this, lib);
-			} else
-				std::cerr << "Couldn't access library file: " << path << NL;
+			auto lib = load_shared_library(path.string());
+			auto loader = boost::dll::import_symbol<library_loader>(lib, STR(LIB_LOADER_SYMBOL));
+			load_library(loader(*this));
 		} catch (std::exception &e) {
-			std::cerr << "Error while loading " << path << ": " << e.what() << NL;
+			std::cerr << "Skipping library " << path << ": " << e.what() << NL;
 		}
+	}
+}
+
+boost::dll::shared_library Interpreter::load_shared_library(const std::string &path)
+{
+	LOG("Loading shared library: " << path)
+	try {
+		boost::dll::shared_library lib(path);
+		if (!lib.is_loaded())
+			throw std::runtime_error("couldn't access library file");
+
+		dlls.push_back(lib);
+		return lib;
+	} catch (std::exception &e) {
+		throw std::runtime_error("Error while loading " + path + ": " + e.what());
 	}
 }
 

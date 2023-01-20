@@ -26,9 +26,15 @@
 #define STRINGS(...) const std::string JOIN(__VA_ARGS__);
 #define STRING_ENUM(name, ...) struct name { static STRINGS(__VA_ARGS__) };
 
+namespace boost::dll
+{
+	class shared_library;
+}
+
 namespace mtl
 {
 
+class LibraryHandle;
 class Parser;
 class AssignExpr;
 class IdentifierExpr;
@@ -68,26 +74,27 @@ class Interpreter
 
 		static std::unique_ptr<Heap> heap;
 
-		DataTable env_table;
+		std::vector<boost::dll::shared_library> dlls;
+		std::vector<std::shared_ptr<Library>> libraries;
 
-		std::pmr::vector<std::shared_ptr<Library>> libraries;
+		DataTable env_table;
+		TypeManager type_mgr { *this };
+		InbuiltFuncMap inbuilt_funcs;
+
+		ExceptionHandler exception_handler;
 
 		OperatorMap<LazyUnaryOpr> lazy_prefix_ops, lazy_postfix_ops;
 		OperatorMap<LazyBinaryOpr> lazy_infix_ops;
 		OperatorMap<UnaryOpr> value_prefix_ops, value_postfix_ops;
 		OperatorMap<BinaryOpr> value_infix_ops;
 
-		InbuiltFuncMap inbuilt_funcs;
-		TypeManager type_mgr { *this };
-
-		std::pmr::deque<Unit*> exec_stack;
-		std::pmr::deque<DataTable*> object_stack;
-		ExceptionHandler exception_handler;
+		std::deque<Unit*> exec_stack;
+		std::deque<DataTable*> object_stack;
 		std::stack<std::shared_ptr<Unit>, std::pmr::deque<std::shared_ptr<Unit>>> tmp_call_stack;
 		Expression *current_expr;
 
 		bool stopped = false;
-		std::pmr::deque<std::function<void(void)>> on_exit_tasks;
+		std::deque<std::function<void(void)>> on_exit_tasks;
 
 		std::unique_ptr<Parser> parser;
 		Unit main;
@@ -414,6 +421,8 @@ class Interpreter
 		{
 			register_func(name, [&]() {return env_table.get(var_name);});
 		}
+
+		boost::dll::shared_library load_shared_library(const std::string &path);
 
 		void enter_scope(Unit &unit);
 		void leave_scope();
