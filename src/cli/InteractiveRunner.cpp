@@ -90,7 +90,17 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 				[](auto &runner)
 					{
 						bool enabled = runner.toggle_cas_mode();
-						std::cout << "CAS mode " << (enabled ? "enabled" : "disabled") << std::endl;
+						std::cout << "CAS mode " << (enabled ? "enabled" : "disabled") << NL;
+						runner.cas_print_end();
+					}
+
+		},
+		{ "cas-reset - reset all previously saved values",
+				[](auto &runner)
+					{
+						runner.reset_cas();
+						std::cout << "All previously saved evaluation results have been reset" << NL;
+						runner.cas_print_end();
 					}
 
 		}
@@ -106,6 +116,25 @@ InteractiveRunner::InteractiveRunner(Interpreter &methan0l)
 void InteractiveRunner::enable_cas_mode(bool value)
 {
 	cas_mode = value;
+	if (!cas_mode)
+		reset_cas();
+}
+
+Value InteractiveRunner::get_saved_value(size_t idx)
+{
+	if (idx == 0)
+		return prev_results.back();
+
+	--idx;
+	if (idx >= prev_results.size())
+		throw std::runtime_error("No such saved value: @" + str(idx));
+
+	return prev_results[idx];
+}
+
+void InteractiveRunner::reset_cas()
+{
+	prev_results.clear();
 }
 
 bool InteractiveRunner::toggle_cas_mode()
@@ -221,8 +250,13 @@ void InteractiveRunner::parse()
 void InteractiveRunner::run()
 {
 	auto result = methan0l.run();
-	if (cas_mode)
-		std::cout << result << std::endl;
+	if (cas_mode && !result.empty() && !result.nil()) {
+		prev_results.push_back(result);
+		auto out_prefix = str(cas_output_pattern);
+		StringFormatter(out_prefix, {"[@" + str(prev_results.size()) + "]"}).format();
+		std::cout << out_prefix << result << NL;
+		cas_print_end();
+	}
 }
 
 void InteractiveRunner::start()

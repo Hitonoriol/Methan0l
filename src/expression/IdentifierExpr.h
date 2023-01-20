@@ -43,6 +43,19 @@ class IdentifierExpr: public Expression
 			return get_name(expr.get());
 		}
 
+		inline static const std::string& get_name_or_default(Expression *expr)
+		{
+			if (!instanceof<IdentifierExpr>(expr))
+				return mtl::empty_string;
+
+			return try_cast<IdentifierExpr>(expr).name;
+		}
+
+		inline static const std::string& get_name_or_default(ExprPtr expr)
+		{
+			return get_name_or_default(expr.get());
+		}
+
 		std::ostream& info(std::ostream &str) override;
 };
 

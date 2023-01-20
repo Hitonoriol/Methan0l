@@ -7,6 +7,7 @@
 #include <deque>
 
 #include "interpreter/Interpreter.h"
+#include "util/StringFormatter.h"
 
 namespace mtl
 {
@@ -18,7 +19,9 @@ class InteractiveRunner
 	private:
 		static constexpr std::string_view
 		prompt = 			"[Methan0l] <-- ",
-		prompt_multiline = 	"             * ";
+		prompt_multiline = 	"             * ",
+		cas_output_pattern = "{%10-r} --> ",
+		cas_line_delim = 	"--------------";
 
 		static constexpr std::string_view cmd_prefix = "/";
 		static constexpr size_t cmd_prefix_len = cmd_prefix.length();
@@ -31,6 +34,7 @@ class InteractiveRunner
 		std::vector<std::string_view> help;
 
 		bool cas_mode = false;
+		std::vector<Value> prev_results;
 
 		void init_commands();
 		void init_env();
@@ -56,6 +60,14 @@ class InteractiveRunner
 
 		void enable_cas_mode(bool);
 		bool toggle_cas_mode();
+		void reset_cas();
+		inline void cas_print_end()
+		{
+			if (cas_mode)
+				std::cout << cas_line_delim << NL;
+		}
+
+		Value get_saved_value(size_t idx);
 
 		inline Interpreter& interpreter()
 		{
