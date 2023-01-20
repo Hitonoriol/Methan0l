@@ -10,7 +10,9 @@ class Interpreter;
 
 struct CLIHooks
 {
-	static std::string NO_EXIT;
+	static std::string
+		NO_EXIT,
+		INTERACTIVE_RUNNER;
 };
 
 class cli

@@ -20,11 +20,20 @@ class InteractiveRunner
 		prompt = 			"[Methan0l] <-- ",
 		prompt_multiline = 	"             * ";
 
-		static constexpr std::string_view cmd_prefix = "!!";
+		static constexpr std::string_view cmd_prefix = "/";
+		static constexpr size_t cmd_prefix_len = cmd_prefix.length();
 
 		Interpreter &methan0l;
 		std::deque<std::string> arg_queue;
-		static const CommandMap commands;
+
+		static const CommandMap default_commands;
+		CommandMap commands;
+		std::vector<std::string_view> help;
+
+		bool cas_mode = false;
+
+		void init_commands();
+		void init_env();
 
 		void save_arg(const std::string &arg);
 		std::string next_arg();
@@ -45,9 +54,17 @@ class InteractiveRunner
 		InteractiveRunner(Interpreter&);
 		void start();
 
+		void enable_cas_mode(bool);
+		bool toggle_cas_mode();
+
 		inline Interpreter& interpreter()
 		{
 			return methan0l;
+		}
+
+		inline bool cas_mode_enabled()
+		{
+			return cas_mode;
 		}
 };
 

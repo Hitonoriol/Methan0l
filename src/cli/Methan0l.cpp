@@ -31,7 +31,9 @@ int main(int argc, char **argv)
 namespace mtl
 {
 
-std::string CLIHooks::NO_EXIT(".no_exit");
+std::string
+	CLIHooks::NO_EXIT(".no_exit"),
+	CLIHooks::INTERACTIVE_RUNNER(".interactive");
 
 int cli::run(int argc, char **argv)
 {
