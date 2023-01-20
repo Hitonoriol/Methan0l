@@ -38,6 +38,8 @@ LIB_NAME = libmethan0l.so
 LINK_STATIC := -lboost_filesystem -lboost_system
 LINK_DYNAMIC :=
 
+FLAGS:=-std=c++17 -Wall -O3
+
 INSTALL_DIR=/opt/methan0l
 
 MACROS = -DBITS=$(BITS)
@@ -99,7 +101,7 @@ libmethan0l.so: $(LIB_OBJS)
 obj/%.o.pic: ../src/%.cpp
 	@echo 'Building target: $@ (file: $<)'
 	@mkdir -p $(dir $@)
-	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -m$(BITS) -fPIC -MMD -MP -MF"$(@:%.o.pic=%.d)" -MT"$@" -o "$@" "$<"
+	g++ $(FLAGS) $(MACROS) $(LIB_INC) -c -m$(BITS) -fPIC -MMD -MP -MF"$(@:%.o.pic=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $@'
 	@echo ' '
 
@@ -147,10 +149,10 @@ $(CLI_BIN_NAME): lib stdlib $(CLI_OBJS)
 obj/%.o: ../src/%.cpp
 	@echo 'Building target: $@, file: $<'
 	@mkdir -p $(dir $@)
-	g++ $(MACROS) -std=c++17 -O3 $(LIB_INC) -c -Wall -fmessage-length=0 -m$(BITS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ $(FLAGS) $(MACROS) $(LIB_INC) -c -Wall -fmessage-length=0 -m$(BITS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 clean: lib-clean
-	-$(RM) $(DEPS) $(CLI_OBJS)
+	-$(RM) $(CLI_BIN_NAME) $(LIB_NAME) $(DEPS) $(CLI_OBJS) $(STDLIB_DIR)/* obj/*
 	-@echo ' '
