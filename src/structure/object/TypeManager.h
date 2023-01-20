@@ -18,7 +18,7 @@ class TypeManager
 	private:
 		std::pmr::unordered_map<size_t, std::shared_ptr<Class>> types;
 		Interpreter &context;
-		Anonymous *root;
+		std::shared_ptr<Anonymous> root;
 
 	public:
 		TypeManager(Interpreter &context);

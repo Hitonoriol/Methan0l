@@ -16,13 +16,10 @@ namespace mtl
 {
 
 TypeManager::TypeManager(Interpreter &context)
-		: context(context), root(new Anonymous(context))
+		: context(context), root(std::make_shared<Anonymous>(context))
 {}
 
-TypeManager::~TypeManager()
-{
-	delete root;
-}
+TypeManager::~TypeManager() = default;
 
 void TypeManager::register_type(std::shared_ptr<Class> type)
 {
@@ -78,7 +75,7 @@ Object TypeManager::create_object(const std::string &type_name, Args &args)
 
 Class* TypeManager::get_root()
 {
-	return root;
+	return root.get();
 }
 
 } /* namespace mtl */
