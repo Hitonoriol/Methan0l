@@ -84,7 +84,6 @@ void LiteralExpr::exec_literal(Interpreter &context, Value &val)
 	}
 
 	default:
-		std::cout << val << std::endl;
 		break;
 	}
 }
