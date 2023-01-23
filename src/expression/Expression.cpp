@@ -15,6 +15,8 @@
 namespace mtl
 {
 
+const std::shared_ptr<LiteralExpr> Expression::NOOP = LiteralExpr::empty();
+
 void Expression::execute(Interpreter &context)
 {
 	evaluate(context);

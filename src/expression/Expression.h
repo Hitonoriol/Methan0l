@@ -35,7 +35,7 @@ inline uint32_t line(const Token &tok)
 	return tok.get_line();
 }
 
-class Translator;
+class LiteralExpr;
 struct Value;
 
 class Expression
@@ -81,6 +81,8 @@ class Expression
 
 		/* Beginning and end of Expression info string */
 		static constexpr charr BEG = {'{', NL, TAB, '\0'}, END = {UNTAB, NL, '}', '\0'};
+
+		static const std::shared_ptr<LiteralExpr> NOOP;
 };
 
 template<typename E, typename ...Args>

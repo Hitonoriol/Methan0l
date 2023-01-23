@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <string>
 
+#include "expression/UnitExpr.h"
 #include "expression/parser/WordOperatorParser.h"
 #include "expression/parser/InfixWordOperatorParser.h"
 #include "expression/parser/LiteralParser.h"
@@ -14,7 +15,8 @@
 namespace mtl
 {
 
-Parser::Parser(const Lexer &lexer) : lexer(lexer)
+Parser::Parser(Interpreter &context)
+	: context(&context)
 {}
 
 Parser::Parser(const Parser &rhs)
@@ -29,6 +31,37 @@ Parser& Parser::operator=(const Parser &rhs)
 	root_unit = rhs.root_unit;
 	lexer = rhs.lexer;
 	return *this;
+}
+
+void Parser::set_context(Interpreter &context)
+{
+	this->context = &context;
+}
+
+std::shared_ptr<LiteralExpr> Parser::evaluate_const(ExprPtr expr)
+{
+	if (context == nullptr)
+		return Expression::NOOP;
+
+	if (const_context == nullptr) {
+		const_context = std::make_unique<Interpreter>(*context);
+		const_context->preserve_data(true);
+	}
+
+	auto cval = expr->evaluate(*const_context);
+
+	/* Handle `const: { ... }` blocks */
+	if (instanceof<UnitExpr>(expr)) {
+		auto &unit = cval.get<Unit>();
+		unit.manage_table(const_context->get_main());
+		unit.set_persisent(true);
+		cval = const_context->invoke(unit);
+	}
+
+	if (cval.empty())
+		return Expression::NOOP;
+
+	return LiteralExpr::create(cval);
 }
 
 void Parser::register_parser(TokenType token, InfixParser *parser)
@@ -167,8 +200,13 @@ void Parser::parse_all()
 			if constexpr (DEBUG)
 				out << "\nParsing next root expression...\n";
 			reset();
-			expression_queue.push_back(parse());
+			auto expression = parse();
+			if (expression != Expression::NOOP)
+				expression_queue.push_back(expression);
 	}
+
+	if (const_context != nullptr)
+		const_context->global()->clear();
 
 	if constexpr (DEBUG)
 		std::cout << "\n* Parsing complete. Expressions parsed: " << expression_queue.size() << std::endl;

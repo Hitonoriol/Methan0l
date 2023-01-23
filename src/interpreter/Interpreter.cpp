@@ -38,7 +38,9 @@ STRINGS(
 		EnvVars::RUNDIR(".rd")
 )
 
-Interpreter::Interpreter() : parser(std::make_unique<Methan0lParser>())
+Interpreter::Interpreter()
+	: exec_stack { &main },
+	  parser(std::make_shared<Methan0lParser>(*this))
 {
 	init_heap();
 }
@@ -48,6 +50,19 @@ Interpreter::Interpreter(const char *path) : Interpreter()
 	set_runpath(path);
 	load_libraries();
 }
+
+Interpreter::Interpreter(const Interpreter &rhs)
+	: dlls(rhs.dlls),
+	  libraries(rhs.libraries),
+	  env_table(rhs.env_table),
+	  type_mgr(rhs.type_mgr),
+	  inbuilt_funcs(rhs.inbuilt_funcs),
+	  lazy_prefix_ops(rhs.lazy_prefix_ops), lazy_infix_ops(rhs.lazy_infix_ops),
+	  value_prefix_ops(rhs.value_prefix_ops), value_postfix_ops(rhs.value_postfix_ops),
+	  value_infix_ops(rhs.value_infix_ops),
+	  exec_stack { &main },
+	  parser(rhs.parser)
+{}
 
 Interpreter::~Interpreter()
 {

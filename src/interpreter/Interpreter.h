@@ -91,12 +91,12 @@ class Interpreter
 		std::deque<Unit*> exec_stack;
 		std::deque<DataTable*> object_stack;
 		std::stack<std::shared_ptr<Unit>, std::pmr::deque<std::shared_ptr<Unit>>> tmp_call_stack;
-		Expression *current_expr;
+		Expression *current_expr = nullptr;
 
 		bool stopped = false;
 		std::deque<std::function<void(void)>> on_exit_tasks;
 
-		std::unique_ptr<Parser> parser;
+		std::shared_ptr<Parser> parser;
 		Unit main;
 
 		Unit load_unit(std::istream &codestr);
@@ -326,6 +326,7 @@ class Interpreter
 	public:
 		Interpreter();
 		Interpreter(const char *runpath);
+		Interpreter(const Interpreter &rhs);
 		~Interpreter();
 
 		void set_runpath(std::string_view runpath);

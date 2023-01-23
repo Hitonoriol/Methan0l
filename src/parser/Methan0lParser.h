@@ -12,7 +12,8 @@ namespace mtl
 class Methan0lParser: public Parser
 {
 	public:
-		Methan0lParser();
+		using Parser::Parser;
+		Methan0lParser(Interpreter&);
 };
 
 } /* namespace mtl */

@@ -22,12 +22,13 @@
 #include "expression/parser/TryCatchParser.h"
 #include "expression/parser/FormatStrParser.h"
 #include "expression/parser/RangeParser.h"
+#include "expression/parser/ConstParser.h"
 
 namespace mtl
 {
 
 /* Grammar definition */
-Methan0lParser::Methan0lParser() : Parser(Lexer())
+Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 {
 	/* Literals */
 	register_literal_parser(TokenType::BOOLEAN, Type::BOOLEAN);
@@ -44,6 +45,8 @@ Methan0lParser::Methan0lParser() : Parser(Lexer())
 	register_parser(TokenType::IDENTIFIER, new IdentifierParser());	// foo -- local scope
 	register_prefix_opr(TokenType::PERCENT, Precedence::PREFIX);
 	register_parser(TokenType::QUESTION, new ConditionParser());// (a && b ? "yep" : "nah")
+	register_parser(TokenType::CONST, new ConstParser());
+	alias_prefix(TokenType::CONST, TokenType::LIST);
 
 	/* Assignment */
 	register_parser(TokenType::ASSIGN, new AssignParser());				// lhs = rhs

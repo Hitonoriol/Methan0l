@@ -46,14 +46,17 @@ class Parser
 		std::unordered_map<TokenType, std::shared_ptr<InfixParser>> infix_parsers;
 		std::unordered_map<TokenType, std::shared_ptr<PrefixParser>> prefix_parsers;
 
-		int32_t nesting_lvl;
-		int32_t access_opr_lvl;
+		int32_t nesting_lvl = 0;
+		int32_t access_opr_lvl = -1;
 
 		std::deque<Token> read_queue;
 		Unit root_unit;
 
 		std::stack<PeekPos> peek_stack;
 		int32_t peek_pos = 0;
+
+		Interpreter *context = nullptr;
+		std::unique_ptr<Interpreter> const_context;
 
 		void peek_mode(bool);
 		bool peeking();
@@ -83,10 +86,13 @@ class Parser
 		Lexer lexer;
 
 	public:
-		Parser(const Lexer &lexer);
+		Parser(Interpreter&);
 		Parser(const Parser&);
 		Parser& operator=(const Parser&);
 		virtual ~Parser() = default;
+
+		void set_context(Interpreter&);
+		std::shared_ptr<LiteralExpr> evaluate_const(ExprPtr);
 
 		void register_parser(TokenType token, InfixParser *parser);
 		void register_parser(TokenType token, PrefixParser *parser);
