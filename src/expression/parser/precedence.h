@@ -10,7 +10,7 @@ enum class Precedence
 	IO,					// <% %% %>
 	COMP_ASSIGNMENT,	// += -= *= /=
 	ASSIGNMENT,			// = ->
-	STRING_CONCAT,		// ::
+	STRING_CONCAT,		// :: e1..e2
 	CONDITIONAL,		// e1 ? e2 : e3
 	LOG_OR,				// ||
 	LOG_AND,			// &&

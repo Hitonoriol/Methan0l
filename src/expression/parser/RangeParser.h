@@ -17,7 +17,7 @@ class RangeParser: public InfixParser
 
 		inline int precedence() override
 		{
-			return prcdc(Precedence::IO);
+			return prcdc(Precedence::STRING_CONCAT);
 		}
 };
 
