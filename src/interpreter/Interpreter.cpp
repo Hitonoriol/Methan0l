@@ -53,16 +53,13 @@ Interpreter::Interpreter(const char *path) : Interpreter()
 
 Interpreter::Interpreter(const Interpreter &rhs)
 	: dlls(rhs.dlls),
-	  libraries(rhs.libraries),
 	  env_table(rhs.env_table),
-	  type_mgr(rhs.type_mgr),
-	  inbuilt_funcs(rhs.inbuilt_funcs),
-	  lazy_prefix_ops(rhs.lazy_prefix_ops), lazy_infix_ops(rhs.lazy_infix_ops),
-	  value_prefix_ops(rhs.value_prefix_ops), value_postfix_ops(rhs.value_postfix_ops),
-	  value_infix_ops(rhs.value_infix_ops),
 	  exec_stack { &main },
 	  parser(rhs.parser)
-{}
+{
+	for (auto &lib : dlls)
+		lib->load(*this);
+}
 
 Interpreter::~Interpreter()
 {
@@ -87,27 +84,10 @@ void Interpreter::load_libraries()
 			continue;
 
 		try {
-			auto lib = load_shared_library(path.string());
-			auto loader = boost::dll::import_symbol<library_loader>(lib, STR(LIB_LOADER_SYMBOL));
-			load_library(loader(*this));
+			load_shared<ExternalLibrary>(path.string());
 		} catch (std::exception &e) {
 			std::cerr << "Skipping library " << path << ": " << e.what() << NL;
 		}
-	}
-}
-
-boost::dll::shared_library Interpreter::load_shared_library(const std::string &path)
-{
-	LOG("Loading shared library: " << path)
-	try {
-		boost::dll::shared_library lib(path);
-		if (!lib.is_loaded())
-			throw std::runtime_error("couldn't access library file");
-
-		dlls.push_back(lib);
-		return lib;
-	} catch (std::exception &e) {
-		throw std::runtime_error("Error while loading " + path + ": " + e.what());
 	}
 }
 

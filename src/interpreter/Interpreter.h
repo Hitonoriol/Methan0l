@@ -14,6 +14,7 @@
 #include <lexer/Token.h>
 #include <lexer/Lexer.h>
 #include <structure/Function.h>
+#include <lang/ExternalLibrary.h>
 #include <structure/object/TypeManager.h>
 #include <interpreter/ExceptionHandler.h>
 
@@ -74,7 +75,7 @@ class Interpreter
 
 		static std::unique_ptr<Heap> heap;
 
-		std::vector<boost::dll::shared_library> dlls;
+		std::vector<std::shared_ptr<SharedLibrary>> dlls;
 		std::vector<std::shared_ptr<Library>> libraries;
 
 		DataTable env_table;
@@ -423,7 +424,19 @@ class Interpreter
 			register_func(name, [&]() {return env_table.get(var_name);});
 		}
 
-		boost::dll::shared_library load_shared_library(const std::string &path);
+		template<class T>
+		std::shared_ptr<SharedLibrary> load_shared(const std::string &path)
+		{
+			LOG("Loading shared library: " << path)
+			try {
+				auto lib = std::make_shared<T>(path);
+				lib->load(*this);
+				dlls.push_back(lib);
+				return lib;
+			} catch (std::exception &e) {
+				throw std::runtime_error("Error while loading " + path + ": " + e.what());
+			}
+		}
 
 		void enter_scope(Unit &unit);
 		void leave_scope();
