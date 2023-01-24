@@ -6,6 +6,7 @@
 #include <boost/dll.hpp>
 
 #include <interpreter/Interpreter.h>
+#include <lang/SharedLibrary.h>
 
 #define LIB_OPERATOR_DEF(type, functor) \
 	void Library::type##_operator(TokenType tok, const functor &opr) \
@@ -66,19 +67,6 @@ class Library
 		Library(const Library&);
 		virtual ~Library();
 		virtual void load() = 0;
-};
-
-/* Shouldn't be used for libraries with dependents */
-struct LibraryHandle
-{
-	boost::dll::shared_library dll;
-	std::shared_ptr<Library> library;
-
-	LibraryHandle(std::shared_ptr<Library> library)
-		: library(library) {}
-
-	LibraryHandle(std::shared_ptr<Library> library, boost::dll::shared_library dll)
-		: dll(dll), library(library) {}
 };
 
 } /* namespace mtl */
