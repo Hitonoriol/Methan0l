@@ -12,15 +12,10 @@ namespace mtl
 class PrefixOperatorParser: public PrefixParser
 {
 	public:
-		PrefixOperatorParser() : PrefixParser(prcdc(Precedence::PREFIX))
-		{
-		}
+		using PrefixParser::PrefixParser;
+		PrefixOperatorParser() : PrefixParser(Precedence::PREFIX) {}
 
-		PrefixOperatorParser(int precedence) : PrefixParser(precedence)
-		{
-		}
-
-		ExprPtr parse(Parser &parser, Token token)
+		ExprPtr parse(Parser &parser, Token token) override
 		{
 			ExprPtr rhs = parser.parse(prec);
 			return make_expr<PrefixExpr>(line(token), token, rhs);

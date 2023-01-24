@@ -1,7 +1,8 @@
 #ifndef EXPRESSION_PARSER_PREFIXPARSER_H_
 #define EXPRESSION_PARSER_PREFIXPARSER_H_
 
-#include "../../type.h"
+#include "type.h"
+#include "precedence.h"
 #include "ExprParser.h"
 
 namespace mtl
@@ -16,6 +17,7 @@ class PrefixParser: public ExprParser
 
 	public:
 		PrefixParser(int prec = 0) : prec(prec) {}
+		PrefixParser(Precedence prec) : PrefixParser(prcdc(prec)) {}
 		virtual ExprPtr parse(Parser &parser, Token token) = 0;
 		virtual ~PrefixParser() = default;
 		int precedence() override {return prec;}
