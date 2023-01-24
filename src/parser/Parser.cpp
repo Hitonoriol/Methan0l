@@ -21,7 +21,7 @@ Parser::Parser(Interpreter &context)
 
 Parser::Parser(const Parser &rhs)
 	: infix_parsers(rhs.infix_parsers), prefix_parsers(rhs.prefix_parsers),
-	  root_unit(rhs.root_unit), lexer(rhs.lexer)
+	  root_unit(rhs.root_unit), context(rhs.context), lexer(rhs.lexer)
 {}
 
 Parser& Parser::operator=(const Parser &rhs)
@@ -30,6 +30,7 @@ Parser& Parser::operator=(const Parser &rhs)
 	prefix_parsers = rhs.prefix_parsers;
 	root_unit = rhs.root_unit;
 	lexer = rhs.lexer;
+	context = rhs.context;
 	return *this;
 }
 
@@ -43,19 +44,22 @@ std::shared_ptr<LiteralExpr> Parser::evaluate_const(ExprPtr expr)
 	if (context == nullptr)
 		return Expression::NOOP;
 
-	if (const_context == nullptr) {
-		const_context = std::make_unique<Interpreter>(*context);
-		const_context->preserve_data(true);
+	if (const_scope == nullptr) {
+		const_scope = std::make_unique<Unit>();
+		const_scope->set_persisent(true);
 	}
 
-	auto cval = expr->evaluate(*const_context);
+	context->enter_scope(*const_scope);
+	auto cval = expr->evaluate(*context);
+	context->leave_scope();
 
 	/* Handle `const: { ... }` blocks */
 	if (instanceof<UnitExpr>(expr)) {
 		auto &unit = cval.get<Unit>();
-		unit.manage_table(const_context->get_main());
+		unit.manage_table(*const_scope);
 		unit.set_persisent(true);
-		cval = const_context->invoke(unit);
+		cval = context->invoke(unit);
+		const_scope->clear_result();
 	}
 
 	if (cval.empty())
@@ -205,8 +209,8 @@ void Parser::parse_all()
 				expression_queue.push_back(expression);
 	}
 
-	if (const_context != nullptr)
-		const_context->global()->clear();
+	if (const_scope != nullptr)
+		const_scope.reset();
 
 	if constexpr (DEBUG)
 		std::cout << "\n* Parsing complete. Expressions parsed: " << expression_queue.size() << std::endl;

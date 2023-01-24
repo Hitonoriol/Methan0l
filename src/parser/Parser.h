@@ -56,7 +56,7 @@ class Parser
 		int32_t peek_pos = 0;
 
 		Interpreter *context = nullptr;
-		std::unique_ptr<Interpreter> const_context;
+		std::unique_ptr<Unit> const_scope;
 
 		void peek_mode(bool);
 		bool peeking();
