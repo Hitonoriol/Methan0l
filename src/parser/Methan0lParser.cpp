@@ -44,9 +44,9 @@ Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 	register_parser(TokenType::HASH, new IdentifierParser()); // #foo -- global scope lookup
 	register_parser(TokenType::IDENTIFIER, new IdentifierParser());	// foo -- local scope
 	register_prefix_opr(TokenType::PERCENT, Precedence::PREFIX);
-	register_parser(TokenType::QUESTION, new ConditionParser());// (a && b ? "yep" : "nah")
-	register_parser(TokenType::CONST, new ConstParser());
-	alias_prefix(TokenType::CONST, TokenType::LIST);
+	register_parser(TokenType::QUESTION, new ConditionParser()); // (a && b ? "yep" : "nah")
+	register_parser(TokenType::CONST, new ConstParser()); // const: ...
+	register_parser(TokenType::LIST, new ConstParser(Precedence::HIGHEST)); // $name
 
 	/* Assignment */
 	register_parser(TokenType::ASSIGN, new AssignParser());				// lhs = rhs
@@ -67,26 +67,33 @@ Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 	register_parser(TokenType::LIST_DEF_L, new InvokeParser());
 	alias_infix(TokenType::LIST_DEF_L, TokenType::PAREN_L);
 
-	register_parser(TokenType::LIST_DEF_L, new ListParser(TokenType::PAREN_R));	// $(expr1, expr2, ...)
-	register_parser(TokenType::BRACKET_L, new ListParser(TokenType::BRACKET_R));	// [expr1, expr2, ...]
-	alias_prefix(TokenType::LIST_DEF_L, TokenType::SET_DEF);	// defset $(expr1, expr2, ...)
-	register_parser(TokenType::BRACE_L, new UnitParser());	// {expr1; expr2; expr3}
-	register_parser(TokenType::ARROW_R, new WeakUnitParser());	// ->{expr1; expr2; expr3}
-	register_parser(TokenType::BRACKET_L, new IndexParser());	// list[expr] or list[]
+	register_parser(TokenType::LIST_DEF_L, new ListParser(TokenType::PAREN_R)); // $(expr1, expr2, ...)
+	register_parser(TokenType::BRACKET_L, new ListParser(TokenType::BRACKET_R)); // [expr1, expr2, ...]
+	alias_prefix(TokenType::LIST_DEF_L, TokenType::SET_DEF); // defset $(expr1, expr2, ...)
+	register_parser(TokenType::BRACE_L, new UnitParser()); // {expr1; expr2; expr3}
+	register_parser(TokenType::ARROW_R, new WeakUnitParser()); // ->{expr1; expr2; expr3}
+	register_parser(TokenType::BRACKET_L, new IndexParser()); // list[expr] or list[]
 
-	register_parser(TokenType::DO, new LoopParser());// do $(init_expr, condition_expr, step_expr) -> {}
-	alias_prefix(TokenType::DO, TokenType::WHILE);
+	/* Loop syntax:
+	 * 1. do (condition_expr) {}
+	 * 2. while (condition_expr) {}
+	 * 3. for (init_expr, condition_expr, step_expr) {}
+	 * 4. for (as_name, iterable_expr) {}
+	 */
+	register_parser(TokenType::DO, new LoopParser()); // do (condition_expr) {}
+	alias_prefix(TokenType::DO, TokenType::WHILE); // while (condition_expr) {}
 	alias_prefix(TokenType::DO, TokenType::FOR);
 
-	register_parser(TokenType::FUNC_DEF, new FunctionParser());	// func @(arg1, arg2: def_val, ...) {expr1, expr2, ...}
+	/* Function definition. See `FunctionParser` header for details. */
+	register_parser(TokenType::FUNC_DEF, new FunctionParser());
 	alias_prefix(TokenType::FUNC_DEF, TokenType::FUNC_DEF_SHORT);
 	alias_prefix(TokenType::FUNC_DEF, TokenType::FUNC_DEF_SHORT_ALT);
 	alias_prefix(TokenType::FUNC_DEF, TokenType::METHOD);
 
-	register_parser(TokenType::BOX, new BoxUnitParser());// box_unit = box {expr1, expr2, ...}
+	register_parser(TokenType::BOX, new BoxUnitParser()); // box_unit = box {expr1, expr2, ...}
 	register_parser(TokenType::CLASS, new ClassParser()); // class: ClassName = @(private => $(), ...)
 	alias_prefix(TokenType::CLASS, TokenType::INTERFACE);
-	register_parser(TokenType::TRY, new TryCatchParser());
+	register_parser(TokenType::TRY, new TryCatchParser()); // try { ... } catch: ex_name { ... }
 
 	/* Reference operator */
 	register_prefix_opr(TokenType::REF); // ref = **idfr

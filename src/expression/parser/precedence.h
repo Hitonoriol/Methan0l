@@ -29,7 +29,7 @@ enum class Precedence
 	INDEX,				// []
 	INVOKE,				// ()
 	POSTFIX_INCREMENT,	// expr++ / expr--
-	HIGHEST				// var: x = ...
+	HIGHEST				// $const; var: x = ...
 };
 
 constexpr int prcdc(Precedence prec)
