@@ -291,7 +291,9 @@ class Token
 		static TokenType get_multichar_op_type(std::string &tokstr);
 		static char escape_seq(char seq);
 
+		static bool is_blank(char chr);
 		static bool is_punctuator(char chr);
+		static bool is_separator(char chr);
 		static bool is_keyword(TokenType tok);
 		static bool is_semantic(const TokenType &tok);
 		static bool is_transparent(const TokenType &tok);

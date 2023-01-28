@@ -183,12 +183,22 @@ char Token::escape_seq(char seq)
 	return escape_seqs.at(seq);
 }
 
+bool Token::is_blank(char chr)
+{
+	return std::isspace(chr) || chr == NL;
+}
+
 bool Token::is_punctuator(char chr)
 {
 	for (size_t i = 0; i < std::size(punctuators); ++i)
 		if (chr == punctuators[i])
 			return true;
 	return false;
+}
+
+bool Token::is_separator(char chr)
+{
+	return is_blank(chr) || is_punctuator(chr);
 }
 
 bool Token::is_keyword(TokenType tok)
