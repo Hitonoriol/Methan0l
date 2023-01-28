@@ -244,10 +244,10 @@ void Lexer::consume()
 {
 	char chr = *cur_chr;
 
-	/* Ignore spaces when saving Number literals
-	 * (this allows to separate digits like so: `123 456 789.912 345`)
+	/* Ignore underscores when saving Number literals
+	 * (this allows to separate digits like so: `123_456_789.912_345`)
 	 */
-	if (std::isspace(chr)) {
+	if (chr == Token::chr(TokenType::UNDERSCORE)) {
 		if (saving_number())
 			return;
 	}
@@ -280,12 +280,12 @@ void Lexer::consume()
 		tokstr.clear();
 		switch (chr) {
 		case 'X':
-			case 'x':
+		case 'x':
 			cur_int_literal = IntLiteral::HEX;
 			return;
 
 		case 'B':
-			case 'b':
+		case 'b':
 			cur_int_literal = IntLiteral::BIN;
 			return;
 
@@ -294,7 +294,7 @@ void Lexer::consume()
 		}
 	}
 
-	else if (saving_number() && !std::isdigit(chr)) {
+	else if (saving_number() && Token::is_separator(chr)) {
 		push();
 		begin(chr);
 		return;
