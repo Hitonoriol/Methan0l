@@ -55,7 +55,7 @@ ifneq ($(OS_NAME),Windows)
 	endif
 endif
 
-.PHONY: all install release modules clean lib-clean
+.PHONY: all lib lib-headers stdlib install release modules clean lib-clean
 
 all: $(CLI_BIN_NAME)
 
@@ -115,7 +115,6 @@ $(INCLUDE_DIR)/%.h: ../src/%.h
 
 $(INCLUDE_DIR):
 	mkdir -p $(INCLUDE_DIR)
-	mkdir -p $(STDLIB_DIR)
 	mkdir -p $(MODULE_DIR)
 
 lib-clean:
@@ -124,7 +123,10 @@ lib-clean:
 # Methan0l core library targets
 read_stdlib_deps=$(patsubst %,obj/$(STDLIB_PATH)/%.o.pic,$(file < ../src/$(STDLIB_PATH)/$(1).deps))
 
-stdlib: lib lib-headers $(STDLIB_BINS)
+$(STDLIB_DIR):
+	mkdir -p $(STDLIB_DIR)
+
+stdlib: $(STDLIB_DIR) lib lib-headers $(STDLIB_BINS)
 	@echo 'Finished building methan0l core libraries'
 	@echo ' '
 
