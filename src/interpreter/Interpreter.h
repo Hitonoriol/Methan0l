@@ -80,7 +80,7 @@ class Interpreter
 
 		DataTable env_table;
 		TypeManager type_mgr { *this };
-		InbuiltFuncMap inbuilt_funcs;
+		NativeFuncMap inbuilt_funcs;
 
 		ExceptionHandler exception_handler;
 
@@ -209,7 +209,7 @@ class Interpreter
 		void load_main(Unit &main);
 
 		Expression* get_current_expr();
-		InbuiltFuncMap& functions();
+		NativeFuncMap& functions();
 
 		/* In-place evaluation & type conversion for C++ to Methan0l function parameter list binding */
 		template<typename T>
@@ -351,16 +351,16 @@ class Interpreter
 		}
 
 		template<unsigned default_argc = 0, typename F>
-		InbuiltFunc bind_func(F &&f, Value default_args = Value::NO_VALUE)
+		NativeFunc bind_func(F &&f, Value default_args = Value::NO_VALUE)
 		{
 			if constexpr (function_traits<F>::arity == 0) {
-				return [&, f](Args args) -> Value {
+				return [&, f](Args &args) -> Value {
 					return call(f, args);
 				};
 			}
 			/* Function accepts the ExprList itself - no binding required */
-			else if constexpr (std::is_same<TYPE(typename function_traits<F>::argument<0>::type), mtl::Args>::value) {
-				return InbuiltFunc(f);
+			else if constexpr (std::is_same<TYPE(typename function_traits<F>::argument<0>::type), mtl::ExprList>::value) {
+				return NativeFunc(f);
 			}
 			else {
 				constexpr bool has_default_args = default_argc > 0;
@@ -371,7 +371,7 @@ class Interpreter
 					default_args = defaults;
 				}
 
-				return [&, f, default_args](Args args) -> Value {
+				return [&, f, default_args](Args &args) -> Value {
 					if constexpr (has_default_args) {
 						constexpr unsigned arity = function_traits<F>::arity;
 						auto argc = args.size();
@@ -388,7 +388,7 @@ class Interpreter
 			}
 		}
 
-		void register_func(const std::string &name, InbuiltFunc &&func);
+		void register_func(const std::string &name, NativeFunc &&func);
 
 		template<unsigned default_argc = 0, typename F>
 		void register_func(const std::string &name, F &&f, Value default_args = Value::NO_VALUE)
