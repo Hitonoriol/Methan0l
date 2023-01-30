@@ -27,13 +27,13 @@ class Random: public Class
 		Managed<std::mt19937_64> managed_rngs;
 
 		template<typename T>
-		T range_min(ExprList &args)
+		T range_min(Args &args)
 		{
 			return args.size() > 2 ? args[1]->evaluate(context).as<T>() : 0;
 		}
 
 		template<typename T>
-		T range_max(ExprList &args)
+		T range_max(Args &args)
 		{
 			return args.size() > 1 ? args.back()->evaluate(context).as<T>() : 0;
 		}
@@ -41,7 +41,7 @@ class Random: public Class
 		dec next_int(std::mt19937_64 &rng, dec bound);
 
 		template<typename T>
-		T next(ExprList &args, Distr<T> &gen)
+		T next(Args &args, Distr<T> &gen)
 		{
 			T min = range_min<T>(args);
 			T max = range_max<T>(args);
@@ -59,10 +59,10 @@ class Random: public Class
 			return n;
 		}
 
-		dec extract_seed(ExprList &args);
-		dec next_int(ExprList &args);
-		double next_double(ExprList &args);
-		bool next_bool(ExprList &args);
+		dec extract_seed(Args &args);
+		dec next_int(Args &args);
+		double next_double(Args &args);
+		bool next_bool(Args &args);
 
 	public:
 		Random(Interpreter &context);

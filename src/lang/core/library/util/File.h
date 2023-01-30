@@ -26,8 +26,8 @@ class File: public Class
 
 		std::fstream &managed_file(Object &obj);
 
-		void set_path(ExprList &args);
-		std::string path(ExprList &args);
+		void set_path(Args &args);
+		std::string path(Args &args);
 		bool open(Object &obj);
 		bool close(Object &obj);
 

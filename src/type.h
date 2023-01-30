@@ -57,7 +57,7 @@ using ValMap = std::pmr::unordered_map<Value, Value>;
 
 using ExprList = std::pmr::deque<ExprPtr>;
 using ExprListPtr = std::shared_ptr<ExprList>;
-using Args = ExprList;
+using Args = const ExprList;
 using RawExprList = std::pmr::deque<Expression*>;
 using ValList = std::pmr::deque<Value>;
 
@@ -75,8 +75,10 @@ using UnaryOpr = std::function<Value(Value&)>;
 template<typename O>
 using OperatorMap = std::pmr::unordered_map<TokenType, O>;
 
-using InbuiltFunc = std::function<Value(ExprList&)>;
+using InbuiltFunc = std::function<Value(Args&)>;
 using InbuiltFuncMap = std::pmr::unordered_map<std::string, InbuiltFunc>;
+
+using class_id = size_t;
 
 constexpr std::string_view
 	PROGRAM_EXT = ".mt0",

@@ -28,7 +28,7 @@ Distr<double> Random::dbl_gen = [](auto &rng) {
 Random::Random(Interpreter &context) : Class(context, "Random")
 {
 	/* rnd = Random.new$([seed]) */
-	register_method(std::string(CONSTRUCT), [&](Args &args) {
+	register_method(Methods::CONSTRUCTOR, [&](Args &args) {
 		Object &obj = Object::get_this(args);
 		managed_rngs.emplace(obj.id(), std::mt19937_64());
 		managed_rng(obj).seed(extract_seed(args));
@@ -70,7 +70,7 @@ Random::Random(Interpreter &context) : Class(context, "Random")
 	});
 }
 
-dec Random::extract_seed(ExprList &args)
+dec Random::extract_seed(Args &args)
 {
 	Value seed_val = args.size() > 1 ? args[1]->evaluate(context) : Value::NIL;
 	Object &this_obj = Object::get_this(args);
@@ -83,7 +83,7 @@ dec Random::extract_seed(ExprList &args)
 	return seed;
 }
 
-bool Random::next_bool(ExprList &args)
+bool Random::next_bool(Args &args)
 {
 	double prob = args.size() > 1 ? dbl(args[1]->evaluate(context)) : 0.5;
 	return dbl_distr(managed_rng(Object::get_this(args))) < prob;
@@ -99,12 +99,12 @@ dec Random::next_int(std::mt19937_64 &rng, dec bound)
 	return val;
 }
 
-dec Random::next_int(ExprList &args)
+dec Random::next_int(Args &args)
 {
 	return next(args, int_gen);
 }
 
-double Random::next_double(ExprList &args)
+double Random::next_double(Args &args)
 {
 	return next(args, dbl_gen);
 }

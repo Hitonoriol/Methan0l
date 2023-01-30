@@ -157,7 +157,7 @@ void LibData::import_reference(const IdentifierExpr &idfr) {
 LibData::DblBinOperation LibData::summator = [](double l, Value r) {return l + r.as<double>();};
 LibData::DblBinOperation LibData::multiplicator = [](double l, Value r) {return l * r.as<double>();};
 
-double LibData::mean(Args args)
+double LibData::mean(Args &args)
 {
 	auto [n, sum] = dispatch_accumulate(args, 0.0, summator);
 	return sum / n;
@@ -172,8 +172,8 @@ std::pair<size_t, double> LibData::dispatch_accumulate(Args &args, double init, 
 		return std::make_pair(size, accumulate(first, init, operation));
 	}
 	else {
-		args.erase(args.begin());
-		return accumulate(first, args, init, operation);
+		ExprList callargs(std::next(args.begin()), args.end());
+		return accumulate(first, callargs, init, operation);
 	}
 }
 
@@ -184,13 +184,12 @@ std::pair<size_t, double> LibData::accumulate(Value &callable, Args &args, doubl
 	auto end = range.get_end(*context).to_double();
 	auto step = range.get_step(*context).to_double();
 
-	args.clear();
 	auto x = LiteralExpr::create(0);
-	args.push_back(x);
+	ExprList callargs {x};
 	double result = init;
 	for (auto i = start; i < end; i += step) {
 		x->raw_ref() = i;
-		result = op(result, context->invoke(callable, args));
+		result = op(result, context->invoke(callable, callargs));
 	}
 	return std::make_pair(abs((end - start) / step), result);
 }
@@ -455,7 +454,7 @@ void LibData::load_operators()
 				} else if (lval.is<Object>()) {
 					auto &proto = lval.get<Object>();
 					Object obj(proto.get_class(), proto.get_data());
-					obj.invoke_method(mgr, Class::CONSTRUCT, ctor_call.arg_list());
+					obj.invoke_method(Methods::CONSTRUCTOR, ctor_call.arg_list());
 					return obj;
 				}
 			}

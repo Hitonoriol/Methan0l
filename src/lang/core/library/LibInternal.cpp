@@ -256,7 +256,7 @@ Value LibInternal::object_dot_operator(Object &obj, ExprPtr rhs)
 	if (instanceof<InvokeExpr>(rhs.get())) {
 		InvokeExpr &method = try_cast<InvokeExpr>(rhs);
 		auto &method_name = try_cast<IdentifierExpr>(method.get_lhs()).get_name();
-		return obj.invoke_method(context->type_mgr, method_name, method.arg_list());
+		return obj.invoke_method(method_name, method.arg_list());
 	}
 	else
 		return Value::ref(obj.field(IdentifierExpr::get_name(rhs)));

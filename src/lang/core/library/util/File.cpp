@@ -31,13 +31,13 @@ namespace fs = std::filesystem;
 File::File(Interpreter &context) : Class(context, "File")
 {
 	/* file = new: File("path/to/file.ext") */
-	register_method(CONSTRUCT, [&](Args &args) {
+	register_method(Methods::CONSTRUCTOR, [&](Args &args) {
 		set_path(args);
 		return Value::NO_VALUE;
 	});
 
 	/* Called automatically when converting to string */
-	register_method(TO_STRING, [&](Args &args) {
+	register_method(Methods::TO_STRING, [&](Args &args) {
 		return Object::get_this(args).field(FNAME);
 	});
 
@@ -203,7 +203,7 @@ File::File(Interpreter &context) : Class(context, "File")
 	});
 }
 
-void File::set_path(ExprList &args)
+void File::set_path(Args &args)
 {
 	Object::get_this(args).def(FNAME) = core::path(context, mtl::str(args[1]->evaluate(context)));
 }
@@ -228,12 +228,12 @@ void File::write_line(Object &obj, const std::string &line)
 	managed_file(obj) << line << std::endl;
 }
 
-std::string File::path(ExprList &args)
+std::string File::path(Args &args)
 {
-	/* This allows to use all `File` methods statically by providing the `path` as the first argument */
+	/* This allows to use all `File` methods statically by providing the `path` as the last argument */
 	if (Class::static_call(args)) {
 		Value p = args[1]->evaluate(context);
-		args.erase(std::next(args.begin()));
+//		args.erase(std::next(args.begin()));
 		return core::path(context, p);
 	}
 

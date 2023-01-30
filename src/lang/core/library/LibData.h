@@ -50,7 +50,7 @@ class LibData: public Library
 		std::pair<size_t, double> accumulate(Value &callable, Args &args, double init, DblBinOperation operation);
 		std::pair<size_t, double> dispatch_accumulate(Args &args, double init, DblBinOperation operation);
 
-		double mean(Args);
+		double mean(Args&);
 
 		/* Set operation where `args` contains 2 set expressions */
 		template<typename T>
