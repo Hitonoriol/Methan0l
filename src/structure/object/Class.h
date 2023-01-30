@@ -65,7 +65,7 @@ class Class : public Allocatable<Class>
 		void register_method(std::string_view name, T &&method)
 		{
 			auto mname = mtl::str(name);
-			if constexpr (std::is_same<TYPE(T), InbuiltFunc>::value)
+			if constexpr (std::is_same<TYPE(T), NativeFunc>::value)
 				class_data.set(mname, method);
 			else
 				class_data.set(mname, context.bind_func(method));

@@ -87,7 +87,7 @@ using VSet = std::shared_ptr<ValSet>;
 using VMap = std::shared_ptr<ValMap>;
 using VUnit = std::shared_ptr<Unit>;
 using VFunction = std::shared_ptr<Function>;
-using VInbuiltFunc = std::shared_ptr<InbuiltFunc>;
+using VNativeFunc = std::shared_ptr<NativeFunc>;
 using VToken = std::shared_ptr<Token>;
 
 struct Nil: public std::monostate
@@ -144,7 +144,7 @@ VString,
 VList, VSet, VMap,
 
 /* Expression blocks */
-VUnit, VFunction, VInbuiltFunc,
+VUnit, VFunction, VNativeFunc,
 
 /* Custom type objects */
 Object,

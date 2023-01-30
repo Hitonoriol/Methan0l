@@ -106,8 +106,9 @@ void Interpreter::init_heap(size_t initial_mem_cap)
 	std::pmr::set_default_resource(heap.get());
 }
 
-void Interpreter::register_func(const std::string &name, InbuiltFunc &&func)
+void Interpreter::register_func(const std::string &name, NativeFunc &&func)
 {
+	OUT("  Registered function: " << name)
 	if (exec_stack.size() <= 1)
 		inbuilt_funcs.emplace(name, func);
 	else {
@@ -552,7 +553,7 @@ Value Interpreter::invoke(const Value &callable, ExprList &args)
 {
 	return unconst(callable).accept([&](auto &c) {
 		HEAP_TYPES(c, {
-			IF (std::is_same_v<VT(*c), InbuiltFunc>)
+			IF (std::is_same_v<VT(*c), NativeFunc>)
 				return (*c)(args);
 			ELIF(std::is_same_v<VT(*c), Function>)
 				return invoke(*c, args);
@@ -570,7 +571,7 @@ Value Interpreter::invoke_method(Object &obj, Value &method, Args &args)
 	return method.is<Function>()
 			? invoke(method.get<Function>(), argcopy)
 						:
-				method.get<InbuiltFunc>()(argcopy);
+				method.get<NativeFunc>()(argcopy);
 }
 
 Value Interpreter::evaluate(InvokeExpr &expr)
@@ -678,7 +679,7 @@ void Interpreter::register_exit_task(Value &callable)
 	});
 }
 
-InbuiltFuncMap& Interpreter::functions()
+NativeFuncMap& Interpreter::functions()
 {
 	return inbuilt_funcs;
 }
@@ -911,7 +912,7 @@ void Interpreter::print_info()
 			<< "* Token: " << sizeof(Token) << NL
 			<< "* Library: " << sizeof(Library) << NL
 			<< "* Class: " << sizeof(Class) << NL
-			<< "* InbuiltFunc: " << sizeof(InbuiltFunc) << NL
+			<< "* NativeFunc: " << sizeof(NativeFunc) << NL
 			<< "* Allocator: " << sizeof(allocator<Value>) << NL
 			<< NL;
 }

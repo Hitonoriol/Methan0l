@@ -75,8 +75,8 @@ using UnaryOpr = std::function<Value(Value&)>;
 template<typename O>
 using OperatorMap = std::pmr::unordered_map<TokenType, O>;
 
-using InbuiltFunc = std::function<Value(Args&)>;
-using InbuiltFuncMap = std::pmr::unordered_map<std::string, InbuiltFunc>;
+using NativeFunc = std::function<Value(Args&)>;
+using NativeFuncMap = std::pmr::unordered_map<std::string, NativeFunc>;
 
 using class_id = size_t;
 

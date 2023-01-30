@@ -202,7 +202,7 @@ Type Value::type() const
 	else if (is<VUnit>())
 		return Type::UNIT;
 
-	else if (is<VFunction>() || is<VInbuiltFunc>())
+	else if (is<VFunction>() || is<VNativeFunc>())
 		return Type::FUNCTION;
 
 	else if (is<VList>())
@@ -285,7 +285,7 @@ std::string Value::to_string(Interpreter *context)
 		return get<Unit>().to_string();
 
 	case Type::FUNCTION:
-		if (is<InbuiltFunc>())
+		if (is<NativeFunc>())
 			return "Native function 0x" + to_base(reinterpret_cast<udec>(identity()), 16);
 		return get<Function>().to_string();
 

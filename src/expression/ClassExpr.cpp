@@ -32,7 +32,6 @@ void ClassExpr::execute(Interpreter &context)
 
 	if (!base.empty()) {
 		auto &class_data = clazz->get_class_data();
-		auto &ctor = class_data.get(str(Methods::CONSTRUCTOR));
 		for (auto &base_name : base) {
 			Class &base_class = type_mgr.get_type(Class::get_id(base_name));
 			clazz->add_base_class(&base_class);
@@ -51,8 +50,8 @@ void ClassExpr::execute(Interpreter &context)
 		Value rval = rhs->evaluate(context);
 		if (rval.is<Function>())
 			clazz->register_method(name, rval.get<Function>());
-		else if (rval.is<InbuiltFunc>())
-			clazz->register_method(name, rval.get<InbuiltFunc>());
+		else if (rval.is<NativeFunc>())
+			clazz->register_method(name, rval.get<NativeFunc>());
 		else
 			obj_data.get_or_create(name) = rval;
 	}
