@@ -3,7 +3,9 @@
 
 #include "Expression.h"
 #include "UnitExpr.h"
-#include "util/cast.h"
+
+#include <interpreter/Interpreter.h>
+#include <util/cast.h>
 
 namespace mtl
 {

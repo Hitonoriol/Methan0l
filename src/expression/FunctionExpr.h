@@ -6,6 +6,8 @@
 namespace mtl
 {
 
+class UnitExpr;
+
 class FunctionExpr: public Expression
 {
 	private:

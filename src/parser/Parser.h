@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <memory>
+#include <stack>
 
 #include "expression/Expression.h"
 #include "expression/parser/InfixParser.h"

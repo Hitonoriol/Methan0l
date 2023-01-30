@@ -1,6 +1,8 @@
 #include "FunctionExpr.h"
 
-#include "../type.h"
+#include <interpreter/Interpreter.h>
+
+#include "type.h"
 #include "UnitExpr.h"
 
 namespace mtl

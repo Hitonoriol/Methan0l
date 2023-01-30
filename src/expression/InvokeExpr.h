@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include <interpreter/Interpreter.h>
+
 #include "Expression.h"
 #include "IdentifierExpr.h"
 #include "ListExpr.h"

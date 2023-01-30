@@ -1,5 +1,7 @@
 #include "UnitExpr.h"
 
+#include <interpreter/Interpreter.h>
+
 namespace mtl
 {
 

@@ -1,16 +1,17 @@
-#include <parser/Parser.h>
+#include "Parser.h"
+
 #include <iostream>
 #include <iomanip>
 #include <string>
 
-#include "expression/UnitExpr.h"
-#include "expression/parser/WordOperatorParser.h"
-#include "expression/parser/InfixWordOperatorParser.h"
-#include "expression/parser/LiteralParser.h"
-#include "expression/parser/PostfixExprParser.h"
-
-#include "util/containers.h"
-#include "except/except.h"
+#include <interpreter/Interpreter.h>
+#include <expression/UnitExpr.h>
+#include <expression/parser/WordOperatorParser.h>
+#include <expression/parser/InfixWordOperatorParser.h>
+#include <expression/parser/LiteralParser.h>
+#include <expression/parser/PostfixExprParser.h>
+#include <util/containers.h>
+#include <except/except.h>
 
 namespace mtl
 {

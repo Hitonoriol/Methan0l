@@ -4,7 +4,6 @@
 #include <lexer/Token.h>
 #include <iostream>
 
-#include "interpreter/Interpreter.h"
 #include "type.h"
 #include "structure/Value.h"
 #include "util/debug.h"
