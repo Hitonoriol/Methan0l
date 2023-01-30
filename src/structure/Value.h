@@ -368,7 +368,7 @@ class Value
 		std::string_view type_name() const;
 
 		static bool is_double_op(const Value &lhs, const Value &rhs);
-		friend std::ostream& operator <<(std::ostream &stream, Value &val);
+		friend std::ostream& operator <<(std::ostream &stream, const Value &val);
 		friend bool operator ==(const Value &lhs, const Value &rhs);
 		bool operator !=(const Value &rhs);
 

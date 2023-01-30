@@ -292,7 +292,7 @@ std::string Value::to_string(Interpreter *context)
 	case Type::OBJECT: {
 		Object &obj = get<Object>();
 		std::stringstream ss;
-		ss << (context == nullptr ? obj.to_string() : obj.to_string(*context));
+		ss << obj.to_string();
 
 		if constexpr (DEBUG) {
 			if (context == nullptr) {
@@ -531,9 +531,9 @@ bool Value::operator !=(const Value &rhs)
 	return !(*this == rhs);
 }
 
-std::ostream& operator <<(std::ostream &stream, Value &val)
+std::ostream& operator <<(std::ostream &stream, const Value &val)
 {
-	return stream << val.to_string();
+	return stream << unconst(val).to_string();
 }
 
 } /* namespace mtl */
