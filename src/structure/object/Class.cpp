@@ -38,12 +38,12 @@ Class::Class(Interpreter &context, const std::string &name) :
 	});
 
 	/* Default constructor */
-	register_method(CONSTRUCT, [&](Args &args) {
+	register_method(Methods::CONSTRUCTOR, [&](Args &args) {
 		return Value::NO_VALUE;
 	});
 
 	/* Default string conversion */
-	register_method(TO_STRING, [&](Object &obj) {
+	register_method(Methods::TO_STRING, [&](Object &obj) {
 		return obj.to_string();
 	});
 
@@ -65,7 +65,7 @@ Class::Class(Interpreter &context, const std::string &name) :
 
 void Class::register_method(std::string_view name, Function &method)
 {
-	method.arg_def.push_front( { std::move(mtl::str(Class::THIS_ARG)),
+	method.arg_def.push_front( { std::move(mtl::str(Parameters::THIS)),
 			LiteralExpr::empty() });
 	class_data.set(mtl::str(name), method);
 }
@@ -91,18 +91,18 @@ Value Class::extract_names(const DataTable &table)
 	return names;
 }
 
-Value Class::invoke_method(Object &obj, const std::string &name, ExprList &args)
+Value Class::invoke_method(Object &obj, const std::string &name, Args &args)
 {
 	DataTable &data = get_class_data();
 	return context.invoke_method(obj, data.get(name, true), args);
 }
 
-Value Anonymous::invoke_method(Object &obj, const std::string &name, ExprList &args)
+Value Anonymous::invoke_method(Object &obj, const std::string &name, Args &args)
 {
 	return context.invoke_method(obj, obj.field(name), args);
 }
 
-Value Class::invoke_static(const std::string &name, ExprList &args)
+Value Class::invoke_static(const std::string &name, Args &args)
 {
 	return invoke_method(*static_instance, name, args);
 }
@@ -127,19 +127,23 @@ const std::string& Class::get_name()
 	return name;
 }
 
-size_t Class::get_id()
+class_id Class::get_id()
 {
 	return id;
 }
 
 Object Class::create(Args &args)
 {
-	Object obj(this, proto_object_data);
-	obj.invoke_method(context.get_type_mgr(), CONSTRUCT, args);
-	return obj;
+	auto obj = create_uninitialized();
+	return obj.construct(context.get_type_mgr(), args);
 }
 
-size_t Class::get_id(const std::string &type_name)
+Object Class::create_uninitialized()
+{
+	return Object(this, proto_object_data);
+}
+
+class_id Class::get_id(const std::string &type_name)
 {
 	return str_hash(type_name);
 }

@@ -4,8 +4,11 @@
 #include <string>
 #include <set>
 #include <unordered_map>
+#include <typeinfo>
 
 #include "type.h"
+#include "OOPDefs.h"
+#include "util/cast.h"
 #include "structure/DataTable.h"
 #include "structure/Value.h"
 #include "interpreter/Interpreter.h"
@@ -25,7 +28,8 @@ class Object;
 class Class : public Allocatable<Class>
 {
 	private:
-		size_t id;
+		class_id id;
+		std::type_info *native_id = nullptr;
 		std::string name;
 
 		std::vector<Class*> base;
@@ -43,17 +47,22 @@ class Class : public Allocatable<Class>
 
 	public:
 		static constexpr std::string_view
-		CONSTRUCT = "construct", SUPER = "super",
-		TO_STRING = "to_string", THIS_ARG = "this",
-		NATIVE_OBJ = ".o";
+
+		THIS_ARG = "this";
 
 		Class(Interpreter &context, const std::string &name);
 		virtual ~Class() = default;
 
+		template<class C>
+		inline void set_native_id()
+		{
+			native_id = &unconst(typeid(C));
+		}
+
 		void register_method(std::string_view, Function&);
 
 		template<typename T>
-		void register_method(std::string_view name, T method)
+		void register_method(std::string_view name, T &&method)
 		{
 			auto mname = mtl::str(name);
 			if constexpr (std::is_same<TYPE(T), InbuiltFunc>::value)
@@ -81,12 +90,17 @@ class Class : public Allocatable<Class>
 
 		bool static_call(Args &args);
 
-		virtual Value invoke_method(Object &obj, const std::string &name, ExprList &args);
-		Value invoke_static(const std::string &name, ExprList &args);
+		virtual Value invoke_method(Object &obj, const std::string &name, Args &args);
+		Value invoke_static(const std::string &name, Args &args);
 
 		Value extract_names(const DataTable&);
 
-		size_t get_id();
+		class_id get_id();
+
+		inline const std::type_info* get_native_id()
+		{
+			return native_id;
+		}
 
 		const std::string& get_name();
 		inline void set_name(const std::string &name)
@@ -100,9 +114,10 @@ class Class : public Allocatable<Class>
 			return context;
 		}
 
-		virtual Object create(ExprList &args);
+		virtual Object create(Args &args);
+		Object create_uninitialized();
 
-		static size_t get_id(const std::string &type_name);
+		static class_id get_id(const std::string &type_name);
 
 		friend std::ostream& operator <<(std::ostream &stream, Class &type);
 };
@@ -111,7 +126,7 @@ class Anonymous: public Class
 {
 	public:
 		Anonymous(Interpreter &context) : Class(context, "Anonymous") {}
-		Value invoke_method(Object&, const std::string&, ExprList&) override;
+		Value invoke_method(Object&, const std::string&, Args&) override;
 };
 
 } /* namespace mtl */

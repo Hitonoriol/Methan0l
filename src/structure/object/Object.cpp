@@ -62,18 +62,24 @@ Value& Object::field(std::string_view name)
 	return field(std::string(name));
 }
 
-Value Object::invoke_method(TypeManager &mgr, const std::string &name, ExprList &args)
+Object& Object::construct(TypeManager &mgr, Args &args)
 {
-	return mgr.invoke_method(*this, name, args);
+	invoke_method(Methods::CONSTRUCTOR, args);
+	return *this;
 }
 
-Value Object::invoke_method(TypeManager &mgr, const std::string_view &name,
-		ExprList &args)
+
+Value Object::invoke_method(const std::string &name, Args &args)
 {
-	return invoke_method(mgr, std::string(name), args);
+	return get_class()->invoke_method(*this, name, args);
 }
 
-Value& Object::get_this_v(ExprList &args)
+Value Object::invoke_method(const std::string_view &name, Args &args)
+{
+	return invoke_method(str(name), args);
+}
+
+Value& Object::get_this_v(Args &args)
 {
 	LiteralExpr &this_expr = try_cast<LiteralExpr>(args.front());
 	return this_expr.raw_ref();
@@ -81,10 +87,15 @@ Value& Object::get_this_v(ExprList &args)
 
 Value& Object::get_native()
 {
-	return field(Class::NATIVE_OBJ);
+	return field(Fields::NATIVE_OBJ);
 }
 
-Object& Object::get_this(ExprList &args)
+void Object::set_native(Value native_obj)
+{
+	def(Fields::NATIVE_OBJ) = native_obj;
+}
+
+Object& Object::get_this(Args &args)
 {
 	return get_this_v(args).get<Object>();
 }
@@ -111,15 +122,8 @@ uintptr_t Object::id() const
 
 std::string Object::to_string()
 {
-	std::stringstream ss;
-	ss << *this;
-	return ss.str();
-}
-
-std::string Object::to_string(Interpreter &context)
-{
-	ExprList noargs;
-	return str(invoke_method(context.get_type_mgr(), Class::TO_STRING, noargs));
+	Args noargs;
+	return str(invoke_method(Methods::TO_STRING, noargs));
 }
 
 void Object::deep_copy()

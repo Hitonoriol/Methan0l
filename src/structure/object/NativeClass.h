@@ -54,6 +54,7 @@ class NativeClass
 	void name::initialize() \
 	{ \
 		class_binder.set_name(STR(name)); \
+		class_binder.get_class().set_native_id<name>(); \
 		JOIN(__VA_ARGS__) \
 		class_binder.register_class(); \
 		LOG("Bound a native class: " << mtl::type_name<bound_class>() << " [" << class_binder.get_class().get_name() << "]") \
@@ -63,6 +64,9 @@ class NativeClass
 #define METHOD(...) [](JOIN(__VA_ARGS__))
 #define THIS OBJECT(class_binder, this_obj)
 #define THIS_CLASS CLASS(class_binder)
+
+#define BIND_CONSTRUCTOR(...) binder.bind_constructor<JOIN(__VA_ARGS__)>();
+#define BIND_METHOD(name) binder.bind_method(#name, &THIS_CLASS::name);
 
 } /* namespace mtl */
 

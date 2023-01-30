@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "OOPDefs.h"
 #include "structure/DataTable.h"
 
 namespace mtl
@@ -31,17 +32,18 @@ class Object
 		Object(const Object &rhs);
 		Object& operator=(const Object &rhs);
 
+		Object& construct(TypeManager &mgr, Args &args);
 		Value& field(std::string_view name);
 		Value& field(const std::string &name);
 		Value& def(std::string_view name);
-		Value invoke_method(TypeManager &mgr, const std::string &name, ExprList &args);
-		Value invoke_method(TypeManager &mgr, const std::string_view &name,
-				ExprList &args);
+		Value invoke_method(const std::string &name, Args &args);
+		Value invoke_method(const std::string_view &name, Args &args);
 
-		static Value& get_this_v(ExprList &args);
-		static Object& get_this(ExprList &args);
+		static Value& get_this_v(Args &args);
+		static Object& get_this(Args &args);
 
 		Value& get_native();
+		void set_native(Value);
 
 		Class* get_class() const;
 
@@ -50,7 +52,6 @@ class Object
 		uintptr_t id() const;
 
 		std::string to_string();
-		std::string to_string(Interpreter &context);
 
 		friend bool operator ==(const Object &lhs, const Object &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Object &obj);
