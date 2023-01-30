@@ -1,6 +1,12 @@
 #ifndef SRC_UTIL_HASH_H_
 #define SRC_UTIL_HASH_H_
 
+#include <deque>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <utility>
+
 #include <expression/Expression.h>
 #include <structure/DataTable.h>
 #include <structure/Function.h>
@@ -8,13 +14,17 @@
 #include <structure/Value.h>
 #include <structure/ValueRef.h>
 #include <type.h>
-#include <deque>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <utility>
 
 #include "cast.h"
+
+#define HASH(type, as_name, ...) \
+	template<> struct std::hash<type> \
+	{ \
+		size_t operator()(const type &as_name) const \
+		{ \
+			JOIN(__VA_ARGS__) \
+		} \
+	};
 
 namespace mtl
 {

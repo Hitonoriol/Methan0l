@@ -23,12 +23,17 @@ TypeManager::~TypeManager() = default;
 
 void TypeManager::register_type(std::shared_ptr<Class> type)
 {
-	if constexpr (DEBUG)
-		out << "! Registering type ["
-				<< std::hex << type->get_id() << "] " << std::dec
-				<< type->get_class_data() << std::endl;
+	LOG("! Registering type ["
+			<< std::hex << type->get_id() << "] " << std::dec
+			<< type->get_class_data())
 
-	types.emplace(type->get_id(), type);
+	auto type_id = type->get_id();
+	auto native_id = type->get_native_id();
+	types.emplace(type_id, type);
+	if (native_id != nullptr) {
+		OUT("Registered a new native type: " << native_id->name())
+		native_types.emplace(*native_id, type.get());
+	}
 }
 
 void TypeManager::unregister_type(const std::string &name)
@@ -71,6 +76,11 @@ Object TypeManager::create_object(size_t type_id, Args &args)
 Object TypeManager::create_object(const std::string &type_name, Args &args)
 {
 	return create_object(std::hash<std::string> { }(type_name), args);
+}
+
+Object TypeManager::create_uninitialized_object(Class *type)
+{
+	return type->create_uninitialized();
 }
 
 Class* TypeManager::get_root()

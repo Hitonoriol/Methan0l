@@ -141,7 +141,7 @@ class Interpreter
 				ExprList args;
 				if constexpr (Optype == OperatorType::BINARY)
 					args.push_back(b);
-				return obj.invoke_method(type_mgr, Token::to_string(op), args);
+				return obj.invoke_method(Token::to_string(op), args);
 			}
 
 			if constexpr (Optype == OperatorType::UNARY) {
@@ -318,7 +318,12 @@ class Interpreter
 		auto call(F &&f, const Container &c)
 		{
 			constexpr unsigned argc = function_traits<decltype(f)>::arity;
-			return call_helper<argc == 0, decltype(f), Container, argc>::engage(*this, f, c);
+			using caller = call_helper<argc == 0, decltype(f), Container, argc>;
+			if constexpr (std::is_void<typename function_traits<F>::return_type>::value) {
+				caller::engage(*this, f, c);
+				return Value::NO_VALUE;
+			} else
+				return caller::engage(*this, f, c);
 		}
 
 		void handle_exception(ExHandlerEntry);
@@ -339,17 +344,18 @@ class Interpreter
 			type_mgr.register_type<T>();
 		}
 
+		template<class C, typename ...Args>
+		inline Object new_object(Args &&...ctor_args)
+		{
+			return type_mgr.new_object<C>(std::forward<Args>(ctor_args)...);
+		}
+
 		template<unsigned default_argc = 0, typename F>
 		InbuiltFunc bind_func(F &&f, Value default_args = Value::NO_VALUE)
 		{
-			using R = typename function_traits<F>::return_type;
 			if constexpr (function_traits<F>::arity == 0) {
 				return [&, f](Args args) -> Value {
-					if constexpr (std::is_void<R>::value) {
-						call(f, args);
-						return Value::NO_VALUE;
-					} else
-						return call(f, args);
+					return call(f, args);
 				};
 			}
 			/* Function accepts the ExprList itself - no binding required */
@@ -370,17 +376,14 @@ class Interpreter
 						constexpr unsigned arity = function_traits<F>::arity;
 						auto argc = args.size();
 						if (argc < arity) {
+							ExprList callargs(args);
 							auto &defargs = unconst(default_args).get<ValList>();
 							for (size_t i = argc - default_argc; i < argc; ++i)
-								args.push_back(defargs.at(i).get<ExprPtr>());
+								callargs.push_back(defargs.at(i).get<ExprPtr>());
+							return call(f, callargs);
 						}
 					}
-					if constexpr (std::is_void<R>::value) {
-						call(f, args);
-						return Value::NO_VALUE;
-					}
-					else
-						return call(f, args);
+					return call(f, args);
 				};
 			}
 		}
@@ -453,7 +456,7 @@ class Interpreter
 		Value invoke(const Function &func, ExprList &args);
 		Value invoke(const Value &callable, ExprList &args);
 
-		Value invoke_method(Object&, Value&, ExprList&);
+		Value invoke_method(Object&, Value&, Args&);
 
 		template<typename T>
 		inline TYPE(T)& tmp_callable(T &&callable)

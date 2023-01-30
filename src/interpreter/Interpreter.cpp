@@ -563,9 +563,9 @@ Value Interpreter::invoke(const Value &callable, ExprList &args)
 	});
 }
 
-Value Interpreter::invoke_method(Object &obj, Value &method, ExprList &args)
+Value Interpreter::invoke_method(Object &obj, Value &method, Args &args)
 {
-	auto argcopy = args;
+	ExprList argcopy = args;
 	argcopy.push_front(LiteralExpr::create(obj));
 	return method.is<Function>()
 			? invoke(method.get<Function>(), argcopy)
