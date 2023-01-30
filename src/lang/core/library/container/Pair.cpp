@@ -15,8 +15,8 @@ namespace mtl
 
 NATIVE_CLASS_INIT(Pair, {
 	auto &binder = get_binder();
-	binder.bind_constructor<Value, Value>();
-	binder.bind_method("swap", &THIS_CLASS::swap);
+	BIND_CONSTRUCTOR(Value, Value)
+	BIND_METHOD(swap)
 
 	binder.register_method("swap_contents", METHOD(OBJ) {
 		auto &p = THIS;
@@ -31,7 +31,7 @@ NATIVE_CLASS_INIT(Pair, {
 		return Value::ref(THIS.second);
 	});
 
-	binder.register_method("to_string", METHOD(OBJ) {
+	binder.register_method(Methods::TO_STRING, METHOD(OBJ) {
 		auto &p = THIS;
 		return std::string("{Pair: [" + p.first.to_string() + ", " + p.second.to_string() + "]}");
 	});
