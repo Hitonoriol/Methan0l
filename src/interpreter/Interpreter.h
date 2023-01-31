@@ -215,6 +215,7 @@ class Interpreter
 		template<typename T>
 		inline T eval(Expression &expr)
 		{
+			LOG("eval<T>() for " << type_name<T>())
 			/* T, but with `const` and `&` / `&&` stripped */
 			using V = TYPE(T);
 			constexpr bool is_allowed = Value::allowed_or_heap<typename std::remove_pointer<V>::type>();
@@ -265,7 +266,6 @@ class Interpreter
 					return *std::any_cast<std::shared_ptr<UR>>(any);
 
 				/* Get a reference to a (const) fallback object */
-				OUT("UR = " << type_name<UR>() << ", T = " << type_name<T>())
 				if (t == typeid(UR))
 					return std::any_cast<UR&>(any);
 				else

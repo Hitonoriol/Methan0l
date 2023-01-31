@@ -108,7 +108,7 @@ void Interpreter::init_heap(size_t initial_mem_cap)
 
 void Interpreter::register_func(const std::string &name, NativeFunc &&func)
 {
-	OUT("  Registered function: " << name)
+	LOG("Registered function: " << name)
 	if (exec_stack.size() <= 1)
 		inbuilt_funcs.emplace(name, func);
 	else {

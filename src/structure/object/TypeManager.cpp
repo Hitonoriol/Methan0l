@@ -31,7 +31,7 @@ void TypeManager::register_type(std::shared_ptr<Class> type)
 	auto native_id = type->get_native_id();
 	types.emplace(type_id, type);
 	if (native_id != nullptr) {
-		OUT("Registered a new native type: " << native_id->name())
+		LOG("Registered a new native type: " << native_id->name())
 		native_types.emplace(*native_id, type.get());
 	}
 }
