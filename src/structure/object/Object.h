@@ -52,6 +52,7 @@ class Object
 		uintptr_t id() const;
 
 		std::string to_string();
+		std::string to_string_default();
 
 		friend bool operator ==(const Object &lhs, const Object &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Object &obj);

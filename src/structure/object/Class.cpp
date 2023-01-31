@@ -44,7 +44,7 @@ Class::Class(Interpreter &context, const std::string &name) :
 
 	/* Default string conversion */
 	register_method(Methods::TO_STRING, [&](Object &obj) {
-		return obj.to_string();
+		return obj.to_string_default();
 	});
 
 	/* Get all methods of this class */

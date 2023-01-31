@@ -126,6 +126,13 @@ std::string Object::to_string()
 	return str(invoke_method(Methods::TO_STRING, noargs));
 }
 
+std::string Object::to_string_default()
+{
+	sstream ss;
+	ss << *this;
+	return ss.str();
+}
+
 void Object::deep_copy()
 {
 	data.copy_managed_map();
