@@ -33,6 +33,9 @@ class NativeClass
 		}
 };
 
+/* Declare a NativeClass<> binder, where:
+ * 		`name` is both the name of the new C++ class and methan0l class
+ * 		`...` is the native class name / template specification being bound to the interpreter. */
 #define NATIVE_CLASS_DECL(name, ...) \
 	class name: public mtl::NativeClass<JOIN(__VA_ARGS__)> \
 	{ \
@@ -43,14 +46,16 @@ class NativeClass
 
 #define NATIVE_CLASS_DECL_END(...) };
 
-/* Declare a NativeClass<> binder, where:
- * 		`name` is both the name of the new C++ class and methan0l class
- * 		`...` is the native class name / template specification being bound to the interpreter. */
+
 #define NATIVE_CLASS(name, ...) \
 		NATIVE_CLASS_DECL(name, __VA_ARGS__) \
 		NATIVE_CLASS_DECL_END()
 
-#define NATIVE_CLASS_INIT(name, ...) \
+/*   For use only in source files.
+ *   `name` is the name of the NativeClass<> binder declared through macros above.
+ *   `...` is a scope statement ({...}) containing a constructor binding and all
+ * native class method bindings you wish to expose to the interpreter. */
+#define NATIVE_CLASS_BINDING(name, ...) \
 	void name::initialize() \
 	{ \
 		class_binder.set_name(STR(name)); \
@@ -60,13 +65,25 @@ class NativeClass
 		LOG("Bound a native class: " << mtl::type_name<bound_class>() << " [" << class_binder.get_class().get_name() << "]") \
 	}
 
-#define OBJ mtl::Object &this_obj
+/* Macros for use inside the NATIVE_CLASS_BINDING(...): */
+
+/* For convenient inline method definitions via ClassBinder<C>::register_method(std::string_view, F&&) */
 #define METHOD(...) [](JOIN(__VA_ARGS__))
+
+/*   For use inside of the METHOD(...) macro above as the first argument.
+ * (treat this like an explicit `this` parameter) */
+#define OBJ mtl::Object &this_obj
+
+/*   For referring to `this` object from inside the inline-defined methods
+ * (e.g. via ClassBinder<C>::register_method(std::string_view, F&&)) */
 #define THIS OBJECT(class_binder, this_obj)
+
+/* For convenient referring to the bound native class */
 #define THIS_CLASS CLASS(class_binder)
 
-#define BIND_CONSTRUCTOR(...) binder.bind_constructor<JOIN(__VA_ARGS__)>();
-#define BIND_METHOD(name) binder.bind_method(#name, &THIS_CLASS::name);
+/* Convenience macros for `bind_method` and `bind_constructor` methods of ClassBinder<C> */
+#define BIND_CONSTRUCTOR(...) class_binder.bind_constructor<JOIN(__VA_ARGS__)>();
+#define BIND_METHOD(name) class_binder.bind_method(#name, &THIS_CLASS::name);
 
 } /* namespace mtl */
 

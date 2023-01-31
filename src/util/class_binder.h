@@ -48,9 +48,13 @@ struct Factory: private FactoryImpl<T, Types...>::OptCall
 METHOD_WRAPPER(R(C::*func)(Args...))
 METHOD_WRAPPER(R(C::*func)(Args...)const)
 
+/* Convenience macro to refer to the bound class of `binder` */
 #define CLASS(binder) std::remove_reference<decltype(binder)>::type::bound_class
+
+/* Convenience macro to get a reference to an object of `binder`'s bound class from the mtl::Object `obj` */
 #define OBJECT(binder, obj) std::remove_reference<decltype(binder)>::type::as_native(obj)
 
+/* Provides mechanisms for binding a native C++ class' constructor and methods to a mtl::Class instance. */
 template<class C>
 class ClassBinder
 {
@@ -70,12 +74,9 @@ class ClassBinder
 			clazz->set_name(name);
 		}
 
-		/*
-		 * Creates a methan0l Class instance with specified constructor
-		 *
-		 * 	`C` - class being bound to a methan0l Class
-		 * 	`Sig...` - `T`'s constructor signature
-		 */
+		/* Binds the specified constructor of `bound_class` by signature to a methan0l class.
+		 * Methan0l classes can only have one constructor.
+		 * `Sig...` - `bound_class`'s constructor signature */
 		template<typename ...Sig>
 		inline void bind_constructor()
 		{
