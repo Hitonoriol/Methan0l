@@ -70,16 +70,20 @@ class TypeManager
 		template<typename T>
 		inline void register_type()
 		{
-			/* If T is callable, it must handle the registration itself inside its invocation operator overload
-			 * (+ the registration must not have any state bound to object of T) */
+			/*   If T is callable, it must handle the registration itself inside its invocation operator overload
+			 * (+ the registration must not have any state bound to object of T).
+			 *   This mechanism is used by NativeClass<T>. */
 			IF (is_callable<T>::value) {
 				T registrator(context);
 				registrator();
 			}
-			else
+			else /* Allocate a mtl::Class instance and register it - for classes not backed by native classes */
 				register_type(Allocatable<T>::allocate(context));
 		}
 
+		/*   Allocate a new object of a native-backed methan0l type (C must inherit from NativeClass<T>),
+		 * where T is the native class bound to a mtl::Class.
+		 * Class C must be registered via the register_type<C>() method above. */
 		template<class C, typename ...Args>
 		Object new_object(Args &&...ctor_args)
 		{
@@ -96,6 +100,12 @@ class TypeManager
 					std::forward<Args>(ctor_args)...);
 			obj.set_native(native_obj);
 			return obj;
+		}
+
+		template<typename ...Args>
+		inline Object new_object(const std::string &type_name, Args &&...ctor_args)
+		{
+			return create_object(type_name, {ctor_args...});
 		}
 
 		void unregister_type(const std::string &name);
