@@ -3,8 +3,7 @@
 namespace mtl
 {
 
-NATIVE_CLASS_INIT(ListIterator, {
-	auto &binder = get_binder();
+NATIVE_CLASS_BINDING(ListIterator, {
 	BIND_CONSTRUCTOR(ValList&)
 	BIND_METHOD(next)
 	BIND_METHOD(has_next)
