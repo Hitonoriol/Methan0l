@@ -110,6 +110,11 @@ Class* Object::get_class() const
 	return data.cget(OBJCLASS);
 }
 
+Interpreter& Object::context() const
+{
+	return get_class()->get_evatuator();
+}
+
 size_t Object::type_id() const
 {
 	return get_class()->get_id();

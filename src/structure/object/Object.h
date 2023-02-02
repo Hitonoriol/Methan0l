@@ -46,6 +46,7 @@ class Object
 		void set_native(Value);
 
 		Class* get_class() const;
+		Interpreter& context() const;
 
 		DataTable& get_data();
 		size_t type_id() const;
