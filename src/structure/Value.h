@@ -447,7 +447,7 @@ class Value
 				else
 					return cget<T>();
 			}
-			/* (1) Convertion to a valid alternative type or (2) copy of an underlying value of type T */
+			/* (1) Conversion to a valid alternative type or (2) copy of an underlying value of type T */
 			else {
 				if (is<T>())
 					return cget<T>();
@@ -526,6 +526,30 @@ class Value
 			});
 		}
 
+		template<typename T> inline bool is() const
+		{
+			IF (allowed_type<T>())
+				return std::holds_alternative<T>(value);
+
+			ELIF (is_heap_storable<T>()) {
+				using Ptr = std::shared_ptr<T>;
+				if (std::holds_alternative<Ptr>(value))
+					return true;
+				else if (std::holds_alternative<std::any>(value))
+					return std::get<std::any>(value).type() == typeid(Ptr);
+			}
+
+			if (std::holds_alternative<std::any>(value))
+				return std::get<std::any>(value).type() == typeid(T);
+
+			return false;
+		}
+
+		void assert_type(Type expected,
+				const std::string &msg = "Invalid type conversion");
+
+		size_t hash_code() const;
+
 		ARITHMETIC_OP(-)
 		ARITHMETIC_OP(*)
 		ARITHMETIC_OP(/)
@@ -562,19 +586,6 @@ class Value
 		POSTFIX_UNARY(++)
 		PREFIX_UNARY(--)
 		POSTFIX_UNARY(--)
-
-		template<typename T> inline bool is() const
-		{
-			if constexpr (allowed_type<T>())
-				return std::holds_alternative<T>(value);
-			else
-				return is_heap_storable<T>() && std::holds_alternative<std::shared_ptr<T>>(value);
-		}
-
-		void assert_type(Type expected,
-				const std::string &msg = "Invalid type conversion");
-
-		size_t hash_code() const;
 };
 
 const Value __ = Value::NO_VALUE;
