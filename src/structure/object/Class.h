@@ -21,7 +21,7 @@ class Function;
 
 /* TODO: Remove this & store object data entirely inside its DataTable */
 template<typename T>
-using Managed = std::unordered_map<uintptr_t, T>;
+using ManagedObjects = std::unordered_map<uintptr_t, T>;
 
 class Object;
 
@@ -70,6 +70,8 @@ class Class : public Allocatable<Class>
 			else
 				class_data.set(mname, context.bind_func(method));
 		}
+
+		Value& register_method(std::string_view name);
 
 		void add_base_class(Class*);
 		const std::vector<Class*>& get_base_classes();

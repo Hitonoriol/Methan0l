@@ -31,6 +31,11 @@ class NativeClass
 		{
 			return class_binder;
 		}
+
+		static inline T& native(Object &obj)
+		{
+			return ClassBinder<T>::as_native(obj);
+		}
 };
 
 /* Declare a NativeClass<> binder, where:
@@ -67,8 +72,10 @@ class NativeClass
 
 /* Macros for use inside the NATIVE_CLASS_BINDING(...): */
 
-/* For convenient inline method definitions via ClassBinder<C>::register_method(std::string_view, F&&) */
-#define METHOD(...) [](JOIN(__VA_ARGS__))
+/* For convenient inline method definitions */
+#define STANDARD_METHOD(name) class_binder.register_method(name) = []
+#define METHOD(name) STANDARD_METHOD(STR(name))
+#define CONSTRUCTOR STANDARD_METHOD(Methods::CONSTRUCTOR)
 
 /*   For use inside of the METHOD(...) macro above as the first argument.
  * (treat this like an explicit `this` parameter) */
@@ -78,12 +85,29 @@ class NativeClass
  * (e.g. via ClassBinder<C>::register_method(std::string_view, F&&)) */
 #define THIS OBJECT(class_binder, this_obj)
 
+/*   For referring to `this` object from inside the proxy-methods (methods that
+ * need to access the mtl::Object representation of the current object or the
+ * interpreter context; such methods must be declared as static member or non-member
+ * functions and have `OBJ` in place of the first argument).
+ *   `class_name` - name of the binder class inheriting from NativeClass<C>. */
+#define NATIVE(class_name) class_name::native(this_obj)
+
+/* For referring to the interpreter context current method is called from */
+#define CONTEXT this_obj.context()
+
 /* For convenient referring to the bound native class */
 #define THIS_CLASS CLASS(class_binder)
 
 /* Convenience macros for `bind_method` and `bind_constructor` methods of ClassBinder<C> */
 #define BIND_CONSTRUCTOR(...) class_binder.bind_constructor<JOIN(__VA_ARGS__)>();
 #define BIND_METHOD(name) class_binder.bind_method(#name, &THIS_CLASS::name);
+
+/*   Bind a static member / non-member function as a mtl::Class method.
+ * Requires function's full name including class it's a member of (if any).
+ * Requires first argument of the function to be a `mtl::Object&` (`OBJ` macro can be used). */
+#define BIND_PROXY_METHOD(name) class_binder.register_method(#name, &name);
+
+/* ----------------------------------------------------- */
 
 } /* namespace mtl */
 

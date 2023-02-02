@@ -70,6 +70,11 @@ void Class::register_method(std::string_view name, Function &method)
 	class_data.set(mtl::str(name), method);
 }
 
+Value& Class::register_method(std::string_view name)
+{
+	return class_data.get_or_create(str(name));
+}
+
 void Class::add_base_class(Class *base)
 {
 	this->base.push_back(base);

@@ -24,7 +24,7 @@ class Random: public Class
 		static Distr<dec> int_gen;
 		static Distr<double> dbl_gen;
 
-		Managed<std::mt19937_64> managed_rngs;
+		ManagedObjects<std::mt19937_64> managed_rngs;
 
 		template<typename T>
 		T range_min(Args &args)
