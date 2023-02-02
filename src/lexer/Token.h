@@ -218,7 +218,7 @@ class Token
 
 				/* Type idfrs */
 				"Nil", "Int", "Float", "String", "Boolean",
-				"List", "Unit", "Map", "Function", "Character",
+				"<List>", "Unit", "Map", "Function", "Character",
 				"Object", "Reference", "Token", "Expression", "Set",
 				"Fallback"
 		};
