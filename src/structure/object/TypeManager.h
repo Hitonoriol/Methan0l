@@ -3,47 +3,12 @@
 
 #include <string>
 #include <unordered_map>
-#include <typeinfo>
 
 #include "util/meta/type_traits.h"
 #include "util/memory.h"
 #include "util/hash.h"
+#include "structure/NativeID.h"
 #include "Object.h"
-
-namespace mtl
-{
-
-class NativeID
-{
-	private:
-		const std::type_info *type_info;
-
-	public:
-		NativeID(const std::type_info &type_info)
-			: type_info(&type_info)	{}
-
-		inline const std::type_info *operator->() const
-		{
-			return type_info;
-		}
-
-		inline bool operator==(const NativeID &rhs) const
-		{
-			return *type_info == *rhs.type_info;
-		}
-
-		template<typename C>
-		static inline NativeID of()
-		{
-			return { typeid(C) };
-		}
-};
-
-}
-
-HASH(mtl::NativeID, v, {
-	return v->hash_code();
-})
 
 namespace mtl
 {
@@ -53,8 +18,8 @@ class Anonymous;
 class TypeManager
 {
 	private:
-		std::pmr::unordered_map<class_id, std::shared_ptr<Class>> types;
-		std::pmr::unordered_map<NativeID, Class*> native_types;
+		std::pmr::unordered_map<class_id, std::shared_ptr<Class>> classes;
+		std::pmr::unordered_map<NativeID, Class*> native_classes;
 		Interpreter &context;
 		std::shared_ptr<Anonymous> root;
 
@@ -89,8 +54,8 @@ class TypeManager
 		{
 			using type = typename C::bound_class;
 			auto native_id = NativeID::of<C>();
-			auto entry = native_types.find(native_id);
-			if (entry == native_types.end())
+			auto entry = native_classes.find(native_id);
+			if (entry == native_classes.end())
 				throw std::runtime_error("Cannot instantiate an object "
 						"of unregistered native type: " + str(mtl::type_name<type>())
 						+ " (" + native_id->name() + ")");

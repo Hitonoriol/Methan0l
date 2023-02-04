@@ -29,22 +29,22 @@ void TypeManager::register_type(std::shared_ptr<Class> type)
 
 	auto type_id = type->get_id();
 	auto native_id = type->get_native_id();
-	types.emplace(type_id, type);
+	classes.emplace(type_id, type);
 	if (native_id != nullptr) {
 		LOG("Registered a new native type: " << native_id->name())
-		native_types.emplace(*native_id, type.get());
+		native_classes.emplace(*native_id, type.get());
 	}
 }
 
 void TypeManager::unregister_type(const std::string &name)
 {
-	types.erase(Class::get_id(name));
+	classes.erase(Class::get_id(name));
 }
 
 Class& TypeManager::get_type(size_t id)
 {
-	auto entry = types.find(id);
-	if (entry != types.end())
+	auto entry = classes.find(id);
+	if (entry != classes.end())
 		return *(entry->second);
 
 	if (id == root->get_id())
