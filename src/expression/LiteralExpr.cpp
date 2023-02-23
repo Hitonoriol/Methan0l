@@ -9,7 +9,7 @@
 namespace mtl
 {
 
-LiteralExpr::LiteralExpr(Type val_type, const Token &token)
+LiteralExpr::LiteralExpr(TypeID val_type, const Token &token)
 {
 	std::string &tokstr = unconst(token.get_value());
 	auto type = token.get_type();
@@ -77,15 +77,8 @@ void LiteralExpr::exec_literal(Interpreter &context, Value &val)
 	if (val.empty())
 		return;
 
-	switch (val.type()) {
-	case Type::UNIT: {
+	if (val.type() == Type::UNIT)
 		context.invoke(val.get<Unit>());
-		break;
-	}
-
-	default:
-		break;
-	}
 }
 
 std::ostream& LiteralExpr::info(std::ostream &str)

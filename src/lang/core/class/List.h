@@ -20,12 +20,31 @@ class List
 		List();
 		List(const ValList&);
 		List(const List&);
-		ValList* operator->();
+
+		inline ValList* operator->()
+		{
+			return list.get();
+		}
+
+		inline ValList& operator*()
+		{
+			return *list;
+		}
+
+		inline operator ValList&()
+		{
+			return *list;
+		}
+
+		inline Value& operator[](UInt idx)
+		{
+			return (*list)[idx];
+		}
 
 		static Object iterator(OBJ);
 
 		void add(Value);
-		Value remove_at(udec);
+		Value remove_at(UInt);
 		Value remove(Value);
 
 		std::string to_string();

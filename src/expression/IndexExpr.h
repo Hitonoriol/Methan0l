@@ -14,7 +14,7 @@ class IndexExpr: public IdentifierExpr
 {
 	private:
 		ExprPtr lhs, idx;
-		Type lhs_val_type = Type::NIL;
+		TypeID lhs_val_type = Type::NIL;
 		bool remove;
 		bool insert;
 

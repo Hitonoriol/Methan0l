@@ -17,7 +17,7 @@ namespace mtl
 std::random_device Random::rand_dev;
 std::uniform_real_distribution<double> Random::dbl_distr(0, 1);
 
-Distr<dec> Random::int_gen = [](auto &rng) {
+Distr<Int> Random::int_gen = [](auto &rng) {
 	return rng();
 };
 
@@ -28,7 +28,7 @@ Distr<double> Random::dbl_gen = [](auto &rng) {
 Random::Random(Interpreter &context) : Class(context, "Random")
 {
 	/* rnd = Random.new$([seed]) */
-	register_method(Methods::CONSTRUCTOR, [&](Args &args) {
+	register_method(Methods::Constructor, [&](Args &args) {
 		Object &obj = Object::get_this(args);
 		managed_rngs.emplace(obj.id(), std::mt19937_64());
 		managed_rng(obj).seed(extract_seed(args));
@@ -70,11 +70,11 @@ Random::Random(Interpreter &context) : Class(context, "Random")
 	});
 }
 
-dec Random::extract_seed(Args &args)
+Int Random::extract_seed(Args &args)
 {
 	Value seed_val = args.size() > 1 ? args[1]->evaluate(context) : Value::NIL;
 	Object &this_obj = Object::get_this(args);
-	dec seed = seed_val.nil() ? rand_dev() : seed_val.as<dec>();
+	Int seed = seed_val.nil() ? rand_dev() : seed_val.as<Int>();
 
 	if constexpr (DEBUG)
 		std::cout << "Seeding Random: " << seed << std::endl;
@@ -89,9 +89,9 @@ bool Random::next_bool(Args &args)
 	return dbl_distr(managed_rng(Object::get_this(args))) < prob;
 }
 
-dec Random::next_int(std::mt19937_64 &rng, dec bound)
+Int Random::next_int(std::mt19937_64 &rng, Int bound)
 {
-	dec bits, val;
+	Int bits, val;
 	do {
 		bits = ((unsigned) (rng() << 1)) >> 1;
 		val = bits % bound;
@@ -99,7 +99,7 @@ dec Random::next_int(std::mt19937_64 &rng, dec bound)
 	return val;
 }
 
-dec Random::next_int(Args &args)
+Int Random::next_int(Args &args)
 {
 	return next(args, int_gen);
 }

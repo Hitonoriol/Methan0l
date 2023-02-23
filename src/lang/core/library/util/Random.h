@@ -21,7 +21,7 @@ class Random: public Class
 
 		static std::random_device rand_dev;
 		static std::uniform_real_distribution<double> dbl_distr;
-		static Distr<dec> int_gen;
+		static Distr<Int> int_gen;
 		static Distr<double> dbl_gen;
 
 		ManagedObjects<std::mt19937_64> managed_rngs;
@@ -38,7 +38,7 @@ class Random: public Class
 			return args.size() > 1 ? args.back()->evaluate(context).as<T>() : 0;
 		}
 
-		dec next_int(std::mt19937_64 &rng, dec bound);
+		Int next_int(std::mt19937_64 &rng, Int bound);
 
 		template<typename T>
 		T next(Args &args, Distr<T> &gen)
@@ -59,8 +59,8 @@ class Random: public Class
 			return n;
 		}
 
-		dec extract_seed(Args &args);
-		dec next_int(Args &args);
+		Int extract_seed(Args &args);
+		Int next_int(Args &args);
 		double next_double(Args &args);
 		bool next_bool(Args &args);
 

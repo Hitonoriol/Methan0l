@@ -30,7 +30,7 @@ void List::add(Value val)
 	list->push_back(val);
 }
 
-Value List::remove_at(udec idx)
+Value List::remove_at(UInt idx)
 {
 	auto removed = list->at(idx);
 	list->erase(list->begin() + idx);

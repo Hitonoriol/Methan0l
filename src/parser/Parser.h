@@ -109,7 +109,7 @@ class Parser
 		void register_postfix_opr(TokenType token,
 				Precedence precedence = Precedence::POSTFIX);
 
-		void register_literal_parser(TokenType token, Type val_type);
+		void register_literal_parser(TokenType token, TypeID val_type);
 
 		void register_word(TokenType wordop, Precedence prec = Precedence::PREFIX,
 				bool multiarg = false);

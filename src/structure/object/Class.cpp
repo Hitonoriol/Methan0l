@@ -10,6 +10,7 @@
 #include <variant>
 
 #include "interpreter/Interpreter.h"
+#include "CoreLibrary.h"
 #include "Object.h"
 #include "lang/Library.h"
 #include "expression/LiteralExpr.h"
@@ -21,7 +22,7 @@ namespace mtl
 {
 
 Class::Class(Interpreter &context, const std::string &name) :
-		id(get_id(name)),
+		native_id(typeid(*this), name),
 		name(name),
 		static_instance(std::make_unique<Object>(this)),
 		context(context)
@@ -34,16 +35,16 @@ Class::Class(Interpreter &context, const std::string &name) :
 	 * 		obj.class_id$()
 	 */
 	register_method("class_id", [&](Args &args) {
-		return id;
+		return get_id();
 	});
 
 	/* Default constructor */
-	register_method(Methods::CONSTRUCTOR, [&](Args &args) {
+	register_method(Methods::Constructor, [&](Args &args) {
 		return Value::NO_VALUE;
 	});
 
 	/* Default string conversion */
-	register_method(Methods::TO_STRING, [&](Object &obj) {
+	register_method(Methods::ToString, [&](Object &obj) {
 		return obj.to_string_default();
 	});
 
@@ -65,7 +66,7 @@ Class::Class(Interpreter &context, const std::string &name) :
 
 void Class::register_method(std::string_view name, Function &method)
 {
-	method.arg_def.push_front( { std::move(mtl::str(Parameters::THIS)),
+	method.arg_def.push_front( { std::move(mtl::str(Parameters::This)),
 			LiteralExpr::empty() });
 	class_data.set(mtl::str(name), method);
 }
@@ -87,7 +88,7 @@ const std::vector<Class*>& Class::get_base_classes()
 
 Value Class::extract_names(const DataTable &table)
 {
-	Value names(Type::LIST);
+	auto names = context.make<List>();
 	auto &list = names.get<ValList>();
 	for (auto&& [name, method] : table.managed_map()) {
 		if (name[0] != '.')
@@ -134,7 +135,7 @@ const std::string& Class::get_name()
 
 class_id Class::get_id()
 {
-	return id;
+	return native_id.type_id();
 }
 
 Object Class::create(Args &args)
@@ -146,11 +147,6 @@ Object Class::create(Args &args)
 Object Class::create_uninitialized()
 {
 	return Object(this, proto_object_data);
-}
-
-class_id Class::get_id(const std::string &type_name)
-{
-	return str_hash(type_name);
 }
 
 std::ostream& operator <<(std::ostream &stream, Class &type)

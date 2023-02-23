@@ -12,7 +12,7 @@
 #include "IdentifierExpr.h"
 #include "UnitExpr.h"
 #include "util/util.h"
-#include "util/meta.h"
+#include "util/meta/type_traits.h"
 
 namespace mtl
 {

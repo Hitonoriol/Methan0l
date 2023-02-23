@@ -10,6 +10,7 @@
 #include "type.h"
 #include "util/util.h"
 #include "util/StringFormatter.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -33,7 +34,7 @@ void LibString::load()
 	/* str.repeat$(times) */
 	function("repeat", [&](Args args) {
 		std::string str = arg(args).to_string(context);
-		dec times = arg(args, 1).get<dec>();
+		Int times = arg(args, 1).get<Int>();
 		std::ostringstream ss;
 		std::fill_n(std::ostream_iterator<std::string>(ss), times, str);
 		return Value(ss.str());
@@ -51,7 +52,7 @@ void LibString::load()
 
 	/* str.split$(delim_expr) */
 	function("split", [&](Args args) {
-		Value tokv(Type::LIST);
+		auto tokv = context->make<List>();
 		auto &toks = tokv.get<ValList>();
 		for (auto &&tok : split(str(args), str(args, 1)))
 			toks.push_back(tok);

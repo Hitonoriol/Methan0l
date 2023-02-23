@@ -17,7 +17,7 @@ class ExceptionHandler
 	private:
 		std::stack<ExHandlerEntry> handlers;
 		std::stack<Value> exceptions;
-		dec exceptions_active = 0;
+		Int exceptions_active = 0;
 
 	public:
 		bool empty();

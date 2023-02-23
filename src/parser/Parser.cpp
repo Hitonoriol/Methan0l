@@ -105,7 +105,7 @@ void Parser::register_infix_word(TokenType wordop, Precedence prec, BinOprType t
 	register_parser(wordop, new InfixWordOperatorParser(prcdc(prec), type == BinOprType::RIGHT_ASSOC));
 }
 
-void Parser::register_literal_parser(TokenType token, Type val_type)
+void Parser::register_literal_parser(TokenType token, TypeID val_type)
 {
 	register_parser(token, new LiteralParser(val_type));
 }

@@ -3,7 +3,8 @@
 
 #include <stdexcept>
 
-#include "../type.h"
+#include "type.h"
+#include "lang/DataType.h"
 
 #define UNIMPLEMENTED { throw mtl::IllegalOperationException(); }
 
@@ -20,12 +21,11 @@ class Exception {
 		const std::string_view &what();
 };
 
-enum class Type : uint8_t;
 struct InvalidTypeException : public std::runtime_error
 {
-		InvalidTypeException(Value received, Type expected);
-		InvalidTypeException(Type type, Type expected, const std::string &msg = "Invalid type conversion:");
-		InvalidTypeException(Type type);
+		InvalidTypeException(Value received, TypeID expected);
+		InvalidTypeException(TypeID type, TypeID expected, const std::string &msg = "Invalid type conversion:");
+		InvalidTypeException(TypeID type);
 };
 
 class IllegalOperationException : public std::runtime_error

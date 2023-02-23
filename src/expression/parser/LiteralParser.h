@@ -12,7 +12,7 @@ namespace mtl
 class LiteralParser: public PrefixParser
 {
 	private:
-		Type type;
+		TypeID type;
 
 		bool compatible(TokenType next)
 		{
@@ -20,7 +20,7 @@ class LiteralParser: public PrefixParser
 		}
 
 	public:
-		LiteralParser(Type type) : type(type)
+		LiteralParser(TypeID type) : type(type)
 		{
 		}
 

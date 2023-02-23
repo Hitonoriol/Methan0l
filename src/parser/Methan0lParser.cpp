@@ -164,7 +164,6 @@ Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 	register_word(TokenType::TYPE_ID);
 	register_word(TokenType::TYPE_NAME);
 	register_word(TokenType::DELETE);
-	register_word(TokenType::DEFINE_VALUE);
 	register_word(TokenType::OBJECT_COPY);
 	register_word(TokenType::HASHCODE);
 	register_word(TokenType::NO_EVAL, Precedence::NO_EVAL);

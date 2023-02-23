@@ -9,7 +9,7 @@
 #include "lang/core/Data.h"
 
 #include "expression/LiteralExpr.h"
-#include "util/meta.h"
+#include "util/meta/type_traits.h"
 #include "util/containers.h"
 #include "util/hash.h"
 

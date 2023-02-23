@@ -30,7 +30,7 @@ NATIVE_CLASS_BINDING(Pair, {
 		return Value::ref(THIS.second);
 	};
 
-	STANDARD_METHOD(Methods::TO_STRING) (OBJ) {
+	STANDARD_METHOD(Methods::ToString) (OBJ) {
 		auto &p = THIS;
 		return std::string("{Pair: [" + p.first.to_string() + ", " + p.second.to_string() + "]}");
 	};

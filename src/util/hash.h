@@ -4,6 +4,7 @@
 #include <deque>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 
@@ -17,21 +18,17 @@
 
 #include "cast.h"
 
-#define HASH(type, as_name, ...) \
-	template<> struct std::hash<type> \
-	{ \
-		size_t operator()(const type &as_name) const \
-		{ \
-			JOIN(__VA_ARGS__) \
-		} \
-	};
-
 namespace mtl
 {
 
 extern std::hash<std::string> str_hash;
+extern std::hash<std::string_view> sv_hash;
 
 }
+
+HASH(mtl::TypeID, v, {
+	return v->hash_code();
+})
 
 template<> struct std::hash<mtl::Value>
 {

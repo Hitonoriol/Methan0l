@@ -29,7 +29,7 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 					}
 		},
 		{ "version - print methan0l version string",
-				[](auto &runner)
+				[](auto&)
 					{
 						std::cout << FULL_VERSION_STR << std::endl;
 					}

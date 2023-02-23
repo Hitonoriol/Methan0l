@@ -12,15 +12,15 @@ struct Fields
 struct Methods
 {
 	static constexpr std::string_view
-		CONSTRUCTOR = "construct",
-		TO_STRING = "to_string";
+		Constructor = "construct",
+		ToString = "to_string";
 };
 
 struct Parameters
 {
 	static constexpr std::string_view
-		THIS = "this",
-		SUPER = "super";
+		This = "this",
+		Super = "super";
 };
 
 #endif /* SRC_STRUCTURE_OBJECT_OOPDEFS_H_ */

@@ -63,7 +63,7 @@ class LibArithmetic: public Library
 				if (Value::is_double_op(lhs.get(), rhs.get()))
 					lhs.get() = apply<op>(lhs.as<double>(), rhs.as<double>());
 				else
-					lhs.get() = apply<op>(lhs.as<dec>(), rhs.as<dec>());
+					lhs.get() = apply<op>(lhs.as<Int>(), rhs.as<Int>());
 				return lhs;
 			});
 		}

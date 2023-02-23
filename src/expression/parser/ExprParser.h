@@ -11,7 +11,7 @@ class ExprParser
 	public:
 		virtual ~ExprParser() = default;
 		virtual int precedence() = 0;
-		virtual bool is_compatible(const Token &tok) {return true;}
+		virtual bool is_compatible(const Token&) {return true;}
 };
 
 }

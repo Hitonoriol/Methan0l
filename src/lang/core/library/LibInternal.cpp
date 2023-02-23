@@ -180,9 +180,9 @@ void LibInternal::load_operators()
 
 	/* Static method invocation: Type@method$(arg1, arg2, ...) */
 	infix_operator(TokenType::AT, LazyBinaryOpr([&](auto lhs, auto rhs) {
-		Class &type = context->get_type_mgr().get_type(Class::get_id(MapParser::key_string(lhs)));
-		InvokeExpr &method_expr = try_cast<InvokeExpr>(rhs);
-		std::string name = MapParser::key_string(method_expr.get_lhs());
+		auto &type = context->get_type_mgr().get_class(IdentifierExpr::get_name(lhs));
+		auto &method_expr = try_cast<InvokeExpr>(rhs);
+		auto name = IdentifierExpr::get_name(method_expr.get_lhs());
 		return type.invoke_static(name, method_expr.arg_list());
 	}));
 

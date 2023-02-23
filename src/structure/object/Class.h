@@ -28,8 +28,7 @@ class Object;
 class Class : public Allocatable<Class>
 {
 	private:
-		class_id id;
-		std::type_info *native_id = nullptr;
+		TypeID native_id;
 		std::string name;
 
 		std::vector<Class*> base;
@@ -56,7 +55,7 @@ class Class : public Allocatable<Class>
 		template<class C>
 		inline void set_native_id()
 		{
-			native_id = &unconst(typeid(C));
+			native_id = TypeID::of<C>(name);
 		}
 
 		void register_method(std::string_view, Function&);
@@ -81,11 +80,11 @@ class Class : public Allocatable<Class>
 
 		inline bool equals_or_inherits(Class *clazz)
 		{
-			if (clazz->id == id)
+			if (clazz->native_id == native_id)
 				return true;
 
 			for (auto &cl : base)
-				if (clazz->id == cl->id)
+				if (clazz->native_id == cl->native_id)
 					return true;
 			return false;
 		}
@@ -99,7 +98,7 @@ class Class : public Allocatable<Class>
 
 		class_id get_id();
 
-		inline const std::type_info* get_native_id()
+		inline const TypeID& get_native_id()
 		{
 			return native_id;
 		}
@@ -108,7 +107,6 @@ class Class : public Allocatable<Class>
 		inline void set_name(const std::string &name)
 		{
 			this->name = name;
-			id = get_id(name);
 		}
 
 		inline Interpreter& get_evatuator()
@@ -118,8 +116,6 @@ class Class : public Allocatable<Class>
 
 		virtual Object create(Args &args);
 		Object create_uninitialized();
-
-		static class_id get_id(const std::string &type_name);
 
 		friend std::ostream& operator <<(std::ostream &stream, Class &type);
 };

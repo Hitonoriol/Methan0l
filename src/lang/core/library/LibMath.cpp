@@ -38,7 +38,7 @@ void LibMath::load()
 		Value n = arg(args), powr = arg(args, 1);
 		double res = pow(mtl::dbl(n), mtl::dbl(powr));
 		if (!Value::is_double_op(n, powr))
-			n = (dec)res;
+			n = (Int)res;
 		else
 			n = res;
 		return n;

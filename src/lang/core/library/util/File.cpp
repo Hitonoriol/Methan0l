@@ -31,13 +31,13 @@ namespace fs = std::filesystem;
 File::File(Interpreter &context) : Class(context, "File")
 {
 	/* file = new: File("path/to/file.ext") */
-	register_method(Methods::CONSTRUCTOR, [&](Args &args) {
+	register_method(Methods::Constructor, [&](Args &args) {
 		set_path(args);
 		return Value::NO_VALUE;
 	});
 
 	/* Called automatically when converting to string */
-	register_method(Methods::TO_STRING, [&](Args &args) {
+	register_method(Methods::ToString, [&](Args &args) {
 		return Object::get_this(args).field(FNAME);
 	});
 
@@ -91,7 +91,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.size$() */
 	register_method("size", [&](Args &args) {
-		return (dec)fs::file_size(path(args));
+		return (Int)fs::file_size(path(args));
 	});
 
 	/* file.absolute_path$() */
@@ -158,8 +158,8 @@ File::File(Interpreter &context) : Class(context, "File")
 		std::ifstream file(fname);
 		if (!file.is_open())
 			throw std::runtime_error("Failed to open " + fname);
-		Value contents(Type::STRING);
-		contents.get<std::string>() = std::move(std::string {std::istreambuf_iterator {file}, {}});
+		auto contents = context.make<std::string>();
+		contents.move_in(std::string {std::istreambuf_iterator {file}, {}});
 		file.close();
 		return contents;
 	});

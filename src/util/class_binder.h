@@ -81,7 +81,7 @@ class ClassBinder
 		inline void bind_constructor()
 		{
 			LOG("Wrapping ctor of " << type_name<C>() << " with sig: " << type_name<Sig...>())
-			clazz->register_method(Methods::CONSTRUCTOR, context.bind_func([](Object &obj, Sig...args) {
+			clazz->register_method(Methods::Constructor, context.bind_func([](Object &obj, Sig...args) {
 				obj.def(mtl::str(Fields::NATIVE_OBJ)) = Factory<C, Sig...>::make(std::forward<Sig>(args)...);
 			}));
 		}

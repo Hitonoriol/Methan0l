@@ -23,6 +23,7 @@
 
 #include "structure/object/Class.h"
 #include "structure/object/Object.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -59,11 +60,12 @@ void LibData::load()
 	 * range$(start, n, step)	<-- {start, start + step, ..., n - 1}
 	 */
 	function("range", [&](Args args) {
-		dec start = args.size() > 1 ? num(args) : 0;
-		dec n = args.size() < 2 ? num(args) : num(args, 1);
-		dec step = args.size() == 3 ? num(args, 2) : 1;
+		auto range = context->make<List>();
+		Int start = args.size() > 1 ? num(args) : 0;
+		Int n = args.size() < 2 ? num(args) : num(args, 1);
+		Int step = args.size() == 3 ? num(args, 2) : 1;
 
-		return core::range(start, n, step);
+		return range.move_in(core::range(start, n, step));
 	});
 
 	function("purge", [&](Args args) {
@@ -73,13 +75,10 @@ void LibData::load()
 
 	/* val.convert$(typeid) -- does not modify <val>, returns a copy of type typeid (if possible)*/
 	function("convert", [&](Args args) {
-		Value val = arg(args);
-		int type_id = num(args, 1);
+		auto val = arg(args);
+		auto type_id = num(args, 1);
 
-		if (type_id >= static_cast<int>(Type::END))
-			throw std::runtime_error("Invalid typeid");
-
-		return val.convert(static_cast<Type>(type_id));
+		return val.convert(context->get_type_mgr().get_type(type_id));
 	});
 
 	/* ms = now$() */
@@ -98,7 +97,7 @@ void LibData::load_set_funcs()
 {
 	/* set_a.intersect(set_b) */
 	function("intersect", [&](Args args) {
-		Value inter_v(Type::SET);
+		auto inter_v = context->make<ValSet>();
 		return set_operation(args, inter_v, [&](auto &a, auto &b, auto &c) {
 			std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
 							[&b](auto &element){return b.count(element) > 0;});
@@ -107,7 +106,7 @@ void LibData::load_set_funcs()
 
 	/* set_a.union(set_b) */
 	function("union", [&](Args args) {
-		Value union_v(Type::SET);
+		auto union_v = context->make<ValSet>();
 		return set_operation(args, union_v, [&](auto &a, auto &b, auto &c) {
 			c.insert(a.begin(), a.end());
 			c.insert(b.begin(), b.end());
@@ -121,13 +120,13 @@ void LibData::load_set_funcs()
 
 	/* set_a.diff(set_b) */
 	function("diff", [&](Args args) {
-		Value diff_v(Type::SET);
+		auto diff_v = context->make<ValSet>();
 		return set_operation(args, diff_v, std::move(set_diff));
 	});
 
 	/* set_a.symdiff(set_b) */
 	function("symdiff", [&](Args args) {
-		Value sdiff_v(Type::SET);
+		auto sdiff_v = context->make<ValSet>();
 		return set_operation(args, sdiff_v, [&](auto &a, auto &b, auto &c) {
 			set_diff(a, b, c);
 			set_diff(b, a, c);
@@ -137,9 +136,9 @@ void LibData::load_set_funcs()
 
 Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 {
-	Value &lval = context->referenced_value(lhs);
-	Type ltype = lval.type();
-	Value rval = val(rhs).get();
+	auto &lval = context->referenced_value(lhs);
+	auto ltype = lval.type();
+	auto rval = val(rhs).get();
 	if (ltype != rval.type()) {
 		if (convert)
 			return Value::ref(lval = rval.convert(ltype));
@@ -290,7 +289,6 @@ void LibData::load_container_funcs()
 	/* <List>.resize$(new_size) */
 	function("resize", [&](Args args) {
 		Value &list_val = ref(args[0]);
-		list_val.assert_type(Type::LIST, "resize$() can only be applied on a List");
 		list_val.get<ValList>().resize(unum(args, 1));
 		return list_val;
 	});
@@ -298,20 +296,13 @@ void LibData::load_container_funcs()
 	/* <Map | List>.clear$() */
 	function("clear", [&](Args args) {
 		Value &cnt = ref(args[0]);
+		TYPE_SWITCH(cnt.type(),
+			TYPE_CASE_T(List)
+				cnt.get<ValList>().clear();
 
-		switch(cnt.type()) {
-			case Type::LIST:
-			cnt.get<ValList>().clear();
-			break;
-
-			case Type::MAP:
-			cnt.get<ValMap>().clear();
-			break;
-
-			default:
-			break;
-		}
-
+			TYPE_CASE(Type::MAP)
+				cnt.get<ValMap>().clear();
+		)
 		return Value::NO_VALUE;
 	});
 
@@ -320,23 +311,19 @@ void LibData::load_container_funcs()
 		Value val = this->arg(args);
 		int size = 0;
 
-		switch(val.type()) {
-			case Type::STRING:
-			size = mtl::str_length(val.get<std::string>());
-			break;
+		TYPE_SWITCH(val.type(),
+			TYPE_CASE(Type::STRING)
+				size = mtl::str_length(val.get<std::string>());
 
-			case Type::LIST:
-			size = val.get<ValList>().size();
-			break;
+			TYPE_CASE_T(List)
+				size = val.get<ValList>().size();
 
-			case Type::MAP:
-			size = val.get<ValMap>().size();
-			break;
+			TYPE_CASE(Type::MAP)
+				size = val.get<ValMap>().size();
 
-			default:
-			throw std::runtime_error(mtl::str(val.type_name()) + " has no (pseudo-)method size()");
-			break;
-		}
+			TYPE_DEFAULT
+				throw std::runtime_error(mtl::str(val.type_name()) + " has no pseudo-method size()");
+		)
 
 		return Value(size);
 	});
@@ -388,7 +375,7 @@ bool LibData::instanceof(Value &rec, ExprPtr exp)
 		if (expv.object())
 			return clazz->equals_or_inherits(expv.get<Object>().get_class());
 		else
-			return clazz->equals_or_inherits(&context->get_type_mgr().get_type(expv.to_string()));
+			return clazz->equals_or_inherits(&context->get_type_mgr().get_class(expv.to_string()));
 	}
 	else {
 		return expv.type_id() == rec.type_id();
@@ -454,7 +441,7 @@ void LibData::load_operators()
 				} else if (lval.is<Object>()) {
 					auto &proto = lval.get<Object>();
 					Object obj(proto.get_class(), proto.get_data());
-					obj.invoke_method(Methods::CONSTRUCTOR, ctor_call.arg_list());
+					obj.invoke_method(Methods::Constructor, ctor_call.arg_list());
 					return obj;
 				}
 			}
@@ -493,7 +480,7 @@ void LibData::load_operators()
 	infix_operator(TokenType::TYPE_SAFE, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		Value l = val(lhs), r = val(rhs);
 		if (!instanceof(l, r))
-			throw InvalidTypeException(l, static_cast<Type>(mtl::num(r)), "Type assertion failed:");
+			throw InvalidTypeException(l, context->get_type_mgr().get_type(mtl::num(r)), "Type assertion failed:");
 
 		return Value::NO_VALUE;
 	}));
@@ -520,19 +507,15 @@ void LibData::load_operators()
 		if (rval.is<Object>())
 			return Object::copy(rval.get<Object>());
 		else if (rval.is<Unit>()) {
-			Value copy(Type::UNIT);
-			Unit &box = copy.get<Unit>();
-			box.box();
-			box.manage_table(rval.get<Unit>());
-			box.local().copy_managed_map();
-			return copy;
+			auto copy = Value::make<Unit>();
+			return copy.as<Unit>([&](auto &box) {
+				box.box();
+				box.manage_table(rval.get<Unit>());
+				box.local().copy_managed_map();
+			});
 		}
 		else
 			throw std::runtime_error("`objcopy` can only be applied on an Object or a Box Unit");
-	}));
-
-	prefix_operator(TokenType::DEFINE_VALUE, LazyUnaryOpr([&](ExprPtr rhs) {
-		return Value(static_cast<Type>(mtl::num(val(rhs))));
 	}));
 
 	/* Reference operator */

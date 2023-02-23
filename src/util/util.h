@@ -11,6 +11,7 @@
 #include "string.h"
 #include "debug.h"
 #include "filesystem.h"
+#include "meta/type_traits.h"
 
 namespace mtl
 {

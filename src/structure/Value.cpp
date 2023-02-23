@@ -10,9 +10,10 @@
 #include "type.h"
 #include "util/util.h"
 #include "util/hash.h"
-#include "util/meta.h"
+#include "util/meta/type_traits.h"
 #include "util/containers.h"
 #include "expression/LiteralExpr.h"
+#include "CoreLibrary.h"
 
 #include "object/Class.h"
 #include "object/Object.h"
@@ -29,59 +30,6 @@ Value::Value() : Value(NIL)
 {
 }
 
-Value::Value(std::initializer_list<Value> values)
-{
-	set(ValList(values));
-	auto &list = get<ValList>();
-	while(!list.empty() && list.front().empty())
-		list.pop_front();
-}
-
-Value::Value(Type type)
-{
-	switch (type) {
-	case Type::BOOLEAN:
-		set(bool());
-		break;
-
-	case Type::CHAR:
-		set(char());
-		break;
-
-	case Type::DOUBLE:
-		set(double());
-		break;
-
-	case Type::INTEGER:
-		set(dec());
-		break;
-
-	case Type::LIST:
-		set(ValList());
-		break;
-
-	case Type::SET:
-		set(ValSet());
-		break;
-
-	case Type::MAP:
-		set(ValMap());
-		break;
-
-	case Type::UNIT:
-		set(Unit());
-		break;
-
-	case Type::STRING:
-		set(std::string());
-		break;
-
-	default:
-		throw std::runtime_error("Can't define default value of type: "
-				+ mtl::str(type_name(type)));
-	}
-}
-
 Value::Value(const Value &val) : value(val.value)
 {
 }
@@ -91,7 +39,7 @@ Value::~Value()
 	DBG {
 		if (!nil() && !empty())
 			LOG("[x] Destroying (" << use_count() << ") [" << type_name() << "] 0x"
-					<< to_base((udec) identity(), 16) << ":" << (heap_type() ? NL : ' ') << *this);
+					<< to_base((UInt) identity(), 16) << ":" << (heap_type() ? NL : ' ') << *this);
 	}
 }
 
@@ -121,9 +69,9 @@ bool Value::heap_type()
 	});
 }
 
-dec Value::use_count()
+Int Value::use_count()
 {
-	return accept([&](auto &v) -> dec {
+	return accept([&](auto &v) -> Int {
 		if constexpr (is_heap_type<VT(v)>())
 			return v.use_count();
 		else
@@ -171,10 +119,10 @@ void Value::clear(ValueContainer &pure_val)
 	pure_val = NoValue();
 }
 
-Type Value::type() const
+TypeID Value::type() const
 {
 	/* Primitive types */
-	if (is<dec>())
+	if (is<Int>())
 		return Type::INTEGER;
 
 	else if (is<double>())
@@ -205,72 +153,69 @@ Type Value::type() const
 	else if (is<VFunction>() || is<VNativeFunc>())
 		return Type::FUNCTION;
 
-	else if (is<VList>())
-		return Type::LIST;
-
 	else if (is<VSet>())
 		return Type::SET;
 
 	else if (is<VMap>())
 		return Type::MAP;
 
-	else if (is<std::any>())
-		return Type::FALLBACK;
-
 	else if (is<Token>())
 		return Type::TOKEN;
+
+	else if (is<std::any>())
+		return cget<std::any>().type();
 
 	/* No value / Unknown type */
 	else
 		return Type::NIL;
 }
 
-dec Value::fallback_type_id() const
+Int Value::fallback_type_id() const
 {
 	return std::get<std::any>(value).type().hash_code();
 }
 
-dec Value::type_id() const
+Int Value::type_id() const
 {
-	Type t = type();
+	auto t = type();
 	if (t == Type::OBJECT)
 		return unconst(*this).get<Object>().type_id();
 
-	return static_cast<dec>(t);
+	return t.type_id();
 }
 
 std::string Value::to_string(Interpreter *context)
 {
-	switch (type()) {
-	case Type::NIL:
+	auto type = this->type();
+	if (type == Type::NIL)
 		return std::string(Token::reserved(Word::NIL));
 
-	case Type::REFERENCE:
+	else if (type == Type::REFERENCE)
 		return get().to_string(context);
 
-	case Type::STRING:
+	else if (type == Type::STRING)
 		return get<std::string>();
 
-	case Type::CHAR:
+	else if (type == Type::CHAR)
 		return mtl::str(get<char>());
 
-	case Type::INTEGER:
-		return std::to_string(get<dec>());
+	else if (type == Type::INTEGER)
+		return std::to_string(get<Int>());
 
-	case Type::DOUBLE:
+	else if (type == Type::DOUBLE)
 		return std::to_string(get<double>());
 
-	case Type::BOOLEAN:
+	else if (type == Type::BOOLEAN)
 		return std::string(
 				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE));
 
-	case Type::LIST:
+	else if (type.is<List>())
 		return stringify_container(context, get<ValList>());
 
-	case Type::SET:
+	else if (type == Type::SET)
 		return stringify_container(context, get<ValSet>());
 
-	case Type::MAP: {
+	else if (type == Type::MAP) {
 		ValMap &map = get<ValMap>();
 		auto it = map.begin(), end = map.end();
 		return stringify([&]() {
@@ -281,15 +226,16 @@ std::string Value::to_string(Interpreter *context)
 		});
 	}
 
-	case Type::UNIT:
+	else if (type == Type::UNIT)
 		return get<Unit>().to_string();
 
-	case Type::FUNCTION:
+	else if (type == Type::FUNCTION) {
 		if (is<NativeFunc>())
-			return "Native function 0x" + to_base(reinterpret_cast<udec>(identity()), 16);
+			return "Native function 0x" + to_base(reinterpret_cast<UInt>(identity()), 16);
 		return get<Function>().to_string();
+	}
 
-	case Type::OBJECT: {
+	else if (type == Type::OBJECT) {
 		Object &obj = get<Object>();
 		std::stringstream ss;
 		ss << obj.to_string();
@@ -305,26 +251,26 @@ std::string Value::to_string(Interpreter *context)
 		return ss.str();
 	}
 
-	case Type::TOKEN:
+	else if (type == Type::TOKEN)
 		return get<Token>().get_value();
 
-	case Type::EXPRESSION: {
+	else if (type == Type::EXPRESSION) {
 		auto &expr = *get<ExprPtr>();
 		return (context == nullptr ? expr.info() : expr.evaluate(*context).to_string(context));
 	}
 
-	default: {
+	else {
 		sstream ss;
-		ss << "{" << type_name() << " @ 0x" << to_base(reinterpret_cast<udec>(identity()), 16) << "}";
+		ss << "{" << type_name() << " @ 0x" << to_base(reinterpret_cast<UInt>(identity()), 16) << "}";
 		return ss.str();
 	}
-	}
+
 }
 
-dec Value::to_dec() const
+Int Value::to_dec() const
 {
 	if (numeric())
-		return convert_numeric<dec>();
+		return convert_numeric<Int>();
 
 	else if (is<std::string>())
 		return std::stol(cget<std::string>());
@@ -347,41 +293,39 @@ double Value::to_double() const
 
 bool Value::to_bool() const
 {
-	Type t = type();
-	switch (t) {
-	case Type::BOOLEAN:
-		return cget<bool>();
+	TYPE_SWITCH(type(),
+		TYPE_CASE(Type::BOOLEAN)
+			return cget<bool>();
 
-	case Type::INTEGER:
-		return cget<dec>() == 1;
+		TYPE_CASE(Type::INTEGER)
+			return cget<Int>() == 1;
 
-	case Type::STRING:
-		return cget<std::string>() == Token::reserved(Word::TRUE);
+		TYPE_CASE(Type::STRING)
+			return cget<std::string>() == Token::reserved(Word::TRUE);
 
-	case Type::DOUBLE:
-		return cget<double>() == 1.0;
+		TYPE_CASE(Type::DOUBLE)
+			return cget<double>() == 1.0;
 
-	default:
-		throw InvalidTypeException(*this, Type::BOOLEAN);
-	}
+		TYPE_DEFAULT
+			throw InvalidTypeException(*this, Type::BOOLEAN);
+	)
 }
 
 char Value::to_char() const
 {
-	Type t = type();
-	switch (t) {
-	case Type::CHAR:
-		return cget<char>();
+	TYPE_SWITCH(type(),
+		TYPE_CASE(Type::CHAR)
+			return cget<char>();
 
-	case Type::STRING:
-		return cget<std::string>().front();
+		TYPE_CASE(Type::STRING)
+			return cget<std::string>().front();
 
-	case Type::INTEGER:
-		return (char) cget<dec>();
+		TYPE_CASE(Type::INTEGER)
+			return (char) cget<Int>();
 
-	default:
-		throw InvalidTypeException(*this, Type::CHAR);
-	}
+		TYPE_DEFAULT
+			throw InvalidTypeException(*this, Type::CHAR);
+	)
 }
 
 void* Value::identity()
@@ -395,43 +339,34 @@ void* Value::identity()
 }
 
 /* Create a copy with converted value */
-Value Value::convert(Type new_val_type)
+Value Value::convert(TypeID new_val_type)
 {
-	switch (new_val_type) {
-	case Type::BOOLEAN:
-		return Value(as<bool>());
+	TYPE_SWITCH (new_val_type,
+		TYPE_CASE(Type::BOOLEAN)
+			return Value(as<bool>());
 
-	case Type::INTEGER:
-		return Value(as<dec>());
+		TYPE_CASE(Type::INTEGER)
+			return Value(as<Int>());
 
-	case Type::CHAR:
-		return Value(as<char>());
+		TYPE_CASE(Type::CHAR)
+			return Value(as<char>());
 
-	case Type::DOUBLE:
-		return Value(as<double>());
+		TYPE_CASE(Type::DOUBLE)
+			return Value(as<double>());
 
-	case Type::STRING:
-		return Value(to_string());
+		TYPE_CASE(Type::STRING)
+			return Value(to_string());
 
-	case Type::LIST: {
-		if (type() != Type::SET)
-			break;
+		TYPE_CASE_T(List) {
+			ValList list;
+			return Value(add_all(get<ValSet>(), list));
+		}
 
-		ValList list;
-		return Value(add_all(get<ValSet>(), list));
-	}
-
-	case Type::SET: {
-		if (type() != Type::LIST)
-			break;
-
-		ValSet set;
-		return Value(add_all(get<ValList>(), set));
-	}
-
-	default:
-		break;
-	}
+		TYPE_CASE(Type::SET) {
+			ValSet set;
+			return Value(add_all(get<ValList>(), set));
+		}
+	)
 
 	throw InvalidTypeException(*this, new_val_type);
 }
@@ -463,9 +398,9 @@ ExprPtr Value::wrapped(const Value &val)
 	return Allocatable<LiteralExpr>::allocate(val);
 }
 
-void Value::assert_type(Type expected, const std::string &msg)
+void Value::assert_type(TypeID expected, const std::string &msg)
 {
-	Type this_type = type();
+	auto this_type = type();
 	if (this_type != expected)
 		throw InvalidTypeException(this_type, expected, msg + " [Value: `" + to_string() + "`]");
 }
@@ -476,13 +411,6 @@ bool Value::is_double_op(const Value &lhs, const Value &rhs)
 	return lhs.is<double>() || rhs.is<double>();
 }
 
-std::string_view Value::type_name(Type type)
-{
-	int type_id = static_cast<int>(type);
-	Word typew = static_cast<Word>(Token::TYPENAMES_BEG_IDX + type_id);
-	return Token::reserved(typew);
-}
-
 std::string_view Value::type_name() const
 {
 	if (is<Object>())
@@ -490,7 +418,7 @@ std::string_view Value::type_name() const
 	else if (is<std::any>())
 		return std::string_view(unconst(*this).as_any().type().name());
 	else
-		return type_name(type());
+		return type().type_name();
 }
 
 Value& Value::operator =(const Value &rhs)

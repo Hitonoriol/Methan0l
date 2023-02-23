@@ -34,12 +34,12 @@ double Library::dbl(ExprList args, int idx)
 	return mtl::dbl(arg(args, idx));
 }
 
-dec Library::num(ExprList args, int idx)
+Int Library::num(ExprList args, int idx)
 {
 	return mtl::num(arg(args, idx));
 }
 
-udec Library::unum(ExprList args, int idx)
+UInt Library::unum(ExprList args, int idx)
 {
 	return mtl::unum(arg(args, idx));
 }

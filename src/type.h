@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 #include <deque>
+#include <any>
+#include <variant>
 
 #include "util/debug.h"
 
@@ -22,19 +24,47 @@
 
 #define HEAP_TYPES(v, ...) if constexpr (mtl::Value::is_heap_type<VT(v)>()) JOIN(__VA_ARGS__)
 
+#define HASH(type, as_name, ...) \
+	template<> struct std::hash<type> \
+	{ \
+		size_t operator()(const type &as_name) const \
+		{ \
+			JOIN(__VA_ARGS__) \
+		} \
+	};
+
 namespace mtl
 {
 
-enum class TokenType : uint16_t;
-class Value;
+struct Nil : public std::monostate {};
+struct NoValue : public std::monostate {};
 
-using dec = int64_t;
-using udec = uint64_t;
+enum class TokenType : uint16_t;
+class Token;
+
+class Type;
+class TypeID;
+class Value;
+class ValueRef;
+
+class Unit;
+class Function;
+
+using Int = int64_t;
+using UInt = uint64_t;
+using Float = double;
+using Boolean = bool;
+using Character = char;
+using Reference = ValueRef;
+using String = std::string;
+using Fallback = std::any;
 
 template<class T>
-using allocator = std::pmr::polymorphic_allocator<T>;
+using Allocator = std::pmr::polymorphic_allocator<T>;
 
-using String = std::pmr::string;
+template<typename K, typename V>
+using HashMap = std::pmr::unordered_map<K, V>;
+
 using StringStream = std::basic_stringstream<char, std::char_traits<char>, String::allocator_type>;
 
 using sstream = std::stringstream;
@@ -78,7 +108,16 @@ using OperatorMap = std::pmr::unordered_map<TokenType, O>;
 using NativeFunc = std::function<Value(Args&)>;
 using NativeFuncMap = std::pmr::unordered_map<std::string, NativeFunc>;
 
-using class_id = size_t;
+using class_id = Int;
+
+using VString = std::shared_ptr<std::string>;
+using VList = std::shared_ptr<ValList>;
+using VSet = std::shared_ptr<ValSet>;
+using VMap = std::shared_ptr<ValMap>;
+using VUnit = std::shared_ptr<Unit>;
+using VFunction = std::shared_ptr<Function>;
+using VNativeFunc = std::shared_ptr<NativeFunc>;
+using VToken = std::shared_ptr<Token>;
 
 constexpr std::string_view
 	PROGRAM_EXT = ".mt0",
@@ -90,8 +129,8 @@ constexpr std::string_view NLTAB = "\n\t";
 Value val(Interpreter&, ExprPtr);
 std::string str(Value);
 double dbl(Value);
-dec num(Value);
-udec unum(Value);
+Int num(Value);
+UInt unum(Value);
 bool bln(Value);
 
 }

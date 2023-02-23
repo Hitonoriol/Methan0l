@@ -64,7 +64,7 @@ Value& Object::field(std::string_view name)
 
 Object& Object::construct(TypeManager &mgr, Args &args)
 {
-	invoke_method(Methods::CONSTRUCTOR, args);
+	invoke_method(Methods::Constructor, args);
 	return *this;
 }
 
@@ -128,7 +128,7 @@ uintptr_t Object::id() const
 std::string Object::to_string()
 {
 	Args noargs;
-	return str(invoke_method(Methods::TO_STRING, noargs));
+	return str(invoke_method(Methods::ToString, noargs));
 }
 
 std::string Object::to_string_default()

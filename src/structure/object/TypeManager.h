@@ -1,13 +1,13 @@
 #ifndef SRC_STRUCTURE_OBJECT_TYPEMANAGER_H_
 #define SRC_STRUCTURE_OBJECT_TYPEMANAGER_H_
 
+#include <structure/TypeID.h>
 #include <string>
 #include <unordered_map>
 
 #include "util/meta/type_traits.h"
 #include "util/memory.h"
 #include "util/hash.h"
-#include "structure/NativeID.h"
 #include "Object.h"
 
 namespace mtl
@@ -18,8 +18,9 @@ class Anonymous;
 class TypeManager
 {
 	private:
-		std::pmr::unordered_map<class_id, std::shared_ptr<Class>> classes;
-		std::pmr::unordered_map<NativeID, Class*> native_classes;
+		HashMap<class_id, std::shared_ptr<Class>> classes;
+		HashMap<std::string, Class*> class_index;
+		HashMap<TypeID, Class*> native_classes;
 		Interpreter &context;
 		std::shared_ptr<Anonymous> root;
 
@@ -29,8 +30,11 @@ class TypeManager
 
 		void register_type(std::shared_ptr<Class> type);
 
-		Class& get_type(size_t id);
-		Class& get_type(const std::string &name);
+		const TypeID& get_type(Int id);
+		const TypeID& get_type(const std::string& name);
+
+		Class& get_class(Int id);
+		Class& get_class(const std::string& name);
 
 		template<typename T>
 		inline void register_type()
@@ -53,7 +57,7 @@ class TypeManager
 		Object new_object(Args &&...ctor_args)
 		{
 			using type = typename C::bound_class;
-			auto native_id = NativeID::of<C>();
+			auto native_id = TypeID::of<C>();
 			auto entry = native_classes.find(native_id);
 			if (entry == native_classes.end())
 				throw std::runtime_error("Cannot instantiate an object "

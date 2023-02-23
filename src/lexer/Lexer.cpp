@@ -16,12 +16,12 @@ Lexer& Lexer::operator=(const Lexer &rhs)
 	return *this;
 }
 
-udec bin_to_int(const std::string &binstr)
+UInt bin_to_int(const std::string &binstr)
 {
 	if (binstr.empty())
 		return 0;
 
-	udec val = 0;
+	UInt val = 0;
 	for (char c : binstr) {
 		val <<= 1;
 		val += c - '0';
@@ -86,7 +86,7 @@ void Lexer::push()
 	}
 
 	else if (toktype == TokenType::INTEGER && cur_int_literal != IntLiteral::DEC) {
-		udec val;
+		UInt val;
 		switch (cur_int_literal) {
 		case IntLiteral::HEX:
 			std::istringstream(tokstr) >> std::hex >> val;

@@ -22,7 +22,7 @@ Value parse_value(const std::string &str)
 		if (is_dbl)
 			value = std::stod(str);
 		else
-			value = (dec) std::stol(str);
+			value = (Int) std::stol(str);
 	}
 
 	else if (str == Token::reserved(Word::TRUE)
@@ -65,7 +65,7 @@ void LibIO::load()
 
 	/* String input function: foo = read_line$() */
 	function("read_line", [&] {
-		Value line(Type::STRING);
+		auto line = context->make<std::string>();
 		std::getline(in, line.get<std::string>());
 		return line;
 	});

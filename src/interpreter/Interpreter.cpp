@@ -23,8 +23,8 @@
 #include "expression/TryCatchExpr.h"
 
 #include "lang/Library.h"
-#include "lang/core/Module.h"
 #include "structure/object/Class.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -417,21 +417,15 @@ void Interpreter::del(ExprPtr idfr)
 		idfr->assert_type<BinaryOperatorExpr>("Trying to delete an invalid Expression");
 		auto dot_expr = try_cast<BinaryOperatorExpr>(idfr);
 		if (dot_expr.get_operator() != TokenType::DOT)
-			throw std::runtime_error("Can't delete a non-dot operator Expression");
+			throw std::runtime_error("Invalid deletion target");
 		Value &scope = referenced_value(dot_expr.get_lhs());
 		ExprPtr rhs = dot_expr.get_rhs();
-		switch (scope.type()) {
-		case Type::UNIT:
+		rhs->assert_type<IdentifierExpr>();
+		auto type = scope.type();
+		if (type == Type::UNIT)
 			scope.get<Unit>().local().del(rhs);
-			return;
-
-		case Type::OBJECT:
+		else if (type == Type::OBJECT)
 			scope.get<Object>().get_data().del(rhs);
-			return;
-
-		default:
-			return;
-		}
 	}
 }
 
@@ -709,10 +703,10 @@ void Interpreter::dump_stack()
 		auto last = table.end();
 		for (auto val = table.begin(); val != table.end(); ++val) {
 			Value &v = val->second;
-			Type type = v.type();
+			auto type = v.type();
 			const char quote = (type == Type::STRING || type == Type::CHAR ? '"' : '\0');
 			ss << "(" << v.use_count() << ") "
-					<< "[" << Value::type_name(type);
+					<< "[" << type.type_name();
 			if (type == Type::REFERENCE)
 				ss << " -> " << v.get().identity();
 			ss << " | " << (v.heap_type() ? "heap" : "non-heap");
@@ -850,9 +844,9 @@ void Interpreter::load_args(int argc, char **argv, int start_from)
 void Interpreter::load_args(ValList &&args)
 {
 	set_env_globals(args[0]);
-	Value list_v(Type::LIST);
-	list_v.get<ValList>() = std::move(args);
-	main.local().set(EnvVars::LAUNCH_ARGS, list_v);
+	auto list = make<List>();
+	list.move_in(args);
+	main.local().set(EnvVars::LAUNCH_ARGS, list);
 }
 
 void Interpreter::set_env_globals(const std::string &scrpath)
@@ -913,7 +907,7 @@ void Interpreter::print_info()
 			<< "* Library: " << sizeof(Library) << NL
 			<< "* Class: " << sizeof(Class) << NL
 			<< "* NativeFunc: " << sizeof(NativeFunc) << NL
-			<< "* Allocator: " << sizeof(allocator<Value>) << NL
+			<< "* Allocator: " << sizeof(Allocator<Value>) << NL
 			<< NL;
 }
 

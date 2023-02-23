@@ -1,5 +1,6 @@
 #include "RangeExpr.h"
-#include "lang/core/Data.h"
+
+#include <CoreLibrary.h>
 
 namespace mtl
 {
@@ -17,10 +18,12 @@ void RangeExpr::execute(Interpreter &context)
 
 Value RangeExpr::evaluate(Interpreter &context)
 {
-	return core::range(start->evaluate(context),
-			end->evaluate(context),
-			has_step() ? step->evaluate(context).as<dec>() : 1,
-			true);
+	auto range = context.make<List>();
+	auto from = start->evaluate(context);
+	auto to = end->evaluate(context);
+	auto step = has_step() ? this->step->evaluate(context).as<Int>() : 1;
+
+	return range.move_in(core::range(from, to, step, true));
 }
 
 std::ostream& RangeExpr::info(std::ostream &str)

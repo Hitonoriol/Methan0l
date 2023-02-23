@@ -5,10 +5,11 @@
 
 #include "parser/MapParser.h"
 #include "util/hash.h"
-#include "util/meta.h"
+#include "util/meta/type_traits.h"
 #include "PrefixExpr.h"
 #include "lang/core/Data.h"
 #include "RangeExpr.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -40,42 +41,37 @@ Value& IndexExpr::indexed_element(Interpreter &context)
 			return DataTable::create_temporary(val);
 		/* bracketed slice */
 		} else if (instanceof<RangeExpr>(idx)) {
-			auto &range = try_cast<RangeExpr>(idx);
-			auto sliced = core::slice(val, range.get_start(context),
-					range.get_end(context),
-					range.has_step() ? range.get_step(context).as<dec>() : 1);
-			return DataTable::create_temporary(sliced);
+			/* TODO */
+			return DataTable::create_temporary(Value::NIL);
 		}
 	}
 
 	lhs_val_type = val.type();
-	switch (lhs_val_type) {
-	case Type::LIST:
+	if (lhs_val_type.is<List>())
 		return indexed_element(context, val.get<ValList>());
 
-	case Type::SET:
+	if (lhs_val_type == Type::SET)
 		return indexed_element(context, val.get<ValSet>());
 
-	case Type::MAP:
+	if (lhs_val_type == Type::MAP)
 		return indexed_element(context, val.get<ValMap>());
 
-	case Type::UNIT:
+	if (lhs_val_type == Type::UNIT)
 		return indexed_element(context, val.get<Unit>().local());
 
-	case Type::OBJECT:
+	if (lhs_val_type == Type::OBJECT)
 		return indexed_element(context, val.get<Object>().get_data());
 
-		/* Process char deletion
-		 * 		& return the & to the string itself -- indexed char must be extracted manually (if required) */
-	case Type::STRING:
+	/* Process char deletion
+	 * 		& return the & to the string itself -- indexed char must be extracted manually (if required) */
+	if (lhs_val_type == Type::STRING) {
 		if (remove)
-			val.get<std::string>().erase(idx->evaluate(context).as<dec>(), 1);
+			val.get<std::string>().erase(idx->evaluate(context).as<Int>(), 1);
 		return val;
-
-	default:
-		throw std::runtime_error("Unsupported subscript operator LHS type: "
-				+ mtl::str(Value::type_name(lhs_val_type)));
 	}
+
+	throw std::runtime_error("Unsupported subscript operator LHS type: "
+				+ mtl::str(lhs_val_type.type_name()));
 }
 
 Value& IndexExpr::indexed_element(Interpreter &context, DataTable &table)
@@ -105,7 +101,7 @@ Value& IndexExpr::indexed_element(Interpreter &context, ValList &list)
 		return list.back();
 	}
 
-	dec elem_idx = idx->evaluate(context).as<dec>();
+	Int elem_idx = idx->evaluate(context).as<Int>();
 
 	if (list.size() <= (size_t) elem_idx)
 		list.resize(elem_idx + 1);
@@ -166,7 +162,7 @@ Value& IndexExpr::assign(Interpreter &context, Value val)
 		if (append())
 			lhs += val.to_string();
 		else
-			lhs[idx->evaluate(context).as<dec>()] = val.as<char>();
+			lhs[idx->evaluate(context).as<Int>()] = val.as<char>();
 	}
 	else
 		ref = val;
@@ -180,7 +176,7 @@ Value IndexExpr::evaluate(Interpreter &context)
 
 	/* Indexing a char from a string */
 	if (!append() && !remove && lhs_val_type == Type::STRING)
-		return Value(val.get<std::string>()[idx->evaluate(context).as<dec>()]);
+		return Value(val.get<std::string>()[idx->evaluate(context).as<Int>()]);
 
 	return val;
 }

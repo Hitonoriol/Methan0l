@@ -5,13 +5,13 @@
 #include <utility>
 #include <sstream>
 
-#include "../expression/Expression.h"
-#include "../expression/LiteralExpr.h"
+#include "expression/Expression.h"
+#include "expression/LiteralExpr.h"
 #include "DataTable.h"
 #include "Value.h"
 #include "interpreter/Interpreter.h"
-#include "../type.h"
-#include "../util/util.h"
+#include "util/util.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -80,8 +80,8 @@ void Function::call(Interpreter &context, const ExprList &args)
 		context.dump_stack();
 
 	auto &table = local();
-	Value callargs_v(Type::LIST);
-	ValList &callargs = callargs_v.get<ValList>();
+	auto callargs_v = context.make<List>();
+	auto &callargs = callargs_v.get<ValList>();
 	size_t i;
 	for (i = 0; i < arg_def.size(); ++i) {
 		const bool non_default = argc > i;

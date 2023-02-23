@@ -112,7 +112,6 @@ enum class TokenType : uint16_t
 	IF,
 	ELSE,
 	RETURN,
-	DEFINE_VALUE,
 	OBJECT_COPY,
 	TYPE_SAFE,
 	HASHCODE,
@@ -203,7 +202,7 @@ class Token
 		/* Words not in `keywords` array can be user-redefined in some contexts */
 		static constexpr std::string_view word_ops[] = {
 				"do", "typeid", "delete", "func", "defbox",
-				"class", "if", "else", "return", "defval",
+				"class", "if", "else", "return",
 				"objcopy", "assert_type", "hashcode",
 				"typename", "noeval", "defset", "while", "for",
 				"try", "catch", "using_module", "new", "global",

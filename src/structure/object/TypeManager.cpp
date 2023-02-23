@@ -28,20 +28,42 @@ void TypeManager::register_type(std::shared_ptr<Class> type)
 			<< type->get_class_data())
 
 	auto type_id = type->get_id();
-	auto native_id = type->get_native_id();
+	auto &native_id = type->get_native_id();
 	classes.emplace(type_id, type);
-	if (native_id != nullptr) {
+	class_index.emplace(type->get_name(), type.get());
+	if (native_id != TypeID::NONE) {
 		LOG("Registered a new native type: " << native_id->name())
-		native_classes.emplace(*native_id, type.get());
+		native_classes.emplace(native_id, type.get());
 	}
 }
 
 void TypeManager::unregister_type(const std::string &name)
 {
-	classes.erase(Class::get_id(name));
+	auto class_node = class_index.extract(name);
+	if (class_node.empty())
+		throw std::runtime_error("Unregistering a non-existing class");
+	classes.erase(class_node.mapped()->get_id());
 }
 
-Class& TypeManager::get_type(size_t id)
+const TypeID& TypeManager::get_type(Int id)
+{
+	auto &type = Type::get(id);
+	if (type != TypeID::NONE)
+		return type;
+
+	return get_class(id).get_native_id();
+}
+
+const TypeID& TypeManager::get_type(const std::string& name)
+{
+	auto &type = Type::get(name);
+	if (type != TypeID::NONE)
+		return type;
+
+	return get_class(name).get_native_id();
+}
+
+Class& TypeManager::get_class(Int id)
 {
 	auto entry = classes.find(id);
 	if (entry != classes.end())
@@ -53,9 +75,9 @@ Class& TypeManager::get_type(size_t id)
 	throw std::runtime_error("Trying to resolve a non-existing class");
 }
 
-Class& TypeManager::get_type(const std::string &name)
+Class& TypeManager::get_class(const std::string& name)
 {
-	return get_type(Class::get_id(name));
+	return *class_index.at(name);
 }
 
 Value TypeManager::invoke_method(Object &obj, const std::string &name, Args &args)
@@ -70,7 +92,7 @@ Value TypeManager::invoke_method(Object &obj, const std::string &name, Args &arg
 
 Object TypeManager::create_object(size_t type_id, Args &args)
 {
-	return get_type(type_id).create(args);
+	return get_class(type_id).create(args);
 }
 
 Object TypeManager::create_object(const std::string &type_name, Args &args)

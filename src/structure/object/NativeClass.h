@@ -75,7 +75,7 @@ class NativeClass
 /* For convenient inline method definitions */
 #define STANDARD_METHOD(name) class_binder.register_method(name) = []
 #define METHOD(name) STANDARD_METHOD(STR(name))
-#define CONSTRUCTOR STANDARD_METHOD(Methods::CONSTRUCTOR)
+#define CONSTRUCTOR STANDARD_METHOD(Methods::Constructor)
 
 /*   For use inside of the METHOD(...) macro above as the first argument.
  * (treat this like an explicit `this` parameter) */

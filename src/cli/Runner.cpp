@@ -20,7 +20,7 @@ int Runner::run_file(mtl::Interpreter &methan0l, int argc, char **argv, int star
 
 	if (!ret.empty() && !ret.nil())
 		try {
-			return ret.as<mtl::dec>();
+			return ret.as<mtl::Int>();
 		} catch (...) {
 			std::cerr << "[Exit value] " << ret.to_string() << std::endl;
 			return -1;

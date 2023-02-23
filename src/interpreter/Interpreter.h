@@ -335,6 +335,13 @@ class Interpreter
 		Interpreter(const Interpreter &rhs);
 		~Interpreter();
 
+		template<typename T>
+		inline Allocator<T> allocator()
+		{
+			/* Same as default ctor as of right now */
+			return Allocator<T>(heap.get());
+		}
+
 		void set_runpath(std::string_view runpath);
 		void load_library(std::shared_ptr<Library>);
 
@@ -348,6 +355,15 @@ class Interpreter
 		inline Object new_object(Args &&...ctor_args)
 		{
 			return type_mgr.new_object<C>(std::forward<Args>(ctor_args)...);
+		}
+
+		template<typename T>
+		inline Value make()
+		{
+			IF (Value::allowed_or_heap<T>())
+				return Value::make<T>(allocator<T>());
+			else
+				return new_object<T>();
 		}
 
 		template<unsigned default_argc = 0, typename F>

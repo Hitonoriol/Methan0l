@@ -15,7 +15,7 @@ void LibModule::load()
 {
 	/* load(path) */
 	function("load", [&](std::string path) {
-		Value module_v(Type::UNIT);
+		auto module_v = context->make<Unit>();
 		core::load_module(*context, path, module_v.get<Unit>());
 		return module_v;
 	});

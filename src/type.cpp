@@ -21,14 +21,14 @@ double dbl(Value val)
 	return val.as<double>();
 }
 
-dec num(Value val)
+Int num(Value val)
 {
-	return val.as<dec>();
+	return val.as<Int>();
 }
 
-udec unum(Value val)
+UInt unum(Value val)
 {
-	return val.as<udec>();
+	return val.as<UInt>();
 }
 
 bool bln(Value val)

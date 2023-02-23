@@ -26,25 +26,25 @@ Exception& Exception::operator=(const Exception &rhs)
 	return *this;
 }
 
-std::string error_msg(const std::string &msg, Type type, Type expected)
+std::string error_msg(const std::string &msg, TypeID type, TypeID expected)
 {
 	return msg + " expected \""
-			+ (expected != Type::END ? str(Value::type_name(expected)) : "<unspecified>")
+			+ (expected != TypeID::NONE ? str(expected.type_name()) : "<unspecified>")
 			+ "\""
-			+ " but received \"" + str(Value::type_name(type)) + "\"";
+			+ " but received \"" + str(type.type_name()) + "\"";
 }
 
-InvalidTypeException::InvalidTypeException(Type type, Type expected, const std::string &msg) :
+InvalidTypeException::InvalidTypeException(TypeID type, TypeID expected, const std::string &msg) :
 		std::runtime_error(error_msg(msg, type, expected))
 {}
 
-InvalidTypeException::InvalidTypeException(Value received, Type expected) :
+InvalidTypeException::InvalidTypeException(Value received, TypeID expected) :
 		std::runtime_error(error_msg("Invalid conversion of value `"
 				+ received.to_string() + "`:",
 				received.type(), expected))
 {}
 
-InvalidTypeException::InvalidTypeException(Type type) : InvalidTypeException(type, Type::END)
+InvalidTypeException::InvalidTypeException(TypeID type) : InvalidTypeException(type, TypeID::NONE)
 {}
 
 }
