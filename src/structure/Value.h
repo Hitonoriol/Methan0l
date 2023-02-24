@@ -383,7 +383,7 @@ class Value
 
 		/* Getter for objects of native classes bound to the interpreter. */
 		template<typename T, typename R = typename T::bound_class>
-		inline auto get() -> std::enable_if_t<is_class_binding<T>::value, R&>
+		inline R& get()
 		{
 			return get<Object>().get_native().get<R>();
 		}
