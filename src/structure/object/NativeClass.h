@@ -64,7 +64,7 @@ class NativeClass
 	void name::initialize() \
 	{ \
 		class_binder.set_name(STR(name)); \
-		class_binder.get_class().set_native_id<name>(); \
+		class_binder.get_class().set_native_id<name::bound_class>(); \
 		JOIN(__VA_ARGS__) \
 		class_binder.register_class(); \
 		LOG("Bound a native class: " << mtl::type_name<bound_class>() << " [" << class_binder.get_class().get_name() << "]") \

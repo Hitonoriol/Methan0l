@@ -24,6 +24,24 @@ class TypeManager
 		Interpreter &context;
 		std::shared_ptr<Anonymous> root;
 
+		template<typename Type, typename ...Args>
+		Object make_new_object(Args &&...ctor_args)
+		{
+			auto native_id = TypeID::of<Type>();
+			auto entry = native_classes.find(native_id);
+			if (entry == native_classes.end())
+				throw std::runtime_error("Cannot instantiate an object "
+						"of unregistered native type: " + str(mtl::type_name<Type>())
+						+ " (" + native_id->name() + ")");
+
+			auto obj = create_uninitialized_object(entry->second);
+			auto native_obj = std::allocate_shared<Type>(
+					std::pmr::polymorphic_allocator<Type> {},
+					std::forward<Args>(ctor_args)...);
+			obj.set_native(native_obj);
+			return obj;
+		}
+
 	public:
 		TypeManager(Interpreter &context);
 		~TypeManager();
@@ -50,25 +68,23 @@ class TypeManager
 				register_type(Allocatable<T>::allocate(context));
 		}
 
-		/*   Allocate a new object of a native-backed methan0l type (C must inherit from NativeClass<T>),
-		 * where T is the native class bound to a mtl::Class.
-		 * Class C must be registered via the register_type<C>() method above. */
-		template<class C, typename ...Args>
-		Object new_object(Args &&...ctor_args)
+		/*   Allocate a new object of a native-backed methan0l type.
+		 * `Binding` must inherit from NativeClass<T>, where T is the
+		 * native class bound to a mtl::Class.
+		 *   Class `Binding` must be registered via the register_type<T>() method above. */
+		template<class Binding, typename BoundClass = typename Binding::bound_class, typename ...Args>
+		inline Object new_object(Args &&...ctor_args)
 		{
-			using type = typename C::bound_class;
-			auto native_id = TypeID::of<C>();
-			auto entry = native_classes.find(native_id);
-			if (entry == native_classes.end())
-				throw std::runtime_error("Cannot instantiate an object "
-						"of unregistered native type: " + str(mtl::type_name<type>())
-						+ " (" + native_id->name() + ")");
+			return make_new_object<BoundClass>(std::forward<Args>(ctor_args)...);
+		}
 
-			auto obj = create_uninitialized_object(entry->second);
-			auto native_obj = std::allocate_shared<type>(std::pmr::polymorphic_allocator<type>{},
-					std::forward<Args>(ctor_args)...);
-			obj.set_native(native_obj);
-			return obj;
+		/*   Allocate a new object of a native-backed methan0l type.
+		 * `Type` is a type that must've been registered via a
+		 * NativeClass<Type> class binding before calling this. */
+		template<typename Type, typename ...Args>
+		inline auto new_object(Args &&...ctor_args) -> std::enable_if_t<!is_class_binding<Type>::value, Object>
+		{
+			return make_new_object<Type>(std::forward<Args>(ctor_args)...);
 		}
 
 		template<typename ...Args>

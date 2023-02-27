@@ -23,7 +23,7 @@ TypeManager::~TypeManager() = default;
 
 void TypeManager::register_type(std::shared_ptr<Class> type)
 {
-	LOG("! Registering type ["
+	LOG("! Registering class: " << std::quoted(type->get_name()) << " ["
 			<< std::hex << type->get_id() << "] " << std::dec
 			<< type->get_class_data())
 
@@ -97,7 +97,7 @@ Object TypeManager::create_object(size_t type_id, Args &args)
 
 Object TypeManager::create_object(const std::string &type_name, Args &args)
 {
-	return create_object(std::hash<std::string> { }(type_name), args);
+	return get_class(type_name).create(args);
 }
 
 Object TypeManager::create_uninitialized_object(Class *type)
