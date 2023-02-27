@@ -172,7 +172,7 @@ TypeID Value::type() const
 
 Int Value::fallback_type_id() const
 {
-	return std::get<std::any>(value).type().hash_code();
+	return mtl::get<std::any>(value).type().hash_code();
 }
 
 Int Value::type_id() const
@@ -210,7 +210,7 @@ std::string Value::to_string(Interpreter *context)
 				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE));
 
 	else if (type.is<List>())
-		return stringify_container(context, get<ValList>());
+		return stringify_container(context, get<List>());
 
 	else if (type == Type::SET)
 		return stringify_container(context, get<ValSet>());
@@ -364,7 +364,7 @@ Value Value::convert(TypeID new_val_type)
 
 		TYPE_CASE(Type::SET) {
 			ValSet set;
-			return Value(add_all(get<ValList>(), set));
+			return Value(add_all(get<List>(), set));
 		}
 	)
 

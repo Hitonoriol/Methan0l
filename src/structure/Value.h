@@ -355,37 +355,61 @@ class Value
 
 		inline std::any& as_any()
 		{
-			if (!is<std::any>())
-				throw std::runtime_error("Value doesn't hold a fallback type");
-			return std::get<std::any>(value);
+			return accept([](auto &value) -> std::any& {
+				using T = VT(value);
+				IF (std::is_same_v<T, std::any>)
+					return value;
+				ELIF (std::is_same_v<T, Object>)
+					return value.get_native().as_any();
+				else
+					throw std::runtime_error("Expected a Fallback type value, but "
+							+ mtl::str(mtl::type_name<T>()) + " received");
+			});
 		}
 
+		/* Provides access to contained values */
 		template<typename T>
 		inline auto get() -> std::enable_if_t<!is_class_binding<T>::value, T&>
 		{
-			using P = std::shared_ptr<T>;
-			/* Follow `mtl::ValueRef`s if underlying value is a mtl::ref and T is not */
-			if constexpr (!std::is_same<TYPE(T), ValueRef>::value)
-				if (std::holds_alternative<ValueRef>(value))
-					return get<ValueRef>().value().get<T>();
+			using Requested = TYPE(T);
+			return accept([&](auto &v) -> T& {
+				using VType = VT(v);
+				/* If underlying value is an Object, but the requested type T is not Object */
+				IF (std::is_same_v<VType, Object> && !std::is_same_v<Requested, Object>) {
+					IF (std::is_same_v<Requested, std::any>)
+						return as_any();
+					else
+						return *mtl::any_cast<std::shared_ptr<Requested>&>(as_any());
+				}
 
-			/* Get a ref to a fallback type */
-			if constexpr (!allowed_type<TYPE(T)>() && !allowed_type<P>())
-				return std::any_cast<T&>(as_any());
+				using P = std::shared_ptr<Requested>;
+				/*   Follow references (`mtl::ValueRef`s) if underlying value is a mtl::ValueRef,
+				 * but the requested type T is not */
+				IF (!std::is_same<Requested, ValueRef>::value) {
+					if (std::holds_alternative<ValueRef>(value))
+						return get<ValueRef>().value().get<T>();
+				}
 
-			/* Get a ref to a heap-stored object */
-			else if constexpr (is_heap_storable<T>())
-				return *std::get<P>(value);
+				/*   If requested type T is not standard, assume that the requested value
+				 * is contained within std::any */
+				IF (!allowed_type<Requested>() && !allowed_type<P>())
+					return mtl::any_cast<Requested&>(as_any());
 
-			else
-				return std::get<T>(value);
+				/* Get a reference to a heap-stored object */
+				ELIF (is_heap_storable<Requested>())
+					return *mtl::get<P>(value);
+
+				/* Otherwise, T is a standard type (valid `ValueContainer` alternative) */
+				else
+					return mtl::get<Requested>(value);
+			});
 		}
 
-		/* Getter for objects of native classes bound to the interpreter. */
+		/* Provides acces to objects of native classes bound to the interpreter. */
 		template<typename T, typename R = typename T::bound_class>
 		inline R& get()
 		{
-			return get<Object>().get_native().get<R>();
+			return get<R>();
 		}
 
 		/* Get this Value's contents as T& and pass it to `task` */
@@ -543,11 +567,11 @@ class Value
 				if (std::holds_alternative<Ptr>(value))
 					return true;
 				else if (std::holds_alternative<std::any>(value))
-					return std::get<std::any>(value).type() == typeid(Ptr);
+					return mtl::get<std::any>(value).type() == typeid(Ptr);
 			}
 
 			if (std::holds_alternative<std::any>(value))
-				return std::get<std::any>(value).type() == typeid(T);
+				return mtl::get<std::any>(value).type() == typeid(T);
 
 			return false;
 		}
