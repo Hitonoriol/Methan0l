@@ -3,8 +3,9 @@
 #include <deque>
 
 #include "interpreter/Interpreter.h"
-#include "../type.h"
-#include "../structure/Value.h"
+#include "structure/Value.h"
+#include "CoreLibrary.h"
+
 
 namespace mtl
 {
@@ -22,7 +23,7 @@ Value ListExpr::evaluate(Interpreter &context)
 {
 	return as_set ?
 			create_and_populate<ValSet>(context) :
-			create_and_populate<ValList>(context);
+			create_and_populate<List>(context);
 }
 
 std::ostream& ListExpr::info(std::ostream &str)

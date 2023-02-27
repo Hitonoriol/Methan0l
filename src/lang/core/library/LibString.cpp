@@ -53,9 +53,9 @@ void LibString::load()
 	/* str.split$(delim_expr) */
 	function("split", [&](Args args) {
 		auto tokv = context->make<List>();
-		auto &toks = tokv.get<ValList>();
+		auto &toks = tokv.get<List>();
 		for (auto &&tok : split(str(args), str(args, 1)))
-			toks.push_back(tok);
+			toks->push_back(tok);
 		return tokv;
 	});
 

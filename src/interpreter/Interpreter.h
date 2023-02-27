@@ -256,20 +256,20 @@ class Interpreter
 					using U = typename std::add_pointer<typename std::remove_const<typename std::remove_pointer<T>::type>::type>::type;
 					IFDBG(std::cout << "U = " << type_name<U>() << std::endl)
 					if (t == typeid(U))
-						return std::any_cast<U>(any);
+						return mtl::any_cast<U>(any);
 				}
 
 				using UR = typename std::remove_reference<T>::type;
 
 				/* If arg is an Object, return its native contents */
 				if (val.is<Object>())
-					return *std::any_cast<std::shared_ptr<UR>>(any);
+					return *mtl::any_cast<std::shared_ptr<UR>>(any);
 
 				/* Get a reference to a (const) fallback object */
 				if (t == typeid(UR))
-					return std::any_cast<UR&>(any);
+					return mtl::any_cast<UR&>(any);
 				else
-					return std::any_cast<T>(any);
+					return mtl::any_cast<T>(any);
 			}
 
 			/* In case of `&&` -- create a new temporary with evaluation result & return a `&&` to it. */

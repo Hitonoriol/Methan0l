@@ -81,7 +81,7 @@ void Function::call(Interpreter &context, const ExprList &args)
 
 	auto &table = local();
 	auto callargs_v = context.make<List>();
-	auto &callargs = callargs_v.get<ValList>();
+	auto &callargs = callargs_v.get<List>();
 	size_t i;
 	for (i = 0; i < arg_def.size(); ++i) {
 		const bool non_default = argc > i;
@@ -89,12 +89,12 @@ void Function::call(Interpreter &context, const ExprList &args)
 		Value arg_val = non_default ?
 										args[i]->evaluate(context) :
 										arg_def[i].second->evaluate(context);
-		callargs.push_back(Value::ref(table.set(arg_name, arg_val)));
+		callargs->push_back(Value::ref(table.set(arg_name, arg_val)));
 	}
 
 	if (args.size() > arg_def.size()) {
 		for (; i < args.size(); ++i)
-			callargs.push_back(Value(args[i]));
+			callargs->push_back(Value(args[i]));
 	}
 
 	local_data.set(CALL_ARGS, callargs_v);

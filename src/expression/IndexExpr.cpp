@@ -48,7 +48,7 @@ Value& IndexExpr::indexed_element(Interpreter &context)
 
 	lhs_val_type = val.type();
 	if (lhs_val_type.is<List>())
-		return indexed_element(context, val.get<ValList>());
+		return indexed_element(context, val.get<List>());
 
 	if (lhs_val_type == Type::SET)
 		return indexed_element(context, val.get<ValSet>());

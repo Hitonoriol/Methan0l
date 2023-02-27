@@ -147,7 +147,7 @@ Unit& Interpreter::get_main()
 
 const std::string& Interpreter::get_scriptpath()
 {
-	return global()->get(EnvVars::LAUNCH_ARGS, true).get<ValList>()[0].get<std::string>();
+	return global()->get(EnvVars::LAUNCH_ARGS, true).get<List>()[0].get<std::string>();
 }
 
 const std::string& Interpreter::get_scriptdir()

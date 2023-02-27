@@ -289,7 +289,7 @@ void LibData::load_container_funcs()
 	/* <List>.resize$(new_size) */
 	function("resize", [&](Args args) {
 		Value &list_val = ref(args[0]);
-		list_val.get<ValList>().resize(unum(args, 1));
+		list_val.get<List>()->resize(unum(args, 1));
 		return list_val;
 	});
 
@@ -298,7 +298,7 @@ void LibData::load_container_funcs()
 		Value &cnt = ref(args[0]);
 		TYPE_SWITCH(cnt.type(),
 			TYPE_CASE_T(List)
-				cnt.get<ValList>().clear();
+				cnt.get<List>()->clear();
 
 			TYPE_CASE(Type::MAP)
 				cnt.get<ValMap>().clear();
@@ -316,7 +316,7 @@ void LibData::load_container_funcs()
 				size = mtl::str_length(val.get<std::string>());
 
 			TYPE_CASE_T(List)
-				size = val.get<ValList>().size();
+				size = val.get<List>()->size();
 
 			TYPE_CASE(Type::MAP)
 				size = val.get<ValMap>().size();
@@ -341,7 +341,7 @@ void LibData::load_container_funcs()
 	/* list.fill(val, [n]) */
 	function("fill", [&](Args args) {
 		Value list_v = ref(args[0]);
-		ValList &list = list_v.get<ValList>();
+		ValList &list = list_v.get<List>();
 		Value val = arg(args, 1);
 		size_t n = args.size() > 2 ? num(args, 2) : list.size();
 		if (n > list.size())
@@ -507,7 +507,7 @@ void LibData::load_operators()
 		if (rval.is<Object>())
 			return Object::copy(rval.get<Object>());
 		else if (rval.is<Unit>()) {
-			auto copy = Value::make<Unit>();
+			auto copy = context->make<Unit>();
 			return copy.as<Unit>([&](auto &box) {
 				box.box();
 				box.manage_table(rval.get<Unit>());

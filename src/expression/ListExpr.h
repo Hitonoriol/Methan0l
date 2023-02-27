@@ -4,6 +4,8 @@
 #include "Expression.h"
 #include "util/hash.h"
 #include "util/containers.h"
+#include "CoreLibrary.h"
+#include "interpreter/Interpreter.h"
 
 namespace mtl
 {
@@ -17,10 +19,11 @@ class ListExpr: public Expression
 		template<typename T>
 		Value create_and_populate(Interpreter &context)
 		{
-			T container;
-			for (auto &expr : exprs)
-				insert(container, expr->evaluate(context));
-			return Value(container);
+			auto container = context.make<T>();
+			return container.template as<T>([&](auto &ctr) {
+				for (auto &expr : exprs)
+					insert(ctr, expr->evaluate(context));
+			});
 		}
 
 	public:

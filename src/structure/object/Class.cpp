@@ -89,10 +89,10 @@ const std::vector<Class*>& Class::get_base_classes()
 Value Class::extract_names(const DataTable &table)
 {
 	auto names = context.make<List>();
-	auto &list = names.get<ValList>();
+	auto &list = names.get<List>();
 	for (auto&& [name, method] : table.managed_map()) {
 		if (name[0] != '.')
-			list.push_back(name);
+			list->push_back(name);
 	}
 	return names;
 }

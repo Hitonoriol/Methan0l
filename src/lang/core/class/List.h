@@ -14,7 +14,7 @@ namespace native
 class List
 {
 	private:
-		std::shared_ptr<ValList> list;
+		ValList list;
 
 	public:
 		List();
@@ -23,23 +23,34 @@ class List
 
 		inline ValList* operator->()
 		{
-			return list.get();
+			return &list;
 		}
 
 		inline ValList& operator*()
 		{
-			return *list;
+			return list;
 		}
 
 		inline operator ValList&()
 		{
-			return *list;
+			return list;
 		}
 
 		inline Value& operator[](UInt idx)
 		{
-			return (*list)[idx];
+			return (list)[idx];
 		}
+
+		inline void push_back(const Value &value)
+		{
+			list.push_back(value);
+		}
+
+		inline auto begin() { return list.begin();	}
+		inline auto begin() const { return list.begin(); }
+
+		inline auto end() { return list.end(); }
+		inline auto end() const { return list.end(); }
 
 		static Object iterator(OBJ);
 
