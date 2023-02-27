@@ -20,9 +20,6 @@ const Token Token::END_OF_EXPR(TokenType::EXPR_END);
 const Token Token::EOF_TOKEN(TokenType::END, "end of program");
 const std::string Token::digits = "1234567890";
 const std::string Token::double_digits = digits + '.';
-const int Token::TYPENAMES_BEG_IDX =
-		std::distance(std::begin(reserved_words),
-				std::find(std::begin(reserved_words), std::end(reserved_words), Token::reserved(Word::T_NIL)));
 
 const std::unordered_map<char, char> Token::escape_seqs = {
 		{ 'a', '\a' },

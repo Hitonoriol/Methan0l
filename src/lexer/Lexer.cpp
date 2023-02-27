@@ -47,13 +47,6 @@ void Lexer::deduce_reserved()
 	if (reserved == Word::NONE)
 		return;
 
-	/* Value Type literal -- "evaluates" immediately to its index (Integer) */
-	const int type_start = static_cast<int>(Word::TYPE_ID_START);
-	if (wrd_id >= type_start) {
-		toktype = TokenType::INTEGER;
-		tokstr = std::to_string(wrd_id - type_start);
-	}
-
 	/* Boolean literal */
 	else if (reserved == Word::TRUE || reserved == Word::FALSE)
 		toktype = TokenType::BOOLEAN;

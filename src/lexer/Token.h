@@ -153,16 +153,7 @@ enum class Word : uint8_t
 	NEW_LINE,
 	BREAK,
 	VOID,
-	SELF_INVOKE,
-
-	TYPE_ID_START,
-	T_NIL = TYPE_ID_START,
-	T_INT, T_DOUBLE, T_STRING,
-	T_BOOLEAN, T_LIST, T_UNIT,
-	T_MAP, T_FUNCTION, T_CHAR,
-	T_OBJECT, T_REFERENCE,
-	T_TOKEN, T_EXPRESSION,
-	T_SET, T_FALLBACK
+	SELF_INVOKE
 };
 
 bool operator ==(const char, const TokenType&);
@@ -213,13 +204,7 @@ class Token
 
 		static constexpr std::string_view reserved_words[] = {
 				"", "nil", "true", "false", ".r",
-				"newl", "break", "void", "selfinvoke",
-
-				/* Type idfrs */
-				"Nil", "Int", "Float", "String", "Boolean",
-				"<List>", "Unit", "Map", "Function", "Character",
-				"Object", "Reference", "Token", "Expression", "Set",
-				"Fallback"
+				"newl", "break", "void", "selfinvoke"
 		};
 
 		/* Can't be redefined inside a program, lexed as their corresponding TokenType */
@@ -316,7 +301,6 @@ class Token
 
 		static const Token END_OF_EXPR;
 		static const Token EOF_TOKEN;
-		static const int TYPENAMES_BEG_IDX;
 		static const int LITERAL_START = static_cast<int>(TokenType::INTEGER);
 		static const int WORD_OP_START = static_cast<int>(TokenType::DO);
 		static const int BICHAR_OP_START = static_cast<int>(TokenType::SHIFT_L);
