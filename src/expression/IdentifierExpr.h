@@ -18,7 +18,7 @@ class IdentifierExpr: public Expression
 
 	public:
 		IdentifierExpr() = default;
-		IdentifierExpr(std::string name, bool global) : name(name), global(global) {}
+		IdentifierExpr(const std::string &name, bool global) : name(name), global(global) {}
 
 		Value evaluate(Interpreter &context) override;
 
