@@ -45,6 +45,11 @@ inline std::string str(const std::string_view &sv)
 	return std::string(sv);
 }
 
+inline std::string str(const char *str)
+{
+	return std::string(str);
+}
+
 inline std::string str(std::ostream &s)
 {
 	std::stringstream ss;

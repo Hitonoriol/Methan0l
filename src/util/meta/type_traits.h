@@ -8,6 +8,28 @@
 namespace mtl
 {
 
+template<typename ...Ts>
+constexpr auto type_name()
+{
+	std::string_view name, prefix, suffix;
+#ifdef __clang__
+	name = __PRETTY_FUNCTION__;
+	prefix = "auto type_name() [Ts = ";
+	suffix = "]";
+#elif defined(__GNUC__)
+	name = __PRETTY_FUNCTION__;
+	prefix = "constexpr auto type_name() [with Ts = ";
+	suffix = "]";
+#elif defined(_MSC_VER)
+	name = __FUNCSIG__;
+	prefix = "auto __cdecl type_name<";
+	suffix = ">(void)";
+#endif
+	name.remove_prefix(prefix.size());
+	name.remove_suffix(suffix.size());
+	return name;
+}
+
 /* is_equality_comparable<T, U>*/
 template<typename T, typename U>
 using equality_comparison_t = decltype(std::declval<T&>() == std::declval<U&>());
