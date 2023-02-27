@@ -32,7 +32,8 @@ class LibData: public Library
 		void import_reference(const IdentifierExpr&);
 		void load_operators();
 		void load_container_funcs();
-		bool instanceof(Value &rec, ExprPtr exp);
+		bool instanceof(Value &lhs, Value &rhs);
+		void assert_type(Value &lhs, Value &rhs);
 
 		template<typename T, typename F>
 		T accumulate(Value &ctr, T init, F &&operation)

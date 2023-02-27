@@ -367,19 +367,23 @@ void LibData::load_container_funcs()
 	});
 }
 
-bool LibData::instanceof(Value &rec, ExprPtr exp)
+bool LibData::instanceof(Value &lhs, Value &rhs)
 {
-	auto expv = val(exp);
-	if (rec.object()) {
-		auto clazz = rec.get<Object>().get_class();
-		if (expv.object())
-			return clazz->equals_or_inherits(expv.get<Object>().get_class());
-		else
-			return clazz->equals_or_inherits(&context->get_type_mgr().get_class(expv.to_string()));
+	auto type_id = rhs.as<Int>();
+	if (lhs.object()) {
+		auto clazz = lhs.get<Object>().get_class();
+		return clazz->equals_or_inherits(&context->get_type_mgr().get_class(type_id));
 	}
 	else {
-		return expv.type_id() == rec.type_id();
+		return lhs.type_id() == type_id;
 	}
+}
+
+void LibData::assert_type(Value &lhs, Value &rhs)
+{
+	if (!instanceof(lhs, rhs))
+		throw InvalidTypeException(lhs.type(), context->get_type_mgr().get_type(mtl::num(rhs)),
+				"Type assertion failed:");
 }
 
 void LibData::load_operators()
@@ -473,16 +477,8 @@ void LibData::load_operators()
 	}));
 
 	infix_operator(TokenType::INSTANCE_OF, LazyBinaryOpr([&](auto lhs, auto rhs) {
-		Value l = val(lhs);
-		return instanceof(l, rhs);
-	}));
-
-	infix_operator(TokenType::TYPE_SAFE, LazyBinaryOpr([&](auto lhs, auto rhs) {
-		Value l = val(lhs), r = val(rhs);
-		if (!instanceof(l, r))
-			throw InvalidTypeException(l, context->get_type_mgr().get_type(mtl::num(r)), "Type assertion failed:");
-
-		return Value::NO_VALUE;
+		auto l = val(lhs), r = val(rhs);
+		return instanceof(l, r);
 	}));
 
 	/* *["Assertion failed"] assert: condition */
@@ -495,10 +491,15 @@ void LibData::load_operators()
 	/* obj require: [Interface1, Interface2, ...] */
 	infix_operator(TokenType::REQUIRE, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		auto lval = val(lhs);
-		Expression::for_one_or_multiple(rhs, [this, &lval](auto &expr) {
-			if (!instanceof(lval, expr))
-				throw std::runtime_error("Object doesn't implement / inherit required interface(s)");
-		});
+		if (mtl::instanceof<ListExpr>(rhs)) {
+			Expression::for_one_or_multiple(rhs, [this, &lval](auto &expr) {
+				auto rval = val(expr);
+				assert_type(lval, rval);
+			});
+		} else {
+			auto rval = val(rhs);
+			assert_type(lval, rval);
+		}
 		return Value::NO_VALUE;
 	}));
 

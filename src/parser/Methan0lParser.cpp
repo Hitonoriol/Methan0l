@@ -176,7 +176,6 @@ Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 	register_parser(TokenType::VAR, new VarDefParser());
 
 	/* Infix word oprs */
-	register_infix_word(TokenType::TYPE_SAFE, Precedence::NO_EVAL);
 	register_infix_word(TokenType::ASSERT, Precedence::NO_EVAL);
 	register_infix_word(TokenType::INSTANCE_OF, Precedence::BIT_SHIFT);
 	register_infix_word(TokenType::REQUIRE, Precedence::NO_EVAL);
