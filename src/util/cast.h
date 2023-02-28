@@ -61,8 +61,11 @@ constexpr T& get(std::variant<Types...> &variant)
 	if (auto valptr = std::get_if<T>(&variant))
 		return *valptr;
 
-	auto contained = std::visit([](auto &v) {
-		return type_name<VT(v)>();
+	auto contained = std::visit([](auto &v) -> std::string_view {
+		using Contained = VT(v);
+		IF (std::is_same_v<Contained, std::any>)
+			return v.type().name();
+		return type_name<Contained>();
 	}, variant);
 	throw std::runtime_error("Bad variant access. "
 			"Contained type: " + mtl::str(contained)
