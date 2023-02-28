@@ -48,6 +48,11 @@ Class::Class(Interpreter &context, const std::string &name) :
 		return obj.to_string_default();
 	});
 
+	/* Default object copy */
+	register_method(Methods::Copy, [&](Object &obj) {
+		return Object::copy(obj);
+	});
+
 	/* Get all methods of this class */
 	register_method("get_methods", [&](Object &obj) {
 		return extract_names(class_data);
@@ -69,11 +74,6 @@ void Class::register_method(std::string_view name, Function &method)
 	method.arg_def.push_front( { std::move(mtl::str(Parameters::This)),
 			LiteralExpr::empty() });
 	class_data.set(mtl::str(name), method);
-}
-
-Value& Class::register_method(std::string_view name)
-{
-	return class_data.get_or_create(str(name));
 }
 
 void Class::add_base_class(Class *base)

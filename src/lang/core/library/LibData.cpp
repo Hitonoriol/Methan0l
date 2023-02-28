@@ -506,7 +506,7 @@ void LibData::load_operators()
 	prefix_operator(TokenType::OBJECT_COPY, LazyUnaryOpr([&](auto rhs) -> Value {
 		Value rval = val(rhs);
 		if (rval.is<Object>())
-			return Object::copy(rval.get<Object>());
+			return rval.get<Object>().invoke_method(Methods::Copy, {});
 		else if (rval.is<Unit>()) {
 			auto copy = context->make<Unit>();
 			return copy.as<Unit>([&](auto &box) {

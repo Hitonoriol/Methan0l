@@ -110,7 +110,7 @@ class ClassBinder
 			clazz->register_method(name, context.bind_func(method));
 		}
 
-		inline Value& register_method(std::string_view name)
+		inline Class::MethodBinder register_method(std::string_view name)
 		{
 			return clazz->register_method(name);
 		}

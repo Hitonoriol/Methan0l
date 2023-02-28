@@ -45,9 +45,10 @@ class Class : public Allocatable<Class>
 		Interpreter &context;
 
 	public:
-		static constexpr std::string_view
+		class MethodBinder;
 
-		THIS_ARG = "this";
+		static constexpr std::string_view
+			THIS_ARG = "this";
 
 		Class(Interpreter &context, const std::string &name);
 		virtual ~Class() = default;
@@ -69,8 +70,6 @@ class Class : public Allocatable<Class>
 			else
 				class_data.set(mname, context.bind_func(method));
 		}
-
-		Value& register_method(std::string_view name);
 
 		void add_base_class(Class*);
 		const std::vector<Class*>& get_base_classes();
@@ -118,6 +117,29 @@ class Class : public Allocatable<Class>
 		Object create_uninitialized();
 
 		friend std::ostream& operator <<(std::ostream &stream, Class &type);
+
+		class MethodBinder
+		{
+			private:
+				Class &clazz;
+				std::string_view name;
+
+			public:
+				MethodBinder(Class &clazz, std::string_view name)
+					: clazz(clazz), name(name) {};
+
+				template<typename F>
+				MethodBinder& operator=(F&& method)
+				{
+					clazz.register_method(name, method);
+					return *this;
+				}
+		};
+
+		MethodBinder register_method(std::string_view name)
+		{
+			return { *this, name };
+		}
 };
 
 class Anonymous: public Class

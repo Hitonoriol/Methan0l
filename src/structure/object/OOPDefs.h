@@ -13,7 +13,8 @@ struct Methods
 {
 	static constexpr std::string_view
 		Constructor = "construct",
-		ToString = "to_string";
+		ToString = "to_string",
+		Copy = "copy";
 };
 
 struct Parameters
