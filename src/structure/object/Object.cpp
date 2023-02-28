@@ -85,6 +85,11 @@ Value& Object::get_this_v(Args &args)
 	return this_expr.raw_ref();
 }
 
+std::any& Object::get_native_any()
+{
+	return field(Fields::NATIVE_OBJ).get<std::any>();
+}
+
 Value& Object::get_native()
 {
 	return field(Fields::NATIVE_OBJ);

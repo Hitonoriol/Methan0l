@@ -2,9 +2,11 @@
 #define SRC_STRUCTURE_OBJECT_H_
 
 #include <string>
+#include <any>
 
 #include "OOPDefs.h"
 #include "structure/DataTable.h"
+#include "util/cast.h"
 
 namespace mtl
 {
@@ -42,6 +44,7 @@ class Object
 		static Value& get_this_v(Args &args);
 		static Object& get_this(Args &args);
 
+		std::any& get_native_any();
 		Value& get_native();
 		void set_native(Value);
 
@@ -60,6 +63,16 @@ class Object
 
 		static void init_self(std::shared_ptr<LiteralExpr> &this_instance);
 		static Object copy(const Object &obj);
+
+		template<typename T>
+		static inline Object copy_native(Object &obj, Allocator<T> alloc = {})
+		{
+			auto new_obj = copy(obj);
+			auto &original_native = *mtl::any_cast<std::shared_ptr<T>&>(obj.get_native_any());
+			auto new_native = std::allocate_shared<T>(alloc, original_native);
+			new_obj.set_native(new_native);
+			return new_obj;
+		}
 };
 
 } /* namespace mtl */

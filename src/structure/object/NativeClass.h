@@ -64,7 +64,8 @@ class NativeClass
 	void name::initialize() \
 	{ \
 		class_binder.set_name(STR(name)); \
-		class_binder.get_class().set_native_id<name::bound_class>(); \
+		class_binder.get_class().set_native_id<bound_class>(); \
+		STANDARD_METHOD(Methods::Copy) (OBJ) { return mtl::Object::copy_native<THIS_CLASS>(this_obj); }; \
 		JOIN(__VA_ARGS__) \
 		class_binder.register_class(); \
 		LOG("Bound a native class: " << mtl::type_name<bound_class>() << " [" << class_binder.get_class().get_name() << "]") \
@@ -100,7 +101,8 @@ class NativeClass
 
 /* Convenience macros for `bind_method` and `bind_constructor` methods of ClassBinder<C> */
 #define BIND_CONSTRUCTOR(...) class_binder.bind_constructor<JOIN(__VA_ARGS__)>();
-#define BIND_METHOD(name) class_binder.bind_method(#name, &THIS_CLASS::name);
+#define BIND_METHOD_AS(bind_as, method_name) class_binder.bind_method(bind_as, &THIS_CLASS::method_name);
+#define BIND_METHOD(name) BIND_METHOD_AS(#name, name)
 
 /*   Bind a static member / non-member function as a mtl::Class method.
  * Requires function's full name including class it's a member of (if any).
