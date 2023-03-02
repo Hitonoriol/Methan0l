@@ -16,33 +16,29 @@ NATIVE_CLASS_BINDING(List, {
 namespace native
 {
 
-List::List() {}
-List::List(const ValList &other) : list(other) {}
-List::List(const List &rhs) : list(rhs.list) {}
-
 Object List::iterator(OBJ)
 {
-	return CONTEXT.new_object<ListIterator>(NATIVE(mtl::List).list);
+	return CONTEXT.new_object<ListIterator>(NATIVE(mtl::List).contained);
 }
 
 void List::add(Value val)
 {
-	list.push_back(val);
+	contained.push_back(val);
 }
 
 Value List::remove_at(UInt idx)
 {
-	auto removed = list.at(idx);
-	list.erase(list.begin() + idx);
+	auto removed = contained.at(idx);
+	contained.erase(contained.begin() + idx);
 	return removed;
 }
 
 Value List::remove(Value val)
 {
-	for (auto it = list.begin(); it != list.end(); ++it) {
+	for (auto it = contained.begin(); it != contained.end(); ++it) {
 		if (*it == val) {
 			auto removed = *it;
-			list.erase(it);
+			contained.erase(it);
 			return removed;
 		}
 	}
@@ -51,7 +47,7 @@ Value List::remove(Value val)
 
 std::string List::to_string()
 {
-	return stringify_container(nullptr, list);
+	return stringify_container(nullptr, contained);
 }
 
 }

@@ -2,6 +2,7 @@
 #define SRC_LANG_CORE_CLASS_LIST_H_
 
 #include <structure/object/NativeClass.h>
+#include <structure/Wrapper.h>
 
 namespace mtl
 {
@@ -11,46 +12,26 @@ class ListIterator;
 namespace native
 {
 
-class List
+class List : public Wrapper<ValList>
 {
-	private:
-		ValList list;
-
 	public:
-		List();
-		List(const ValList&);
-		List(const List&);
-
-		inline ValList* operator->()
-		{
-			return &list;
-		}
-
-		inline ValList& operator*()
-		{
-			return list;
-		}
-
-		inline operator ValList&()
-		{
-			return list;
-		}
+		using Wrapper<contained_type>::Wrapper;
 
 		inline Value& operator[](UInt idx)
 		{
-			return (list)[idx];
+			return (contained)[idx];
 		}
 
 		inline void push_back(const Value &value)
 		{
-			list.push_back(value);
+			contained.push_back(value);
 		}
 
-		inline auto begin() { return list.begin();	}
-		inline auto begin() const { return list.begin(); }
+		inline auto begin() { return contained.begin();	}
+		inline auto begin() const { return contained.begin(); }
 
-		inline auto end() { return list.end(); }
-		inline auto end() const { return list.end(); }
+		inline auto end() { return contained.end(); }
+		inline auto end() const { return contained.end(); }
 
 		static Object iterator(OBJ);
 
