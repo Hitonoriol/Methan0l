@@ -115,6 +115,14 @@ inline std::string stringify(std::function<std::string(void)> str_supplier)
 	return list_str;
 }
 
+inline constexpr std::string_view strip_name_scope(std::string_view full_name)
+{
+	auto idx = full_name.find_last_of("::");
+	if (idx == std::string_view::npos)
+		return full_name;
+	return full_name.substr(idx + 1);
+}
+
 }
 
 #endif /* SRC_UTIL_STRING_H_ */

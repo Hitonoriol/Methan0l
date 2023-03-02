@@ -2,6 +2,7 @@
 #define SRC_STRUCTURE_OBJECT_NATIVECLASS_H_
 
 #include <util/class_binder.h>
+#include <util/string.h>
 
 namespace mtl
 {
@@ -107,9 +108,23 @@ class NativeClass
 /*   Bind a static member / non-member function as a mtl::Class method.
  * Requires function's full name including class it's a member of (if any).
  * Requires first argument of the function to be a `mtl::Object&` (`OBJ` macro can be used). */
-#define BIND_PROXY_METHOD(name) class_binder.register_method(#name, &name);
+#define BIND_PROXY_METHOD_AS(bind_as, method_name) class_binder.register_method(bind_as, &method_name);
+#define BIND_PROXY_METHOD(name) BIND_PROXY_METHOD_AS(strip_name_scope(#name), name)
 
 /* ----------------------------------------------------- */
+
+#define ADAPTER_INVOKE(name, ...) obj.invoke_method(STR(name), {JOIN(__VA_ARGS__)})
+#define ADAPTER_METHOD(name, ...) { return ADAPTER_INVOKE(name, JOIN(__VA_ARGS__)); }
+#define ADAPTER_VOID_METHOD(name, ...) { ADAPTER_INVOKE(name, JOIN(__VA_ARGS__)); }
+
+class Adapter
+{
+	protected:
+		Object obj;
+
+	public:
+		Adapter(const Object &obj) : obj(obj) {};
+};
 
 } /* namespace mtl */
 
