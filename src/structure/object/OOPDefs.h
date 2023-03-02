@@ -3,6 +3,9 @@
 
 #include <string_view>
 
+namespace mtl
+{
+
 struct Fields
 {
 	static constexpr std::string_view
@@ -23,5 +26,7 @@ struct Parameters
 		This = "this",
 		Super = "super";
 };
+
+}
 
 #endif /* SRC_STRUCTURE_OBJECT_OOPDEFS_H_ */
