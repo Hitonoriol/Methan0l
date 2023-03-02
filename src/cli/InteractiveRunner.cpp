@@ -241,8 +241,7 @@ void InteractiveRunner::parse()
 	/* Wrap single expressions in return expressions */
 	if (cas_mode && main.size() == 1) {
 		auto &expr = main.expressions().front();
-		if (!instanceof<IdentifierExpr>(expr))
-			expr = Expression::return_expr(expr);
+		expr = Expression::return_expr(expr);
 	}
 	main.clear_result();
 }
