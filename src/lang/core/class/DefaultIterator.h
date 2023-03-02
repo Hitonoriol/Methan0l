@@ -35,7 +35,7 @@ class DefaultIterator : public Iterator
 			static_assert(std::is_same_v<value_type, Value>);
 		}
 
-		Value get() override
+		Value peek() override
 		{
 			check_bounds();
 			return Value::ref(*current_it);
