@@ -34,12 +34,11 @@ class Object
 		Object(const Object &rhs);
 		Object& operator=(const Object &rhs);
 
-		Object& construct(TypeManager &mgr, Args &args);
+		Object& construct(Args &args);
 		Value& field(std::string_view name);
 		Value& field(const std::string &name);
 		Value& def(std::string_view name);
 		Value invoke_method(const std::string &name, Args &args);
-		Value invoke_method(const std::string_view &name, Args &args);
 
 		static Value& get_this_v(Args &args);
 		static Object& get_this(Args &args);

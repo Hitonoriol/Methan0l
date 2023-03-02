@@ -141,7 +141,7 @@ class_id Class::get_id()
 Object Class::create(Args &args)
 {
 	auto obj = create_uninitialized();
-	return obj.construct(context.get_type_mgr(), args);
+	return obj.construct(args);
 }
 
 Object Class::create_uninitialized()

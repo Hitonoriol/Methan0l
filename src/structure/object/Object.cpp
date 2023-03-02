@@ -62,9 +62,9 @@ Value& Object::field(std::string_view name)
 	return field(std::string(name));
 }
 
-Object& Object::construct(TypeManager &mgr, Args &args)
+Object& Object::construct(Args &args)
 {
-	invoke_method(Methods::Constructor, args);
+	invoke_method(str(Methods::Constructor), args);
 	return *this;
 }
 
@@ -72,11 +72,6 @@ Object& Object::construct(TypeManager &mgr, Args &args)
 Value Object::invoke_method(const std::string &name, Args &args)
 {
 	return get_class()->invoke_method(*this, name, args);
-}
-
-Value Object::invoke_method(const std::string_view &name, Args &args)
-{
-	return invoke_method(str(name), args);
 }
 
 Value& Object::get_this_v(Args &args)
@@ -133,7 +128,7 @@ uintptr_t Object::id() const
 std::string Object::to_string()
 {
 	Args noargs;
-	return str(invoke_method(Methods::ToString, noargs));
+	return str(invoke_method(str(Methods::ToString), noargs));
 }
 
 std::string Object::to_string_default()

@@ -445,7 +445,7 @@ void LibData::load_operators()
 				} else if (lval.is<Object>()) {
 					auto &proto = lval.get<Object>();
 					Object obj(proto.get_class(), proto.get_data());
-					obj.invoke_method(Methods::Constructor, ctor_call.arg_list());
+					obj.construct(ctor_call.arg_list());
 					return obj;
 				}
 			}
@@ -506,7 +506,7 @@ void LibData::load_operators()
 	prefix_operator(TokenType::OBJECT_COPY, LazyUnaryOpr([&](auto rhs) -> Value {
 		Value rval = val(rhs);
 		if (rval.is<Object>())
-			return rval.get<Object>().invoke_method(Methods::Copy, {});
+			return rval.get<Object>().invoke_method(mtl::str(Methods::Copy), {});
 		else if (rval.is<Unit>()) {
 			auto copy = context->make<Unit>();
 			return copy.as<Unit>([&](auto &box) {
