@@ -10,6 +10,9 @@
 namespace mtl
 {
 
+template<typename C>
+using iterator_of = decltype(std::begin(std::declval<C&>()));
+
 template<typename C, typename T>
 inline auto insert(C &c, T &&val) -> LIST_T
 {
@@ -20,6 +23,12 @@ template<typename C, typename T>
 inline auto remove(C &c, T &&val) -> LIST_T
 {
 	c.erase(std::remove(c.begin(), c.end(), FWD_VAL), c.end());
+}
+
+template<typename C>
+inline auto remove(C &c, iterator_of<C> &it)
+{
+	c.erase(it);
 }
 
 template<typename C, typename T>
