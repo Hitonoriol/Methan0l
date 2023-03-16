@@ -42,7 +42,17 @@ struct Factory: private FactoryImpl<T, Types...>::OptCall
 		template<class C, typename R, typename ...Args> \
 		constexpr auto method(sig) \
 		{ \
-			return [func](C& obj, Args ...args) -> R {return ((&obj)->*func)(args...);}; \
+			return [func](C& obj, Args ...args) -> R { \
+				return ((&obj)->*func)(args...); \
+			}; \
+		} \
+		template<class C, typename R, typename ...Args> \
+		constexpr auto mutator_method(sig) \
+		{ \
+			return [func](const mtl::Value& obj, Args ...args) -> mtl::Value { \
+				((&(mtl::unconst(obj).get<C>()))->*func)(args...); \
+				return obj;\
+			}; \
 		}
 
 METHOD_WRAPPER(R(C::*func)(Args...))
@@ -69,7 +79,7 @@ class ClassBinder
 		ClassBinder(Interpreter &context, const std::string &name = "") :
 			clazz(Allocatable<Class>::allocate(context, name)), context(context) {}
 
-		inline void set_name(const std::string &name)
+		inline void set_name(std::string_view name)
 		{
 			clazz->set_name(name);
 		}
@@ -99,8 +109,13 @@ class ClassBinder
 		template<typename F>
 		inline void bind_method(std::string_view name, F &&method)
 		{
-			LOG("Binding native class method: " << name << "[" << type_name<F>() << "]")
 			clazz->register_method(name, context.bind_func(mtl::method(method)));
+		}
+
+		template<typename F>
+		inline void bind_mutator_method(std::string_view name, F &&method)
+		{
+			clazz->register_method(name, context.bind_func(mtl::mutator_method(method)));
 		}
 
 		template<typename F>
