@@ -87,6 +87,17 @@ inline U& retain_all(T &lookup_in, U &retain_in)
 	return retain_in;
 }
 
+template<typename T, typename V>
+inline Int index_of(T &&container, V &&value)
+{
+	Int idx = 0;
+	for (auto &&elem : container) {
+		if (value == elem)
+			return idx;
+	}
+	return -1;
+}
+
 }
 
 #endif /* SRC_UTIL_CONTAINERS_H_ */

@@ -6,6 +6,8 @@
 namespace mtl
 {
 
+Args empty_args;
+
 Value val(Interpreter &context, ExprPtr expr)
 {
 	return expr->evaluate(context).get();

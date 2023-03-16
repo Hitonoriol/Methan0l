@@ -11,6 +11,7 @@
 #include "string.h"
 #include "debug.h"
 #include "filesystem.h"
+#include "containers.h"
 #include "meta/type_traits.h"
 #include "meta/variant_traits.h"
 

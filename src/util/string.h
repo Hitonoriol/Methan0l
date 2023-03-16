@@ -76,6 +76,12 @@ inline bool ends_with(std::string_view str, std::string_view suffix)
 	return end == suffix;
 }
 
+inline bool starts_with(std::string_view str, std::string_view prefix)
+{
+	auto start = str.substr(0, prefix.size());
+	return start == prefix;
+}
+
 inline std::string& strip_quotes(std::string &str)
 {
 	if (str[0] != '"' && str[0] != '\'')
@@ -86,8 +92,7 @@ inline std::string& strip_quotes(std::string &str)
 	return str;
 }
 
-template<typename T>
-inline bool contains(const std::string &str, const T &needle)
+inline bool contains(std::string_view str, std::string_view needle)
 {
 	if (needle.size() > str.size())
 		return false;
