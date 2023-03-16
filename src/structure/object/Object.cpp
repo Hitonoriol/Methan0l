@@ -112,7 +112,7 @@ Class* Object::get_class() const
 
 Interpreter& Object::context() const
 {
-	return get_class()->get_evatuator();
+	return get_class()->get_context();
 }
 
 size_t Object::type_id() const

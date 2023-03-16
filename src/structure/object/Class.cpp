@@ -22,22 +22,10 @@ namespace mtl
 {
 
 Class::Class(Interpreter &context, const std::string &name) :
-		native_id(typeid(*this), name),
 		name(name),
 		static_instance(std::make_unique<Object>(this)),
 		context(context)
 {
-	/*
-	 * Can be called as a static method:
-	 * 		Class@class_id$()
-	 *
-	 * 	As well as a method of an Object:
-	 * 		obj.class_id$()
-	 */
-	register_method("class_id", [&](Args &args) {
-		return get_id();
-	});
-
 	/* Default constructor */
 	register_method(Methods::Constructor, [&](Args &args) {
 		return Value::NO_VALUE;
@@ -53,19 +41,31 @@ Class::Class(Interpreter &context, const std::string &name) :
 		return Object::copy(obj);
 	});
 
-	/* Get all methods of this class */
+	/* Reflective methods: */
+
+	/* [Static] Get class id */
+	register_method("class_id", [&](Args &args) {
+		return get_id();
+	});
+
+	/* [Static] Get all methods of this class */
 	register_method("get_methods", [&](Object &obj) {
 		return extract_names(class_data);
 	});
 
-	/* Get all fields of object of this class */
+	/* [Non-static] Get all fields of object of this class */
 	register_method("get_fields", [&](Object &obj) {
 		return extract_names(obj.get_data());
 	});
 
-	/* Get method by name */
+	/* [Static] Get method by name */
 	register_method("get_method", [&](Object &obj, const std::string &name) {
 		return class_data.get(name, true);
+	});
+
+	/* [Non-static] Get field value by name */
+	register_method("get_field", [&](Object &obj, const std::string &name) {
+		return obj.field(name);
 	});
 }
 
@@ -76,14 +76,36 @@ void Class::register_method(std::string_view name, Function &method)
 	class_data.set(mtl::str(name), method);
 }
 
-void Class::add_base_class(Class *base)
+void Class::add_base_class(Class *base_class)
 {
-	this->base.push_back(base);
+	for (auto& [name, value] : *(base_class->get_class_data().map_ptr())) {
+		if (name != Methods::Constructor)
+			class_data.set(name, value);
+	}
 }
 
-const std::vector<Class*>& Class::get_base_classes()
+void Class::inherit(Class *parent)
 {
-	return base;
+	if (superclass)
+		throw std::runtime_error("Classes can only have one superclass");
+
+	superclass = parent;
+	for (auto& [name, value] : *(parent->get_object_data().map_ptr()))
+		proto_object_data.set(name, value);
+	class_data.set(str(Parameters::Super), parent->get_class_data().get(str(Methods::Constructor)));
+	add_base_class(parent);
+
+}
+
+void Class::implement(Class *interface)
+{
+	interfaces.push_back(interface);
+	add_base_class(interface);
+}
+
+const std::vector<Class*>& Class::get_interfaces()
+{
+	return interfaces;
 }
 
 Value Class::extract_names(const DataTable &table)

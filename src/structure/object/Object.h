@@ -38,7 +38,7 @@ class Object
 		Value& field(std::string_view name);
 		Value& field(const std::string &name);
 		Value& def(std::string_view name);
-		Value invoke_method(const std::string &name, Args &args);
+		Value invoke_method(const std::string &name, Args &args = empty_args);
 
 		static Value& get_this_v(Args &args);
 		static Object& get_this(Args &args);

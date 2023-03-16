@@ -28,10 +28,11 @@ class Object;
 class Class : public Allocatable<Class>
 {
 	private:
-		TypeID native_id;
 		std::string name;
+		TypeID native_id;
 
-		std::vector<Class*> base;
+		Class *superclass = nullptr;
+		std::vector<Class*> interfaces;
 
 		/* Methods & fields that are associated with this Class */
 		DataTable class_data;
@@ -40,6 +41,8 @@ class Class : public Allocatable<Class>
 		DataTable proto_object_data;
 
 		std::unique_ptr<Object> static_instance;
+
+		void add_base_class(Class*);
 
 	protected:
 		Interpreter &context;
@@ -71,19 +74,36 @@ class Class : public Allocatable<Class>
 				class_data.set(mname, context.bind_func(method));
 		}
 
-		void add_base_class(Class*);
-		const std::vector<Class*>& get_base_classes();
+		void inherit(Class*);
+		void implement(Class*);
+
+		inline void inherit(const std::string &parent_name)
+		{
+			inherit(&context.get_type_mgr().get_class(parent_name));
+		}
+
+		inline void implement(const std::string &parent_name)
+		{
+			implement(&context.get_type_mgr().get_class(parent_name));
+		}
+
+		Class* get_superclass();
+		const std::vector<Class*>& get_interfaces();
 
 		DataTable& get_class_data();
 		DataTable& get_object_data();
 
 		inline bool equals_or_inherits(Class *clazz)
 		{
-			if (clazz->native_id == native_id)
+			auto &id = clazz->native_id;
+			if (id == native_id)
 				return true;
 
-			for (auto &cl : base)
-				if (clazz->native_id == cl->native_id)
+			if (superclass && id == superclass->native_id)
+				return true;
+
+			for (auto &cl : interfaces)
+				if (id == cl->native_id)
 					return true;
 			return false;
 		}
@@ -103,12 +123,12 @@ class Class : public Allocatable<Class>
 		}
 
 		const std::string& get_name();
-		inline void set_name(const std::string &name)
+		inline void set_name(std::string_view name)
 		{
 			this->name = name;
 		}
 
-		inline Interpreter& get_evatuator()
+		inline Interpreter& get_context()
 		{
 			return context;
 		}

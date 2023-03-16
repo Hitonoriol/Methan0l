@@ -31,19 +31,12 @@ void ClassExpr::execute(Interpreter &context)
 	auto &obj_data = clazz->get_object_data();
 
 	if (!base.empty()) {
-		auto &class_data = clazz->get_class_data();
-		for (auto &base_name : base) {
-			Class &base_class = type_mgr.get_class(base_name);
-			clazz->add_base_class(&base_class);
-			for (auto& [name, value] : *(base_class.get_class_data().map_ptr())) {
-				if (name != Methods::Constructor)
-					class_data.set(name, value);
-			}
+		auto it = base.begin();
+		clazz->inherit(&type_mgr.get_class(*it++));
+		for (; it != base.end(); ++it) {
+			auto &base_class = type_mgr.get_class(*it);
+			clazz->implement(&base_class);
 		}
-		auto &super = *(clazz->get_base_classes().front());
-		for (auto& [name, value] : *(super.get_object_data().map_ptr()))
-			obj_data.set(name, value);
-		class_data.set(str(Parameters::Super), super.get_class_data().get(str(Methods::Constructor)));
 	}
 
 	for (auto& [name, rhs] : body) {
