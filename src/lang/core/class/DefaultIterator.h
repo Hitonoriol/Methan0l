@@ -1,6 +1,7 @@
 #ifndef SRC_LANG_CORE_CLASS_DEFAULTITERATOR_H_
 #define SRC_LANG_CORE_CLASS_DEFAULTITERATOR_H_
 
+#include <structure/Value.h>
 #include <lang/core/class/Iterator.h>
 #include <util/containers.h>
 
@@ -79,12 +80,19 @@ class DefaultIterator : public Iterator
 
 		Value previous() override
 		{
-			if (!has_previous())
+			IF (!is_reverse_iterator<iterator_type>::value)
 				throw IllegalOperationException();
+			else {
+				if (!has_previous())
+					throw IllegalOperationException();
 
-			return Value::ref(*(current_it--));
+				return Value::ref(*(current_it--));
+			}
 		}
 };
+
+NATIVE_CLASS(ListIterator, DefaultIterator<ValList>)
+NATIVE_CLASS(SetIterator, DefaultIterator<ValSet>)
 
 } /* namespace mtl */
 

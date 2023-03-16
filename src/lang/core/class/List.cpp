@@ -1,29 +1,21 @@
 #include "List.h"
-#include "ListIterator.h"
+#include "DefaultIterator.h"
 
 namespace mtl
 {
 
 NATIVE_CLASS_BINDING(List, {
-	BIND_CONSTRUCTOR()
-	BIND_METHOD(add)
-	BIND_METHOD(remove)
-	BIND_METHOD(remove_at)
+	IMPLEMENTS_COLLECTION
 	BIND_METHOD(to_string)
-	BIND_PROXY_METHOD(native::List::iterator)
 })
 
 namespace native
 {
 
-Object List::iterator(OBJ)
-{
-	return CONTEXT.new_object<ListIterator>(NATIVE(mtl::List).contained);
-}
-
-void List::add(Value val)
+Boolean List::add(Value val)
 {
 	contained.push_back(val);
+	return true;
 }
 
 Value List::remove_at(UInt idx)
@@ -45,9 +37,45 @@ Value List::remove(Value val)
 	return Value::NIL;
 }
 
+Value List::get(Int idx)
+{
+	return contained.at(idx);
+}
+
 std::string List::to_string()
 {
 	return stringify_container(nullptr, contained);
+}
+
+UInt List::size()
+{
+	return contained.size();
+}
+
+void List::clear()
+{
+	contained.clear();
+}
+
+UInt List::index_of(Value value)
+{
+	return mtl::index_of(contained, value);
+}
+
+Boolean List::contains(Value value)
+{
+	return mtl::contains(contained, value);
+}
+
+Value List::append()
+{
+	auto &elem = contained.emplace_back();
+	return Value::ref(elem);
+}
+
+Boolean List::is_empty()
+{
+	return contained.empty();
 }
 
 }

@@ -6,6 +6,7 @@
 #include <structure/Value.h>
 #include <structure/object/OOPDefs.h>
 #include <structure/object/NativeClass.h>
+#include <Grammar.h>
 
 namespace mtl
 {
@@ -46,6 +47,16 @@ class IteratorAdapter : public Iterator, public Adapter
 
 		Value remove() override ADAPTER_METHOD(remove)
 };
+
+#define ITERATOR_BINDINGS(container_type) \
+		BIND_CONSTRUCTOR(container_type&) \
+		BIND_METHOD(peek) \
+		BIND_METHOD(next) \
+		BIND_METHOD(has_next) \
+		BIND_METHOD(reverse) \
+		BIND_METHOD(previous) \
+		BIND_METHOD(has_previous) \
+		BIND_METHOD(remove)
 
 } /* namespace mtl */
 

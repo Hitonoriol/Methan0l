@@ -138,6 +138,14 @@ struct is_callable
 /* Checks whether supplied type T is a class binding
  * (if it defines a `bound_class` public member type) */
 MEMBER_TYPE_DETECTOR(is_class_binding, bound_class)
+MEMBER_TYPE_DETECTOR(is_class_wrapper, wrapped_type)
+
+template<typename Iter>
+struct is_reverse_iterator: std::false_type {};
+
+template<typename Iter>
+struct is_reverse_iterator<std::reverse_iterator<Iter>>
+: std::integral_constant<bool, !is_reverse_iterator<Iter>::value> {};
 
 }
 

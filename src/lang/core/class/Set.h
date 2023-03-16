@@ -1,6 +1,7 @@
-#ifndef SRC_LANG_CORE_CLASS_LIST_H_
-#define SRC_LANG_CORE_CLASS_LIST_H_
+#ifndef SRC_LANG_CORE_CLASS_SET_H_
+#define SRC_LANG_CORE_CLASS_SET_H_
 
+#include <type.h>
 #include <lang/core/class/Collection.h>
 #include <structure/object/NativeClass.h>
 #include <structure/Wrapper.h>
@@ -9,36 +10,27 @@
 namespace mtl
 {
 
-class ListIterator;
-
 namespace native
 {
 
-class List : public ContainerWrapper<ValList>, public Collection
+class List;
+
+class Set : public ContainerWrapper<ValSet>, public Collection
 {
 	public:
-		using iterator_type = ListIterator::bound_class;
+		using iterator_type = SetIterator::bound_class;
 		using ContainerWrapper<wrapped_type>::ContainerWrapper;
-
-		inline Value& operator[](UInt idx)
-		{
-			return (contained)[idx];
-		}
-
-		inline void push_back(const Value &value)
-		{
-			contained.push_back(value);
-		}
+		Set(const List&);
 
 		Boolean add(Value) override;
-		Value remove_at(UInt) override;
 		Value remove(Value) override;
-		Value get(Int) override;
+		Value remove_at(UInt) override UNIMPLEMENTED
 		UInt size() override;
+		Value get(Int) override;
 		void clear() override;
 		UInt index_of(Value) override;
 		Boolean contains(Value) override;
-		Value append() override;
+		Value append() override UNIMPLEMENTED
 		Boolean is_empty() override;
 
 		std::string to_string();
@@ -46,8 +38,8 @@ class List : public ContainerWrapper<ValList>, public Collection
 
 }
 
-NATIVE_CLASS(List, native::List)
+NATIVE_CLASS(Set, native::Set)
 
 } /* namespace mtl */
 
-#endif /* SRC_LANG_CORE_CLASS_LIST_H_ */
+#endif /* SRC_LANG_CORE_CLASS_SET_H_ */
