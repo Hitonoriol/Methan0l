@@ -16,30 +16,33 @@ class LiteralExpr: public Expression
 		Value value;
 
 	public:
+		LiteralExpr();
+		LiteralExpr(const Value &val);
 		LiteralExpr(TypeID val_type, const Token&);
 
 		template<typename T>
-		LiteralExpr(T value) : value(value)
-		{
-		}
-
-		LiteralExpr(const Value &val);
-		LiteralExpr();
+		LiteralExpr(T value) : value(value) {}
 
 		bool is_empty();
 
-		Value evaluate(Interpreter &context);
+		Value evaluate(Interpreter &context) override;
+		void execute(Interpreter &context) override;
 
 		Value raw_value();
 		Value& raw_ref();
 
-		void execute(Interpreter &context) override;
-
 		static std::shared_ptr<LiteralExpr> empty();
+
 		template<typename T>
-		static std::shared_ptr<LiteralExpr> create(T val)
+		static std::shared_ptr<LiteralExpr> create(T&& val)
 		{
 			return make_expr<LiteralExpr>(0, val);
+		}
+
+		template<typename ...Args>
+		inline static ExprList make_list(Args &&...args)
+		{
+			return {create(args)...};
 		}
 
 		static void exec_literal(Interpreter &context, Value &val);
