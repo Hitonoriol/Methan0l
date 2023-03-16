@@ -4,7 +4,6 @@
 #include "Expression.h"
 #include "util/hash.h"
 #include "util/containers.h"
-#include "CoreLibrary.h"
 #include "interpreter/Interpreter.h"
 
 namespace mtl

@@ -8,5 +8,6 @@
 #include <lang/core/Module.h>
 
 #include <lang/core/class/List.h>
+#include <lang/core/class/Set.h>
 
 #endif /* SRC_CORELIBRARY_H_ */
