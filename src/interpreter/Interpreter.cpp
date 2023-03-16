@@ -845,7 +845,7 @@ void Interpreter::load_args(ValList &&args)
 {
 	set_env_globals(args[0]);
 	auto list = make<List>();
-	list.move_in(args);
+	list.move_in<List>(args);
 	main.local().set(EnvVars::LAUNCH_ARGS, list);
 }
 

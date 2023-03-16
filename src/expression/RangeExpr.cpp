@@ -23,7 +23,7 @@ Value RangeExpr::evaluate(Interpreter &context)
 	auto to = end->evaluate(context);
 	auto step = has_step() ? this->step->evaluate(context).as<Int>() : 1;
 
-	return range.move_in(core::range(from, to, step, true));
+	return range.move_in<List>(core::range(from, to, step, true));
 }
 
 std::ostream& RangeExpr::info(std::ostream &str)
