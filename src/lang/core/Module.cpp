@@ -35,7 +35,7 @@ void load_module(Interpreter &context, const std::string &path, Unit &unit)
 
 	IMPORT<void(Interpreter*)>(module, ModuleSymbols::ENTRYPOINT)(&context);
 	for (std::string &symbol : boost::dll::library_info(name).symbols()) {
-		if (contains(symbol, ModuleSymbols::FUNC_DEF_PREFIX))
+		if (starts_with(symbol, ModuleSymbols::FUNC_DEF_PREFIX))
 			IMPORT<void(void)>(module, symbol)();
 	}
 
