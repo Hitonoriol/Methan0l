@@ -294,6 +294,10 @@ class Value
 		bool heap_type();
 		bool container();
 		bool numeric() const;
+		inline bool is_callable() const
+		{
+			return is<Function>() || is<NativeFunc>() || is<Unit>() || is<Object>();
+		}
 
 		bool empty() const;
 		bool nil() const;
@@ -317,18 +321,6 @@ class Value
 				if constexpr (is_heap_type<decltype(v)>())
 					visitor(*v);
 			}, value);
-		}
-
-		template<bool allow_associative = true, typename F>
-		constexpr void accept_container(F &&visitor)
-		{
-			accept_heap([&](auto &v) {
-				using C = VT(v);
-				if constexpr (is_container<C>::value
-						&& !(is_associative<C>::value && !allow_associative)) {
-					visitor(v);
-				}
-			});
 		}
 
 		template<bool allow_bool = false, typename F>
@@ -424,6 +416,14 @@ class Value
 		template<typename T>
 		inline Value& move_in(T &&value)
 		{
+			return as<T>([&](auto &contents) {
+				contents = std::move(value);
+			});
+		}
+
+		template<typename T, typename Wrapped = typename T::wrapped_type>
+		inline Value& move_in(Wrapped &&value)
+		{
 			return as<T>([&](auto &contents){
 				contents = std::move(value);
 			});
@@ -456,6 +456,11 @@ class Value
 		void* identity();
 
 		static Value ref(Value &val);
+		inline static Value ref(const Value &val)
+		{
+			return ref(unconst(val));
+		}
+
 		static ExprPtr wrapped(const Value &val);
 
 		/* Get current value by copy or convert to specified type */
@@ -503,6 +508,12 @@ class Value
 			throw InvalidTypeException(type());
 		}
 
+		template<typename ...Args>
+		Value invoke_method(const std::string &name, Args &&...args)
+		{
+			return get<Object>().invoke_method(name, {wrapped(args)...});
+		}
+
 		template <typename T>
 		operator T () const
 		{
@@ -513,6 +524,16 @@ class Value
 		operator T& ()
 		{
 			return get<TYPE(T)>();
+		}
+
+		inline Value& operator*()
+		{
+			return get();
+		}
+
+		inline Value* operator->()
+		{
+			return  &get();
 		}
 
 		template<typename T>
