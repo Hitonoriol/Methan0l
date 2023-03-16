@@ -103,6 +103,19 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 						runner.cas_print_end();
 					}
 
+		},
+		{ "classes - list all registered classes",
+				[](auto &runner)
+				{
+					auto classes = runner.interpreter().get_type_mgr().get_classes();
+					for (Class *clazz : classes) {
+						auto &native = clazz->get_native_id();
+						out << "* " << clazz->get_name() << " ("
+								<< native.type_name() << " / "
+								<< std::hex << native.type_id() << std::dec
+								<< ")" << NL;
+					}
+				}
 		}
 };
 
