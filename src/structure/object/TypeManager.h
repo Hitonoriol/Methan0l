@@ -17,10 +17,15 @@ class Anonymous;
 
 class TypeManager
 {
+	public:
+		using IdIndex = HashMap<class_id, std::shared_ptr<Class>>;
+		using NameIndex = HashMap<std::string, Class*>;
+		using NativeIndex = HashMap<TypeID, Class*>;
+
 	private:
-		HashMap<class_id, std::shared_ptr<Class>> classes;
-		HashMap<std::string, Class*> class_index;
-		HashMap<TypeID, Class*> native_classes;
+		IdIndex classes;
+		NameIndex class_index;
+		NativeIndex native_classes;
 		Interpreter &context;
 		std::shared_ptr<Anonymous> root;
 
@@ -102,6 +107,15 @@ class TypeManager
 		Object create_uninitialized_object(Class*);
 
 		Class* get_root();
+
+		auto get_classes()
+		{
+			std::vector<Class*> classes;
+			classes.reserve(class_index.size());
+			for (auto &&[name, clazz] : class_index)
+				classes.push_back(clazz);
+			return classes;
+		}
 };
 
 } /* namespace mtl */
