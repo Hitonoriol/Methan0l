@@ -8,7 +8,7 @@
 #include <structure/Value.h>
 #include <structure/DataTable.h>
 #include <util/util.h>
-#include <structure/object/NativeClass.h>
+#include <oop/NativeClass.h>
 
 #define API extern "C"
 #define INIT_MODULE 		mtl::Interpreter *context = nullptr;\

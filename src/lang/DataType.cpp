@@ -1,6 +1,6 @@
 #include "DataType.h"
 
-#include "structure/object/Object.h"
+#include "oop/Object.h"
 #include "structure/ValueRef.h"
 
 namespace mtl

@@ -2,7 +2,7 @@
 #define SRC_UTIL_CLASS_BINDER_H_
 
 #include "interpreter/Interpreter.h"
-#include "structure/object/Class.h"
+#include "oop/Class.h"
 
 #include <memory>
 

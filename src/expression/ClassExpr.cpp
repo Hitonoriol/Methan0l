@@ -1,4 +1,4 @@
-#include <structure/object/Class.h>
+#include <oop/Class.h>
 #include "ClassExpr.h"
 
 #include <algorithm>
@@ -9,7 +9,7 @@
 #include "interpreter/Interpreter.h"
 #include "structure/DataTable.h"
 #include "structure/Function.h"
-#include "structure/object/TypeManager.h"
+#include "interpreter/TypeManager.h"
 #include "structure/Value.h"
 #include "type.h"
 #include "util/util.h"

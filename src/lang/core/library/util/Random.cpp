@@ -8,7 +8,7 @@
 
 #include "expression/Expression.h"
 #include "interpreter/Interpreter.h"
-#include "structure/object/Object.h"
+#include "oop/Object.h"
 #include "structure/Value.h"
 #include "type.h"
 

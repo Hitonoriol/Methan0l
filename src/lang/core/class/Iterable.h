@@ -2,7 +2,7 @@
 #define SRC_LANG_CORE_CLASS_ITERABLE_H_
 
 #include <except/except.h>
-#include <structure/object/NativeClass.h>
+#include <oop/NativeClass.h>
 #include <Grammar.h>
 #include <lang/core/class/Iterator.h>
 

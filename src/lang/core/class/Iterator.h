@@ -4,8 +4,8 @@
 #include <type.h>
 #include <except/except.h>
 #include <structure/Value.h>
-#include <structure/object/OOPDefs.h>
-#include <structure/object/NativeClass.h>
+#include <oop/OOPDefs.h>
+#include <oop/NativeClass.h>
 #include <Grammar.h>
 
 namespace mtl

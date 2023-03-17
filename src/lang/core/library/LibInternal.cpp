@@ -20,8 +20,8 @@
 #include "util/Heap.h"
 #include "lang/core/Internal.h"
 
-#include "structure/object/Class.h"
-#include "structure/object/Object.h"
+#include "oop/Class.h"
+#include "oop/Object.h"
 
 namespace mtl
 {

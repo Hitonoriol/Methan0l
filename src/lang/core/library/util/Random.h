@@ -4,7 +4,7 @@
 #include <random>
 #include <type_traits>
 
-#include <structure/object/Class.h>
+#include <oop/Class.h>
 
 namespace mtl
 {

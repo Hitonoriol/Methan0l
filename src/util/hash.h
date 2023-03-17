@@ -11,7 +11,7 @@
 #include <expression/Expression.h>
 #include <structure/DataTable.h>
 #include <structure/Function.h>
-#include <structure/object/Object.h>
+#include <oop/Object.h>
 #include <structure/Value.h>
 #include <structure/ValueRef.h>
 #include <type.h>

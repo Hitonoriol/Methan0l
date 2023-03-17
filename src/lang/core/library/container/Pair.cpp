@@ -8,7 +8,7 @@
 #include <util/class_binder.h>
 #include <util/debug.h>
 #include <util/io.h>
-#include <structure/object/Object.h>
+#include <oop/Object.h>
 
 namespace mtl
 {

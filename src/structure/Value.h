@@ -12,7 +12,7 @@
 #include "ValueRef.h"
 #include "Function.h"
 #include "except/except.h"
-#include "object/Object.h"
+#include "oop/Object.h"
 #include "util/meta/type_traits.h"
 #include "util/cast.h"
 #include "lang/DataType.h"

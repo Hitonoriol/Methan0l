@@ -10,7 +10,7 @@
 #include "structure/Function.h"
 #include "structure/Value.h"
 
-#include "structure/object/Class.h"
+#include "oop/Class.h"
 
 namespace mtl
 {

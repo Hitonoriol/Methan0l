@@ -15,8 +15,8 @@
 #include "expression/LiteralExpr.h"
 #include "CoreLibrary.h"
 
-#include "object/Class.h"
-#include "object/Object.h"
+#include "oop/Class.h"
+#include "oop/Object.h"
 
 namespace mtl
 {

@@ -3,7 +3,7 @@
 
 #include <type.h>
 #include <lang/core/class/Collection.h>
-#include <structure/object/NativeClass.h>
+#include <oop/NativeClass.h>
 #include <structure/Wrapper.h>
 #include <lang/core/class/DefaultIterator.h>
 

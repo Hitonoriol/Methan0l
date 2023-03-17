@@ -15,7 +15,7 @@
 #include <lexer/Lexer.h>
 #include <structure/Function.h>
 #include <lang/ExternalLibrary.h>
-#include <structure/object/TypeManager.h>
+#include <interpreter/TypeManager.h>
 #include <interpreter/ExceptionHandler.h>
 
 #define OPERATOR_DEF(prefix, type, functor) \

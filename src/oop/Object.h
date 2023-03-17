@@ -1,10 +1,10 @@
 #ifndef SRC_STRUCTURE_OBJECT_H_
 #define SRC_STRUCTURE_OBJECT_H_
 
+#include <oop/OOPDefs.h>
 #include <string>
 #include <any>
 
-#include "OOPDefs.h"
 #include "structure/DataTable.h"
 #include "util/cast.h"
 

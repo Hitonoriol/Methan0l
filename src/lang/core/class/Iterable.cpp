@@ -1,6 +1,6 @@
 #include "Iterable.h"
 
-#include <structure/object/NativeClass.h>
+#include <oop/NativeClass.h>
 #include <CoreLibrary.h>
 
 

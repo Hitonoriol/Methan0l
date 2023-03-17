@@ -1,6 +1,7 @@
 #ifndef SRC_STRUCTURE_OBJECT_TYPEMANAGER_H_
 #define SRC_STRUCTURE_OBJECT_TYPEMANAGER_H_
 
+#include <oop/Object.h>
 #include <structure/TypeID.h>
 #include <string>
 #include <unordered_map>
@@ -8,7 +9,6 @@
 #include "util/meta/type_traits.h"
 #include "util/memory.h"
 #include "util/hash.h"
-#include "Object.h"
 
 namespace mtl
 {

@@ -23,7 +23,7 @@
 #include "expression/TryCatchExpr.h"
 
 #include "lang/Library.h"
-#include "structure/object/Class.h"
+#include "oop/Class.h"
 #include "CoreLibrary.h"
 
 namespace mtl

@@ -2,7 +2,7 @@
 #define SRC_LANG_CORE_CLASS_LIST_H_
 
 #include <lang/core/class/Collection.h>
-#include <structure/object/NativeClass.h>
+#include <oop/NativeClass.h>
 #include <structure/Wrapper.h>
 #include <lang/core/class/DefaultIterator.h>
 

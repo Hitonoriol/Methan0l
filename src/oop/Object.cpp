@@ -11,9 +11,9 @@
 #include "lang/Library.h"
 #include "type.h"
 #include "util/util.h"
-#include "TypeManager.h"
+#include "interpreter/TypeManager.h"
 #include "interpreter/Interpreter.h"
-#include "structure/object/Class.h"
+#include "oop/Class.h"
 
 namespace mtl
 {

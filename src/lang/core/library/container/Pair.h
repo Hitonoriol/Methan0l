@@ -1,7 +1,7 @@
 #ifndef SRC_LANG_CLASS_PAIR_H_
 #define SRC_LANG_CLASS_PAIR_H_
 
-#include <structure/object/NativeClass.h>
+#include <oop/NativeClass.h>
 
 namespace mtl
 {
