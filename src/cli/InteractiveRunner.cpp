@@ -107,14 +107,13 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 		{ "classes - list all registered classes",
 				[](auto &runner)
 				{
-					auto classes = runner.interpreter().get_type_mgr().get_classes();
-					for (Class *clazz : classes) {
-						auto &native = clazz->get_native_id();
-						out << "* " << clazz->get_name() << " ("
-								<< native.type_name() << " / "
-								<< std::hex << native.type_id() << std::dec
-								<< ")" << NL;
-					}
+					runner.list_classes();
+				}
+		},
+		{ "class <ClassName> - print info about a class",
+				[](auto &runner)
+				{
+					runner.print_class_info(runner.next_arg());
 				}
 		}
 };
@@ -294,6 +293,39 @@ void InteractiveRunner::start()
 		if (ready)
 			run();
 	} while (!methan0l.execution_stopped());
+}
+
+void InteractiveRunner::list_classes()
+{
+	auto classes = interpreter().get_type_mgr().get_classes();
+	for (Class *clazz : classes) {
+		auto &native = clazz->get_native_id();
+		OUT("* "
+				<< *clazz
+				<< ", native id: {" << native.type_name() << " / "
+				<< std::hex << native.type_id() << std::dec
+				<< ")")
+	}
+}
+
+void InteractiveRunner::print_class_info(const std::string &name)
+{
+	auto types = methan0l.get_type_mgr();
+	auto &clazz = types.get_class(name);
+
+	auto &interfaces = clazz.get_interfaces();
+
+	auto it = std::begin(interfaces), end = std::end(interfaces);
+	auto int_str = mtl::stringify([&]() {
+		if (it == end) return empty_string;
+		return (*(it++))->get_name();
+	});
+
+	OUT("Class " << clazz.get_name() << std::hex << std::dec)
+	OUT("Inherits: " << (clazz.has_superclass() ? clazz.get_superclass()->get_name() : "<Nothing>"))
+	OUT("Implements: " << int_str << NL)
+	OUT("Fields" << NL << clazz.get_fields() << NL)
+	OUT("Methods" << NL << clazz.get_methods())
 }
 
 } /* namespace mtl */

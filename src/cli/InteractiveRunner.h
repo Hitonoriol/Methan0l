@@ -54,6 +54,9 @@ class InteractiveRunner
 		void parse();
 		void run();
 
+		void list_classes();
+		void print_class_info(const std::string &name);
+
 	public:
 		InteractiveRunner(Interpreter&);
 		void start();
