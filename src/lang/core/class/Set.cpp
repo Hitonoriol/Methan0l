@@ -10,6 +10,13 @@ namespace mtl
 NATIVE_CLASS_BINDING(Set, {
 	IMPLEMENTS_COLLECTION
 	BIND_CONSTRUCTOR(const mtl::native::List&)
+	BIND_METHOD_AS(Operators::Get, contains)
+
+	BIND_METHOD(intersect)
+	BIND_METHOD_AS("union", union_set)
+	BIND_METHOD(diff)
+	BIND_METHOD(symdiff)
+
 	BIND_METHOD(to_string)
 })
 
@@ -63,6 +70,39 @@ Boolean Set::is_empty()
 Boolean Set::add(Value value)
 {
 	return contained.insert(value).second;
+}
+
+Value Set::intersect(Value &b)
+{
+	auto c = b.get_context().make<Set>();
+		return set_operation(*this, b, c, [&](auto &a, auto &b, auto &c) {
+			std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
+							[&b](auto &element){return b.count(element) > 0;});
+		});
+}
+
+Value Set::union_set(Value &b)
+{
+	auto c = b.get_context().make<Set>();
+		return set_operation(*this, b, c, [&](auto &a, auto &b, auto &c) {
+			c.insert(a.begin(), a.end());
+			c.insert(b.begin(), b.end());
+		});
+}
+
+Value Set::diff(Value &b)
+{
+	auto c = b.get_context().make<Set>();
+	return set_operation(*this, b, c, set_diff);
+}
+
+Value Set::symdiff(Value &b)
+{
+	auto c = b.get_context().make<Set>();
+		return set_operation(*this, b, c, [&](auto &a, auto &b, auto &c) {
+			set_diff(a, b, c);
+			set_diff(b, a, c);
+		});
 }
 
 }

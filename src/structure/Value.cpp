@@ -153,9 +153,6 @@ TypeID Value::type() const
 	else if (is<VFunction>() || is<VNativeFunc>())
 		return Type::FUNCTION;
 
-	else if (is<VSet>())
-		return Type::SET;
-
 	else if (is<VMap>())
 		return Type::MAP;
 
@@ -208,12 +205,6 @@ std::string Value::to_string(Interpreter *context)
 	else if (type == Type::BOOLEAN)
 		return std::string(
 				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE));
-
-	else if (type.is<List>())
-		return stringify_container(context, get<List>());
-
-	else if (type == Type::SET)
-		return stringify_container(context, get<ValSet>());
 
 	else if (type == Type::MAP) {
 		ValMap &map = get<ValMap>();
@@ -356,16 +347,6 @@ Value Value::convert(TypeID new_val_type)
 
 		TYPE_CASE(Type::STRING)
 			return Value(to_string());
-
-		TYPE_CASE_T(List) {
-			ValList list;
-			return Value(add_all(get<ValSet>(), list));
-		}
-
-		TYPE_CASE(Type::SET) {
-			ValSet set;
-			return Value(add_all(get<List>(), set));
-		}
 	)
 
 	throw InvalidTypeException(*this, new_val_type);

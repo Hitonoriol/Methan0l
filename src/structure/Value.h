@@ -122,7 +122,7 @@ Int, double, bool, char,
 VString,
 
 /* Data Structures (To be removed) */
-VSet, VMap,
+VMap,
 
 /* Callable types */
 VUnit, VFunction, VNativeFunc,
@@ -333,6 +333,11 @@ class Value
 			}, value);
 		}
 
+		inline Interpreter& get_context()
+		{
+			return get<Object>().context();
+		}
+
 		void clear();
 		static void clear(ValueContainer &pure_val);
 
@@ -515,13 +520,13 @@ class Value
 		}
 
 		template <typename T>
-		operator T () const
+		inline operator T () const
 		{
 			return as<T>();
 		}
 
 		template <typename T>
-		operator T& ()
+		inline operator T& ()
 		{
 			return get<TYPE(T)>();
 		}

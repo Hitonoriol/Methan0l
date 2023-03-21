@@ -25,7 +25,6 @@ DATA_TYPE(OBJECT, Object)
 DATA_TYPE(REFERENCE, ValueRef)
 HEAP_DATA_TYPE(TOKEN, Token)					// To be removed
 DATA_TYPE_DEF(EXPRESSION, Expression, ExprPtr)
-HEAP_DATA_TYPE(SET, Set)						// To be removed
 DATA_TYPE(FALLBACK, std::any)
 
 #define TYPE_INDEX(type) {type.type_id(), &type}
@@ -45,7 +44,6 @@ Type::Type()
 		TYPE_INDEX(REFERENCE),
 		TYPE_INDEX(TOKEN),
 		TYPE_INDEX(EXPRESSION),
-		TYPE_INDEX(SET),
 		TYPE_INDEX(FALLBACK)
 	})
 {

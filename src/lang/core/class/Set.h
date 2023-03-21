@@ -7,6 +7,8 @@
 #include <structure/Wrapper.h>
 #include <lang/core/class/DefaultIterator.h>
 
+#include <algorithm>
+
 namespace mtl
 {
 
@@ -17,6 +19,21 @@ class List;
 
 class Set : public ContainerWrapper<ValSet>, public Collection
 {
+	private:
+		/* Set operation where `args` contains 2 set expressions */
+		template<typename T>
+		inline Value& set_operation(Set &a, Set &b, Value &result, T &&operation)
+		{
+			operation(*a, *b, *result.get<Set>());
+			return result;
+		}
+
+		static void set_diff(ValSet &a, ValSet &b, ValSet &c)
+		{
+			std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
+					[&b](auto &element) {return b.count(element) == 0;});
+		}
+
 	public:
 		using iterator_type = SetIterator::bound_class;
 		using ContainerWrapper<wrapped_type>::ContainerWrapper;
@@ -32,6 +49,11 @@ class Set : public ContainerWrapper<ValSet>, public Collection
 		Boolean contains(Value) override;
 		Value append() override UNIMPLEMENTED
 		Boolean is_empty() override;
+
+		Value intersect(Value &b);
+		Value union_set(Value &b);
+		Value diff(Value &b);
+		Value symdiff(Value &b);
 
 		std::string to_string();
 };

@@ -26,7 +26,6 @@ class Type
 			REFERENCE,
 			TOKEN,
 			EXPRESSION,
-			SET,
 			FALLBACK;
 
 	private:

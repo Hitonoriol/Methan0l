@@ -21,8 +21,8 @@
 #include "type.h"
 #include "version.h"
 
-#include "structure/object/Class.h"
-#include "structure/object/Object.h"
+#include "oop/Class.h"
+#include "oop/Object.h"
 #include "CoreLibrary.h"
 
 namespace mtl
@@ -65,7 +65,7 @@ void LibData::load()
 		Int n = args.size() < 2 ? num(args) : num(args, 1);
 		Int step = args.size() == 3 ? num(args, 2) : 1;
 
-		return range.move_in(core::range(start, n, step));
+		return range.move_in<List>(core::range(start, n, step));
 	});
 
 	function("purge", [&](Args args) {
@@ -88,50 +88,8 @@ void LibData::load()
 				.count());
 	});
 
-	load_set_funcs();
 	load_container_funcs();
 	load_operators();
-}
-
-void LibData::load_set_funcs()
-{
-	/* set_a.intersect(set_b) */
-	function("intersect", [&](Args args) {
-		auto inter_v = context->make<ValSet>();
-		return set_operation(args, inter_v, [&](auto &a, auto &b, auto &c) {
-			std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
-							[&b](auto &element){return b.count(element) > 0;});
-		});
-	});
-
-	/* set_a.union(set_b) */
-	function("union", [&](Args args) {
-		auto union_v = context->make<ValSet>();
-		return set_operation(args, union_v, [&](auto &a, auto &b, auto &c) {
-			c.insert(a.begin(), a.end());
-			c.insert(b.begin(), b.end());
-		});
-	});
-
-	auto set_diff = [&](auto &a, auto &b, auto &c) {
-		std::copy_if(a.begin(), a.end(), std::inserter(c, c.begin()),
-		    [&b](auto &element) {return b.count(element) == 0;});
-	};
-
-	/* set_a.diff(set_b) */
-	function("diff", [&](Args args) {
-		auto diff_v = context->make<ValSet>();
-		return set_operation(args, diff_v, std::move(set_diff));
-	});
-
-	/* set_a.symdiff(set_b) */
-	function("symdiff", [&](Args args) {
-		auto sdiff_v = context->make<ValSet>();
-		return set_operation(args, sdiff_v, [&](auto &a, auto &b, auto &c) {
-			set_diff(a, b, c);
-			set_diff(b, a, c);
-		});
-	});
 }
 
 Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
@@ -153,8 +111,8 @@ void LibData::import_reference(const IdentifierExpr &idfr) {
 	context->local_scope()->set(name, Value::ref(context->scope_lookup(name, true)->get(name)));
 }
 
-LibData::DblBinOperation LibData::summator = [](double l, Value r) {return l + r.as<double>();};
-LibData::DblBinOperation LibData::multiplicator = [](double l, Value r) {return l * r.as<double>();};
+DblBinOperation LibData::summator = [](double l, Value r) {return l + r.as<double>();};
+DblBinOperation LibData::multiplicator = [](double l, Value r) {return l * r.as<double>();};
 
 double LibData::mean(Args &args)
 {
@@ -165,15 +123,8 @@ double LibData::mean(Args &args)
 std::pair<size_t, double> LibData::dispatch_accumulate(Args &args, double init, DblBinOperation operation)
 {
 	auto first = arg(args);
-	size_t size = 0;
-	if (first.container()) {
-		first.accept_container([&size](auto &v) {size = v.size();});
-		return std::make_pair(size, accumulate(first, init, operation));
-	}
-	else {
-		ExprList callargs(std::next(args.begin()), args.end());
-		return accumulate(first, callargs, init, operation);
-	}
+	ExprList callargs(std::next(args.begin()), args.end());
+	return accumulate(first, callargs, init, operation);
 }
 
 std::pair<size_t, double> LibData::accumulate(Value &callable, Args &args, double init, DblBinOperation op)
@@ -195,7 +146,7 @@ std::pair<size_t, double> LibData::accumulate(Value &callable, Args &args, doubl
 
 void LibData::load_container_funcs()
 {
-	/* ------------------ Accumulative container functions ------------------- */
+	/* ------------------ Accumulative functions ------------------- */
 	function("sum", [this](Args args) {
 		return dispatch_accumulate(args, 0.0, summator).second;
 	});
@@ -221,149 +172,6 @@ void LibData::load_container_funcs()
 			return l + (r.as<double>() - mean) * (r.as<double>() - mean);
 		});
 		return sqrt(dsum / n);
-	});
-
-	function("join", [this](Value ctr) {
-		return accumulate(ctr, std::string(""), [this](std::string l, Value r) {
-			return std::move(l) + r.to_string(context);
-		});
-	});
-	/* ----------------------------------------------------------------------- */
-
-	/* <List | Map>.for_each$(action, [finalizer])
-	 * Passes elements / key & value pairs to action$() one by one
-	 * action$() must be a 1-arg Function for Lists and 2-arg for Maps
-	 */
-	function("for_each", [&](Args args) {
-		Value ctr = ref(args[0]);
-		if (!ctr.container())
-			throw std::runtime_error("for_each() on a non-container type");
-
-		Function action = arg(args, 1).get<Function>();
-
-		if constexpr(DEBUG)
-			std::cout << "Beginning " << ctr.type_name() << " for_each..." << std::endl;
-
-		ctr.accept_container([&](auto &container) {
-			core::for_each(*context, container, action);
-		});
-
-		if (args.size() > 2)
-			args[2]->execute(*context);
-
-		if constexpr (DEBUG)
-			std::cout << "* End of " << ctr.type_name() << " for_each" << std::endl;
-
-		return ctr;
-	});
-
-	/* list.map(mapping_function) */
-	function("map", [&](Args args) -> Value {
-		Value ctr = ref(args[0]);
-		if (!ctr.container())
-			throw std::runtime_error("map() on a non-container type");
-
-		Function mapper = arg(args, 1).get<Function>();
-		Value result;
-		ctr.accept_container<false>([&](auto &container) {
-			map(container, result, mapper);
-		});
-		return result;
-	});
-
-	/* dest.add_all(src) */
-	function("add_all", [&](Args args) {
-		return container_operation(args, [&](auto &src, auto &dst){add_all(src, dst);});
-	});
-
-	/* dest.remove_all(src) */
-	function("remove_all", [&](Args args) {
-		return container_operation(args, [&](auto &src, auto &dst){remove_all(src, dst);});
-	});
-
-	/* dest.retain_all(src) */
-	function("retain_all", [&](Args args) {
-		return container_operation(args, [&](auto &src, auto &dst) {retain_all(src, dst);});
-	});
-
-	/* <List>.resize$(new_size) */
-	function("resize", [&](Args args) {
-		Value &list_val = ref(args[0]);
-		list_val.get<List>()->resize(unum(args, 1));
-		return list_val;
-	});
-
-	/* <Map | List>.clear$() */
-	function("clear", [&](Args args) {
-		Value &cnt = ref(args[0]);
-		TYPE_SWITCH(cnt.type(),
-			TYPE_CASE_T(List)
-				cnt.get<List>()->clear();
-
-			TYPE_CASE(Type::MAP)
-				cnt.get<ValMap>().clear();
-		)
-		return Value::NO_VALUE;
-	});
-
-	/* <Map | List>.size$() */
-	function("size", [this](Args args) {
-		Value val = this->arg(args);
-		int size = 0;
-
-		TYPE_SWITCH(val.type(),
-			TYPE_CASE(Type::STRING)
-				size = mtl::str_length(val.get<std::string>());
-
-			TYPE_CASE_T(List)
-				size = val.get<List>()->size();
-
-			TYPE_CASE(Type::MAP)
-				size = val.get<ValMap>().size();
-
-			TYPE_DEFAULT
-				throw std::runtime_error(mtl::str(val.type_name()) + " has no pseudo-method size()");
-		)
-
-		return Value(size);
-	});
-
-	function("is_empty", [&](Args args) {
-		bool empty = false;
-		Value arg = val(args[0]);
-		if (arg.is<std::string>())
-			return Value(arg.get<std::string>().empty());
-
-		arg.accept_container([&](auto &c) {empty = c.empty();});
-		return Value(empty);
-	});
-
-	/* list.fill(val, [n]) */
-	function("fill", [&](Args args) {
-		Value list_v = ref(args[0]);
-		ValList &list = list_v.get<List>();
-		Value val = arg(args, 1);
-		size_t n = args.size() > 2 ? num(args, 2) : list.size();
-		if (n > list.size())
-			list.resize(n);
-		for (auto &elem : list)
-			elem = val;
-		return list_v;
-	});
-
-	/* map.list_of$(keys) or map.list_of$(values) */
-	function("list_of", [&](Args args) {
-		std::string type = MapParser::key_string(args[1]);
-
-		if (type != KEY_LIST && type != VAL_LIST)
-			throw std::runtime_error("Invalid list type");
-
-		bool keylist = type == KEY_LIST;
-		ValMap &map = ref(args[0]).get<ValMap>();
-		ValList list;
-		for (auto entry : map)
-			list.push_back(keylist ? entry.first : entry.second);
-		return Value(list);
 	});
 }
 
