@@ -26,7 +26,7 @@ Exception& Exception::operator=(const Exception &rhs)
 	return *this;
 }
 
-std::string error_msg(const std::string &msg, TypeID type, TypeID expected)
+std::string type_error_msg(const std::string &msg, TypeID type, TypeID expected)
 {
 	return msg + " expected \""
 			+ (expected != TypeID::NONE ? str(expected.type_name()) : "<unspecified>")
@@ -35,11 +35,11 @@ std::string error_msg(const std::string &msg, TypeID type, TypeID expected)
 }
 
 InvalidTypeException::InvalidTypeException(TypeID type, TypeID expected, const std::string &msg) :
-		std::runtime_error(error_msg(msg, type, expected))
+		std::runtime_error(type_error_msg(msg, type, expected))
 {}
 
 InvalidTypeException::InvalidTypeException(Value received, TypeID expected) :
-		std::runtime_error(error_msg("Invalid conversion of value `"
+		std::runtime_error(type_error_msg("Invalid conversion of value `"
 				+ received.to_string() + "`:",
 				received.type(), expected))
 {}
