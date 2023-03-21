@@ -37,7 +37,7 @@ class TypeManager
 			if (entry == native_classes.end())
 				throw std::runtime_error("Cannot instantiate an object "
 						"of unregistered native type: " + str(mtl::type_name<Type>())
-						+ " (" + native_id->name() + ")");
+						+ " (" + mtl::str(native_id.type_name()) + ")");
 
 			auto obj = create_uninitialized_object(entry->second);
 			auto native_obj = std::allocate_shared<Type>(

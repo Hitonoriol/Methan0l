@@ -22,10 +22,11 @@ namespace mtl
 {
 
 Class::Class(Interpreter &context, const std::string &name) :
-		name(name),
 		static_instance(std::make_unique<Object>(this)),
 		context(context)
 {
+	set_name(name);
+
 	/* Default constructor */
 	register_method(Methods::Constructor, [&](Args &args) {
 		return Value::NO_VALUE;
@@ -50,12 +51,12 @@ Class::Class(Interpreter &context, const std::string &name) :
 
 	/* [Static] Get all methods of this class */
 	register_method("get_methods", [&](Object &obj) {
-		return extract_names(class_data);
+		return get_methods();
 	});
 
 	/* [Non-static] Get all fields of object of this class */
 	register_method("get_fields", [&](Object &obj) {
-		return extract_names(obj.get_data());
+		return get_fields(obj);
 	});
 
 	/* [Static] Get method by name */
@@ -86,7 +87,7 @@ void Class::add_base_class(Class *base_class)
 
 void Class::inherit(Class *parent)
 {
-	if (superclass)
+	if (has_superclass())
 		throw std::runtime_error("Classes can only have one superclass");
 
 	superclass = parent;
@@ -106,6 +107,21 @@ void Class::implement(Class *interface)
 const std::vector<Class*>& Class::get_interfaces()
 {
 	return interfaces;
+}
+
+Value Class::get_methods()
+{
+	return extract_names(class_data);
+}
+
+Value Class::get_fields(Object &obj)
+{
+	return extract_names(obj.get_data());
+}
+
+Value Class::get_fields()
+{
+	return extract_names(proto_object_data);
 }
 
 Value Class::extract_names(const DataTable &table)
@@ -155,11 +171,6 @@ const std::string& Class::get_name()
 	return name;
 }
 
-class_id Class::get_id()
-{
-	return native_id.type_id();
-}
-
 Object Class::create(Args &args)
 {
 	auto obj = create_uninitialized();
@@ -173,7 +184,11 @@ Object Class::create_uninitialized()
 
 std::ostream& operator <<(std::ostream &stream, Class &type)
 {
-	return stream << "{Type 0x" << std::hex << type.get_id() << std::dec << "}";
+	return stream << "{"
+			<< (type.native ? "Native" : "Runtime")
+			<< " Class "
+			<< std::quoted(type.name)
+			<< " (" << std::hex << type.get_id() << std::dec << ")}";
 }
 
 } /* namespace mtl */

@@ -27,7 +27,7 @@ extern std::hash<std::string_view> sv_hash;
 }
 
 HASH(mtl::TypeID, v, {
-	return v->hash_code();
+	return v.type_id();
 })
 
 template<> struct std::hash<mtl::Value>

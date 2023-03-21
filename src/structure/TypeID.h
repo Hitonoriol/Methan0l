@@ -13,26 +13,39 @@ namespace mtl
 class TypeID
 {
 	private:
-		const std::type_info *type_info;
+		Int id;
 		std::string_view name;
 
 	public:
 		TypeID(const std::type_info &type_info, std::string_view name = "")
-			: type_info(&type_info), name(name)
+			: id(type_info.hash_code()), name(name)
 		{
 			if (name.empty())
 				this->name = type_info.name();
 		}
 
+		TypeID(Int id, std::string_view name)
+			: id(id), name(name) {}
+
 		TypeID() : TypeID(NONE) {}
 
-		TypeID(const TypeID &rhs) : type_info(rhs.type_info), name(rhs.name) {}
+		TypeID(const TypeID &rhs) : id(rhs.id), name(rhs.name) {}
 
 		inline TypeID& operator=(const TypeID &rhs)
 		{
-			type_info = rhs.type_info;
+			id = rhs.id;
 			name = rhs.name;
 			return *this;
+		}
+
+		inline void set_name(std::string_view name)
+		{
+			this->name = name;
+		}
+
+		inline void set_id(Int id)
+		{
+			this->id = id;
 		}
 
 		inline std::string_view type_name() const
@@ -42,31 +55,26 @@ class TypeID
 
 		inline Int type_id() const
 		{
-			return type_info->hash_code();
+			return id;
 		}
 
 		template<typename T>
 		inline bool is() const
 		{
 			IF(is_class_binding<T>::value)
-				return *type_info == typeid(typename T::bound_class);
+				return static_cast<size_t>(id) == typeid(typename T::bound_class).hash_code();
 			else
-				return *type_info == typeid(T);
+				return static_cast<size_t>(id) == typeid(T).hash_code();
 		}
 
-		inline const std::type_info& operator*()
+		inline bool is_empty()
 		{
-			return *type_info;
-		}
-
-		inline const std::type_info *operator->() const
-		{
-			return type_info;
+			return *this == NONE;
 		}
 
 		inline bool operator==(const TypeID &rhs) const
 		{
-			return *type_info == *rhs.type_info;
+			return id == rhs.id;
 		}
 
 		inline bool operator!=(const TypeID &rhs) const
@@ -76,7 +84,7 @@ class TypeID
 
 		inline bool operator==(const std::type_info &rhs) const
 		{
-			return *type_info == rhs;
+			return static_cast<size_t>(id) == rhs.hash_code();
 		}
 
 		template<typename C>

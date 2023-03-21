@@ -29,9 +29,10 @@ class Class : public Allocatable<Class>
 {
 	private:
 		std::string name;
-		TypeID native_id;
+		TypeID id;
+		bool native = false;
 
-		Class *superclass = nullptr;
+		Class *superclass = this;
 		std::vector<Class*> interfaces;
 
 		/* Methods & fields that are associated with this Class */
@@ -56,10 +57,16 @@ class Class : public Allocatable<Class>
 		Class(Interpreter &context, const std::string &name);
 		virtual ~Class() = default;
 
-		template<class C>
-		inline void set_native_id()
+		inline bool is_native()
 		{
-			native_id = TypeID::of<C>(name);
+			return native;
+		}
+
+		template<class C>
+		inline void set_id()
+		{
+			id = TypeID::of<C>(name);
+			native = true;
 		}
 
 		void register_method(std::string_view, Function&);
@@ -87,23 +94,32 @@ class Class : public Allocatable<Class>
 			implement(&context.get_type_mgr().get_class(parent_name));
 		}
 
-		Class* get_superclass();
+		inline Class* get_superclass()
+		{
+			return superclass;
+		}
+
 		const std::vector<Class*>& get_interfaces();
+
+		inline bool has_superclass()
+		{
+			return superclass != this;
+		}
 
 		DataTable& get_class_data();
 		DataTable& get_object_data();
 
 		inline bool equals_or_inherits(Class *clazz)
 		{
-			auto &id = clazz->native_id;
-			if (id == native_id)
+			auto &rhs_id = clazz->id;
+			if (rhs_id == id)
 				return true;
 
-			if (superclass && id == superclass->native_id)
+			if (has_superclass() && rhs_id == superclass->id)
 				return true;
 
 			for (auto &cl : interfaces)
-				if (id == cl->native_id)
+				if (rhs_id == cl->id)
 					return true;
 			return false;
 		}
@@ -114,18 +130,29 @@ class Class : public Allocatable<Class>
 		Value invoke_static(const std::string &name, Args &args);
 
 		Value extract_names(const DataTable&);
+		Value get_methods();
+		Value get_fields(Object &obj);
+		Value get_fields();
 
-		class_id get_id();
-
-		inline const TypeID& get_native_id()
+		inline class_id get_id() const
 		{
-			return native_id;
+			return id.type_id();
+		}
+
+		inline const TypeID& get_native_id() const
+		{
+			return id;
 		}
 
 		const std::string& get_name();
+
 		inline void set_name(std::string_view name)
 		{
 			this->name = name;
+			if (!is_native()) {
+				auto hash = mtl::str_hash(this->name) ^ TypeID::NONE.type_id();
+				id = TypeID(hash, this->name);
+			}
 		}
 
 		inline Interpreter& get_context()
@@ -133,7 +160,7 @@ class Class : public Allocatable<Class>
 			return context;
 		}
 
-		virtual Object create(Args &args);
+		virtual Object create(Args &args = empty_args);
 		Object create_uninitialized();
 
 		friend std::ostream& operator <<(std::ostream &stream, Class &type);
