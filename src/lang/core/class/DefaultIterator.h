@@ -63,6 +63,22 @@ class DefaultIterator : public Iterator
 			return Value::ref(*(current_it++));
 		}
 
+		virtual Value skip(Int n = 1) override
+		{
+			if (!can_skip(n))
+				throw IllegalOperationException();
+
+			return *(current_it = std::next(current_it, n));
+		}
+
+		virtual bool can_skip(Int n = 1) override
+		{
+			IF (!is_random_access_iterator<iterator_type>::value)
+				throw IllegalOperationException();
+			else
+				return std::next(current_it, n) <= last();
+		}
+
 		void reverse() override
 		{
 			if (current_it == first())
@@ -80,7 +96,7 @@ class DefaultIterator : public Iterator
 
 		Value previous() override
 		{
-			IF (!is_reverse_iterator<iterator_type>::value)
+			IF (!is_random_access_iterator<iterator_type>::value)
 				throw IllegalOperationException();
 			else {
 				if (!has_previous())

@@ -6,7 +6,7 @@
 #include <structure/Value.h>
 #include <oop/OOPDefs.h>
 #include <oop/NativeClass.h>
-#include <Grammar.h>
+#include <lang/core/Adapter.h>
 
 namespace mtl
 {
@@ -21,6 +21,9 @@ class Iterator
 
 		virtual Value next() UNIMPLEMENTED
 		virtual bool has_next() UNIMPLEMENTED
+
+		virtual Value skip(Int n) UNIMPLEMENTED
+		virtual bool can_skip(Int n) UNIMPLEMENTED
 
 		virtual void reverse() UNIMPLEMENTED
 
@@ -40,6 +43,9 @@ class IteratorAdapter : public Iterator, public Adapter
 		Value next() override ADAPTER_METHOD(next)
 		bool has_next() override ADAPTER_METHOD(has_next)
 
+		virtual Value skip(Int n = 1) override ADAPTER_METHOD(skip, n)
+		virtual bool can_skip(Int n = 1) override ADAPTER_METHOD(can_skip, n)
+
 		void reverse() override ADAPTER_VOID_METHOD(reverse)
 
 		Value previous() override ADAPTER_METHOD(previous)
@@ -53,6 +59,8 @@ class IteratorAdapter : public Iterator, public Adapter
 		BIND_METHOD(peek) \
 		BIND_METHOD(next) \
 		BIND_METHOD(has_next) \
+		BIND_DARGS_METHOD(skip, 1) \
+		BIND_DARGS_METHOD(can_skip, 1) \
 		BIND_METHOD(reverse) \
 		BIND_METHOD(previous) \
 		BIND_METHOD(has_previous) \

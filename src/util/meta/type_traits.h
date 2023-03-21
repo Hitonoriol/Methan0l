@@ -140,12 +140,11 @@ struct is_callable
 MEMBER_TYPE_DETECTOR(is_class_binding, bound_class)
 MEMBER_TYPE_DETECTOR(is_class_wrapper, wrapped_type)
 
-template<typename Iter>
-struct is_reverse_iterator: std::false_type {};
-
-template<typename Iter>
-struct is_reverse_iterator<std::reverse_iterator<Iter>>
-: std::integral_constant<bool, !is_reverse_iterator<Iter>::value> {};
+template<typename T>
+using is_random_access_iterator = std::is_same<
+	typename std::iterator_traits<T>::iterator_category,
+	std::random_access_iterator_tag
+>;
 
 }
 
