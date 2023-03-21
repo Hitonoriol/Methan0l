@@ -66,10 +66,12 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 	BIND_METHOD_AS(Operators::Append, append) \
 	BIND_METHOD_AS(Operators::Remove, remove_at) \
 	BIND_METHOD_AS(Operators::Clear, clear) \
-	BIND_METHOD_AS(Operators::Insert, add)
+	BIND_METHOD_AS(Operators::Insert, add) \
+	METHOD_ALIAS(for_each, Operators::Foreach) \
+	METHOD_ALIAS(slice, Operators::Slice)
 
 #define IMPLEMENTS_COLLECTION \
-	INHERITS(Collection) \
+	IMPLEMENTS(Collection) \
 	BIND_CONSTRUCTOR() \
 	BIND_NATIVE_ITERATOR() \
 	COLLECTION_BINDINGS
