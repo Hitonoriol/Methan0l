@@ -13,6 +13,16 @@ namespace mtl
 template<typename C>
 using iterator_of = decltype(std::begin(std::declval<C&>()));
 
+template<typename Container, typename Tuple>
+inline auto from_tuple(Tuple &&tuple)
+{
+	return std::apply([](auto &&... elems) {
+		Container result;
+		(result.push_back(std::forward<Value>(Value(elems))), ...);
+		return result;
+	}, std::forward<Tuple>(tuple));
+}
+
 template<typename C, typename T>
 inline auto insert(C &c, T &&val) -> LIST_T
 {

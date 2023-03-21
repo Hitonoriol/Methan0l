@@ -261,9 +261,9 @@ class Interpreter
 
 				using UR = typename std::remove_reference<T>::type;
 
-				/* If arg is an Object, return its native contents */
+				/* If arg is an Object, return its native contents (ignoring any qualifiers on T) */
 				if (val.is<Object>())
-					return *mtl::any_cast<std::shared_ptr<UR>>(any);
+					return *mtl::any_cast<std::shared_ptr<V>>(any);
 
 				/* Get a reference to a (const) fallback object */
 				if (t == typeid(UR))
@@ -402,6 +402,14 @@ class Interpreter
 					return call(f, args);
 				};
 			}
+		}
+
+		template<typename F, typename DArgs>
+		NativeFunc bind_func(F &&f, DArgs default_args)
+		{
+			Value default_args_v = ValList();
+			default_args_v.move_in(mtl::from_tuple<ValList>(default_args));
+			return bind_func<std::tuple_size_v<DArgs>>(f, default_args_v);
 		}
 
 		void register_func(const std::string &name, NativeFunc &&func);

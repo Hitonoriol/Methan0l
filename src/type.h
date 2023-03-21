@@ -13,11 +13,13 @@
 #include <deque>
 #include <any>
 #include <variant>
+#include <tuple>
 
 #include "util/debug.h"
 
 #define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
 #define VT(v) TYPE(decltype(v))
+#define UNCONST(T) typename std::remove_const<T>::type
 
 #define IF(...) if constexpr (JOIN(__VA_ARGS__))
 #define ELIF(...) else IF(__VA_ARGS__)
@@ -134,6 +136,12 @@ double dbl(Value);
 Int num(Value);
 UInt unum(Value);
 bool bln(Value);
+
+template<typename ...Types>
+constexpr auto tuple(Types &&...args)
+{
+	return std::make_tuple<Types...>(std::forward<Types...>(args)...);
+}
 
 }
 

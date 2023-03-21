@@ -59,7 +59,7 @@ class NativeClass
 /* Update methan0l class' name and native id */
 #define SET_CLASS_ID(name) \
 	class_binder.set_name(mtl::strip_name_scope(STR(name))); \
-	class_binder.get_class().set_native_id<bound_class>();
+	class_binder.get_class().set_id<bound_class>();
 
 /*   For use only in source files.
  *   `name` is the name of the NativeClass<> binder declared through macros above.
@@ -139,6 +139,9 @@ class NativeClass
 #define BIND_CONSTRUCTOR(...) class_binder.bind_constructor<JOIN(__VA_ARGS__)>();
 #define BIND_METHOD_AS(bind_as, method_name) class_binder.bind_method(bind_as, &THIS_CLASS::method_name);
 #define BIND_METHOD(name) BIND_METHOD_AS(#name, name)
+#define BIND_DARGS_METHOD_AS(bind_as, method_name, ...) \
+	class_binder.bind_method(bind_as, &THIS_CLASS::method_name, JOIN(__VA_ARGS__));
+#define BIND_DARGS_METHOD(name, ...) BIND_DARGS_METHOD_AS(#name, name, JOIN(__VA_ARGS__))
 
 /*   Bind a "mutator" method (a method that's intended to return `this`).
  * The native method being bound isn't required to return anything. */
@@ -155,28 +158,10 @@ class NativeClass
 
 /* ----------------------------------------------------- */
 
-#define ADAPTER_INVOKE(name, ...) obj.invoke_method(STR(name), LiteralExpr::make_list(JOIN(__VA_ARGS__)))
-#define ADAPTER_METHOD(name, ...) { return ADAPTER_INVOKE(name, JOIN(__VA_ARGS__)); }
-#define ADAPTER_VOID_METHOD(name, ...) { ADAPTER_INVOKE(name, JOIN(__VA_ARGS__)); }
-
-class Adapter
-{
-	protected:
-		Object obj;
-
-	public:
-		Adapter(const Object &obj) : obj(obj) {};
-
-		inline Object& get_object()
-		{
-			return obj;
-		}
-
-		inline Interpreter& get_context()
-		{
-			return obj.context();
-		}
-};
+#define METHOD_ALIAS(method_name, alias) \
+	STANDARD_METHOD(alias) (Args args) { \
+		return Object::get_this(args).invoke_method(STR(method_name), args); \
+	}; \
 
 } /* namespace mtl */
 

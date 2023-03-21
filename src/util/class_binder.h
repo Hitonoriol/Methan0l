@@ -106,6 +106,14 @@ class ClassBinder
 			return *obj.get_native().get<Obj>();
 		}
 
+		template<typename F, typename ...Types>
+		inline void bind_method(std::string_view name, F &&method, Types &&...default_args)
+		{
+			clazz->register_method(name,
+					context.bind_func(mtl::method(method),
+							mtl::tuple(std::forward<Types>(default_args)...)));
+		}
+
 		template<typename F>
 		inline void bind_method(std::string_view name, F &&method)
 		{
