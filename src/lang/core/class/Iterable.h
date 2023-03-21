@@ -20,7 +20,8 @@ class IteratorProvider
 		template<typename Iter = typename T::iterator_type>
 		static Object iterator(OBJ)
 		{
-			return CONTEXT.new_object<Iter>(this_obj.get_native().get<T>());
+			auto &container = *this_obj.get_native().get<std::shared_ptr<T>>();
+			return CONTEXT.new_object<Iter>(container);
 		}
 };
 
@@ -37,7 +38,6 @@ METHAN0L_CLASS(Iterable)
 			virtual void for_each(Value) UNIMPLEMENTED
 			virtual Value map(Value) UNIMPLEMENTED
 			virtual Int accumulate(Value) UNIMPLEMENTED
-			virtual Int sum() UNIMPLEMENTED
 	};
 */
 
@@ -46,12 +46,14 @@ class IterableAdapter : public Adapter
 	public:
 		using Adapter::Adapter;
 
-		IteratorAdapter iterator() ADAPTER_METHOD(iterator)
+		IteratorAdapter iterator() ADAPTER_FACTORY_METHOD(iterator)
+
+		void for_each(Value action) ADAPTER_VOID_METHOD(for_each, action)
+		Value map(Value mapper) ADAPTER_METHOD(for_each, mapper)
+		Value accumulate(Value action) ADAPTER_METHOD(accumulate, action)
 };
 
 } /* namespace mtl */
-
-#define IMPLEMENTS_ITERABLE ABSTRACT_METHOD(iterator)
 
 #define BIND_NATIVE_ITERATOR() \
 	BIND_EXTERNAL_METHOD(native::IteratorProvider<bound_class>::iterator)

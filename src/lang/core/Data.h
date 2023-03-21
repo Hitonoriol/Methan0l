@@ -1,11 +1,52 @@
 #ifndef SRC_LANG_CORE_DATA_H_
 #define SRC_LANG_CORE_DATA_H_
 
-#include "interpreter/Interpreter.h"
-#include "expression/LiteralExpr.h"
+#include <interpreter/Interpreter.h>
+#include <expression/LiteralExpr.h>
+#include <CoreLibrary.h>
+#include <lang/core/class/Collection.h>
+
+namespace mtl
+{
+
+using DblBinOperation = const std::function<Float(Float, Value)>;
+
+}
 
 namespace mtl::core
 {
+
+using Initializer = std::function<void(ExprList&)>;
+
+template<typename F>
+inline Value do_for_each(IterableAdapter iterable, F action, Initializer init = [](ExprList&){})
+{
+	auto &context = iterable.get_context();
+	auto it = iterable.iterator();
+	auto elem_expr = LiteralExpr::empty();
+	ExprList action_args { elem_expr };
+	init(action_args);
+	while (it.has_next()) {
+		elem_expr->raw_ref() = it.next();
+		action(context, action_args);
+	}
+	return iterable.get_object();
+}
+
+Value for_each(Object &obj, Value action);
+Value map(Object &obj, Value mapper);
+Value accumulate(Object &obj, Value accumulator);
+
+template<typename T, typename F>
+T do_accumulate(IterableAdapter iterable, T init, F &&operation)
+{
+	auto it = iterable.iterator();
+	while(it.has_next())
+		init = operation(init, it.next());
+	return init;
+}
+
+Value slice(CollectionAdapter collection, Int start, Int end, Int step);
 
 ValList range(Int start, Int n, Int step = 1, bool inclusive = false);
 
@@ -27,7 +68,7 @@ inline bool rng_neg_cond(Int i, Int end)
 }
 
 template<typename T>
-inline TYPE(T) slice(T &container, UInt start, UInt end, Int step = 1)
+inline TYPE(T) do_slice(T &container, UInt start, UInt end, Int step = 1)
 {
 	check_range(start, end, step);
 	end += step > 0 ? 1 : -1;
@@ -38,38 +79,6 @@ inline TYPE(T) slice(T &container, UInt start, UInt end, Int step = 1)
 	for (auto i = start; condition(i, end); i += step)
 		sliced.push_back(container[i]);
 	return sliced;
-}
-
-template<typename T>
-void for_each(Interpreter &context, T &container, Function &action)
-{
-	static_assert(is_container<T>::value);
-	if (container.empty())
-		return;
-
-	ExprList action_args;
-	ValueRef valref;
-	/* List-like types */
-	if constexpr (!is_associative<T>::value) {
-		auto elem_expr = LiteralExpr::empty();
-		action_args.push_front(elem_expr);
-		for (auto &elem : container) {
-			valref.reset(unconst(elem));
-			elem_expr->raw_ref() = valref;
-			context.invoke(action, action_args);
-		}
-	}
-	/* Map-like types */
-	else {
-		auto key = LiteralExpr::empty(), val = LiteralExpr::empty();
-		action_args = { key, val };
-		for (auto &entry : container) {
-			key->raw_ref() = entry.first;
-			valref.reset(entry.second);
-			val->raw_ref() = valref;
-			context.invoke(action, action_args);
-		}
-	}
 }
 
 }
