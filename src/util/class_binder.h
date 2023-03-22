@@ -46,6 +46,14 @@ struct Factory: private FactoryImpl<T, Types...>::OptCall
 				return ((&obj)->*func)(args...); \
 			}; \
 		} \
+		/* Make `this` exactly the type of `ThisClass` */ \
+		template<class ThisClass, class C, typename R, typename ...Args> \
+		constexpr auto polymorphic_method(sig) \
+		{ \
+			return [func](ThisClass& obj, Args ...args) -> R { \
+				return ((&obj)->*func)(args...); \
+			}; \
+		} \
 		template<class C, typename R, typename ...Args> \
 		constexpr auto mutator_method(sig) \
 		{ \
@@ -110,20 +118,31 @@ class ClassBinder
 		inline void bind_method(std::string_view name, F &&method, Types &&...default_args)
 		{
 			clazz->register_method(name,
-					context.bind_func(mtl::method(method),
+					context.bind_func(mtl::polymorphic_method<bound_class>(method),
 							mtl::tuple(std::forward<Types>(default_args)...)));
 		}
 
 		template<typename F>
 		inline void bind_method(std::string_view name, F &&method)
 		{
-			clazz->register_method(name, context.bind_func(mtl::method(method)));
+			clazz->register_method(name, context.bind_func(mtl::polymorphic_method<bound_class>(method)));
 		}
 
 		template<typename F>
 		inline void bind_mutator_method(std::string_view name, F &&method)
 		{
 			clazz->register_method(name, context.bind_func(mtl::mutator_method(method)));
+		}
+
+		template<typename F>
+		inline void bind_external_mutator_method(std::string_view name, F &&method)
+		{
+			clazz->register_method(name, context.bind_func(
+				[&, bound_method = context.bind_func(method)](Args args) {
+					bound_method(args);
+					return Object::get_this(args);
+				}
+			));
 		}
 
 		template<typename F>

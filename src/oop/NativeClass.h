@@ -93,6 +93,8 @@ class NativeClass
 /* Mark classes as interfaces or methods as abstract */
 #define INTERFACE CONSTRUCTOR (OBJ) UNIMPLEMENTED;
 #define ABSTRACT_METHOD(name) METHOD(name) (OBJ) UNIMPLEMENTED;
+#define NON_CONSTRUCTIBLE INTERFACE
+#define UNIMPLEMENTED_METHOD(name) ABSTRACT_METHOD(name)
 
 /* Allows to specify base classes of the bound class */
 #define INHERITS(name) \
@@ -139,15 +141,11 @@ class NativeClass
 #define BIND_CONSTRUCTOR(...) class_binder.bind_constructor<JOIN(__VA_ARGS__)>();
 #define BIND_METHOD_AS(bind_as, method_name) class_binder.bind_method(bind_as, &THIS_CLASS::method_name);
 #define BIND_METHOD(name) BIND_METHOD_AS(#name, name)
+
+/* Bind a method with specified default arguments */
 #define BIND_DARGS_METHOD_AS(bind_as, method_name, ...) \
 	class_binder.bind_method(bind_as, &THIS_CLASS::method_name, JOIN(__VA_ARGS__));
 #define BIND_DARGS_METHOD(name, ...) BIND_DARGS_METHOD_AS(#name, name, JOIN(__VA_ARGS__))
-
-/*   Bind a "mutator" method (a method that's intended to return `this`).
- * The native method being bound isn't required to return anything. */
-#define BIND_MUTATOR_METHOD_AS(bind_as, method_name) \
-	class_binder.bind_mutator_method(bind_as, &THIS_CLASS::method_name);
-#define BIND_MUTATOR_METHOD(name) BIND_MUTATOR_METHOD_AS(STR(name), name)
 
 /*   Bind a static member (PROXY) / non-member (EXTERNAL) function as a mtl::Class method.
  * Requires function's full name including class it's a member of (if any).
@@ -155,6 +153,15 @@ class NativeClass
 #define BIND_EXTERNAL_METHOD_AS(bind_as, method_name) class_binder.register_method(bind_as, &method_name);
 #define BIND_PROXY_METHOD(name) BIND_EXTERNAL_METHOD_AS(#name, THIS_CLASS::name)
 #define BIND_EXTERNAL_METHOD(name) BIND_EXTERNAL_METHOD_AS(strip_name_scope(#name), name)
+
+/*   Bind a "mutator" method (a method that's intended to return `this`).
+ * The native method being bound isn't required to return anything. */
+#define BIND_MUTATOR_METHOD_AS(bind_as, method_name) \
+	class_binder.bind_mutator_method(bind_as, &THIS_CLASS::method_name);
+#define BIND_MUTATOR_METHOD(name) BIND_MUTATOR_METHOD_AS(STR(name), name)
+#define BIND_EXTERNAL_MUTATOR_METHOD_AS(bind_as, method_name) \
+	class_binder.bind_external_mutator_method(bind_as, &method_name);
+#define BIND_EXTERNAL_MUTATOR_METHOD(name) BIND_EXTERNAL_MUTATOR_METHOD_AS(STR(name), name)
 
 /* ----------------------------------------------------- */
 
