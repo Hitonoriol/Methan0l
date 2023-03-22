@@ -33,6 +33,8 @@ class Iterator
 		virtual Value remove() UNIMPLEMENTED
 };
 
+METHAN0L_CLASS(Iterator)
+
 class IteratorAdapter : public Iterator, public Adapter
 {
 	public:
@@ -54,7 +56,7 @@ class IteratorAdapter : public Iterator, public Adapter
 		Value remove() override ADAPTER_METHOD(remove)
 };
 
-#define ITERATOR_BINDINGS(container_type) \
+#define ITERATOR_BINDINGS \
 		INTERFACE \
 		BIND_METHOD(peek) \
 		BIND_METHOD(next) \

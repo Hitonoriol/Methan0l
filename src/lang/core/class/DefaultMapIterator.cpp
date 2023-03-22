@@ -15,7 +15,7 @@ NATIVE_CLASS_BINDING(MapEntry, {
 })
 
 NATIVE_CLASS_BINDING(MapIterator, {
-	ITERATOR_BINDINGS(ValMap)
+	ITERATOR_BINDINGS
 })
 
 namespace native
