@@ -25,27 +25,27 @@ Value IndexExpr::evaluate(Interpreter &context)
 		/* Bracketed for-each: list[do: action] */
 		if (PrefixExpr::is(*idx, TokenType::DO)) {
 			auto action = try_cast<PrefixExpr>(idx).get_rhs()->evaluate(context);
-			val.invoke_method(Operators::Foreach, action);
+			val.invoke_method(IndexOperator::Foreach, action);
 			return val;
 		}
 		/* Bracketed slice: list[a..b] */
 		else if (instanceof<RangeExpr>(idx)) {
-			return val.invoke_method(Operators::Slice);
+			return val.invoke_method(IndexOperator::Slice);
 		}
 		/* Bracketed remove-at: list[~idx] */
 		else if (remove) {
-			return val.invoke_method(Operators::Remove, idx->evaluate(context));
+			return val.invoke_method(IndexOperator::Remove, idx->evaluate(context));
 		}
 		/* Insert operator: set[>value] */
 		else if (insert) {
-			return val.invoke_method(Operators::Insert, idx->evaluate(context));
+			return val.invoke_method(IndexOperator::Insert, idx->evaluate(context));
 		}
 		/* Access operator: list[idx] */
 		else {
 			/* Map, Set, List, String */
 			TYPE_SWITCH(val.type(),
 				TYPE_CASE(Type::OBJECT) {
-					return val.invoke_method(Operators::Get, idx->evaluate(context));
+					return val.invoke_method(IndexOperator::Get, idx->evaluate(context));
 				}
 
 				TYPE_CASE(Type::UNIT) {
@@ -61,12 +61,12 @@ Value IndexExpr::evaluate(Interpreter &context)
 	} else {
 		/* Clear operator: list[~] */
 		if (remove) {
-			val.invoke_method(Operators::Clear);
+			val.invoke_method(IndexOperator::Clear);
 			return val;
 		}
 		/* Append operator: list[] */
 		else {
-			return val.invoke_method(Operators::Append);
+			return val.invoke_method(IndexOperator::Append);
 		}
 	}
 }

@@ -24,14 +24,25 @@ namespace mtl
 
 ExprPtr MapParser::parse(Parser &parser, Token token)
 {
-	ExprMap map;
-	parse(parser, [&](std::string key, ExprPtr val) {map.emplace(key, val);});
+	ExprExprMap map;
+	auto start_tok = token.get_type();
+	auto end_tok = TokenType::PAREN_R;
+
+	/* @[...] */
+	if (start_tok != TokenType::MAP_DEF_L) {
+		token.assert_type(TokenType::MAP_DEF_L_ALT);
+		end_tok = TokenType::BRACKET_R;
+	}
+
+	parse(parser, [&](auto key, auto val) {
+		map.emplace(key, val);
+	}, end_tok);
 	return make_expr<MapExpr>(line(token), map);
 }
 
 /* Assumes that the `@(` token is already consumed */
 void MapParser::parse(Parser &parser,
-		std::function<void(std::string, ExprPtr)> collector,
+		ExprPairCollector collector,
 		TokenType ends_with)
 {
 	if (parser.match(ends_with))
@@ -46,17 +57,17 @@ void MapParser::parse(Parser &parser,
 			 * (behaves the same as: var_name => **var_name) */
 			if (PrefixExpr::is(*key_expr, TokenType::PERCENT)) {
 				auto idfr = try_cast<PrefixExpr>(key_expr).get_rhs();
-				collector(key_string(idfr), make_expr<PrefixExpr>(0, Token(TokenType::REF), idfr));
+				collector(idfr, make_expr<PrefixExpr>(0, Token(TokenType::REF), idfr));
 				continue;
 			}
 			else
-				collector(key_string(key_expr), LiteralExpr::empty());
+				collector(key_expr, LiteralExpr::empty());
 			continue;
 		}
 
 		/* Otherwise, this is a key-value pair: `key_expr => value_expr` */
 		auto value_expr = parser.parse();
-		collector(key_string(key_expr), value_expr);
+		collector(key_expr, value_expr);
 
 		/* Look for key-value pair delimiters: `,` or newline / `;` */
 	} while (parser.match(TokenType::COMMA)

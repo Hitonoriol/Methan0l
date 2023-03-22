@@ -9,24 +9,23 @@ namespace mtl
 class MapExpr: public Expression
 {
 	private:
-		ExprMap exprs;
+		ExprExprMap exprs;
 
 	public:
-		MapExpr(ExprMap exprs) : exprs(exprs)
-		{
-		}
+		MapExpr(ExprExprMap exprs)
+			: exprs(exprs) {}
 
 		Value evaluate(Interpreter &context) override;
 
 		/* Map execution works as a local idfr init list */
 		void execute(Interpreter &context) override;
 
-		ExprMap raw_map()
+		ExprExprMap raw_map()
 		{
 			return exprs;
 		}
 
-		ExprMap& raw_ref()
+		ExprExprMap& raw_ref()
 		{
 			return exprs;
 		}

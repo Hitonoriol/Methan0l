@@ -23,6 +23,7 @@ class Map : public ContainerWrapper<ValMap>, public AbstractMap
 		Value remove(Value) override;
 		Boolean contains_key(Value) override;
 		Value get(Value) override;
+		Value operator_get(Value);
 		UInt size() override;
 		void clear() override;
 		Boolean is_empty() override;

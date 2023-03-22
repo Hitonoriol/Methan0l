@@ -18,7 +18,8 @@ struct Methods
 	static constexpr std::string_view
 		Constructor = "construct",
 		ToString = "to_string",
-		Copy = "copy";
+		Copy = "copy",
+		Hashcode = "hashcode";
 };
 
 struct Parameters
@@ -28,7 +29,7 @@ struct Parameters
 		Super = "super";
 };
 
-struct Operators
+struct IndexOperator
 {
 	static const std::string
 		Append, Get, Remove,

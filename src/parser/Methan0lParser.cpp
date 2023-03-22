@@ -100,6 +100,7 @@ Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 
 	/* Map definition */
 	register_parser(TokenType::MAP_DEF_L, new MapParser());
+	alias_prefix(TokenType::MAP_DEF_L, TokenType::MAP_DEF_L_ALT);
 
 	/* IO / String oprs */
 	register_prefix_opr(TokenType::OUT_NL, Precedence::IO);				// <% expr

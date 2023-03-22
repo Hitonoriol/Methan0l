@@ -90,6 +90,7 @@ enum class TokenType : uint16_t
 	COMP_MOD,			// %=
 	DOUBLE_SLASH,		// //
 	DOUBLE_DOT,			// ..
+	MAP_DEF_L_ALT,		// @[
 
 	/* Literals */
 	INTEGER = 0x100,
@@ -186,7 +187,7 @@ class Token
 				"**", "!!", "%>", "<%", "*[",
 				"@:", "$$", "-->", "^=", "|=",
 				"&=", "<<=", ">>=", "%=", "//",
-				".."
+				"..", "@["
 		};
 
 		/* Words not in `keywords` array can be user-redefined in some contexts */
@@ -224,7 +225,8 @@ class Token
 
 		static constexpr TokenType block_begin_tokens[] = {
 				TokenType::PAREN_L, TokenType::BRACKET_L, TokenType::BRACE_L,
-				TokenType::MAP_DEF_L, TokenType::LIST_DEF_L, TokenType::INFIX_WORD_LHS_L
+				TokenType::MAP_DEF_L, TokenType::MAP_DEF_L_ALT,  TokenType::LIST_DEF_L,
+				TokenType::INFIX_WORD_LHS_L
 		};
 
 		static constexpr TokenType block_end_tokens[] = {

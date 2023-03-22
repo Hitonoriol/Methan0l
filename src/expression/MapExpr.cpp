@@ -11,6 +11,7 @@
 #include "util/util.h"
 #include "util/hash.h"
 #include "CoreLibrary.h"
+#include "expression/parser/MapParser.h"
 
 namespace mtl
 {
@@ -19,17 +20,16 @@ Value MapExpr::evaluate(Interpreter &context)
 {
 	return context.make<Map>().as<Map>([&](auto &map) {
 		for (auto entry : exprs)
-			map->emplace(Value(entry.first), entry.second->evaluate(context));
+			map->emplace(entry.first->evaluate(context), entry.second->evaluate(context));
 	});;
 }
 
 void MapExpr::execute(Interpreter &context)
 {
-	auto &map = evaluate(context).get<Map>();
 	auto &scope = context.current_unit()->local();
-	for (auto &entry : map) {
-		auto keystr = unconst(entry.first).to_string(&context);
-		scope.set(keystr, entry.second);
+	for (auto &entry : exprs) {
+		auto keystr = MapParser::key_string(entry.first);
+		scope.set(keystr, entry.second->evaluate(context));
 	}
 }
 

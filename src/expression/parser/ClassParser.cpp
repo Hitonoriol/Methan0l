@@ -37,8 +37,9 @@ ExprPtr ClassParser::parse(Parser &parser, mtl::Token token)
 	}
 
 	ExprMap body_map;
-	MapParser::parse(parser, [&body_map](auto name,
-			auto expr) {body_map.emplace(name, expr);}, end_token);
+	MapParser::parse(parser, [&body_map](auto name_expr, auto expr) {
+		body_map.emplace(MapParser::key_string(name_expr), expr);
+	}, end_token);
 	return make_expr<ClassExpr>(line(token), name, base, body_map);
 }
 

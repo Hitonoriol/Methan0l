@@ -52,10 +52,10 @@ class AbstractMapAdapter : public native::AbstractMap, public IterableAdapter
 	BIND_METHOD(clear) \
 	BIND_METHOD(is_empty) \
 	/* Subscript operator overloads: */ \
-	BIND_METHOD_AS(Operators::Get, get) \
-	BIND_METHOD_AS(Operators::Remove, remove) \
-	BIND_METHOD_AS(Operators::Clear, clear) \
-	METHOD_ALIAS(for_each, Operators::Foreach)
+	BIND_METHOD_AS(IndexOperator::Get, get) \
+	BIND_METHOD_AS(IndexOperator::Remove, remove) \
+	BIND_METHOD_AS(IndexOperator::Clear, clear) \
+	METHOD_ALIAS(for_each, IndexOperator::Foreach)
 
 #define IMPLEMENTS_ABSTRACT_MAP \
 	IMPLEMENTS(AbstractMap) \

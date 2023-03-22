@@ -6,6 +6,7 @@ namespace mtl
 NATIVE_CLASS_BINDING(Map, {
 	IMPLEMENTS_ABSTRACT_MAP
 	BIND_METHOD(to_string)
+	BIND_METHOD_AS(IndexOperator::Get, operator_get)
 })
 
 namespace native
@@ -37,6 +38,11 @@ Value Map::get(Value key)
 	if (it == contained.end())
 		return Value::NIL;
 	return it->second;
+}
+
+Value Map::operator_get(Value key)
+{
+	return Value::ref(contained[key]);
 }
 
 UInt Map::size()

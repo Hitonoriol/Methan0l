@@ -84,6 +84,7 @@ using ExprPtr = std::shared_ptr<Expression>;
 using ObjectPtr = std::shared_ptr<Object>;
 
 using ExprMap = std::pmr::unordered_map<std::string, ExprPtr>;
+using ExprExprMap = std::pmr::unordered_map<ExprPtr, ExprPtr>;
 using DataMap = std::pmr::unordered_map<std::string, Value>;
 using ValMap = std::pmr::unordered_map<Value, Value>;
 

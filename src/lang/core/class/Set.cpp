@@ -10,8 +10,8 @@ namespace mtl
 NATIVE_CLASS_BINDING(Set, {
 	IMPLEMENTS_COLLECTION
 	BIND_CONSTRUCTOR(const mtl::native::List&)
-	BIND_METHOD_AS(Operators::Get, contains)
-	BIND_METHOD_AS(Operators::Remove, remove)
+	BIND_METHOD_AS(IndexOperator::Get, contains)
+	BIND_METHOD_AS(IndexOperator::Remove, remove)
 
 	BIND_METHOD(intersect)
 	BIND_METHOD_AS("union", union_set)

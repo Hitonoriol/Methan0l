@@ -62,13 +62,13 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 	BIND_METHOD(index_of) \
 	BIND_METHOD(contains) \
 	/* Subscript operator overloads: */ \
-	BIND_METHOD_AS(Operators::Get, get) \
-	BIND_METHOD_AS(Operators::Append, append) \
-	BIND_METHOD_AS(Operators::Remove, remove_at) \
-	BIND_METHOD_AS(Operators::Clear, clear) \
-	BIND_METHOD_AS(Operators::Insert, add) \
-	METHOD_ALIAS(for_each, Operators::Foreach) \
-	METHOD_ALIAS(slice, Operators::Slice)
+	BIND_METHOD_AS(IndexOperator::Get, get) \
+	BIND_METHOD_AS(IndexOperator::Append, append) \
+	BIND_METHOD_AS(IndexOperator::Remove, remove_at) \
+	BIND_METHOD_AS(IndexOperator::Clear, clear) \
+	BIND_METHOD_AS(IndexOperator::Insert, add) \
+	METHOD_ALIAS(for_each, IndexOperator::Foreach) \
+	METHOD_ALIAS(slice, IndexOperator::Slice)
 
 #define IMPLEMENTS_COLLECTION \
 	IMPLEMENTS(Collection) \
