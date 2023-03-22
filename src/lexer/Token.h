@@ -194,7 +194,7 @@ class Token
 		static constexpr std::string_view word_ops[] = {
 				"do", "typeid", "delete", "func", "defbox",
 				"class", "if", "else", "return",
-				"copy", "hashcode",
+				"copy", "hash_code",
 				"typename", "noeval", "defset", "while", "for",
 				"try", "catch", "using_module", "new", "global",
 				"assert", "instanceof", "unwrap", "is_reference",

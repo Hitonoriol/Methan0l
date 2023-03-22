@@ -115,14 +115,14 @@ Interpreter& Object::context() const
 	return get_class()->get_context();
 }
 
-size_t Object::type_id() const
+class_id Object::type_id() const
 {
 	return get_class()->get_id();
 }
 
-uintptr_t Object::id() const
+Int Object::id() const
 {
-	return reinterpret_cast<uintptr_t>(&(data.managed_map()));
+	return reinterpret_cast<Int>(&(data.managed_map()));
 }
 
 std::string Object::to_string()

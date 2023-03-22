@@ -29,6 +29,7 @@ class Map : public ContainerWrapper<ValMap>, public AbstractMap
 		Boolean is_empty() override;
 
 		std::string to_string();
+		Int hash_code();
 };
 
 } /* namespace native */

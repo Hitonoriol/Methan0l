@@ -42,6 +42,7 @@ class List : public ContainerWrapper<ValList>, public Collection
 		Boolean is_empty() override;
 
 		std::string to_string();
+		Int hash_code();
 };
 
 }

@@ -37,6 +37,16 @@ template<> struct std::hash<mtl::Value>
 			return 0;
 		}
 
+		size_t operator()(const mtl::NoValue&) const
+		{
+			return typeid(mtl::NoValue).hash_code();
+		}
+
+		size_t operator()(const mtl::Nil&) const
+		{
+			return typeid(mtl::Nil).hash_code();
+		}
+
 		size_t operator()(const mtl::Value &v) const
 		{
 			return v.hash_code();
@@ -62,22 +72,6 @@ template<> struct std::hash<mtl::Value>
 		size_t operator()(const mtl::Token &tok) const
 		{
 			return mtl::str_hash(tok.get_value());
-		}
-
-		size_t operator()(const mtl::ValList &lst) const
-		{
-			size_t hash = lst.size();
-			for (auto &v : lst)
-				hash ^= v.hash_code() + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-			return hash;
-		}
-
-		size_t operator()(const mtl::ValMap &map) const
-		{
-			size_t hash = map.size();
-			for (auto &entry : map)
-				hash ^= entry.first.hash_code() + entry.second.hash_code();
-			return hash;
 		}
 
 		size_t operator()(const mtl::DataMap &map) const
@@ -107,7 +101,7 @@ template<> struct std::hash<mtl::Value>
 
 		size_t operator()(const mtl::Object &obj) const
 		{
-			return obj.type_id() ^ operator ()(unconst(obj).get_data().managed_map());
+			return mtl::unconst(obj).invoke_method(mtl::str(mtl::Methods::Hashcode));
 		}
 };
 

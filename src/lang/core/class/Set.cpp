@@ -19,6 +19,7 @@ NATIVE_CLASS_BINDING(Set, {
 	BIND_METHOD(symdiff)
 
 	BIND_METHOD(to_string)
+	BIND_METHOD(hash_code)
 })
 
 namespace native
@@ -104,6 +105,11 @@ Value Set::symdiff(Value &b)
 			set_diff(a, b, c);
 			set_diff(b, a, c);
 		});
+}
+
+Int Set::hash_code()
+{
+	return mtl::value_container_hash_code(contained);
 }
 
 }

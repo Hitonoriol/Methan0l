@@ -274,7 +274,7 @@ void LibData::load_operators()
 		return Value(rhs);
 	}));
 
-	/* hashcode: idfr (overloadable) */
+	/* hash_code: idfr (overloadable) */
 	prefix_operator(TokenType::HASHCODE, UnaryOpr([&](auto &rhs) {
 		return rhs.hash_code();
 	}));

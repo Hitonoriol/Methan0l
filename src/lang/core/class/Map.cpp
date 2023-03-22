@@ -5,8 +5,10 @@ namespace mtl
 
 NATIVE_CLASS_BINDING(Map, {
 	IMPLEMENTS_ABSTRACT_MAP
-	BIND_METHOD(to_string)
 	BIND_METHOD_AS(IndexOperator::Get, operator_get)
+
+	BIND_METHOD(to_string)
+	BIND_METHOD(hash_code)
 })
 
 namespace native
@@ -69,6 +71,14 @@ std::string Map::to_string()
 		++it;
 		return str;
 	});
+}
+
+Int Map::hash_code()
+{
+	size_t hash = size();
+	for (auto &entry : contained)
+		hash ^= entry.first.hash_code() + entry.second.hash_code();
+	return hash;
 }
 
 }

@@ -56,6 +56,7 @@ class Set : public ContainerWrapper<ValSet>, public Collection
 		Value symdiff(Value &b);
 
 		std::string to_string();
+		Int hash_code();
 };
 
 }

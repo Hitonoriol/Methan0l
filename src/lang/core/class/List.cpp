@@ -7,6 +7,7 @@ namespace mtl
 NATIVE_CLASS_BINDING(List, {
 	IMPLEMENTS_COLLECTION
 	BIND_METHOD(to_string)
+	BIND_METHOD(hash_code)
 })
 
 namespace native
@@ -76,6 +77,11 @@ Value List::append()
 Boolean List::is_empty()
 {
 	return contained.empty();
+}
+
+Int List::hash_code()
+{
+	return mtl::value_container_hash_code(contained);
 }
 
 }

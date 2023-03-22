@@ -51,8 +51,8 @@ class Object
 		Interpreter& context() const;
 
 		DataTable& get_data();
-		size_t type_id() const;
-		uintptr_t id() const;
+		class_id type_id() const;
+		Int id() const;
 
 		std::string to_string();
 		std::string to_string_default();

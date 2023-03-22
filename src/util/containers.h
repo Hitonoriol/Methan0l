@@ -108,6 +108,15 @@ inline Int index_of(T &&container, V &&value)
 	return -1;
 }
 
+template<typename C>
+Int value_container_hash_code(C &&container)
+{
+	Int hash = container.size();
+	for (auto &v : container)
+		hash ^= v.hash_code() + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	return hash;
+}
+
 }
 
 #endif /* SRC_UTIL_CONTAINERS_H_ */

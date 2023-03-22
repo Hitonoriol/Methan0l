@@ -19,7 +19,7 @@ struct Methods
 		Constructor = "construct",
 		ToString = "to_string",
 		Copy = "copy",
-		Hashcode = "hashcode";
+		Hashcode = "hash_code";
 };
 
 struct Parameters

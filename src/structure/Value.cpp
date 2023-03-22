@@ -341,9 +341,7 @@ Value Value::convert(TypeID new_val_type)
 size_t Value::hash_code() const
 {
 	return std::visit([&](auto &v) -> size_t {
-		if constexpr (std::is_same<VT(v), NoValue>::value || std::is_same<VT(v), Nil>::value)
-			return 0;
-		else if constexpr (std::is_arithmetic<VT(v)>::value)
+		if constexpr (std::is_arithmetic<VT(v)>::value)
 			return static_cast<size_t>(v);
 		else if constexpr (is_heap_type<VT(v)>())
 			return hasher(*v);
