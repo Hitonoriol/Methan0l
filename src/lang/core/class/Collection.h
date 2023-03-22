@@ -38,7 +38,7 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 {
 	public:
 		using IterableAdapter::IterableAdapter;
-		Boolean add(Value elem) override ADAPTER_METHOD(name, elem)
+		Boolean add(Value elem) override ADAPTER_METHOD(add, elem)
 		Value append() override ADAPTER_METHOD(append)
 		Value remove(Value elem) override ADAPTER_METHOD(remove, elem)
 		Value remove_at(UInt idx) override ADAPTER_METHOD(remove_at, idx)
