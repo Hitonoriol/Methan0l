@@ -357,13 +357,13 @@ class Interpreter
 			return type_mgr.new_object<C>(std::forward<Args>(ctor_args)...);
 		}
 
-		template<typename T>
-		inline Value make()
+		template<typename T, typename ...Args>
+		inline Value make(Args &&...ctor_args)
 		{
 			IF (Value::allowed_or_heap<T>())
 				return Value::make<T>(allocator<T>());
 			else
-				return new_object<T>();
+				return new_object<T>(std::forward<Args>(ctor_args)...);
 		}
 
 		template<unsigned default_argc = 0, typename F>
@@ -544,6 +544,15 @@ class Interpreter
 
 		Value& get_env_var(const std::string&);
 		void set_env_var(const std::string&, Value);
+
+		template<typename T>
+		inline T& get_env_hook(const std::string &name)
+		{
+			auto &hook_var = get_env_var(name);
+			if (hook_var.nil())
+				throw std::runtime_error("No such environment hook: " + name);
+			return *hook_var.get<T*>();
+		}
 
 		Value& referenced_value(Expression *expr, bool follow_refs = true);
 		inline Value& referenced_value(ExprPtr expr, bool follow_refs = true)

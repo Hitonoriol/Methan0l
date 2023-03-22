@@ -25,7 +25,7 @@ void LibCLI::load()
 	}));
 
 	function("pause_on_exit", [&](bool value) {
-		cli_hook<bool>(CLIHooks::NO_EXIT) = value;
+		context->get_env_hook<bool>(CLIHooks::NO_EXIT) = value;
 	});
 
 	function("enable_cas_mode", [&](bool value) {

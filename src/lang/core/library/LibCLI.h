@@ -11,18 +11,9 @@ namespace mtl
 class LibCLI: public Library
 {
 	private:
-		template<typename T>
-		T& cli_hook(const std::string &name)
-		{
-			auto &hook_var = context->get_env_var(name);
-			if (hook_var.nil())
-				throw std::runtime_error("No such CLI hook: " + name);
-			return *hook_var.get<T*>();
-		}
-
 		inline InteractiveRunner& interactive_runner()
 		{
-			return cli_hook<InteractiveRunner>(CLIHooks::INTERACTIVE_RUNNER);
+			return context->get_env_hook<InteractiveRunner>(CLIHooks::INTERACTIVE_RUNNER);
 		}
 
 	public:
