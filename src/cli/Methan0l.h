@@ -12,6 +12,7 @@ struct CLIHooks
 {
 	static std::string
 		NO_EXIT,
+		CAS_MODE,
 		INTERACTIVE_RUNNER;
 };
 
@@ -19,6 +20,7 @@ class cli
 {
 	private:
 		bool no_exit = false;
+		bool cas = false;
 
 		void init_env(mtl::Interpreter&);
 		int parse_args(int, char**);

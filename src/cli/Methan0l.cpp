@@ -21,6 +21,7 @@
  * 		--no-heap-limit
  * 		--no-flat-buffer
  * 		--version
+ * 		--cas
  */
 
 int main(int argc, char **argv)
@@ -33,6 +34,7 @@ namespace mtl
 
 std::string
 	CLIHooks::NO_EXIT(".no_exit"),
+	CLIHooks::CAS_MODE(".cas"),
 	CLIHooks::INTERACTIVE_RUNNER(".interactive");
 
 int cli::run(int argc, char **argv)
@@ -64,6 +66,7 @@ void cli::init_env(Interpreter &context)
 {
 	auto &env = context.get_env_table();
 	env.set(CLIHooks::NO_EXIT, &(cli::no_exit));
+	env.set(CLIHooks::CAS_MODE, &(cli::cas));
 }
 
 bool is_valid_arg(std::string_view arg, std::string_view cstr, bool has_value = true)
@@ -99,6 +102,9 @@ int cli::parse_args(int argc, char **argv)
 
 		if (is_valid_flag("--no-exit", arg))
 			cli::no_exit = true;
+
+		else if (is_valid_flag("--cas", arg))
+			cli::cas = true;
 
 		else if (is_valid_arg("--max-mem", arg)) {
 			mtl::HEAP_MAX_MEM = get_numeric_arg(arg);

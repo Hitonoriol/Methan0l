@@ -159,6 +159,9 @@ void InteractiveRunner::init_env()
 {
 	auto &env = methan0l.get_env_table();
 	env.set(CLIHooks::INTERACTIVE_RUNNER, this);
+
+	if (env.exists(CLIHooks::CAS_MODE))
+		enable_cas_mode(methan0l.get_env_hook<bool>(CLIHooks::CAS_MODE));
 }
 
 void InteractiveRunner::init_commands()
