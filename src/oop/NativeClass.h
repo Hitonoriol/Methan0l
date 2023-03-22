@@ -152,7 +152,7 @@ class NativeClass
  * Requires first argument of the function to be a `mtl::Object&` (`OBJ` macro can be used). */
 #define BIND_EXTERNAL_METHOD_AS(bind_as, method_name) class_binder.register_method(bind_as, &method_name);
 #define BIND_PROXY_METHOD(name) BIND_EXTERNAL_METHOD_AS(#name, THIS_CLASS::name)
-#define BIND_EXTERNAL_METHOD(name) BIND_EXTERNAL_METHOD_AS(strip_name_scope(#name), name)
+#define BIND_EXTERNAL_METHOD(name) BIND_EXTERNAL_METHOD_AS(#name, name)
 
 /*   Bind a "mutator" method (a method that's intended to return `this`).
  * The native method being bound isn't required to return anything. */

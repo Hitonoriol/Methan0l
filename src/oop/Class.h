@@ -74,6 +74,7 @@ class Class : public Allocatable<Class>
 		template<typename T>
 		void register_method(std::string_view name, T &&method)
 		{
+			name = mtl::strip_name_scope(name);
 			auto mname = mtl::str(name);
 			if constexpr (std::is_same<TYPE(T), NativeFunc>::value)
 				class_data.set(mname, method);

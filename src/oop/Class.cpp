@@ -42,6 +42,11 @@ Class::Class(Interpreter &context, const std::string &name) :
 		return Object::copy(obj);
 	});
 
+	/* Default object hash_code */
+	register_method(Methods::Hashcode, [&](Object &obj) {
+		return obj.id();
+	});
+
 	/* Reflective methods: */
 
 	/* [Static] Get class id */
@@ -72,6 +77,7 @@ Class::Class(Interpreter &context, const std::string &name) :
 
 void Class::register_method(std::string_view name, Function &method)
 {
+	name = mtl::strip_name_scope(name);
 	method.arg_def.push_front( { std::move(mtl::str(Parameters::This)),
 			LiteralExpr::empty() });
 	class_data.set(mtl::str(name), method);
