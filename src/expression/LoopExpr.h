@@ -36,23 +36,6 @@ class LoopExpr: public Expression
 		void exec_for_loop(Interpreter &context);
 		void exec_foreach_loop(Interpreter &context);
 
-		template<typename T> void for_each(Interpreter &context, T &container, const std::string &as_elem)
-		{
-			Unit &body_unit = context.tmp_callable(Unit::from_expression(body));
-			body_unit.call();
-			body_unit.expr_block();
-			DataTable &local = body_unit.local();
-			context.enter_scope(body_unit);
-			Value &elem = local.get_or_create(as_elem);
-			Value ret;
-			for (auto &val : container) {
-				elem = unconst(val);
-				if (loop_iteration(context, body_unit, ret))
-					break;
-			}
-			exit_loop(context, ret);
-		}
-
 	public:
 		/* do $(i = 0, i < 10, ++i) -> {expr1; expr2; expr3} */
 		LoopExpr(ExprPtr init, ExprPtr condition, ExprPtr step, ExprPtr body) :

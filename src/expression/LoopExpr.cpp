@@ -13,6 +13,7 @@
 #include "UnitExpr.h"
 #include "util/util.h"
 #include "util/meta/type_traits.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -63,14 +64,23 @@ void LoopExpr::exec_for_loop(Interpreter &context)
 
 void LoopExpr::exec_foreach_loop(Interpreter &context)
 {
-	init->assert_type<IdentifierExpr>("First argument of foreach expr must be an Identifier");
-	Value listval = condition->evaluate(context);
-	std::string as_elem = IdentifierExpr::get_name(init);
-	listval.accept([&](auto &container) {
-		if constexpr (Value::is_heap_type<decltype(container)>())
-			if constexpr (is_container<VT(*container)>::value && !is_associative<VT(*container)>::value)
-				for_each(context, *container, as_elem);
-	});
+	init->assert_type<IdentifierExpr>("First argument of for-each expression must be an Identifier");
+	auto as_elem = IdentifierExpr::get_name(init);
+	auto &body_unit = context.tmp_callable(Unit::from_expression(body));
+	IterableAdapter iterable(condition->evaluate(context));
+	auto it = iterable.iterator();
+	body_unit.call();
+	body_unit.expr_block();
+	auto &local = body_unit.local();
+	context.enter_scope(body_unit);
+	auto &elem = local.get_or_create(as_elem);
+	Value ret;
+	while (it.has_next()) {
+		elem = it.next();
+		if (loop_iteration(context, body_unit, ret))
+			break;
+	}
+	exit_loop(context, ret);
 }
 
 std::ostream& LoopExpr::info(std::ostream &str)
