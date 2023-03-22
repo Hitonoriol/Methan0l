@@ -27,6 +27,8 @@ class Adapter
 		Adapter(const Value &val) : obj(val.cget<Object>()) {};
 		Adapter(const Object &obj) : obj(obj) {};
 
+		virtual ~Adapter() = default;
+
 		inline Object& get_object()
 		{
 			return obj;

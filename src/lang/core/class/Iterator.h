@@ -55,7 +55,7 @@ class IteratorAdapter : public Iterator, public Adapter
 };
 
 #define ITERATOR_BINDINGS(container_type) \
-		BIND_CONSTRUCTOR(container_type&) \
+		INTERFACE \
 		BIND_METHOD(peek) \
 		BIND_METHOD(next) \
 		BIND_METHOD(has_next) \
