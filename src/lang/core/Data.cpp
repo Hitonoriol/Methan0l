@@ -30,7 +30,7 @@ Value accumulate(Object &obj, Value accumulator)
 		/* Initializer: modify arg list so that the `accumulator`
 		 * is called for a pair of arguments. */
 		[&result](auto &args) {
-			args.push_front(Value::ref(result));
+			args.push_front(Value::wrapped(Value::ref(result)));
 		}
 	);
 	return result;
