@@ -8,13 +8,17 @@
 namespace mtl
 {
 
+namespace native
+{
+
 template<class C>
 class DefaultIterator : public Iterator
 {
-	private:
+	public:
 		using iterator_type = iterator_of<C>;
 		using value_type = typename C::value_type;
 
+	protected:
 		C &container;
 		iterator_type current_it;
 
@@ -31,10 +35,17 @@ class DefaultIterator : public Iterator
 
 	public:
 		DefaultIterator(C &container)
-			: container(container), current_it(first())
+			: container(container),
+			  current_it(first())
 		{
-			static_assert(std::is_same_v<value_type, Value>);
+			static_assert(
+					std::is_same_v<value_type, Value>
+				 || std::is_same_v<value_type, std::pair<const Value, Value>>
+			);
 		}
+
+		DefaultIterator(C &container, Interpreter&)
+			: DefaultIterator(container) {}
 
 		Value peek() override
 		{
@@ -107,8 +118,10 @@ class DefaultIterator : public Iterator
 		}
 };
 
-NATIVE_CLASS(ListIterator, DefaultIterator<ValList>)
-NATIVE_CLASS(SetIterator, DefaultIterator<ValSet>)
+}
+
+NATIVE_CLASS(ListIterator, native::DefaultIterator<ValList>)
+NATIVE_CLASS(SetIterator, native::DefaultIterator<ValSet>)
 
 } /* namespace mtl */
 

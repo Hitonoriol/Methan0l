@@ -20,8 +20,9 @@ class IteratorProvider
 		template<typename Iter = typename T::iterator_type>
 		static Object iterator(OBJ)
 		{
-			auto &container = *this_obj.get_native().get<std::shared_ptr<T>>();
-			return CONTEXT.new_object<Iter>(container);
+			auto &native = *this_obj.get_native().get<std::shared_ptr<T>>();
+			auto &context = CONTEXT;
+			return context.new_object<Iter>(native, context);
 		}
 };
 
