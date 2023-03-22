@@ -10,26 +10,25 @@
 #include "type.h"
 #include "util/util.h"
 #include "util/hash.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
 
 Value MapExpr::evaluate(Interpreter &context)
 {
-	ValMap map;
-
-	for (auto entry : exprs)
-		map.emplace(Value(entry.first), entry.second->evaluate(context));
-
-	return Value(map);
+	return context.make<Map>().as<Map>([&](auto &map) {
+		for (auto entry : exprs)
+			map->emplace(Value(entry.first), entry.second->evaluate(context));
+	});;
 }
 
 void MapExpr::execute(Interpreter &context)
 {
-	ValMap map = evaluate(context).get<ValMap>();
-	DataTable &scope = context.current_unit()->local();
+	auto &map = evaluate(context).get<Map>();
+	auto &scope = context.current_unit()->local();
 	for (auto &entry : map) {
-		std::string keystr = unconst(entry.first).to_string(&context);
+		auto keystr = unconst(entry.first).to_string(&context);
 		scope.set(keystr, entry.second);
 	}
 }

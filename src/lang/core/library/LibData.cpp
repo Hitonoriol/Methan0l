@@ -259,8 +259,7 @@ void LibData::load_operators()
 			}
 		} else {
 			auto rval = val(rhs);
-			rval.assert_type(Type::MAP, "Attempting to create an anonymous object out of a wrong value");
-			Object obj(context->get_type_mgr().get_root(), DataTable::make(rval.get<ValMap>(), *context));
+			Object obj(context->get_type_mgr().get_root(), DataTable::make(rval.get<Map>(), *context));
 			return obj;
 		}
 		throw std::runtime_error("Invalid `new` expression");

@@ -19,7 +19,6 @@ class Type
 			STRING,
 			BOOLEAN,
 			UNIT,
-			MAP,
 			FUNCTION,
 			CHAR,
 			OBJECT,

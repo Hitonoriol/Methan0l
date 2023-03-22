@@ -121,9 +121,6 @@ Int, double, bool, char,
 /* Strings (To be removed) */
 VString,
 
-/* Data Structures (To be removed) */
-VMap,
-
 /* Callable types */
 VUnit, VFunction, VNativeFunc,
 

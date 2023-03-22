@@ -153,9 +153,6 @@ TypeID Value::type() const
 	else if (is<VFunction>() || is<VNativeFunc>())
 		return Type::FUNCTION;
 
-	else if (is<VMap>())
-		return Type::MAP;
-
 	else if (is<Token>())
 		return Type::TOKEN;
 
@@ -205,17 +202,6 @@ std::string Value::to_string(Interpreter *context)
 	else if (type == Type::BOOLEAN)
 		return std::string(
 				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE));
-
-	else if (type == Type::MAP) {
-		ValMap &map = get<ValMap>();
-		auto it = map.begin(), end = map.end();
-		return stringify([&]() {
-			if (it == end) return empty_string;
-			std::string str = "{" + unconst(it->first).to_string(context) + ": " + it->second.to_string(context) + "}";
-			it++;
-			return str;
-		});
-	}
 
 	else if (type == Type::UNIT)
 		return get<Unit>().to_string();
