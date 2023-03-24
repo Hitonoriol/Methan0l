@@ -9,7 +9,7 @@
 namespace mtl
 {
 
-using DblBinOperation = const std::function<Float(Float, Value)>;
+using FloatOperator = const std::function<Float(Float, Float)>;
 
 }
 
@@ -37,13 +37,22 @@ Value for_each(Object &obj, Value action);
 Value map(Object &obj, Value mapper);
 Value accumulate(Object &obj, Value accumulator);
 
+Float sum(Object &iterable);
+Float mean(Object &iterable);
+Float product(Object &iterable);
+Float rms(Object &iterable);
+Float deviation(Object &iterable);
+
 template<typename T, typename F>
-T do_accumulate(IterableAdapter iterable, T init, F &&operation)
+std::pair<T, UInt> do_accumulate(IterableAdapter iterable, T init, F &&operation)
 {
+	UInt size = 0;
 	auto it = iterable.iterator();
-	while(it.has_next())
-		init = operation(init, it.next());
-	return init;
+	while(it.has_next()) {
+		init = operation(init, it.next().as<T>());
+		++size;
+	}
+	return {init, size};
 }
 
 Value slice(CollectionAdapter collection, Int start, Int end, Int step);

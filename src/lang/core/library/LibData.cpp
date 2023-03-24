@@ -88,7 +88,6 @@ void LibData::load()
 				.count());
 	});
 
-	load_container_funcs();
 	load_operators();
 }
 
@@ -109,70 +108,6 @@ Value LibData::if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert)
 void LibData::import_reference(const IdentifierExpr &idfr) {
 	auto &name = idfr.get_name();
 	context->local_scope()->set(name, Value::ref(context->scope_lookup(name, true)->get(name)));
-}
-
-DblBinOperation LibData::summator = [](double l, Value r) {return l + r.as<double>();};
-DblBinOperation LibData::multiplicator = [](double l, Value r) {return l * r.as<double>();};
-
-double LibData::mean(Args &args)
-{
-	auto [n, sum] = dispatch_accumulate(args, 0.0, summator);
-	return sum / n;
-}
-
-std::pair<size_t, double> LibData::dispatch_accumulate(Args &args, double init, DblBinOperation operation)
-{
-	auto first = arg(args);
-	ExprList callargs(std::next(args.begin()), args.end());
-	return accumulate(first, callargs, init, operation);
-}
-
-std::pair<size_t, double> LibData::accumulate(Value &callable, Args &args, double init, DblBinOperation op)
-{
-	auto &range = try_cast<RangeExpr>(args[0]);
-	auto start = range.get_start(*context).to_double();
-	auto end = range.get_end(*context).to_double();
-	auto step = range.get_step(*context).to_double();
-
-	auto x = LiteralExpr::create(0);
-	ExprList callargs {x};
-	double result = init;
-	for (auto i = start; i < end; i += step) {
-		x->raw_ref() = i;
-		result = op(result, context->invoke(callable, callargs));
-	}
-	return std::make_pair(abs((end - start) / step), result);
-}
-
-void LibData::load_container_funcs()
-{
-	/* ------------------ Accumulative functions ------------------- */
-	function("sum", [this](Args args) {
-		return dispatch_accumulate(args, 0.0, summator).second;
-	});
-
-	function("product", [this](Args args) {
-		return dispatch_accumulate(args, 1.0, multiplicator).second;
-	});
-
-	function("mean", mtl::member(this, &LibData::mean));
-
-	/* Root mean square */
-	function("rms", [this](Args args) {
-		auto [n, rsum] = dispatch_accumulate(args, 0.0, [](double l, Value r) {
-			return l + r.as<double>() * r.as<double>();
-		});
-		return sqrt(rsum / n);
-	});
-
-	/* Standard deviation */
-	function("deviation", [this](Args args) {
-		double mean = this->mean(args);
-		auto [n, dsum] = dispatch_accumulate(args, 0.0, [mean](double l, Value r){
-			return l + (r.as<double>() - mean) * (r.as<double>() - mean);
-		});
-		return sqrt(dsum / n);
-	});
 }
 
 bool LibData::instanceof(Value &lhs, Value &rhs)
