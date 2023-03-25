@@ -48,9 +48,18 @@ class Library
 		Value arg(ExprList args, int idx = 0);
 
 		template<typename T>
-		void function(const std::string &name, T &&callable)
+		inline void function(const std::string &name, T &&callable)
 		{
 			context->register_func(name, std::move(callable));
+		}
+
+		/* Register an external context-dependent function */
+		template<typename R, typename ...Types>
+		inline void external_function(const std::string &name, R(*func)(Interpreter&, Types...))
+		{
+			context->register_func(name, [&, func](Types ...args) {
+				return func(*context, std::forward<Types>(args)...);
+			});
 		}
 
 		void getter(const std::string &name, Value);
