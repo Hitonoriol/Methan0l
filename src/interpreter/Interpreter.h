@@ -215,7 +215,7 @@ class Interpreter
 		template<typename T>
 		inline T eval(Expression &expr)
 		{
-			LOG("eval<T>() for " << type_name<T>())
+			LOG("eval<T>() for " << type_name<T>() << ", expression: " << expr.info())
 			/* T, but with `const` and `&` / `&&` stripped */
 			using V = TYPE(T);
 			constexpr bool is_allowed = Value::allowed_or_heap<typename std::remove_pointer<V>::type>();
@@ -225,6 +225,8 @@ class Interpreter
 			/* Get as unevaluated expression */
 			if constexpr (std::is_same<T, Expression*>::value)
 				return &expr;
+			else if constexpr (std::is_same<T, Expression&>::value)
+				return expr;
 
 			/* Get as mtl::Value by `&`, `*`, or value */
 			else if constexpr (std::is_same<typename std::remove_pointer<V>::type, Value>::value) {
@@ -317,6 +319,7 @@ class Interpreter
 		template<typename F, typename Container>
 		auto call(F &&f, const Container &c)
 		{
+			LOG("Calling a " << type_name<F>() << " with " << c.size() << " arguments...")
 			constexpr unsigned argc = function_traits<decltype(f)>::arity;
 			using caller = call_helper<argc == 0, decltype(f), Container, argc>;
 			if constexpr (std::is_void<typename function_traits<F>::return_type>::value) {

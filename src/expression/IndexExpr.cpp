@@ -30,7 +30,7 @@ Value IndexExpr::evaluate(Interpreter &context)
 		}
 		/* Bracketed slice: list[a..b] */
 		else if (instanceof<RangeExpr>(idx)) {
-			return val.invoke_method(IndexOperator::Slice);
+			return val.invoke_method(IndexOperator::Slice, idx->evaluate(context));
 		}
 		/* Bracketed remove-at: list[~idx] */
 		else if (remove) {

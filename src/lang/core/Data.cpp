@@ -81,26 +81,42 @@ Float deviation(Object &iterable)
 	return sqrt(dsum / n);
 }
 
-Value slice(CollectionAdapter collection, Int start, Int end, Int step)
+bool rng_pos_cond(Int i, Int end)
 {
-	auto sliced = collection.get_object().get_class()->create();
-	auto it = collection.iterator();
-	/* TODO */
+	return i < end;
+}
+
+bool rng_neg_cond(Int i, Int end)
+{
+	return i > end;
+}
+
+Value slice(Object &obj, Object &range_obj)
+{
+	CollectionAdapter collection(obj);
+	CollectionAdapter sliced(obj.get_class()->create());
+
+	auto &range = range_obj.get_native().get<IntRange>();
+	Int start = range.get_start();
+	Int end = range.get_end();
+	Int step = range.get_step();
+
+	if (static_cast<UInt>(end) > collection.size() || static_cast<UInt>(start) >= collection.size())
+		throw std::runtime_error("Slice is out of bounds");
+
+	auto condition = step > 0 ? rng_pos_cond : rng_neg_cond;
+	for (auto i = start; condition(i, end); i += step)
+		sliced.add(collection.get(i));
+
 	return sliced;
 }
 
-ValList range(Int start, Int end, Int step, bool inclusive)
+Value range(Interpreter &context, Value start, Value end, Value step)
 {
-	check_range(start, end, step);
-
-	if (inclusive)
-		end += step > 0 ? 1 : -1;
-
-	auto condition = step > 0 ? rng_pos_cond : rng_neg_cond;
-	ValList list;
-	for (Int i = start; condition(i, end); i += step)
-		list.push_back(i);
-	return list;
+	if (start.is<Float>() || end.is<Float>() || step.is<Float>())
+		return context.make<FloatRange>(start.as<Float>(), end.as<Float>(), step.as<Float>());
+	else
+		return context.make<IntRange>(start.as<Int>(), end.as<Int>(), step.as<Int>());
 }
 
 }

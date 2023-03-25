@@ -7,6 +7,7 @@
 #include <string_view>
 #include <type_traits>
 #include <any>
+#include <cstring>
 
 #include "memory.h"
 #include "string.h"
@@ -15,6 +16,19 @@
 
 namespace mtl
 {
+
+template<typename Dest, typename Src>
+inline Dest bit_pattern_as(Src n)
+{
+	static_assert(sizeof(Src) == sizeof(Dest));
+
+	if constexpr (std::is_same_v<Src, Dest>)
+		return n;
+
+	Dest result;
+	std::memcpy(&result, &n, sizeof(n));
+	return result;
+}
 
 template<typename T>
 inline T any_cast(std::any &any)

@@ -172,6 +172,11 @@ DataTable& Class::get_object_data()
 	return proto_object_data;
 }
 
+Value Class::get_method(const std::string &name)
+{
+	return class_data.get(name, true);
+}
+
 const std::string& Class::get_name()
 {
 	return name;

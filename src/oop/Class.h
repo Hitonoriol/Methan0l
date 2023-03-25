@@ -110,6 +110,8 @@ class Class : public Allocatable<Class>
 		DataTable& get_class_data();
 		DataTable& get_object_data();
 
+		Value get_method(const std::string&);
+
 		inline bool equals_or_inherits(Class *clazz)
 		{
 			auto &rhs_id = clazz->id;
@@ -132,6 +134,7 @@ class Class : public Allocatable<Class>
 
 		Value extract_names(const DataTable&);
 		Value get_methods();
+
 		Value get_fields(Object &obj);
 		Value get_fields();
 

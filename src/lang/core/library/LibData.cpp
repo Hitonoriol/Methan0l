@@ -55,17 +55,16 @@ void LibData::load()
 		return context->current_function().get_callargs();
 	});
 
-	/* range$(n)				<-- Returns a list w\ Values in range [0; n - 1]
+	/* range$(n)				<-- Returns a Range [0; n - 1]
 	 * range$(start, n)			<-- [start, n - 1]
 	 * range$(start, n, step)	<-- {start, start + step, ..., n - 1}
 	 */
 	function("range", [&](Args args) {
-		auto range = context->make<List>();
-		Int start = args.size() > 1 ? num(args) : 0;
-		Int n = args.size() < 2 ? num(args) : num(args, 1);
-		Int step = args.size() == 3 ? num(args, 2) : 1;
+		auto start = args.size() > 1 ? arg(args) : Value(0);
+		auto n = args.size() < 2 ? arg(args) : arg(args, 1);
+		auto step = args.size() == 3 ? arg(args, 2) : Value(1);
 
-		return range.move_in<List>(core::range(start, n, step));
+		return core::range(*context, start, n, step);
 	});
 
 	function("purge", [&](Args args) {
@@ -74,12 +73,7 @@ void LibData::load()
 	});
 
 	/* val.convert$(typeid) -- does not modify <val>, returns a copy of type typeid (if possible)*/
-	function("convert", [&](Args args) {
-		auto val = arg(args);
-		auto type_id = num(args, 1);
-
-		return val.convert(context->get_type_mgr().get_type(type_id));
-	});
+	external_function("convert", core::convert);
 
 	/* ms = now$() */
 	function("now", [&](Args args) {
