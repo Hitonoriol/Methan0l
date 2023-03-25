@@ -154,7 +154,7 @@ NATIVE_CLASS(FloatRangeIterator, native::RangeIterator<Float>)
 class RangeAdapter : IterableAdapter
 {
 	public:
-		using Adapter::Adapter;
+		using IterableAdapter::Adapter;
 
 		Value get_start() ADAPTER_METHOD(get_start)
 		Value get_end() ADAPTER_METHOD(get_end)
