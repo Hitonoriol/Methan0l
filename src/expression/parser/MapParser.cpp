@@ -77,15 +77,15 @@ void MapParser::parse(Parser &parser,
 		parser.consume(ends_with);
 }
 
-std::string MapParser::key_string(ExprPtr expr)
+std::string MapParser::key_string(Expression &expr)
 {
-	if (instanceof<IdentifierExpr>(expr.get()))
-		return IdentifierExpr::get_name(expr);
+	if (instanceof<IdentifierExpr>(expr))
+		return IdentifierExpr::get_name(&expr);
 
-	if (instanceof<LiteralExpr>(expr.get()))
-		return try_cast<LiteralExpr>(expr).raw_ref().to_string();
+	if (instanceof<LiteralExpr>(expr))
+		return try_cast<LiteralExpr>(&expr).raw_ref().to_string();
 
-	throw std::runtime_error("Invalid map key expression: " + expr->info());
+	throw std::runtime_error("Invalid map key expression: " + expr.info());
 }
 
 }

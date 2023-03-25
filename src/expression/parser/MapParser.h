@@ -21,7 +21,12 @@ class MapParser : public PrefixParser
 				ExprPairCollector collector,
 				TokenType ends_with = TokenType::PAREN_R);
 
-		static std::string key_string(ExprPtr expr);
+		static std::string key_string(Expression &expr);
+
+		inline static std::string key_string(ExprPtr expr)
+		{
+			return key_string(*expr);
+		}
 };
 
 } /* namespace mtl */
