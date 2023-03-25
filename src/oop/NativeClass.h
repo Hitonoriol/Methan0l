@@ -139,6 +139,8 @@ class NativeClass
 
 /* Convenience macros for `bind_method` and `bind_constructor` methods of ClassBinder<C> */
 #define BIND_CONSTRUCTOR(...) class_binder.bind_constructor<JOIN(__VA_ARGS__)>();
+#define CONSTRUCTOR_DARGS(...) class_binder.set_constructor_default_args(JOIN(__VA_ARGS__));
+
 #define BIND_METHOD_AS(bind_as, method_name) class_binder.bind_method(bind_as, &THIS_CLASS::method_name);
 #define BIND_METHOD(name) BIND_METHOD_AS(#name, name)
 

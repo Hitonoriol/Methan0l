@@ -92,16 +92,31 @@ class ClassBinder
 			clazz->set_name(name);
 		}
 
+		template<typename ...Sig>
+		inline NativeFunc wrap_constructor()
+		{
+			LOG("Wrapping ctor of " << type_name<C>() << " with sig: " << type_name<Sig...>())
+			return context.bind_func([](Object &obj, Sig ...args) {
+				obj.def(mtl::str(Fields::NATIVE_OBJ)) = Factory<C, Sig...>::make(std::forward<Sig>(args)...);
+			});
+		}
+
+		/* Calling this more than once will break the constructor */
+		template<typename ...Types>
+		void set_constructor_default_args(Types ...default_args)
+		{
+			auto &ctor = clazz->get_method(mtl::str(Methods::Constructor)).get<NativeFunc>();
+			clazz->register_method(Methods::Constructor,
+					context.bind_func(ctor, mtl::tuple(std::forward<Types>(default_args)...)));
+		}
+
 		/* Binds the specified constructor of `bound_class` by signature to a methan0l class.
 		 * Methan0l classes can only have one constructor.
 		 * `Sig...` - `bound_class`'s constructor signature */
 		template<typename ...Sig>
 		inline void bind_constructor()
 		{
-			LOG("Wrapping ctor of " << type_name<C>() << " with sig: " << type_name<Sig...>())
-			clazz->register_method(Methods::Constructor, context.bind_func([](Object &obj, Sig...args) {
-				obj.def(mtl::str(Fields::NATIVE_OBJ)) = Factory<C, Sig...>::make(std::forward<Sig>(args)...);
-			}));
+			clazz->register_method(Methods::Constructor, wrap_constructor<Sig...>());
 		}
 
 		inline Class& get_class()
