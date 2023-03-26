@@ -77,7 +77,11 @@ Class& TypeManager::get_class(Int id)
 
 Class& TypeManager::get_class(const std::string& name)
 {
-	return *class_index.at(name);
+	auto clazz = class_index.find(name);
+	if (clazz == class_index.end())
+		throw std::runtime_error("Class " + name + " is not defined");
+
+	return *clazz->second;
 }
 
 Value TypeManager::invoke_method(Object &obj, const std::string &name, Args &args)
