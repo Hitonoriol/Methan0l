@@ -104,23 +104,22 @@ void LibData::import_reference(const IdentifierExpr &idfr) {
 	context->local_scope()->set(name, Value::ref(context->scope_lookup(name, true)->get(name)));
 }
 
-bool LibData::instanceof(Value &lhs, Value &rhs)
+bool LibData::instanceof(Value &lhs, ExprPtr rhs_expr)
 {
-	auto type_id = rhs.as<Int>();
+	auto type = core::resolve_type(*context, *rhs_expr);
 	if (lhs.object()) {
 		auto clazz = lhs.get<Object>().get_class();
-		return clazz->equals_or_inherits(&context->get_type_mgr().get_class(type_id));
+		return clazz->equals_or_inherits(&context->get_type_mgr().get_class(type.type_id()));
 	}
 	else {
-		return lhs.type_id() == type_id;
+		return lhs.type_id() == type.type_id();
 	}
 }
 
-void LibData::assert_type(Value &lhs, Value &rhs)
+void LibData::assert_type(Value &lhs, ExprPtr rhs_expr)
 {
-	if (!instanceof(lhs, rhs))
-		throw InvalidTypeException(lhs.type(), context->get_type_mgr().get_type(mtl::num(rhs)),
-				"Type assertion failed:");
+	if (!instanceof(lhs, rhs_expr))
+		throw InvalidTypeException(lhs.type(), TypeID::NONE, "Type assertion failed:");
 }
 
 void LibData::load_operators()
@@ -213,8 +212,8 @@ void LibData::load_operators()
 	}));
 
 	infix_operator(TokenType::INSTANCE_OF, LazyBinaryOpr([&](auto lhs, auto rhs) {
-		auto l = val(lhs), r = val(rhs);
-		return instanceof(l, r);
+		auto l = val(lhs);
+		return instanceof(l, rhs);
 	}));
 
 	/* *["Assertion failed"] assert: condition */

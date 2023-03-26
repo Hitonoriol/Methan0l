@@ -2,6 +2,7 @@
 
 #include <interpreter/Interpreter.h>
 #include <expression/parser/MapParser.h>
+#include <oop/Class.h>
 
 namespace mtl::core
 {
@@ -17,16 +18,19 @@ void import(Interpreter *context, Unit &module)
 	}
 }
 
-Value convert(Interpreter &context, Value &val, Expression &type_expr)
+TypeID resolve_type(Interpreter &context, Expression &type_expr)
 {
 	auto type_id_val = type_expr.evaluate(context);
 	TypeID type_id;
 	auto &types = context.get_type_mgr();
-
 	TYPE_SWITCH(type_id_val.type(),
 		/* Type name passed as a string */
 		TYPE_CASE_T(String) {
 			type_id = types.get_type(type_id_val.get<String>());
+		}
+
+		TYPE_CASE(Type::OBJECT) {
+			type_id = type_id_val.get<Object>().get_class()->get_native_id();
 		}
 
 		/* If type id evaluates to `nil`, perhaps an unquoted type name has been passed */
@@ -39,8 +43,12 @@ Value convert(Interpreter &context, Value &val, Expression &type_expr)
 			type_id = types.get_type(type_id_val.get<Int>());
 		}
 	)
+	return type_id;
+}
 
-	return val.convert(type_id);
+Value convert(Interpreter &context, Value &val, Expression &type_expr)
+{
+	return val.convert(resolve_type(context, type_expr));
 }
 
 } /* namespace mtl */

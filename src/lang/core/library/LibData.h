@@ -26,8 +26,8 @@ class LibData: public Library
 	private:
 		void import_reference(const IdentifierExpr&);
 		void load_operators();
-		bool instanceof(Value &lhs, Value &rhs);
-		void assert_type(Value &lhs, Value &rhs);
+		bool instanceof(Value &lhs, ExprPtr rhs_expr);
+		void assert_type(Value &lhs, ExprPtr rhs_expr);
 
 		Value if_not_same(ExprPtr lhs, ExprPtr rhs, bool convert = true);
 };

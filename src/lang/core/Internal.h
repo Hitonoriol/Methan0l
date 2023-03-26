@@ -16,6 +16,7 @@ namespace mtl::core
 
 void import(Interpreter *context, Unit &module);
 
+TypeID resolve_type(Interpreter &context, Expression &type_expr);
 Value convert(Interpreter &context, Value &val, Expression &type_expr);
 
 } /* namespace mtl */
