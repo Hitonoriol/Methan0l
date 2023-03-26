@@ -197,7 +197,7 @@ class Token
 				"copy", "hash_code",
 				"typename", "noeval", "defset", "while", "for",
 				"try", "catch", "using_module", "new", "global",
-				"assert", "instanceof", "unwrap", "is_reference",
+				"assert", "is", "unwrap", "is_reference",
 				"method", "f", "var", "import", "base", "require",
 				"interface", "const"
 		};
