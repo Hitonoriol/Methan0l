@@ -180,6 +180,7 @@ Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 	register_infix_word(TokenType::ASSERT, Precedence::NO_EVAL);
 	register_infix_word(TokenType::INSTANCE_OF, Precedence::BIT_SHIFT);
 	register_infix_word(TokenType::REQUIRE, Precedence::NO_EVAL);
+	register_infix_word(TokenType::CONVERT, Precedence::BIT_SHIFT);
 
 	/* Class / Box field / method access operators */
 	register_infix_opr(TokenType::AT, Precedence::DOT, BinOprType::RIGHT_ASSOC);

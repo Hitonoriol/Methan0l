@@ -124,6 +124,11 @@ void LibData::assert_type(Value &lhs, ExprPtr rhs_expr)
 
 void LibData::load_operators()
 {
+	infix_operator(TokenType::CONVERT, LazyBinaryOpr([&](auto &lhs, auto &rhs){
+		auto src = val(lhs);
+		return core::convert(*context, src, *rhs);
+	}));
+
 	/* Dereference value */
 	postfix_operator(TokenType::DOUBLE_EXCL, LazyUnaryOpr([&](auto lhs) {
 		return val(lhs);

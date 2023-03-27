@@ -137,6 +137,7 @@ enum class TokenType : uint16_t
 	REQUIRE,
 	INTERFACE,
 	CONST,
+	CONVERT,
 
 	NONE = 0x500,
 	EXPR_END,
@@ -199,7 +200,7 @@ class Token
 				"try", "catch", "using_module", "new", "global",
 				"assert", "is", "unwrap", "is_reference",
 				"method", "f", "var", "import", "base", "require",
-				"interface", "const"
+				"interface", "const", "to"
 		};
 
 		static constexpr std::string_view reserved_words[] = {
