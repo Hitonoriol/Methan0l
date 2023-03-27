@@ -5,6 +5,7 @@
 #include <lang/core/class/Set.h>
 #include <lang/core/class/Map.h>
 #include <lang/core/class/Range.h>
+#include <lang/core/class/Mapping.h>
 
 namespace mtl
 {
@@ -29,6 +30,8 @@ void LibContainer::load()
 	REGISTER_CLASS_BINDING(*context, IntRangeIterator)
 	REGISTER_CLASS_BINDING(*context, FloatRange)
 	REGISTER_CLASS_BINDING(*context, FloatRangeIterator)
+	REGISTER_CLASS_BINDING(*context, Mapping)
+	REGISTER_CLASS_BINDING(*context, MappingIterator)
 }
 
 } /* namespace mtl */

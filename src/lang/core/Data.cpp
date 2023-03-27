@@ -1,5 +1,7 @@
 #include "Data.h"
 
+#include <CoreLibrary.h>
+
 #include <cmath>
 
 namespace mtl::core
@@ -24,11 +26,8 @@ Value for_each(Object &obj, Value action)
 
 Value map(Object &obj, Value mapper)
 {
-	auto mapped = CollectionAdapter(obj.context().make<List>());
-	do_for_each(obj, [&mapper, &mapped](auto &context, auto &args) {
-		mapped.add(context.invoke(mapper, args));
-	});
-	return mapped.get_object();
+	auto &context = obj.context();
+	return context.make<Mapping>(obj, mapper);
 }
 
 Value accumulate(Object &obj, Value accumulator)
@@ -109,6 +108,16 @@ Value slice(Object &obj, Object &range_obj)
 		sliced.add(collection.get(i));
 
 	return sliced;
+}
+
+Value collect(Object &iterable_obj, Object collection_obj)
+{
+	IterableAdapter iterable(iterable_obj);
+	CollectionAdapter collection(collection_obj);
+	auto it = iterable.iterator();
+	while(it.has_next())
+		collection.add(it.next());
+	return collection_obj;
 }
 
 Value range(Interpreter &context, Value start, Value end, Value step)

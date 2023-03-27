@@ -12,5 +12,6 @@
 #include <lang/core/class/Map.h>
 
 #include <lang/core/class/Range.h>
+#include <lang/core/class/Mapping.h>
 
 #endif /* SRC_CORELIBRARY_H_ */

@@ -38,6 +38,8 @@ Value map(Object &obj, Value mapper);
 Value accumulate(Object &obj, Value accumulator);
 Value slice(Object &obj, Object &range);
 
+Value collect(Object &iterable_obj, Object collection_obj);
+
 Float sum(Object &iterable);
 Float mean(Object &iterable);
 Float product(Object &iterable);
