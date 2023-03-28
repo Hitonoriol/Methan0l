@@ -155,6 +155,10 @@ class NativeClass
 #define BIND_EXTERNAL_METHOD_AS(bind_as, method_name) class_binder.register_method(bind_as, &method_name);
 #define BIND_PROXY_METHOD(name) BIND_EXTERNAL_METHOD_AS(#name, THIS_CLASS::name)
 #define BIND_EXTERNAL_METHOD(name) BIND_EXTERNAL_METHOD_AS(#name, name)
+#define BIND_EXTERNAL_DARGS_METHOD_AS(bind_as, method_name, ...) \
+	class_binder.register_method(bind_as, method_name, JOIN(__VA_ARGS__));
+#define BIND_EXTERNAL_DARGS_METHOD(name, ...) \
+		BIND_EXTERNAL_DARGS_METHOD_AS(#name, name, JOIN(__VA_ARGS__))
 
 /*   Bind a "mutator" method (a method that's intended to return `this`).
  * The native method being bound isn't required to return anything. */

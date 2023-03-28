@@ -130,11 +130,19 @@ class ClassBinder
 		}
 
 		template<typename F, typename ...Types>
-		inline void bind_method(std::string_view name, F &&method, Types &&...default_args)
+		inline void register_method(std::string_view name, F &&method, Types &&...default_args)
 		{
 			clazz->register_method(name,
-					context.bind_func(mtl::polymorphic_method<bound_class>(method),
+					context.bind_func(method,
 							mtl::tuple(std::forward<Types>(default_args)...)));
+		}
+
+		template<typename F, typename ...Types>
+		inline void bind_method(std::string_view name, F &&method, Types &&...default_args)
+		{
+			register_method(name,
+					mtl::polymorphic_method<bound_class>(method),
+					std::forward<Types>(default_args)...);
 		}
 
 		template<typename F>
