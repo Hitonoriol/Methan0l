@@ -33,18 +33,19 @@ inline Value do_for_each(IterableAdapter iterable, F action, Initializer init = 
 	return iterable.get_object();
 }
 
-Value for_each(Object &obj, Value action);
-Value map(Object &obj, Value mapper);
-Value accumulate(Object &obj, Value accumulator);
-Value slice(Object &obj, Object &range);
+Value for_each(Object &iterable_obj, Value action);
+Value map(Object &iterable_obj, Value mapper);
+Value filter(Object &iterable_obj, Value predicate);
+Value accumulate(Object &iterable_obj, Value accumulator);
+Value slice(Object &iterable_obj, Object &range);
 
 Value collect(Object &iterable_obj, Object collection_obj);
 
-Float sum(Object &iterable);
-Float mean(Object &iterable);
-Float product(Object &iterable);
-Float rms(Object &iterable);
-Float deviation(Object &iterable);
+Float sum(Object &iterable_obj);
+Float mean(Object &iterable_obj);
+Float product(Object &iterable_obj);
+Float rms(Object &iterable_obj);
+Float deviation(Object &iterable_obj);
 
 template<typename T, typename F>
 std::pair<T, UInt> do_accumulate(IterableAdapter iterable, T init, F &&operation)

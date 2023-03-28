@@ -14,6 +14,7 @@ METHAN0L_CLASS_BODY(Iterable, {
 	/* Transformations */
 	BIND_EXTERNAL_MUTATOR_METHOD(core::for_each)
 	BIND_EXTERNAL_METHOD(core::map)
+	BIND_EXTERNAL_METHOD(core::filter)
 	BIND_EXTERNAL_METHOD(core::accumulate)
 	BIND_EXTERNAL_METHOD(core::collect)
 

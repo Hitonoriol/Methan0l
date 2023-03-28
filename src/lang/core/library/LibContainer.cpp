@@ -1,11 +1,7 @@
 #include <lang/core/library/LibContainer.h>
 
+#include <CoreLibrary.h>
 #include <lang/core/library/container/Pair.h>
-#include <lang/core/class/List.h>
-#include <lang/core/class/Set.h>
-#include <lang/core/class/Map.h>
-#include <lang/core/class/Range.h>
-#include <lang/core/class/Mapping.h>
 
 namespace mtl
 {
@@ -32,6 +28,8 @@ void LibContainer::load()
 	REGISTER_CLASS_BINDING(*context, FloatRangeIterator)
 	REGISTER_CLASS_BINDING(*context, Mapping)
 	REGISTER_CLASS_BINDING(*context, MappingIterator)
+	REGISTER_CLASS_BINDING(*context, Filter)
+	REGISTER_CLASS_BINDING(*context, FilterIterator)
 }
 
 } /* namespace mtl */

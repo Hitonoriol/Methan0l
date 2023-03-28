@@ -17,24 +17,30 @@ Float multiplicator(Float l, Float r)
 	return l * r;
 }
 
-Value for_each(Object &obj, Value action)
+Value for_each(Object &iterable_obj, Value action)
 {
-	return do_for_each(obj, [&action](auto &context, auto &args) {
+	return do_for_each(iterable_obj, [&action](auto &context, auto &args) {
 		context.invoke(action, args);
 	});
 }
 
-Value map(Object &obj, Value mapper)
+Value map(Object &iterable_obj, Value mapper)
 {
-	auto &context = obj.context();
-	return context.make<Mapping>(obj, mapper);
+	auto &context = iterable_obj.context();
+	return context.make<Mapping>(iterable_obj, mapper);
 }
 
-Value accumulate(Object &obj, Value accumulator)
+Value filter(Object &iterable_obj, Value predicate)
+{
+	auto &context = iterable_obj.context();
+	return context.make<Filter>(iterable_obj, predicate);
+}
+
+Value accumulate(Object &iterable_obj, Value accumulator)
 {
 	Value result = 0.0;
 	do_for_each(
-		obj,
+		iterable_obj,
 		[&result, &accumulator](auto &context, auto &args) {
 			result = context.invoke(accumulator, args);
 		},
@@ -47,34 +53,34 @@ Value accumulate(Object &obj, Value accumulator)
 	return result;
 }
 
-Float sum(Object &iterable)
+Float sum(Object &iterable_obj)
 {
-	return do_accumulate(iterable, 0.0, &summator).first;
+	return do_accumulate(iterable_obj, 0.0, &summator).first;
 }
 
-Float product(Object &iterable)
+Float product(Object &iterable_obj)
 {
-	return do_accumulate(iterable, 1.0, &multiplicator).first;
+	return do_accumulate(iterable_obj, 1.0, &multiplicator).first;
 }
 
-Float mean(Object &iterable)
+Float mean(Object &iterable_obj)
 {
-	auto [sum, n] = do_accumulate(iterable, 0.0, &summator);
+	auto [sum, n] = do_accumulate(iterable_obj, 0.0, &summator);
 	return sum / n;
 }
 
-Float rms(Object &iterable)
+Float rms(Object &iterable_obj)
 {
-	auto [dsum, n] = do_accumulate(iterable, 0.0, [](Float l, Float r) {
+	auto [dsum, n] = do_accumulate(iterable_obj, 0.0, [](Float l, Float r) {
 		return l + r * r;
 	});
 	return sqrt(dsum / n);
 }
 
-Float deviation(Object &iterable)
+Float deviation(Object &iterable_obj)
 {
-	double mean = core::mean(iterable);
-	auto [dsum, n] = do_accumulate(iterable, 0.0, [mean](Float l, Float r) {
+	double mean = core::mean(iterable_obj);
+	auto [dsum, n] = do_accumulate(iterable_obj, 0.0, [mean](Float l, Float r) {
 		return l + (r - mean) * (r - mean);
 	});
 	return sqrt(dsum / n);
@@ -90,10 +96,10 @@ bool rng_neg_cond(Int i, Int end)
 	return i > end;
 }
 
-Value slice(Object &obj, Object &range_obj)
+Value slice(Object &iterable_obj, Object &range_obj)
 {
-	CollectionAdapter collection(obj);
-	CollectionAdapter sliced(obj.get_class()->create());
+	CollectionAdapter collection(iterable_obj);
+	CollectionAdapter sliced(iterable_obj.get_class()->create());
 
 	auto &range = range_obj.get_native().get<IntRange>();
 	Int start = range.get_start();

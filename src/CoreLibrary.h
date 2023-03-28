@@ -13,5 +13,6 @@
 
 #include <lang/core/class/Range.h>
 #include <lang/core/class/Mapping.h>
+#include <lang/core/class/Filter.h>
 
 #endif /* SRC_CORELIBRARY_H_ */
