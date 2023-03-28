@@ -392,12 +392,12 @@ class Interpreter
 
 				return [&, f, default_args](Args &args) -> Value {
 					if constexpr (has_default_args) {
-						constexpr unsigned arity = function_traits<F>::arity;
+						constexpr auto arity = function_traits<F>::arity;
 						auto argc = args.size();
 						if (argc < arity) {
 							ExprList callargs(args);
 							auto &defargs = unconst(default_args).get<ValList>();
-							for (size_t i = argc - default_argc; i < argc; ++i)
+							for (size_t i = argc - (arity - default_argc); i < default_argc; ++i)
 								callargs.push_back(defargs.at(i).get<ExprPtr>());
 							return call(f, callargs);
 						}
