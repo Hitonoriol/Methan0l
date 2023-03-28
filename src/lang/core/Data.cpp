@@ -17,6 +17,29 @@ Float multiplicator(Float l, Float r)
 	return l * r;
 }
 
+Boolean contains(Object &iterable_obj, Value value)
+{
+	IterableAdapter iterable(iterable_obj);
+	auto it = iterable.iterator();
+	while (it.has_next()) {
+		if (it.next() == value)
+			return true;
+	}
+	return false;
+}
+
+Int count(Object &iterable_obj)
+{
+	IterableAdapter iterable(iterable_obj);
+	auto it = iterable.iterator();
+	Int count = 0;
+	while(it.has_next()) {
+		it.next();
+		++count;
+	}
+	return count;
+}
+
 Value for_each(Object &iterable_obj, Value action)
 {
 	return do_for_each(iterable_obj, [&action](auto &context, auto &args) {
@@ -132,6 +155,59 @@ Value range(Interpreter &context, Value start, Value end, Value step)
 		return context.make<FloatRange>(start.as<Float>(), end.as<Float>(), step.as<Float>());
 	else
 		return context.make<IntRange>(start.as<Int>(), end.as<Int>(), step.as<Int>());
+}
+
+Value retain_all(Object &retain_in_obj, Object lookup_in_obj)
+{
+	IterableAdapter lookup_in(lookup_in_obj);
+	CollectionAdapter retain_in(retain_in_obj);
+
+	Value elem;
+	auto it = retain_in.iterator();
+	while(it.has_next()) {
+		elem = it.next();
+		if (lookup_in.contains(elem))
+			retain_in.remove(elem);
+	}
+	return retain_in;
+}
+
+Value remove_all(Object &remove_from_obj, Object lookup_in_obj)
+{
+	IterableAdapter lookup_in(lookup_in_obj);
+	CollectionAdapter remove_from(remove_from_obj);
+
+	auto it = lookup_in.iterator();
+	while (it.has_next())
+		remove_from.remove(it.next());
+
+	return remove_from;
+}
+
+Value add_all(Object &to_obj, Object from_obj)
+{
+	IterableAdapter from(from_obj);
+	CollectionAdapter to(to_obj);
+
+	auto it = from.iterator();
+	while (it.has_next())
+		to.add(it.next());
+
+	return to;
+}
+
+Value fill(Object &collection_obj, Value elem, size_t size)
+{
+	CollectionAdapter collection(collection_obj);
+
+	if (size != 0)
+		collection.resize(size);
+
+	auto it = collection.iterator();
+	while(it.has_next())
+		it.next() = elem;
+
+	return collection;
 }
 
 }

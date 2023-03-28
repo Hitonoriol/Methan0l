@@ -38,7 +38,7 @@ METHAN0L_CLASS(Iterable)
 
 			virtual void for_each(Value) UNIMPLEMENTED
 			virtual Value map(Value) UNIMPLEMENTED
-			virtual Int accumulate(Value) UNIMPLEMENTED
+			...
 	};
 */
 
@@ -51,7 +51,18 @@ class IterableAdapter : public Adapter
 
 		void for_each(Value action) ADAPTER_VOID_METHOD(for_each, action)
 		Value map(Value mapper) ADAPTER_METHOD(for_each, mapper)
+		Value filter(Value predicate) ADAPTER_METHOD(filter, predicate)
 		Value accumulate(Value action) ADAPTER_METHOD(accumulate, action)
+		Value collect(Value collection) ADAPTER_METHOD(collect, collection)
+
+		Boolean contains(Value elem) ADAPTER_METHOD(contains, elem)
+		Int count() ADAPTER_METHOD(count)
+
+		Float sum() ADAPTER_METHOD(sum)
+		Float product() ADAPTER_METHOD(product)
+		Float mean() ADAPTER_METHOD(mean)
+		Float rms() ADAPTER_METHOD(rms)
+		Float deviation() ADAPTER_METHOD(deviation)
 };
 
 } /* namespace mtl */

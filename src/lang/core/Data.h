@@ -33,6 +33,9 @@ inline Value do_for_each(IterableAdapter iterable, F action, Initializer init = 
 	return iterable.get_object();
 }
 
+Boolean contains(Object &iterable_obj, Value);
+Int count(Object &iterable_obj);
+
 Value for_each(Object &iterable_obj, Value action);
 Value map(Object &iterable_obj, Value mapper);
 Value filter(Object &iterable_obj, Value predicate);
@@ -60,6 +63,11 @@ std::pair<T, UInt> do_accumulate(IterableAdapter iterable, T init, F &&operation
 }
 
 Value range(Interpreter &context, Value start, Value end, Value step);
+
+Value fill(Object &collection_obj, Value elem, size_t size);
+Value add_all(Object &to_obj, Object from_obj);
+Value remove_all(Object &remove_from_obj, Object lookup_in_obj);
+Value retain_all(Object &retain_in_obj, Object lookup_in_obj);
 
 }
 

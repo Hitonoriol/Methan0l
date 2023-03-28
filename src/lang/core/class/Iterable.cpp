@@ -18,6 +18,9 @@ METHAN0L_CLASS_BODY(Iterable, {
 	BIND_EXTERNAL_METHOD(core::accumulate)
 	BIND_EXTERNAL_METHOD(core::collect)
 
+	BIND_EXTERNAL_METHOD(core::contains)
+	BIND_EXTERNAL_METHOD(core::count)
+
 	/* Accumulative mathematical operations */
 	BIND_EXTERNAL_METHOD(core::sum)
 	BIND_EXTERNAL_METHOD(core::product)

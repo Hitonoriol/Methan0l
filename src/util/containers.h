@@ -67,36 +67,6 @@ inline auto pop(C &c)
 	return elem;
 }
 
-
-template<typename T, typename U>
-inline U& add_all(T &from, U &to)
-{
-	for (auto &&elem : from)
-		insert(to, elem);
-	return to;
-}
-
-template<typename T, typename U>
-inline U& remove_all(T &lookup_in, U &remove_from)
-{
-	for (auto &&elem : lookup_in)
-		remove(remove_from, elem);
-	return remove_from;
-}
-
-template<typename T, typename U>
-inline U& retain_all(T &lookup_in, U &retain_in)
-{
-	auto it = retain_in.begin(), end = retain_in.end();
-	while(it != end) {
-		if (!contains(lookup_in, *it))
-			retain_in.erase(it++);
-		else
-			++it;
-	}
-	return retain_in;
-}
-
 template<typename T, typename V>
 inline Int index_of(T &&container, V &&value)
 {
