@@ -57,6 +57,9 @@ class InteractiveRunner
 		void list_classes();
 		void print_class_info(const std::string &name);
 
+		std::string cmd_str(std::string_view);
+		void toggle_cas_message();
+
 	public:
 		InteractiveRunner(Interpreter&);
 		void start();

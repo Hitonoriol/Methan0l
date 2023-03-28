@@ -89,9 +89,8 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 		{ "cas - toggle CAS mode (print out each expression result after evalution); off by default",
 				[](auto &runner)
 					{
-						bool enabled = runner.toggle_cas_mode();
-						std::cout << "CAS mode " << (enabled ? "enabled" : "disabled") << NL;
-						runner.cas_print_end();
+						runner.toggle_cas_mode();
+						runner.toggle_cas_message();
 					}
 
 		},
@@ -125,11 +124,25 @@ InteractiveRunner::InteractiveRunner(Interpreter &methan0l)
 	init_commands();
 }
 
+std::string InteractiveRunner::cmd_str(std::string_view cmd)
+{
+	return mtl::str(cmd_prefix) + mtl::str(cmd);
+}
+
 void InteractiveRunner::enable_cas_mode(bool value)
 {
 	cas_mode = value;
 	if (!cas_mode)
 		reset_cas();
+}
+
+void InteractiveRunner::toggle_cas_message()
+{
+	out << "CAS mode "
+			<< (cas_mode ? "enabled" : "disabled")
+			<< ". Use " << std::quoted(cmd_str("cas")) << " to toggle it."
+			<< NL;
+	cas_print_end();
 }
 
 Value InteractiveRunner::get_saved_value(size_t idx)
@@ -277,6 +290,11 @@ void InteractiveRunner::start()
 {
 	std::cout << FULL_VERSION_STR << " on " << get_os() << ".\n"
 			<< "Use \"" << cmd_prefix << "help\" to view command list." << std::endl;
+
+	/* Print CAS mode toggle message if started with --cas flag */
+	if (cas_mode)
+		toggle_cas_message();
+
 	std::string line;
 	bool ready = true;
 	do {
