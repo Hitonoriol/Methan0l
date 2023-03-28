@@ -39,6 +39,16 @@ class Adapter
 			return obj.context();
 		}
 
+		inline operator Value()
+		{
+			return obj;
+		}
+
+		inline operator Object&()
+		{
+			return obj;
+		}
+
 		/* Default methods */
 
 		inline Object copy() ADAPTER_METHOD(copy)
