@@ -53,6 +53,11 @@ UInt List::size()
 	return contained.size();
 }
 
+void List::resize(UInt new_size)
+{
+	contained.resize(new_size);
+}
+
 void List::clear()
 {
 	contained.clear();

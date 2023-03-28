@@ -24,6 +24,7 @@ class Collection
 		virtual Value remove_at(UInt) UNIMPLEMENTED
 		virtual Value get(Int) UNIMPLEMENTED
 		virtual UInt size() UNIMPLEMENTED
+		virtual void resize(UInt) UNIMPLEMENTED
 		virtual void clear() UNIMPLEMENTED
 		virtual Boolean is_empty() UNIMPLEMENTED
 		virtual UInt index_of(Value) UNIMPLEMENTED
@@ -44,6 +45,7 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 		Value remove_at(UInt idx) override ADAPTER_METHOD(remove_at, idx)
 		Value get(Int idx) override ADAPTER_METHOD(get, idx)
 		UInt size() override ADAPTER_METHOD(size)
+		void resize(UInt nsize) override ADAPTER_VOID_METHOD(resize, nsize)
 		void clear() override ADAPTER_VOID_METHOD(clear)
 		Boolean is_empty() override ADAPTER_METHOD(is_empty)
 		UInt index_of(Value elem) override ADAPTER_METHOD(index_of, elem)
@@ -57,7 +59,8 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 	BIND_METHOD(remove_at) \
 	BIND_METHOD(get) \
 	BIND_METHOD(size) \
-	BIND_METHOD(clear) \
+	BIND_MUTATOR_METHOD(resize) \
+	BIND_MUTATOR_METHOD(clear) \
 	BIND_METHOD(is_empty) \
 	BIND_METHOD(index_of) \
 	BIND_METHOD(contains) \

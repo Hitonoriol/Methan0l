@@ -35,6 +35,7 @@ class List : public ContainerWrapper<ValList>, public Collection
 		Value remove(Value) override;
 		Value get(Int) override;
 		UInt size() override;
+		void resize(UInt) override;
 		void clear() override;
 		UInt index_of(Value) override;
 		Boolean contains(Value) override;
