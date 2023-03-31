@@ -8,8 +8,16 @@ namespace mtl
 
 class Runner
 {
+	private:
+		Interpreter &methan0l;
+
+		int run();
+		bool load_file(const std::string &path);
+
 	public:
-		static int run_file(Interpreter&, int argc, char **argv, int start_from = 1);
+		Runner(Interpreter &methan0l);
+		int run_file(int argc, char **argv, int start_from = 1);
+		int run_file(const std::string &path, const ValList &args);
 };
 
 } /* namespace mtl */

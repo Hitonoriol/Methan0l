@@ -49,7 +49,7 @@ int cli::run(int argc, char **argv)
 		init_env(methan0l);
 
 		if (argc - arg_start > 0)
-			return_value = Runner::run_file(methan0l, argc, argv, arg_start);
+			return_value = Runner(methan0l).run_file(argc, argv, arg_start);
 		else
 			InteractiveRunner(methan0l).start();
 	}

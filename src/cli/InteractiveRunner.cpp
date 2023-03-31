@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "cli/Methan0l.h"
+#include "cli/Runner.h"
 #include "parser/Methan0lParser.h"
 #include "expression/IdentifierExpr.h"
 #include "structure/Unit.h"
@@ -64,26 +65,27 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 		{ "load <path/to/script.mt0> - load a methan0l program without executing it",
 				[](auto &runner)
 					{
-						auto path = std::move(runner.next_arg());
-						if (runner.load_program(path))
+						auto path = runner.next_arg();
+						if (runner.interpreter().load_program(path))
 							out << "Successfully loaded " << std::quoted(path) << "."
 									<< NL
 									<< "Press <Enter> to run the loaded Unit." << NL;
+						else
+							out << "Failed to load " << std::quoted(path) << "." << NL;
 					}
 		},
-		{ "run <path/to/script.mt0> - load and execute a methan0l program",
+		{ "run <path/to/script.mt0> [arg1 arg2 ...] - load and execute a methan0l program",
 				[](auto &runner)
 					{
 						auto &mt0 = runner.interpreter();
-						auto path = std::move(runner.next_arg());
-						if (runner.load_program(path)) {
-							ValList args;
-							args.push_back(path);
-							while (runner.has_args())
-								args.push_back(std::move(runner.next_arg()));
-							mt0.load_args(std::move(args));
-							mt0.run();
-						}
+						auto path = runner.next_arg();
+
+						ValList args;
+						args.push_back(path);
+						while (runner.has_args())
+							args.push_back(runner.next_arg());
+
+						Runner(mt0).run_file(path, args);
 					}
 		},
 		{ "cas - toggle CAS mode (print out each expression result after evalution); off by default",
@@ -185,16 +187,6 @@ void InteractiveRunner::init_commands()
 		auto space_idx = full_name.find(" ");
 		if (space_idx != std::string_view::npos)
 			commands.emplace(full_name.substr(0, space_idx), action);
-	}
-}
-
-bool InteractiveRunner::load_program(const std::string &path)
-{
-	if (methan0l.load_program(path))
-		return true;
-	else {
-		out << "Failed to load " << std::quoted(path) << " (or the file is empty)." << NL;
-		return false;
 	}
 }
 

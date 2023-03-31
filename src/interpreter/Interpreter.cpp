@@ -841,11 +841,10 @@ void Interpreter::load_args(int argc, char **argv, int start_from)
 	load_args(std::move(list));
 }
 
-void Interpreter::load_args(ValList &&args)
+void Interpreter::load_args(const ValList &args)
 {
 	set_env_globals(args[0]);
-	auto list = make<List>();
-	list.move_in<List>(args);
+	auto list = make<List>(args);
 	main.local().set(EnvVars::LAUNCH_ARGS, list);
 }
 

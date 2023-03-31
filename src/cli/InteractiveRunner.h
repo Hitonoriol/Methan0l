@@ -49,8 +49,6 @@ class InteractiveRunner
 		bool process_commands(const std::string &cmd);
 		bool load_line(std::string &line);
 
-		bool load_program(const std::string&);
-
 		void parse();
 		void run();
 
