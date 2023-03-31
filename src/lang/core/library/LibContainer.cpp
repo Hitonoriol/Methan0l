@@ -12,6 +12,7 @@ void LibContainer::load()
 {
 	REGISTER_METHAN0L_CLASS(*context, Iterable)
 	REGISTER_METHAN0L_CLASS(*context, Iterator)
+	REGISTER_METHAN0L_CLASS(*context, Range)
 	REGISTER_CLASS_BINDING(*context, Collection)
 	REGISTER_CLASS_BINDING(*context, AbstractMap)
 	REGISTER_CLASS_BINDING(*context, Pair)

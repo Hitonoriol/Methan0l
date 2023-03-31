@@ -150,6 +150,7 @@ NATIVE_CLASS(IntRange, native::Range<Int>)
 NATIVE_CLASS(IntRangeIterator, native::RangeIterator<Int>)
 NATIVE_CLASS(FloatRange, native::Range<Float>)
 NATIVE_CLASS(FloatRangeIterator, native::RangeIterator<Float>)
+METHAN0L_CLASS(Range)
 
 class RangeAdapter : IterableAdapter
 {
@@ -162,12 +163,16 @@ class RangeAdapter : IterableAdapter
 };
 
 #define RANGE_BINDINGS \
-		IMPLEMENTS(Iterable) \
-		BIND_CONSTRUCTOR(Float, Float, Float) \
-		CONSTRUCTOR_DARGS(1) /* Default step = 1 */ \
-		BIND_NATIVE_ITERATOR() \
-		BIND_METHOD(to_string) \
-		BIND_METHOD(hash_code) \
+	ABSTRACT_METHOD(get_start) \
+	ABSTRACT_METHOD(get_end) \
+	ABSTRACT_METHOD(get_step)
+
+#define IMPLEMENTS_RANGE \
+	IMPLEMENTS(Range) \
+	RANGE_BINDINGS \
+	BIND_NATIVE_ITERATOR() \
+	BIND_CONSTRUCTOR(Float, Float, Float) \
+	CONSTRUCTOR_DARGS(1) /* Default step = 1 */
 
 } /* namespace mtl */
 

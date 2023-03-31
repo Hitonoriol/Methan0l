@@ -3,8 +3,17 @@
 namespace mtl
 {
 
-NATIVE_CLASS_BINDING(IntRange, {
+METHAN0L_CLASS_BODY(Range, {
+	INTERFACE
+	IMPLEMENTS(Iterable)
 	RANGE_BINDINGS
+})
+
+NATIVE_CLASS_BINDING(IntRange, {
+	IMPLEMENTS_RANGE
+
+	BIND_METHOD(to_string)
+	BIND_METHOD(hash_code)
 })
 
 NATIVE_CLASS_BINDING(IntRangeIterator, {
@@ -13,7 +22,10 @@ NATIVE_CLASS_BINDING(IntRangeIterator, {
 })
 
 NATIVE_CLASS_BINDING(FloatRange, {
-	RANGE_BINDINGS
+	IMPLEMENTS_RANGE
+
+	BIND_METHOD(to_string)
+	BIND_METHOD(hash_code)
 })
 
 NATIVE_CLASS_BINDING(FloatRangeIterator, {
