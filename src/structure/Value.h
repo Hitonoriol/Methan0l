@@ -522,6 +522,12 @@ class Value
 			return as<T>();
 		}
 
+		template<typename T>
+		inline operator const T& () const
+		{
+			return cget<TYPE(T)>();
+		}
+
 		template <typename T>
 		inline operator T& ()
 		{
