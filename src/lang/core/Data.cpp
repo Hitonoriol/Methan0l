@@ -119,7 +119,7 @@ bool rng_neg_cond(Int i, Int end)
 	return i > end;
 }
 
-Value slice(Object &iterable_obj, Object &range_obj)
+Value slice(Object &iterable_obj, Object range_obj)
 {
 	CollectionAdapter collection(iterable_obj);
 	CollectionAdapter sliced(iterable_obj.get_class()->create());

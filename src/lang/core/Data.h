@@ -40,7 +40,7 @@ Value for_each(Object &iterable_obj, Value action);
 Value map(Object &iterable_obj, Value mapper);
 Value filter(Object &iterable_obj, Value predicate);
 Value accumulate(Object &iterable_obj, Value accumulator);
-Value slice(Object &iterable_obj, Object &range);
+Value slice(Object &iterable_obj, Object range);
 
 Value collect(Object &iterable_obj, Object collection_obj);
 
