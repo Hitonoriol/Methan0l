@@ -146,6 +146,9 @@ class Parser
 		void clear();
 
 		Lexer& get_lexer();
+
+		Interpreter& get_context();
+
 		void dump_queue(size_t len = 15);
 };
 

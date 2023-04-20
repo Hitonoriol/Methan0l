@@ -399,4 +399,9 @@ void Parser::dump_queue(size_t len)
 	out << tab(ss.str());
 }
 
+Interpreter& Parser::get_context()
+{
+	return *context;
+}
+
 } /* namespace mtl */
