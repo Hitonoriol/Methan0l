@@ -43,7 +43,6 @@ void Lexer::save(char chr)
 void Lexer::deduce_reserved()
 {
 	Word reserved = Token::as_reserved(tokstr);
-	int wrd_id = static_cast<int>(reserved);
 	if (reserved == Word::NONE)
 		return;
 
@@ -158,7 +157,7 @@ bool Lexer::try_save_multichar_op(char chr, char next)
 		op += *it;
 
 	/* Test from longest to shortest possible punctuator combination */
-	TokenType multichar_type;
+	TokenType multichar_type = TokenType::NONE;
 	while(op.length() >= 2) {
 		if ((multichar_type = Token::get_multichar_op_type(op)) != TokenType::NONE)
 			break;
