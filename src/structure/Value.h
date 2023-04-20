@@ -118,9 +118,6 @@ Int, double, bool, char,
 
 /* Heap-stored types: */
 
-/* Strings (To be removed) */
-VString,
-
 /* Callable types */
 VUnit, VFunction, VNativeFunc,
 
@@ -151,7 +148,8 @@ class Value
 		template<typename T>
 		inline void set(const T &val, Allocator<T> alloc = {})
 		{
-			/* String types */
+			/* String-like types are converted to std::string.
+			 * Beware: std::string is not a built-in methan0l type. */
 			if constexpr (std::is_same<TYPE(T), const char*>::value
 					|| std::is_same<TYPE(T), std::string_view>::value)
 				set(std::string(val));
@@ -164,16 +162,17 @@ class Value
 			else if constexpr (allowed_type<T>() && is_shared_ptr<T>::value)
 				value = val;
 
-			/* RHS type is heap-storable but is not yet in the heap */
+			/* RHS type is heap-storable but is not passed as a shared pointer */
 			else if constexpr (is_heap_storable<T>()) {
-				/* Don't reallocate if this value is already of heap storable type T */
+				/* Use copy assignment instead of reallocation if this value
+				 * is already a shared pointer of T */
 				if (this->is<std::shared_ptr<T>>())
 					get<T>() = val;
 				else
 					value = std::allocate_shared<T>(alloc, val);
 			}
 			else {
-				/* Cast numeric types */
+				/* Cast numeric types to built-in ones */
 				if constexpr (!std::is_same<T, char>::value
 						&& !std::is_same<T, bool>::value
 						&& std::is_integral<T>())
@@ -181,11 +180,11 @@ class Value
 				else if constexpr (std::is_floating_point<T>::value)
 					value = (double) val;
 
-				/* Fallback type (for interoperability with external modules) */
+				/* Fallback type (for interoperability with external modules / native objects) */
 				else if constexpr (!allowed_type<T>())
 					value = std::any(val);
 
-				/* Default copy assignment */
+				/* If T is a valid alternative, just copy assign it */
 				else
 					value = val;
 			}
@@ -212,7 +211,7 @@ class Value
 		inline static Value make(Allocator<T> alloc = {})
 		{
 			IF (!allowed_or_heap<T>())
-				throw std::runtime_error("Cannot Value::make() a value of a non-standard type");
+				throw std::runtime_error("Cannot Value::make() a value of a non-built-in type");
 			ELIF (is_heap_storable<T>())
 				return std::allocate_shared<T>(alloc);
 			else
@@ -240,7 +239,7 @@ class Value
 		template<typename T>
 		static constexpr bool is_convertible()
 		{
-			return std::is_arithmetic<TYPE(T)>::value || string_type<T>();
+			return std::is_arithmetic<TYPE(T)>::value;
 		}
 
 		Value& get();
@@ -406,6 +405,18 @@ class Value
 			return get<R>();
 		}
 
+		template<typename T>
+		inline const auto cget() const -> std::enable_if_t<!is_class_binding<T>::value, T&>
+		{
+			return unconst(*this).get<T>();
+		}
+
+		template<typename T, typename R = typename T::bound_class>
+		inline R& cget() const
+		{
+			return cget<R>();
+		}
+
 		/* Get this Value's contents as T& and pass it to `task` */
 		template<typename T, typename F>
 		inline Value& as(F &&task)
@@ -429,12 +440,6 @@ class Value
 			return as<T>([&](auto &contents){
 				contents = std::move(value);
 			});
-		}
-
-		template<typename T>
-		inline const T& cget() const
-		{
-			return unconst(*this).get<T>();
 		}
 
 		std::string to_string(Interpreter *context = nullptr);

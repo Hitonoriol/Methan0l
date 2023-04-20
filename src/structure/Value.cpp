@@ -27,12 +27,10 @@ const Value Value::NO_VALUE(NoValue { });
 const std::hash<Value> Value::hasher;
 
 Value::Value() : Value(NIL)
-{
-}
+{}
 
 Value::Value(const Value &val) : value(val.value)
-{
-}
+{}
 
 Value::~Value()
 {
@@ -141,11 +139,9 @@ TypeID Value::type() const
 		return Type::EXPRESSION;
 
 	/* Heap-stored types */
-	else if (is<VString>())
-		return Type::STRING;
 
 	else if (is<Object>())
-		return Type::OBJECT;
+		return unconst(*this).as_any().type();
 
 	else if (is<VUnit>())
 		return Type::UNIT;
@@ -171,15 +167,14 @@ Int Value::fallback_type_id() const
 
 Int Value::type_id() const
 {
-	auto t = type();
-	if (t == Type::OBJECT)
-		return unconst(*this).get<Object>().type_id();
-
-	return t.type_id();
+	return type().type_id();
 }
 
 std::string Value::to_string(Interpreter *context)
 {
+	if (is<Object>())
+		return get<Object>().to_string();
+
 	auto type = this->type();
 	if (type == Type::NIL)
 		return std::string(Token::reserved(Word::NIL));
@@ -187,8 +182,8 @@ std::string Value::to_string(Interpreter *context)
 	else if (type == Type::REFERENCE)
 		return get().to_string(context);
 
-	else if (type == Type::STRING)
-		return get<std::string>();
+	else if (type.is<String>())
+		return get<String>();
 
 	else if (type == Type::CHAR)
 		return mtl::str(get<char>());
@@ -210,22 +205,6 @@ std::string Value::to_string(Interpreter *context)
 		if (is<NativeFunc>())
 			return "Native function 0x" + to_base(reinterpret_cast<UInt>(identity()), 16);
 		return get<Function>().to_string();
-	}
-
-	else if (type == Type::OBJECT) {
-		Object &obj = get<Object>();
-		std::stringstream ss;
-		ss << obj.to_string();
-
-		if constexpr (DEBUG) {
-			if (context == nullptr) {
-				ss << "\n\t\t" << "Object data " << obj.get_data() << std::endl;
-				for (auto &entry : *obj.get_data().map_ptr())
-					ss << "\t\t\t" << entry.first << " = " << entry.second << std::endl;
-			}
-		}
-
-		return ss.str();
 	}
 
 	else if (type == Type::TOKEN)
@@ -250,7 +229,7 @@ Int Value::to_dec() const
 		return convert_numeric<Int>();
 
 	else if (is<std::string>())
-		return std::stol(cget<std::string>());
+		return std::stol(cget<String>());
 
 	else
 		throw InvalidTypeException(*this, Type::INTEGER);
@@ -262,7 +241,7 @@ double Value::to_double() const
 		return convert_numeric<double>();
 
 	else if (is<std::string>())
-		return std::stod(cget<std::string>());
+		return std::stod(cget<String>());
 
 	else
 		throw InvalidTypeException(*this, Type::DOUBLE);
@@ -277,8 +256,8 @@ bool Value::to_bool() const
 		TYPE_CASE(Type::INTEGER)
 			return cget<Int>() == 1;
 
-		TYPE_CASE(Type::STRING)
-			return cget<std::string>() == Token::reserved(Word::TRUE);
+		TYPE_CASE_T(String)
+			return cget<String>() == Token::reserved(Word::TRUE);
 
 		TYPE_CASE(Type::DOUBLE)
 			return cget<double>() == 1.0;
@@ -294,8 +273,8 @@ char Value::to_char() const
 		TYPE_CASE(Type::CHAR)
 			return cget<char>();
 
-		TYPE_CASE(Type::STRING)
-			return cget<std::string>().front();
+		TYPE_CASE_T(String)
+			return cget<String>()->front();
 
 		TYPE_CASE(Type::INTEGER)
 			return (char) cget<Int>();
@@ -331,7 +310,7 @@ Value Value::convert(TypeID new_val_type)
 		TYPE_CASE(Type::DOUBLE)
 			return Value(as<double>());
 
-		TYPE_CASE(Type::STRING)
+		TYPE_CASE_T(String)
 			return Value(to_string());
 	)
 
