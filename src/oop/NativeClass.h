@@ -47,6 +47,7 @@ class NativeClass
 	{ \
 		public: \
 			using bound_class = JOIN(__VA_ARGS__); \
+			using object_type = std::shared_ptr<bound_class>; \
 			using mtl::NativeClass<JOIN(__VA_ARGS__)>::NativeClass; \
 			void initialize() override; \
 
