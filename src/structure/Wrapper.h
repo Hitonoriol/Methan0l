@@ -30,7 +30,17 @@ class Wrapper
 			return &contained;
 		}
 
+		inline const T* operator->() const
+		{
+			return &contained;
+		}
+
 		inline T& operator*()
+		{
+			return contained;
+		}
+
+		inline const T& operator*() const
 		{
 			return contained;
 		}
