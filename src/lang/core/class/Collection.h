@@ -71,7 +71,10 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 	BIND_METHOD_AS(IndexOperator::Clear, clear) \
 	BIND_METHOD_AS(IndexOperator::Insert, add) \
 	METHOD_ALIAS(for_each, IndexOperator::Foreach) \
-	METHOD_ALIAS(slice, IndexOperator::Slice)
+	METHOD_ALIAS(slice, IndexOperator::Slice) \
+	/* Compound assignment operator overloads: */ \
+	BIND_METHOD_AS("+=", add) \
+	BIND_METHOD_AS("-=", remove)
 
 #define IMPLEMENTS_COLLECTION \
 	IMPLEMENTS(Collection) \
