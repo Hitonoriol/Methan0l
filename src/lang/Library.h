@@ -38,6 +38,8 @@ class Library
 		Interpreter *context = 0;
 
 		std::string str(ExprList args, int idx = 0);
+		Value str(std::string_view);
+
 		double dbl(ExprList args, int idx = 0);
 		Int num(ExprList args, int idx = 0);
 		UInt unum(ExprList args, int idx = 0);

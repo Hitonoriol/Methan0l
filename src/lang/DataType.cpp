@@ -2,6 +2,7 @@
 
 #include "oop/Object.h"
 #include "structure/ValueRef.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -15,7 +16,6 @@ namespace mtl
 DATA_TYPE(NIL, Nil)
 DATA_TYPE(INTEGER, Int)
 DATA_TYPE(DOUBLE, Float)
-HEAP_DATA_TYPE(STRING, String)					// To be removed
 DATA_TYPE(BOOLEAN, Boolean)
 HEAP_DATA_TYPE(UNIT, Unit)
 HEAP_DATA_TYPE(FUNCTION, Function)
@@ -26,6 +26,9 @@ HEAP_DATA_TYPE(TOKEN, Token)					// To be removed
 DATA_TYPE_DEF(EXPRESSION, Expression, ExprPtr)
 DATA_TYPE(FALLBACK, std::any)
 
+/* Non-built-in types */
+DATA_TYPE(STRING, std::shared_ptr<native::String>)
+
 #define TYPE_INDEX(type) {type.type_id(), &type}
 Type Type::instance;
 Type::Type()
@@ -33,7 +36,6 @@ Type::Type()
 		TYPE_INDEX(NIL),
 		TYPE_INDEX(INTEGER),
 		TYPE_INDEX(DOUBLE),
-		TYPE_INDEX(STRING),
 		TYPE_INDEX(BOOLEAN),
 		TYPE_INDEX(UNIT),
 		TYPE_INDEX(FUNCTION),

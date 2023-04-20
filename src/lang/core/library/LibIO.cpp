@@ -8,6 +8,7 @@
 #include "interpreter/Interpreter.h"
 #include "oop/Object.h"
 #include "structure/Value.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -66,7 +67,7 @@ void LibIO::load()
 	/* String input function: foo = read_line$() */
 	function("read_line", [&] {
 		auto line = context->make<std::string>();
-		std::getline(in, line.get<std::string>());
+		std::getline(in, *line.get<String>());
 		return line;
 	});
 }

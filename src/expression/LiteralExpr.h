@@ -17,8 +17,7 @@ class LiteralExpr: public Expression
 
 	public:
 		LiteralExpr();
-		LiteralExpr(const Value &val);
-		LiteralExpr(TypeID val_type, const Token&);
+		LiteralExpr(const Value&);
 
 		template<typename T>
 		LiteralExpr(T value) : value(value) {}

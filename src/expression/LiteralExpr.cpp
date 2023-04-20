@@ -1,45 +1,21 @@
 #include "LiteralExpr.h"
 
-#include <interpreter/Interpreter.h>
-#include <lexer/Token.h>
 #include <memory>
 #include <string>
 #include <string_view>
 
+#include <interpreter/Interpreter.h>
+#include <lexer/Token.h>
+#include <CoreLibrary.h>
+
 namespace mtl
 {
 
-LiteralExpr::LiteralExpr(TypeID val_type, const Token &token)
-{
-	std::string &tokstr = unconst(token.get_value());
-	auto type = token.get_type();
-
-	if (val_type == Type::INTEGER)
-		value = std::stol(tokstr);
-
-	else if (val_type == Type::DOUBLE)
-		value = std::stod(tokstr);
-
-	else if (type == TokenType::BOOLEAN)
-		value = tokstr == Token::reserved(Word::TRUE);
-
-	else if (type == TokenType::STRING)
-		value = strip_quotes(tokstr);
-
-	else if (val_type == Type::CHAR)
-		value = strip_quotes(tokstr)[0];
-
-	else if (val_type == Type::TOKEN)
-		value = token;
-}
-
 LiteralExpr::LiteralExpr(const Value &val) : value(val)
-{
-}
+{}
 
 LiteralExpr::LiteralExpr() : value(NoValue())
-{
-}
+{}
 
 bool LiteralExpr::is_empty()
 {
@@ -48,7 +24,7 @@ bool LiteralExpr::is_empty()
 
 Value LiteralExpr::evaluate(Interpreter &context)
 {
-	return Value(value);
+	return value;
 }
 
 Value LiteralExpr::raw_value()

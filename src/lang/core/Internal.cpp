@@ -3,6 +3,7 @@
 #include <interpreter/Interpreter.h>
 #include <expression/parser/MapParser.h>
 #include <oop/Class.h>
+#include <CoreLibrary.h>
 
 namespace mtl::core
 {
@@ -23,14 +24,14 @@ TypeID resolve_type(Interpreter &context, Expression &type_expr)
 	auto type_id_val = type_expr.evaluate(context);
 	TypeID type_id;
 	auto &types = context.get_type_mgr();
+
+	if (type_id_val.object())
+		return type_id_val.get<Object>().get_class()->get_native_id();
+
 	TYPE_SWITCH(type_id_val.type(),
 		/* Type name passed as a string */
 		TYPE_CASE_T(String) {
 			type_id = types.get_type(type_id_val.get<String>());
-		}
-
-		TYPE_CASE(Type::OBJECT) {
-			type_id = type_id_val.get<Object>().get_class()->get_native_id();
 		}
 
 		/* If type id evaluates to `nil`, perhaps an unquoted type name has been passed */

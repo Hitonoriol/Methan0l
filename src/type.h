@@ -58,7 +58,6 @@ using Float = double;
 using Boolean = bool;
 using Character = char;
 using Reference = ValueRef;
-using String = std::string;
 using Fallback = std::any;
 
 template<class T>
@@ -67,7 +66,7 @@ using Allocator = std::pmr::polymorphic_allocator<T>;
 template<typename K, typename V>
 using HashMap = std::pmr::unordered_map<K, V>;
 
-using StringStream = std::basic_stringstream<char, std::char_traits<char>, String::allocator_type>;
+using StringStream = std::basic_stringstream<char, std::char_traits<char>, std::string::allocator_type>;
 
 using sstream = std::stringstream;
 using charr = const char[];

@@ -14,6 +14,7 @@
 #include "interpreter/TypeManager.h"
 #include "interpreter/Interpreter.h"
 #include "oop/Class.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -128,7 +129,7 @@ Int Object::id() const
 std::string Object::to_string()
 {
 	Args noargs;
-	return str(invoke_method(str(Methods::ToString), noargs));
+	return invoke_method(str(Methods::ToString), noargs).get<String>();
 }
 
 std::string Object::to_string_default()

@@ -147,12 +147,12 @@ Unit& Interpreter::get_main()
 
 const std::string& Interpreter::get_scriptpath()
 {
-	return global()->get(EnvVars::LAUNCH_ARGS, true).get<List>()[0].get<std::string>();
+	return global()->get(EnvVars::LAUNCH_ARGS, true).get<List>()[0].get<String>();
 }
 
 const std::string& Interpreter::get_scriptdir()
 {
-	return global()->get(EnvVars::SCRDIR, true).get<std::string>();
+	return global()->get(EnvVars::SCRDIR, true).get<String>();
 }
 
 Value Interpreter::execute(Unit &unit, const bool use_own_scope)
@@ -424,7 +424,7 @@ void Interpreter::del(ExprPtr idfr)
 		auto type = scope.type();
 		if (type == Type::UNIT)
 			scope.get<Unit>().local().del(rhs);
-		else if (type == Type::OBJECT)
+		else if (scope.object())
 			scope.get<Object>().get_data().del(rhs);
 	}
 }
@@ -704,7 +704,7 @@ void Interpreter::dump_stack()
 		for (auto val = table.begin(); val != table.end(); ++val) {
 			Value &v = val->second;
 			auto type = v.type();
-			const char quote = (type == Type::STRING || type == Type::CHAR ? '"' : '\0');
+			const char quote = (type.is<String>() || type == Type::CHAR ? '"' : '\0');
 			ss << "(" << v.use_count() << ") "
 					<< "[" << type.type_name();
 			if (type == Type::REFERENCE)

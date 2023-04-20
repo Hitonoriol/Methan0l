@@ -42,12 +42,11 @@ Value IndexExpr::evaluate(Interpreter &context)
 		}
 		/* Access operator: list[idx] */
 		else {
+			if (val.object())
+				return val.invoke_method(IndexOperator::Get, idx->evaluate(context));
+
 			/* Map, Set, List, String */
 			TYPE_SWITCH(val.type(),
-				TYPE_CASE(Type::OBJECT) {
-					return val.invoke_method(IndexOperator::Get, idx->evaluate(context));
-				}
-
 				TYPE_CASE(Type::UNIT) {
 					return indexed_element(context, val.get<Unit>().local());
 				}

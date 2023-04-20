@@ -16,16 +16,19 @@ class Type
 			NIL,
 			INTEGER,
 			DOUBLE,
-			STRING,
 			BOOLEAN,
+			CHAR,
+			REFERENCE,
+			OBJECT,
+			FALLBACK,
+
 			UNIT,
 			FUNCTION,
-			CHAR,
-			OBJECT,
-			REFERENCE,
 			TOKEN,
 			EXPRESSION,
-			FALLBACK;
+
+			/* Non-built-in types */
+			STRING;
 
 	private:
 		Type();
