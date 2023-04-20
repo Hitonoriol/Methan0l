@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <utility>
 #include <iterator>
+#include <algorithm>
+#include <tuple>
 
 namespace mtl
 {
@@ -29,6 +31,20 @@ constexpr auto type_name()
 	name.remove_suffix(suffix.size());
 	return name;
 }
+
+template<class X, class ... T>
+class IndexOf
+{
+	private:
+		template<std::size_t ... idx>
+		static constexpr ssize_t find_idx(std::index_sequence<idx...>)
+		{
+			return std::max({static_cast<ssize_t>(std::is_same_v<X, T> ? idx : -1)...});
+		}
+
+	public:
+		static constexpr ssize_t value = find_idx(std::index_sequence_for<T...>{});
+};
 
 /* is_equality_comparable<T, U>*/
 template<typename T, typename U>
