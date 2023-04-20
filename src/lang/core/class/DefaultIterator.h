@@ -41,6 +41,7 @@ class DefaultIterator : public Iterator
 			static_assert(
 					std::is_same_v<value_type, Value>
 				 || std::is_same_v<value_type, std::pair<const Value, Value>>
+				 || Value::allowed_type<value_type>()
 			);
 		}
 
