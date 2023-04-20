@@ -57,6 +57,40 @@ STRING_ENUM(EnvVars,
 	SCRDIR
 )
 
+template<typename T>
+class Proxy
+{
+	private:
+		T &obj;
+
+	public:
+		using type = T;
+
+		Proxy(T &obj) : obj(obj) {}
+
+		inline T* operator->()
+		{
+			return &obj;
+		}
+
+		inline T& operator*()
+		{
+			return obj;
+		}
+};
+
+/* Tag type for capturing the current context from arbitrary functions */
+struct Context : public Proxy<Interpreter>
+{
+	using Proxy<type>::Proxy;
+};
+
+/* Tag type for capturing all callargs passed to a function */
+struct CallArgs : public Proxy<ExprList>
+{
+	using Proxy<type>::Proxy;
+};
+
 class Interpreter
 {
 	private:
@@ -255,8 +289,7 @@ class Interpreter
 
 				/* Get a non-const `*` as const `*` */
 				if constexpr (std::is_pointer<T>::value) {
-					using U = typename std::add_pointer<typename std::remove_const<typename std::remove_pointer<T>::type>::type>::type;
-					IFDBG(std::cout << "U = " << type_name<U>() << std::endl)
+					using U = std::add_pointer_t<std::remove_const_t<std::remove_pointer_t<T>>>;
 					if (t == typeid(U))
 						return mtl::any_cast<U>(any);
 				}
@@ -282,12 +315,12 @@ class Interpreter
 
 			/* Otherwise -- evaluate and convert to T (return by value) */
 			else {
-				Value val = eval(expr);
+				auto val = eval(expr);
 				/* If T is not in variant's alternative list but is convertible to one of them */
 				if constexpr (!is_allowed && is_convertible) {
 					return val.as<V>();
 				} else
-					return val.as<T>();
+					return val.get<T>();
 			}
 		}
 
@@ -295,25 +328,53 @@ class Interpreter
 				unsigned N, unsigned ...I>
 		struct call_helper
 		{
-				static auto engage(Interpreter &context, Functor &&f, const Container &c)
-				{
-					return call_helper<sizeof...(I) + 1 == N, Functor, Container,
-							N, I..., sizeof...(I)>::engage(context, f, c);
-				}
+			static auto call(Interpreter &context, Functor &&f, const Container &c)
+			{
+				return call_helper<sizeof...(I) + 1 == N, Functor, Container,
+						N, I..., sizeof...(I)>::call(context, f, c);
+			}
 		};
 
 		template<typename Functor, typename Container,
 				unsigned N, unsigned ...I>
 		struct call_helper<true, Functor, Container, N, I...>
 		{
-				static auto engage(Interpreter &context, Functor &&f, const Container &c)
-				{
-					if (c.size() < N)
-						throw std::runtime_error("Too few arguments: "
-								+ str(c.size()) + " received, " + str(N) + " expected");
+			template<unsigned i>
+			using ArgType = typename function_traits<Functor>::template argument<i>::type;
 
-					return std::invoke(f, context.eval<typename function_traits<Functor>::template argument<I>::type>(*c.at(I))...);
+			template<typename T, typename ...TArgs>
+			inline static void inject_callarg(Args args, TArgs&&... proxy_args)
+			{
+				constexpr auto idx = IndexOf<T, ArgType<I>...>::value;
+				IF (idx != -1) {
+					/* unconst() is safe here because callarg list is never constructed as const. */
+					unconst(args).insert(
+						args.begin() + idx,
+						Value::wrapped(T(std::forward<TArgs>(proxy_args)...))
+					);
 				}
+			}
+
+			static auto call(Interpreter &context, Functor &&f, const Container &c)
+			{
+				IF (N > 0) {
+					/* Inject all callargs as expression list into the argument list if bound function's signature
+					 * contains a mtl::CallArgs argument. */
+					inject_callarg<CallArgs>(c, unconst(c));
+
+					/* Inject the calling context into the argument list if bound function's signature contains a
+					 * mtl::Context argument. */
+					inject_callarg<Context>(c, context);
+				}
+
+				if (c.size() < N)
+					throw std::runtime_error("Too few arguments: "
+							+ str(c.size()) + " received, " + str(N) + " expected: "
+							+ str(type_name<ArgType<I>...>()));
+
+				return std::invoke(f,
+						context.eval<ArgType<I>>(*c.at(I))...);
+			}
 		};
 
 		template<typename F, typename Container>
@@ -323,10 +384,10 @@ class Interpreter
 			constexpr unsigned argc = function_traits<decltype(f)>::arity;
 			using caller = call_helper<argc == 0, decltype(f), Container, argc>;
 			if constexpr (std::is_void<typename function_traits<F>::return_type>::value) {
-				caller::engage(*this, f, c);
+				caller::call(*this, f, c);
 				return Value::NO_VALUE;
 			} else
-				return caller::engage(*this, f, c);
+				return caller::call(*this, f, c);
 		}
 
 		void handle_exception(ExHandlerEntry);
