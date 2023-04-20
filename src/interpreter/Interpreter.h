@@ -343,7 +343,7 @@ class Interpreter
 			using ArgType = typename function_traits<Functor>::template argument<i>::type;
 
 			template<typename T, typename ...TArgs>
-			inline static void inject_callarg(Args args, TArgs&&... proxy_args)
+			inline static void inject_callarg(Args &args, TArgs&&... proxy_args)
 			{
 				constexpr auto idx = IndexOf<T, ArgType<I>...>::value;
 				IF (idx != -1) {
