@@ -3,6 +3,7 @@
 #include <iterator>
 #include <lang/core/class/List.h>
 #include <util/util.h>
+#include <lang/core/Data.h>
 
 namespace mtl
 {
@@ -18,6 +19,7 @@ NATIVE_CLASS_BINDING(Set, {
 	BIND_METHOD(diff)
 	BIND_METHOD(symdiff)
 
+	EQUALITY_COMPARABLE
 	BIND_METHOD(to_string)
 	BIND_METHOD(hash_code)
 })
@@ -28,9 +30,9 @@ namespace native
 Set::Set(const List &list)
 	: ContainerWrapper<wrapped_type>(ValSet(list.begin(), list.end())) {}
 
-std::string Set::to_string()
+Value Set::to_string(Context context)
 {
-	return stringify_container(nullptr, contained);
+	return core::stringify_container(*context, contained);
 }
 
 Value Set::remove(Value value)

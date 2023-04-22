@@ -42,7 +42,8 @@ class List : public ContainerWrapper<ValList>, public Collection
 		Value append() override;
 		Boolean is_empty() override;
 
-		std::string to_string();
+		WRAPPER_EQUALS_COMPARABLE(List)
+		Value to_string(Context);
 		Int hash_code();
 };
 

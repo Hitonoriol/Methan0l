@@ -32,6 +32,11 @@ Class::Class(Interpreter &context, const std::string &name) :
 		return Value::NO_VALUE;
 	});
 
+	/* Default equals comparison: compare object memory addresses */
+	register_method(Methods::Equals, [&](OBJ, Object &rhs) {
+		return this_obj.id() == rhs.id();
+	});
+
 	/* Default string conversion */
 	register_method(Methods::ToString, [&](Object &obj) {
 		return obj.to_string_default();

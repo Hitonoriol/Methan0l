@@ -17,6 +17,13 @@ class Interpreter;
 class LiteralExpr;
 class Class;
 
+namespace native
+{
+
+class String;
+
+}
+
 class Object
 {
 	private:
@@ -54,7 +61,7 @@ class Object
 		class_id type_id() const;
 		Int id() const;
 
-		std::string to_string();
+		Shared<native::String> to_string();
 		std::string to_string_default();
 
 		friend bool operator ==(const Object &lhs, const Object &rhs);

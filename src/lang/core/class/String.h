@@ -47,6 +47,7 @@ class String : public ContainerWrapper<std::string>, public Collection
 		Boolean is_empty() override;
 		Boolean add(Value) override;
 
+		WRAPPER_EQUALS_COMPARABLE(String)
 		Int hash_code();
 
 		inline operator std::string_view()

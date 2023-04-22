@@ -17,6 +17,7 @@ struct Methods
 {
 	static constexpr std::string_view
 		Constructor = "construct",
+		Equals = "equals",
 		ToString = "to_string",
 		Copy = "copy",
 		Hashcode = "hash_code";

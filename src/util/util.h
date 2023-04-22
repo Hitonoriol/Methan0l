@@ -15,21 +15,4 @@
 #include "meta/type_traits.h"
 #include "meta/variant_traits.h"
 
-namespace mtl
-{
-
-struct Value;
-
-template<typename T>
-inline std::string stringify_container(Interpreter *context, const T &ctr)
-{
-	auto it = std::begin(ctr), end = std::end(ctr);
-	return stringify([&]() {
-		if (it == end) return empty_string;
-		return unconst(*(it++)).to_string(context);
-	});
-}
-
-}
-
 #endif /* UTIL_H_ */

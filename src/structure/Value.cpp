@@ -173,54 +173,63 @@ Int Value::type_id() const
 std::string Value::to_string(Interpreter *context)
 {
 	if (is<Object>())
-		return get<Object>().to_string();
+		return *get<Object>().to_string();
 
-	auto type = this->type();
-	if (type == Type::NIL)
-		return std::string(Token::reserved(Word::NIL));
+	/* String conversion for built-in types */
+	TYPE_SWITCH(type(),
+		TYPE_CASE(Type::NIL) {
+			return std::string(Token::reserved(Word::NIL));
+		}
 
-	else if (type == Type::REFERENCE)
-		return get().to_string(context);
+		TYPE_CASE(Type::REFERENCE) {
+			return get().to_string(context);
+		}
 
-	else if (type.is<String>())
-		return get<String>();
+		TYPE_CASE(Type::CHAR) {
+			return mtl::str(get<char>());
+		}
 
-	else if (type == Type::CHAR)
-		return mtl::str(get<char>());
+		TYPE_CASE(Type::INTEGER) {
+			return std::to_string(get<Int>());
+		}
 
-	else if (type == Type::INTEGER)
-		return std::to_string(get<Int>());
+		TYPE_CASE(Type::DOUBLE) {
+			return std::to_string(get<double>());
+		}
 
-	else if (type == Type::DOUBLE)
-		return std::to_string(get<double>());
+		TYPE_CASE(Type::BOOLEAN) {
+			return std::string(
+				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE)
+			);
+		}
 
-	else if (type == Type::BOOLEAN)
-		return std::string(
-				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE));
+		TYPE_CASE(Type::UNIT) {
+			return get<Unit>().to_string();
+		}
 
-	else if (type == Type::UNIT)
-		return get<Unit>().to_string();
+		TYPE_CASE(Type::FUNCTION) {
+			if (is<NativeFunc>())
+				return "Native function 0x" + to_base(reinterpret_cast<UInt>(identity()), 16);
+			return get<Function>().to_string();
+		}
 
-	else if (type == Type::FUNCTION) {
-		if (is<NativeFunc>())
-			return "Native function 0x" + to_base(reinterpret_cast<UInt>(identity()), 16);
-		return get<Function>().to_string();
-	}
+		TYPE_CASE(Type::TOKEN) {
+			return get<Token>().get_value();
+		}
 
-	else if (type == Type::TOKEN)
-		return get<Token>().get_value();
+		TYPE_CASE(Type::EXPRESSION) {
+			auto &expr = *get<ExprPtr>();
+			return (context == nullptr ?
+					expr.info() : expr.evaluate(*context).to_string(context)
+			);
+		}
 
-	else if (type == Type::EXPRESSION) {
-		auto &expr = *get<ExprPtr>();
-		return (context == nullptr ? expr.info() : expr.evaluate(*context).to_string(context));
-	}
-
-	else {
-		sstream ss;
-		ss << "{" << type_name() << " @ 0x" << to_base(reinterpret_cast<UInt>(identity()), 16) << "}";
-		return ss.str();
-	}
-
+		TYPE_DEFAULT {
+			sstream ss;
+			ss << "{" << type_name() << " @ 0x" << to_base(reinterpret_cast<UInt>(identity()), 16) << "}";
+			return ss.str();
+		}
+	)
 }
 
 Int Value::to_dec() const
@@ -257,7 +266,7 @@ bool Value::to_bool() const
 			return cget<Int>() == 1;
 
 		TYPE_CASE_T(String)
-			return cget<String>() == Token::reserved(Word::TRUE);
+			return *cget<String>() == Token::reserved(Word::TRUE);
 
 		TYPE_CASE(Type::DOUBLE)
 			return cget<double>() == 1.0;

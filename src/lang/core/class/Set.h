@@ -55,7 +55,8 @@ class Set : public ContainerWrapper<ValSet>, public Collection
 		Value diff(Value &b);
 		Value symdiff(Value &b);
 
-		std::string to_string();
+		WRAPPER_EQUALS_COMPARABLE(Set)
+		Value to_string(Context);
 		Int hash_code();
 };
 

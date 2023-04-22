@@ -60,6 +60,9 @@ using Character = char;
 using Reference = ValueRef;
 using Fallback = std::any;
 
+template<typename T>
+using Shared = std::shared_ptr<T>;
+
 template<class T>
 using Allocator = std::pmr::polymorphic_allocator<T>;
 
@@ -141,6 +144,18 @@ template<typename ...Types>
 constexpr auto tuple(Types &&...args)
 {
 	return std::make_tuple<Types...>(std::forward<Types...>(args)...);
+}
+
+template<typename T, typename ...Types>
+inline Shared<T> allocate(Allocator<T> alloc, Types &&...args)
+{
+	return std::allocate_shared(alloc, std::forward<Types...>(args)...);
+}
+
+template<typename T, typename ...Types>
+inline Shared<T> allocate(Types &&...args)
+{
+	return allocate({}, std::forward<Types...>(args)...);
 }
 
 }

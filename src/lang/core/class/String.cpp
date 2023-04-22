@@ -22,6 +22,7 @@ NATIVE_CLASS_BINDING(String, {
 	BIND_DARGS_METHOD(replace, 0)
 	BIND_DARGS_METHOD(erase, -1)
 
+	EQUALITY_COMPARABLE
 	STANDARD_METHOD(Methods::ToString) (OBJ) {
 		return this_obj;
 	};

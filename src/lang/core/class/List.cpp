@@ -1,11 +1,13 @@
 #include "List.h"
-#include "DefaultIterator.h"
+
+#include <lang/core/Data.h>
 
 namespace mtl
 {
 
 NATIVE_CLASS_BINDING(List, {
 	IMPLEMENTS_COLLECTION
+	EQUALITY_COMPARABLE
 	BIND_METHOD(to_string)
 	BIND_METHOD(hash_code)
 })
@@ -43,9 +45,9 @@ Value List::get(Int idx)
 	return contained.at(idx);
 }
 
-std::string List::to_string()
+Value List::to_string(Context context)
 {
-	return stringify_container(nullptr, contained);
+	return core::stringify_container(*context, contained);
 }
 
 UInt List::size()

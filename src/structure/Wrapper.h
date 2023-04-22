@@ -3,6 +3,12 @@
 
 #include <utility>
 
+#define WRAPPER_EQUALS_COMPARABLE(class_name) \
+	bool operator==(const class_name &rhs) const \
+	{ \
+		return contained == rhs.contained; \
+	}
+
 namespace mtl
 {
 
@@ -48,6 +54,16 @@ class Wrapper
 		inline operator T&()
 		{
 			return contained;
+		}
+
+		inline operator const T&() const
+		{
+			return contained;
+		}
+
+		virtual bool operator==(const Wrapper<T> &rhs) const
+		{
+			return contained == rhs.contained;
 		}
 };
 

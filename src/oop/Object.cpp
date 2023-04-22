@@ -126,10 +126,9 @@ Int Object::id() const
 	return reinterpret_cast<Int>(&(data.managed_map()));
 }
 
-std::string Object::to_string()
+Shared<native::String> Object::to_string()
 {
-	Args noargs;
-	return invoke_method(str(Methods::ToString), noargs).get<String>();
+	return invoke_method(str(Methods::ToString), empty_args).get<Shared<native::String>>();
 }
 
 std::string Object::to_string_default()
@@ -146,7 +145,7 @@ void Object::deep_copy()
 
 bool operator ==(const Object &lhs, const Object &rhs)
 {
-	return &lhs == &rhs;
+	return unconst(lhs).invoke_method(mtl::str(Methods::Equals), LiteralExpr::make_list(unconst(rhs)));
 }
 
 std::ostream& operator <<(std::ostream &stream, Object &obj)

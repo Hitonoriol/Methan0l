@@ -116,8 +116,6 @@ ExprPtr,
 /* Primitives */
 Int, double, bool, char,
 
-/* Heap-stored types: */
-
 /* Callable types */
 VUnit, VFunction, VNativeFunc,
 
@@ -371,6 +369,8 @@ class Value
 				IF (std::is_same_v<VType, Object> && !std::is_same_v<Requested, Object>) {
 					IF (std::is_same_v<Requested, std::any>)
 						return as_any();
+					ELIF (is_shared_ptr<Requested>::value)
+						return mtl::any_cast<Requested&>(as_any());
 					else
 						return *mtl::any_cast<std::shared_ptr<Requested>&>(as_any());
 				}
@@ -383,7 +383,7 @@ class Value
 						return get<ValueRef>().value().get<T>();
 				}
 
-				/*   If requested type T is not standard, assume that the requested value
+				/*   If requested type T is not built-in, assume that the requested value
 				 * is contained within std::any */
 				IF (!allowed_type<Requested>() && !allowed_type<P>())
 					return mtl::any_cast<Requested&>(as_any());
@@ -392,7 +392,7 @@ class Value
 				ELIF (is_heap_storable<Requested>())
 					return *mtl::get<P>(value);
 
-				/* Otherwise, T is a standard type (valid `ValueContainer` alternative) */
+				/* Otherwise, T is a built-in type (valid `ValueContainer` alternative) */
 				else
 					return mtl::get<Requested>(value);
 			});

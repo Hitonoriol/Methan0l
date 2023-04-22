@@ -1,5 +1,7 @@
 #include "Map.h"
 
+#include <CoreLibrary.h>
+
 namespace mtl
 {
 
@@ -7,6 +9,7 @@ NATIVE_CLASS_BINDING(Map, {
 	IMPLEMENTS_ABSTRACT_MAP
 	BIND_METHOD_AS(IndexOperator::Get, operator_get)
 
+	EQUALITY_COMPARABLE
 	BIND_METHOD(to_string)
 	BIND_METHOD(hash_code)
 })
@@ -62,15 +65,15 @@ Boolean Map::is_empty()
 	return contained.empty();
 }
 
-std::string Map::to_string()
+Value Map::to_string(Context context)
 {
 	auto it = contained.begin(), end = contained.end();
-	return stringify([&] {
+	return context->make<String>(std::move(stringify([&] {
 		if (it == end) return empty_string;
 		auto str = "{" + unconst(it->first).to_string() + ": " + it->second.to_string() + "}";
 		++it;
 		return str;
-	});
+	})));
 }
 
 Int Map::hash_code()

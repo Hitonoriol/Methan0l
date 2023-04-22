@@ -28,7 +28,8 @@ class Map : public ContainerWrapper<ValMap>, public AbstractMap
 		void clear() override;
 		Boolean is_empty() override;
 
-		std::string to_string();
+		WRAPPER_EQUALS_COMPARABLE(Map)
+		Value to_string(Context context);
 		Int hash_code();
 };
 

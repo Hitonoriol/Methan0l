@@ -97,6 +97,8 @@ class NativeClass
 #define NON_CONSTRUCTIBLE INTERFACE
 #define UNIMPLEMENTED_METHOD(name) ABSTRACT_METHOD(name)
 
+#define EQUALITY_COMPARABLE BIND_METHOD_AS(Methods::Equals, operator==)
+
 /* Allows to specify base classes of the bound class */
 #define INHERITS(name) \
 	{ \

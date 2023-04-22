@@ -2,6 +2,7 @@
 #define SRC_LANG_CORE_CLASS_RANGE_H_
 
 #include "Iterable.h"
+#include "String.h"
 
 namespace mtl
 {
@@ -49,9 +50,11 @@ class Range
 			return step;
 		}
 
-		std::string to_string()
+		Value to_string(Context context)
 		{
-			return "Range [" + mtl::str(start) + "; " + mtl::str(end) + "), step = " + mtl::str(step);
+			return context->make<String>(std::move(
+				"Range [" + mtl::str(start) + "; " + mtl::str(end) + "), step = " + mtl::str(step)
+			));
 		}
 
 		Int hash_code()
