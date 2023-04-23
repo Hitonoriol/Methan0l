@@ -34,6 +34,16 @@ Value Library::str(std::string_view str)
 	return context->make<String>(str);
 }
 
+Value Library::str(std::string &&str)
+{
+	return context->make<String>(std::move(str));
+}
+
+Value Library::str(const Shared<native::String> &raw_str)
+{
+	return context->bind_object(raw_str);
+}
+
 double Library::dbl(ExprList args, int idx)
 {
 	return mtl::dbl(arg(args, idx));

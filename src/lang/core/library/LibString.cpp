@@ -37,7 +37,9 @@ void LibString::load_operators()
 	/* String concatenation */
 	infix_operator(TokenType::STRING_CONCAT, LazyBinaryOpr([this](auto lhs, auto rhs) {
 		auto lexpr = val(lhs), rexpr = val(rhs);
-		return lexpr.to_string() + rexpr.to_string();
+		return context->make<String>(*lexpr.to_string()).template as<String>([&](auto &s) {
+			s.append(*rexpr.to_string());
+		});
 	}));
 }
 

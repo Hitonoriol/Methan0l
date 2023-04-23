@@ -2,12 +2,12 @@
 
 #include <string>
 
-#include "../util/util.h"
-#include "../structure/Value.h"
-#include "../expression/Expression.h"
-#include "../type.h"
+#include "util/util.h"
+#include "structure/Value.h"
+#include "expression/Expression.h"
 #include "util/global.h"
 #include "interpreter/Interpreter.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -40,7 +40,7 @@ InvalidTypeException::InvalidTypeException(TypeID type, TypeID expected, const s
 
 InvalidTypeException::InvalidTypeException(Value received, TypeID expected) :
 		std::runtime_error(type_error_msg("Invalid conversion of value `"
-				+ received.to_string() + "`:",
+				+ mtl::str(received.to_string()) + "`:",
 				received.type(), expected))
 {}
 

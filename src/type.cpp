@@ -2,6 +2,7 @@
 
 #include "expression/Expression.h"
 #include "structure/Value.h"
+#include "lang/core/class/String.h"
 
 namespace mtl
 {
@@ -36,6 +37,11 @@ UInt unum(Value val)
 bool bln(Value val)
 {
 	return val.as<bool>();
+}
+
+std::string& str(Shared<native::String> str)
+{
+	return *str;
 }
 
 }

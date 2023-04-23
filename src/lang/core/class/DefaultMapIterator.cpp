@@ -1,5 +1,7 @@
 #include "DefaultMapIterator.h"
 
+#include <CoreLibrary.h>
+
 namespace mtl
 {
 
@@ -10,7 +12,10 @@ NATIVE_CLASS_BINDING(MapEntry, {
 
 	STANDARD_METHOD(Methods::ToString) (OBJ) {
 		auto &p = THIS;
-		return std::string("{" + p.key().to_string() + ": " + p.value().to_string() + "}");
+		return CONTEXT.make<String>(
+			"{" + mtl::str(p.key().to_string()) + ": "
+			+ mtl::str(p.value().to_string()) + "}"
+		);
 	};
 })
 

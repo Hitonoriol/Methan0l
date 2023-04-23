@@ -60,6 +60,13 @@ using Character = char;
 using Reference = ValueRef;
 using Fallback = std::any;
 
+namespace native
+{
+
+class String;
+
+}
+
 template<typename T>
 using Shared = std::shared_ptr<T>;
 
@@ -135,6 +142,8 @@ constexpr std::string_view NLTAB = "\n\t";
 
 Value val(Interpreter&, ExprPtr);
 std::string str(Value);
+std::string& str(Shared<native::String>);
+
 double dbl(Value);
 Int num(Value);
 UInt unum(Value);
@@ -147,15 +156,15 @@ constexpr auto tuple(Types &&...args)
 }
 
 template<typename T, typename ...Types>
-inline Shared<T> allocate(Allocator<T> alloc, Types &&...args)
+inline Shared<T> make(Allocator<T> alloc, Types &&...args)
 {
-	return std::allocate_shared(alloc, std::forward<Types...>(args)...);
+	return std::allocate_shared<T>(alloc, std::forward<Types...>(args)...);
 }
 
 template<typename T, typename ...Types>
-inline Shared<T> allocate(Types &&...args)
+inline Shared<T> make(Types &&...args)
 {
-	return allocate({}, std::forward<Types...>(args)...);
+	return make<T>({}, std::forward<Types...>(args)...);
 }
 
 }

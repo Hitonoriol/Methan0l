@@ -272,6 +272,18 @@ class Interpreter
 					return eval(expr);
 			}
 
+			/* Special case: provide compatibility of mtl::native::String with std::string */
+			else if constexpr (std::is_same<V, std::string>::value) {
+				auto &str = mtl::str(eval(expr).to_string());
+				/* If for some reason a std::string* is requested */
+				if constexpr (std::is_pointer<V>::value)
+					return &str;
+				else if constexpr (std::is_rvalue_reference<T>::value) /* && */
+					return std::move(str);
+				else
+					return str; /* By-value, &, const& */
+			}
+
 			/* Get as a `&` or `*` to a value of a valid ValueContainer variant alternative */
 			else if constexpr (is_allowed && std::is_reference<T>::value)
 				return referenced_value(&expr).get<V>();
@@ -358,13 +370,15 @@ class Interpreter
 			static auto call(Interpreter &context, Functor &&f, const Container &c)
 			{
 				IF (N > 0) {
-					/* Inject all callargs as expression list into the argument list if bound function's signature
-					 * contains a mtl::CallArgs argument. */
-					inject_callarg<CallArgs>(c, unconst(c));
-
 					/* Inject the calling context into the argument list if bound function's signature contains a
-					 * mtl::Context argument. */
+					 * `mtl::Context` argument.
+					 * This argument must always precede the `CallArgs` one in the function signature if they're
+					 * both declared. */
 					inject_callarg<Context>(c, context);
+
+					/* Inject all callargs as expression list into the argument list if bound function's signature
+					 * contains a `mtl::CallArgs` argument. */
+					inject_callarg<CallArgs>(c, unconst(c));
 				}
 
 				if (c.size() < N)
@@ -428,6 +442,12 @@ class Interpreter
 				return Value::make<T>(allocator<T>());
 			else
 				return new_object<T>(std::forward<Args>(ctor_args)...);
+		}
+
+		template<class C>
+		inline Object bind_object(const Shared<C> &raw_obj)
+		{
+			return type_mgr.bind_object(raw_obj);
 		}
 
 		template<unsigned default_argc = 0, typename F>
@@ -575,7 +595,7 @@ class Interpreter
 				if constexpr (stdex)
 					msg = exception.what();
 				else
-					msg = exception.to_string();
+					msg = *exception.to_string();
 				unhandled_exception(msg);
 				if constexpr (DEBUG)
 					dump_stack();

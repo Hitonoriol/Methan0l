@@ -98,6 +98,20 @@ class TypeManager
 			return create_object(type_name, {ctor_args...});
 		}
 
+		/* Bind an existing raw native object to its runtime Methan0l class */
+		template<class C>
+		inline Object bind_object(const Shared<C> &raw_obj)
+		{
+			auto it = native_classes.find(TypeID::of<C>());
+			if (it == native_classes.end())
+				throw std::runtime_error("Unable to bind object of unregistered native type "
+						+ mtl::str(type_name<C>()));
+
+			auto obj = create_uninitialized_object(it->second);
+			obj.set_native(raw_obj);
+			return obj;
+		}
+
 		void unregister_type(const std::string &name);
 
 		Value invoke_method(Object &obj, const std::string &name, Args &args);

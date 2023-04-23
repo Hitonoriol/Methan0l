@@ -74,9 +74,9 @@ template<typename T>
 inline Value stringify_container(Interpreter &context, const T &ctr)
 {
 	auto it = std::begin(ctr), end = std::end(ctr);
-	return context.make<String>(std::move(stringify([&]() {
+	return context.make<String>(std::move(stringify([&] {
 		if (it == end) return empty_string;
-		return unconst(*(it++)).to_string();
+		return mtl::str(unconst(*(it++)).to_string());
 	})));
 }
 

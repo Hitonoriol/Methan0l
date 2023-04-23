@@ -18,6 +18,10 @@ NATIVE_CLASS_BINDING(String, {
 	BIND_DARGS_METHOD(find, 0)
 	BIND_DARGS_METHOD(substr, 0)
 
+	BIND_MUTATOR_METHOD(append)
+	BIND_METHOD(concat)
+	BIND_METHOD_AS("+", concat)
+
 	BIND_METHOD(insert)
 	BIND_DARGS_METHOD(replace, 0)
 	BIND_DARGS_METHOD(erase, -1)
@@ -39,7 +43,7 @@ Value String::format(Context context, CallArgs args)
 	std::vector<std::string> sargs;
 	sargs.reserve(args->size());
 	for (auto it = args->begin() + 3; it != args->end(); ++it)
-		sargs.push_back((*it)->evaluate(*context).to_string());
+		sargs.push_back(*(*it)->evaluate(*context).to_string());
 
 	StringFormatter(fmt.get<String>(), sargs).format();
 	return fmt;
@@ -149,6 +153,34 @@ Boolean String::add(Value value)
 {
 	contained += value.as<char>();
 	return true;
+}
+
+String& String::append(const String &rhs)
+{
+	contained += rhs.contained;
+	return *this;
+}
+
+Value String::concat(Context context, const String &rhs)
+{
+	auto str = context->make<String>(contained);
+	str.get<String>().append(rhs);
+	return str;
+}
+
+String operator+(const char *lhs, const String &rhs)
+{
+	return String(mtl::str(lhs)).append(rhs);
+}
+
+String operator+(const std::string &lhs, const String &rhs)
+{
+	return String(lhs).append(rhs);
+}
+
+std::ostream& operator<<(std::ostream &out, const String &str)
+{
+	return out << *str;
 }
 
 }

@@ -3,6 +3,15 @@
 
 #include <oop/NativeClass.h>
 
+/*
+ *   This class is an example of a direct binding of a
+ * native class to the interpreter runtime.
+ *   This means that objects constructed on `Pair` construction
+ * are actual `std::pair<Value, Value>` objects.
+ *   Other classes that are bindings to standard C++ types
+ * (List, Set, Map, String, ...) are bound indirectly (via wrapper classes).
+ */
+
 namespace mtl
 {
 

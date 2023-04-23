@@ -39,6 +39,8 @@ class Library
 
 		std::string str(ExprList args, int idx = 0);
 		Value str(std::string_view);
+		Value str(std::string&&);
+		Value str(const Shared<native::String>&);
 
 		double dbl(ExprList args, int idx = 0);
 		Int num(ExprList args, int idx = 0);

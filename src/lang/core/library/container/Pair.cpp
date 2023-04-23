@@ -9,6 +9,7 @@
 #include <util/debug.h>
 #include <util/io.h>
 #include <oop/Object.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {
@@ -32,7 +33,10 @@ NATIVE_CLASS_BINDING(Pair, {
 
 	STANDARD_METHOD(Methods::ToString) (OBJ) {
 		auto &p = THIS;
-		return std::string("{Pair: [" + p.first.to_string() + ", " + p.second.to_string() + "]}");
+		return CONTEXT.make<String>(
+			"{Pair: [" + mtl::str(p.first.to_string()) + ", "
+			+ mtl::str(p.second.to_string()) + "]}"
+		);
 	};
 })
 

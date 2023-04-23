@@ -1,4 +1,3 @@
-#include <lexer/Token.h>
 #include "DataTable.h"
 
 #include <algorithm>
@@ -6,8 +5,10 @@
 #include <memory>
 #include <utility>
 
+#include "lexer/Token.h"
 #include "expression/IdentifierExpr.h"
 #include "Value.h"
+#include "CoreLibrary.h"
 
 namespace mtl
 {
@@ -162,7 +163,7 @@ DataTable DataTable::make(const ValMap &vmap, Interpreter &context)
 	DataTable table;
 	table.map->reserve(vmap.size());
 	for (auto &&[key, val] : vmap) {
-		table.map->emplace(std::move(unconst(key).to_string()), val);
+		table.map->emplace(std::move(*unconst(key).to_string()), val);
 	}
 	return table;
 }

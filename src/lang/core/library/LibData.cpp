@@ -200,11 +200,11 @@ void LibData::load_operators()
 
 	/* Evaluate and convert to string: $$expr */
 	prefix_operator(TokenType::DOUBLE_DOLLAR, LazyUnaryOpr([&](auto rhs) {
-		return rhs->evaluate(*context).to_string(context);
+		return str(rhs->evaluate(*context).to_string());
 	}));
 
 	prefix_operator(TokenType::NO_EVAL, LazyUnaryOpr([&](auto rhs) {
-		return Value(rhs);
+		return rhs;
 	}));
 
 	/* hash_code: idfr (overloadable) */
@@ -224,7 +224,7 @@ void LibData::load_operators()
 	/* *["Assertion failed"] assert: condition */
 	infix_operator(TokenType::ASSERT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		if (!bln(val(rhs)))
-			throw std::runtime_error(val(lhs).to_string(context));
+			throw std::runtime_error(*val(lhs).to_string());
 		return Value::NO_VALUE;
 	}));
 
@@ -270,7 +270,7 @@ void LibData::load_operators()
 	}));
 
 	prefix_operator(TokenType::TYPE_NAME, LazyUnaryOpr([&](ExprPtr rhs) {
-		return mtl::str(val(rhs).type_name());
+		return str(val(rhs).type_name());
 	}));
 
 	prefix_operator(TokenType::VAR, LazyUnaryOpr([&](ExprPtr rhs) {

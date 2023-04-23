@@ -170,15 +170,16 @@ Int Value::type_id() const
 	return type().type_id();
 }
 
-std::string Value::to_string()
+Shared<native::String> Value::to_string()
 {
 	if (is<Object>())
-		return *get<Object>().to_string();
+		return get<Object>().to_string();
 
 	/* String conversion for built-in types */
+	using String = native::String;
 	TYPE_SWITCH(type(),
 		TYPE_CASE(Type::NIL) {
-			return std::string(Token::reserved(Word::NIL));
+			return mtl::make<String>(Token::reserved(Word::NIL));
 		}
 
 		TYPE_CASE(Type::REFERENCE) {
@@ -186,45 +187,45 @@ std::string Value::to_string()
 		}
 
 		TYPE_CASE(Type::CHAR) {
-			return mtl::str(get<char>());
+			return mtl::make<String>(mtl::str(get<char>()));
 		}
 
 		TYPE_CASE(Type::INTEGER) {
-			return std::to_string(get<Int>());
+			return mtl::make<String>(std::to_string(get<Int>()));
 		}
 
 		TYPE_CASE(Type::DOUBLE) {
-			return std::to_string(get<double>());
+			return mtl::make<String>(std::to_string(get<double>()));
 		}
 
 		TYPE_CASE(Type::BOOLEAN) {
-			return std::string(
+			return mtl::make<String>(
 				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE)
 			);
 		}
 
 		TYPE_CASE(Type::UNIT) {
-			return get<Unit>().to_string();
+			return mtl::make<String>(get<Unit>().to_string());
 		}
 
 		TYPE_CASE(Type::FUNCTION) {
 			if (is<NativeFunc>())
-				return "Native function 0x" + to_base(reinterpret_cast<UInt>(identity()), 16);
-			return get<Function>().to_string();
+				return mtl::make<String>("Native function 0x" + to_base(reinterpret_cast<UInt>(identity()), 16));
+			return mtl::make<String>(get<Function>().to_string());
 		}
 
 		TYPE_CASE(Type::TOKEN) {
-			return get<Token>().get_value();
+			return mtl::make<String>(get<Token>().get_value());
 		}
 
 		TYPE_CASE(Type::EXPRESSION) {
-			return get<ExprPtr>()->info();
+			return mtl::make<String>(get<ExprPtr>()->info());
 		}
 
 		TYPE_DEFAULT {
 			sstream ss;
 			ss << "{" << type_name() << " @ 0x" << to_base(reinterpret_cast<UInt>(identity()), 16) << "}";
-			return ss.str();
+			return mtl::make<String>(ss.str());
 		}
 	)
 }
@@ -305,19 +306,19 @@ Value Value::convert(TypeID new_val_type)
 {
 	TYPE_SWITCH (new_val_type,
 		TYPE_CASE(Type::BOOLEAN)
-			return Value(as<bool>());
+			return as<bool>();
 
 		TYPE_CASE(Type::INTEGER)
-			return Value(as<Int>());
+			return as<Int>();
 
 		TYPE_CASE(Type::CHAR)
-			return Value(as<char>());
+			return as<char>();
 
 		TYPE_CASE(Type::DOUBLE)
-			return Value(as<double>());
+			return as<double>();
 
 		TYPE_CASE_T(String)
-			return Value(to_string());
+			return to_string();
 	)
 
 	throw InvalidTypeException(*this, new_val_type);
@@ -352,7 +353,7 @@ void Value::assert_type(TypeID expected, const std::string &msg)
 {
 	auto this_type = type();
 	if (this_type != expected)
-		throw InvalidTypeException(this_type, expected, msg + " [Value: `" + to_string() + "`]");
+		throw InvalidTypeException(this_type, expected, msg + " [Value: `" + *to_string() + "`]");
 }
 
 /* If at least one of the operands is of type DOUBLE, operation result should also be DOUBLE */
@@ -411,7 +412,7 @@ bool Value::operator !=(const Value &rhs)
 
 std::ostream& operator <<(std::ostream &stream, const Value &val)
 {
-	return stream << unconst(val).to_string();
+	return stream << *unconst(val).to_string();
 }
 
 } /* namespace mtl */

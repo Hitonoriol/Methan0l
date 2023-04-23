@@ -10,14 +10,14 @@
 #include <utility>
 
 #include "structure/Value.h"
-#include "type.h"
 #include "util/util.h"
+#include "CoreLibrary.h"
 
-#include "../BinaryOperatorExpr.h"
-#include "../IdentifierExpr.h"
-#include "../LiteralExpr.h"
-#include "../PrefixExpr.h"
-#include "../MapExpr.h"
+#include "expression/BinaryOperatorExpr.h"
+#include "expression/IdentifierExpr.h"
+#include "expression/LiteralExpr.h"
+#include "expression/PrefixExpr.h"
+#include "expression/MapExpr.h"
 
 namespace mtl
 {
@@ -83,7 +83,7 @@ std::string MapParser::key_string(Expression &expr)
 		return IdentifierExpr::get_name(&expr);
 
 	if (instanceof<LiteralExpr>(expr))
-		return try_cast<LiteralExpr>(&expr).raw_ref().to_string();
+		return *try_cast<LiteralExpr>(&expr).raw_ref().to_string();
 
 	throw std::runtime_error("Invalid map key expression: " + expr.info());
 }

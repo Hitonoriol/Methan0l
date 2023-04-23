@@ -70,9 +70,9 @@ Value Map::to_string(Context context)
 	auto it = contained.begin(), end = contained.end();
 	return context->make<String>(std::move(stringify([&] {
 		if (it == end) return empty_string;
-		auto str = "{" + unconst(it->first).to_string() + ": " + it->second.to_string() + "}";
+		auto str = "{" + *unconst(it->first).to_string() + ": " + *it->second.to_string() + "}";
 		++it;
-		return str;
+		return *str;
 	})));
 }
 

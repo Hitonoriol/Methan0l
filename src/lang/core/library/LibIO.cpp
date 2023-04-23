@@ -42,12 +42,12 @@ void LibIO::load()
 {
 	/* Output Operator */
 	prefix_operator(TokenType::OUT, LazyUnaryOpr([&](auto expr) {
-		out << val(expr).to_string();
+		out << *val(expr).to_string();
 		return Value::NO_VALUE;
 	}));
 
 	prefix_operator(TokenType::OUT_NL, LazyUnaryOpr([&](auto expr) {
-		out << val(expr).to_string() << std::endl;
+		out << *val(expr).to_string() << std::endl;
 		return Value::NO_VALUE;
 	}));
 

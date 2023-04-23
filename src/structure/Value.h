@@ -442,8 +442,8 @@ class Value
 			});
 		}
 
-		std::string to_string();
-		inline std::string str(Interpreter *context = nullptr) const
+		Shared<native::String> to_string();
+		inline Shared<native::String> to_string() const
 		{
 			return unconst(*this).to_string();
 		}
@@ -497,7 +497,7 @@ class Value
 					return (*cget<ValueRef>().ptr()).as<T>();
 
 				if constexpr (std::is_same<T, std::string>::value)
-					return unconst(*this).to_string();
+					return *unconst(*this).to_string();
 
 				else if constexpr (std::is_same<T, Int>::value)
 					return to_dec();
@@ -549,45 +549,6 @@ class Value
 			return  &get();
 		}
 
-		template<typename T>
-		Value operator+(const T &rhs)
-		{
-			return accept([&](auto &lhs) -> Value {
-				if constexpr (numeric<VT(lhs)>() && numeric<VT(rhs)>()) {
-					return lhs + rhs;
-				}
-				else if constexpr (string_type<VT(lhs)>()) {
-					return *lhs + Value(rhs).str();
-				}
-				else if constexpr (string_type<VT(rhs)>()) {
-					return Value(lhs).str() + Value(rhs).str();
-				}
-				else {
-					throw InvalidTypeException(type());
-					return NO_VALUE;
-				}
-			});
-		}
-
-		template<typename T>
-		Value& operator +=(const T &rhs)
-		{
-			return accept([&](auto &lhs) -> Value& {
-				if constexpr (numeric<VT(lhs)>() && numeric<VT(rhs)>()) {
-					lhs += rhs;
-					return *this;
-				}
-				else if constexpr (string_type<VT(lhs)>()) {
-					*lhs += Value(rhs).str();
-					return *this;
-				}
-				else {
-					throw InvalidTypeException(type());
-					return unconst(NO_VALUE);
-				}
-			});
-		}
-
 		template<typename T> inline bool is() const
 		{
 			IF (is_class_binding<T>::value)
@@ -615,6 +576,7 @@ class Value
 
 		size_t hash_code() const;
 
+		ARITHMETIC_OP(+)
 		ARITHMETIC_OP(-)
 		ARITHMETIC_OP(*)
 		ARITHMETIC_OP(/)
@@ -636,6 +598,7 @@ class Value
 		ARITHMETIC_OP(^)
 		UNARY_ARITHMETIC(~)
 
+		COMPOUND_ARITHMETIC(+=)
 		COMPOUND_ARITHMETIC(-=)
 		COMPOUND_ARITHMETIC(*=)
 		COMPOUND_ARITHMETIC(/=)
