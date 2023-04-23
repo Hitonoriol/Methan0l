@@ -575,7 +575,7 @@ class Interpreter
 				if constexpr (stdex)
 					msg = exception.what();
 				else
-					msg = exception.to_string(this);
+					msg = exception.to_string();
 				unhandled_exception(msg);
 				if constexpr (DEBUG)
 					dump_stack();

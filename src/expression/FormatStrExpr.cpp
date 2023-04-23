@@ -15,7 +15,7 @@ Value FormatStrExpr::evaluate(Interpreter &context)
 	std::string fmt = this->fmt;
 	std::vector<std::string> sargs;
 	for (auto expr : args)
-		sargs.push_back(expr->evaluate(context).to_string(&context));
+		sargs.push_back(expr->evaluate(context).to_string());
 	StringFormatter formatter(fmt, sargs);
 	formatter.format();
 	return fmt;

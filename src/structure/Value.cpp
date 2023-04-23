@@ -170,7 +170,7 @@ Int Value::type_id() const
 	return type().type_id();
 }
 
-std::string Value::to_string(Interpreter *context)
+std::string Value::to_string()
 {
 	if (is<Object>())
 		return *get<Object>().to_string();
@@ -182,7 +182,7 @@ std::string Value::to_string(Interpreter *context)
 		}
 
 		TYPE_CASE(Type::REFERENCE) {
-			return get().to_string(context);
+			return get().to_string();
 		}
 
 		TYPE_CASE(Type::CHAR) {
@@ -218,10 +218,7 @@ std::string Value::to_string(Interpreter *context)
 		}
 
 		TYPE_CASE(Type::EXPRESSION) {
-			auto &expr = *get<ExprPtr>();
-			return (context == nullptr ?
-					expr.info() : expr.evaluate(*context).to_string(context)
-			);
+			return get<ExprPtr>()->info();
 		}
 
 		TYPE_DEFAULT {

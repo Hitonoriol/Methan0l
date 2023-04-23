@@ -442,10 +442,10 @@ class Value
 			});
 		}
 
-		std::string to_string(Interpreter *context = nullptr);
+		std::string to_string();
 		inline std::string str(Interpreter *context = nullptr) const
 		{
-			return unconst(*this).to_string(context);
+			return unconst(*this).to_string();
 		}
 
 		template<typename T>

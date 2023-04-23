@@ -162,7 +162,7 @@ DataTable DataTable::make(const ValMap &vmap, Interpreter &context)
 	DataTable table;
 	table.map->reserve(vmap.size());
 	for (auto &&[key, val] : vmap) {
-		table.map->emplace(std::move(unconst(key).to_string(&context)), val);
+		table.map->emplace(std::move(unconst(key).to_string()), val);
 	}
 	return table;
 }
