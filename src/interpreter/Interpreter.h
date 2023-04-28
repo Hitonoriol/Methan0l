@@ -272,26 +272,29 @@ class Interpreter
 					return eval(expr);
 			}
 
-			/* Special case: provide compatibility of mtl::native::String with std::string */
-			else if constexpr (std::is_same<V, std::string>::value) {
-				auto &str = mtl::str(eval(expr).to_string());
-				/* If for some reason a std::string* is requested */
-				if constexpr (std::is_pointer<V>::value)
-					return &str;
-				else if constexpr (std::is_rvalue_reference<T>::value) /* && */
-					return std::move(str);
-				else
-					return str; /* By-value, &, const& */
-			}
-
 			/* Get as a `&` or `*` to a value of a valid ValueContainer variant alternative */
 			else if constexpr (is_allowed && std::is_reference<T>::value)
 				return referenced_value(&expr).get<V>();
 			else if constexpr (is_allowed && std::is_pointer<T>::value)
 				return &referenced_value(&expr).get<typename std::remove_pointer<V>::type>();
 
+			/* Special case: provide compatibility of mtl::native::String with std::string */
+			else if constexpr (std::is_same<V, std::string>::value) {
+				auto val = eval(expr);
+				if (!val.is<std::string>()) {
+					auto &str = mtl::str(val.to_string());
+					/* If for some reason a std::string* is requested */
+					if constexpr (std::is_pointer<V>::value)
+						return &str;
+					else if constexpr (std::is_rvalue_reference<T>::value) /* && */
+						return std::move(str);
+					else
+						return str; /* By-value, &, const& */
+				}
+			}
+
 			/* Get as a value of fallback type (std::any) */
-			else if constexpr (!is_allowed && !is_convertible) {
+			if constexpr (!is_allowed && !is_convertible) {
 				auto &val = referenced_value(&expr);
 				auto &any = val.is<Object>() ? val.get<Object>().get_native().as_any() : val.as_any();
 				auto &t = any.type();
@@ -489,7 +492,7 @@ class Interpreter
 		}
 
 		template<typename F, typename DArgs>
-		NativeFunc bind_func(F &&f, DArgs default_args)
+		NativeFunc bind_func(F &&f, const DArgs &default_args)
 		{
 			Value default_args_v = ValList();
 			default_args_v.move_in(mtl::from_tuple<ValList>(default_args));
@@ -498,16 +501,16 @@ class Interpreter
 
 		void register_func(const std::string &name, NativeFunc &&func);
 
-		template<unsigned default_argc = 0, typename F>
-		void register_func(const std::string &name, F &&f, Value default_args = Value::NO_VALUE)
+		template<typename F>
+		void register_func(const std::string &name, F &&f)
 		{
-			register_func(name, bind_func<default_argc>(f, default_args));
+			register_func(name, bind_func(f));
 		}
 
-		template<unsigned N, typename F>
-		inline void register_func(const std::string &name, std::initializer_list<Value> list, F &&f)
+		template<typename F, typename DArgs>
+		void register_func(const std::string &name, const DArgs &default_args, F &&f)
 		{
-			register_func<N>(name, std::forward<F>(f), list);
+			register_func(name, bind_func(f, default_args));
 		}
 
 		void register_exit_task(Value&);
