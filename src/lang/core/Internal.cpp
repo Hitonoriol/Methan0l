@@ -49,7 +49,11 @@ TypeID resolve_type(Interpreter &context, Expression &type_expr)
 
 Value convert(Interpreter &context, Value &val, Expression &type_expr)
 {
-	return val.convert(resolve_type(context, type_expr));
+	auto dest_type = resolve_type(context, type_expr);
+	if (val.is<Fallback>())
+		return context.get_type_mgr().bind_object(dest_type, val);
+	else
+		return val.convert(dest_type);
 }
 
 } /* namespace mtl */

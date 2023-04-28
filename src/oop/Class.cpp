@@ -78,6 +78,14 @@ Class::Class(Interpreter &context, const std::string &name) :
 	register_method("get_field", [&](Object &obj, const std::string &name) {
 		return obj.field(name);
 	});
+
+	register_method("is_native", [&] {
+		return is_native();
+	});
+
+	register_method("get_native", [&](Object &obj) {
+		return obj.get_native();
+	});
 }
 
 void Class::register_method(std::string_view name, Function &method)
