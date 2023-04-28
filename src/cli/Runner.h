@@ -17,7 +17,7 @@ class Runner
 	public:
 		Runner(Interpreter &methan0l);
 		int run_file(int argc, char **argv, int start_from = 1);
-		int run_file(const std::string &path, const ValList &args);
+		int run_file(const std::string &path, const std::vector<std::string> &args);
 };
 
 } /* namespace mtl */

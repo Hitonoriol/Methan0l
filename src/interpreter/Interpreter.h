@@ -427,6 +427,12 @@ class Interpreter
 		void load_library(std::shared_ptr<Library>);
 
 		template<typename T>
+		void load_library()
+		{
+			load_library(mtl::make<T>(this));
+		}
+
+		template<typename T>
 		inline void register_class()
 		{
 			type_mgr.register_type<T>();
@@ -445,6 +451,12 @@ class Interpreter
 				return Value::make<T>(allocator<T>());
 			else
 				return new_object<T>(std::forward<Args>(ctor_args)...);
+		}
+
+		template<typename T, typename F, typename ...Args>
+		inline Value make_as(F initializer, Args &&...ctor_args)
+		{
+			return make<T>(std::forward<Args>(ctor_args)...).template as<T>(initializer);
 		}
 
 		template<class C>
@@ -631,6 +643,7 @@ class Interpreter
 
 		Value& get_env_var(const std::string&);
 		void set_env_var(const std::string&, Value);
+		void set_env_var(const std::string&, const std::string&);
 
 		template<typename T>
 		inline T& get_env_hook(const std::string &name)
@@ -677,15 +690,8 @@ class Interpreter
 
 		void dump_stack();
 
-		inline const std::string& get_runpath()
-		{
-			return get_env_var(EnvVars::RUNPATH);
-		}
-
-		inline const std::string& get_rundir()
-		{
-			return get_env_var(EnvVars::RUNDIR);
-		}
+		const std::string& get_runpath();
+		const std::string& get_rundir();
 
 		template<typename T>
 		bool try_load(T &&loader)
@@ -717,7 +723,7 @@ class Interpreter
 		Value run();
 
 		void load_args(int argc, char **argv, int start_from = 1);
-		void load_args(const ValList &args);
+		void load_args(const std::vector<std::string> &args);
 		void set_env_globals(const std::string &scrpath);
 
 		void preserve_data(bool val);

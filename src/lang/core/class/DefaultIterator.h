@@ -123,6 +123,7 @@ class DefaultIterator : public Iterator
 
 NATIVE_CLASS(ListIterator, native::DefaultIterator<ValList>)
 NATIVE_CLASS(SetIterator, native::DefaultIterator<ValSet>)
+NATIVE_CLASS(StringIterator, native::DefaultIterator<std::string>)
 
 } /* namespace mtl */
 

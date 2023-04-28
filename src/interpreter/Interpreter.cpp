@@ -25,6 +25,7 @@
 #include "lang/Library.h"
 #include "oop/Class.h"
 #include "CoreLibrary.h"
+#include "Builtins.h"
 
 namespace mtl
 {
@@ -43,6 +44,7 @@ Interpreter::Interpreter()
 	  parser(std::make_shared<Methan0lParser>(*this))
 {
 	init_heap();
+	load_library<Builtins>();
 }
 
 Interpreter::Interpreter(const char *path) : Interpreter()
@@ -57,6 +59,7 @@ Interpreter::Interpreter(const Interpreter &rhs)
 	  exec_stack { &main },
 	  parser(rhs.parser)
 {
+	load_library<Builtins>();
 	for (auto &lib : dlls)
 		lib->load(*this);
 }
@@ -143,6 +146,16 @@ void Interpreter::load_main(Unit &main)
 Unit& Interpreter::get_main()
 {
 	return *exec_stack.front();
+}
+
+const std::string& Interpreter::get_runpath()
+{
+	return get_env_var(EnvVars::RUNPATH).get<String>();
+}
+
+const std::string& Interpreter::get_rundir()
+{
+	return get_env_var(EnvVars::RUNDIR).get<String>();
 }
 
 const std::string& Interpreter::get_scriptpath()
@@ -447,6 +460,11 @@ Value& Interpreter::get_env_var(const std::string &name)
 void Interpreter::set_env_var(const std::string &name, Value val)
 {
 	env_table.set(name, val);
+}
+
+void Interpreter::set_env_var(const std::string &name, const std::string &val)
+{
+	set_env_var(name, make<String>(val));
 }
 
 Value& Interpreter::referenced_value(Expression *expr, bool follow_refs)
@@ -834,17 +852,20 @@ Value Interpreter::run()
 
 void Interpreter::load_args(int argc, char **argv, int start_from)
 {
-	ValList list;
+	std::vector<std::string> list;
 	for (int i = start_from; i < argc; ++i)
-		list.push_back(Value(std::string(argv[i])));
+		list.push_back(std::string(argv[i]));
 
-	load_args(std::move(list));
+	load_args(list);
 }
 
-void Interpreter::load_args(const ValList &args)
+void Interpreter::load_args(const std::vector<std::string> &args)
 {
 	set_env_globals(args[0]);
-	auto list = make<List>(args);
+	auto list = make_as<List>([&](auto &list) {
+		for (auto &&arg : args)
+			list.push_back(make<String>(std::move(arg)));
+	});
 	main.local().set(EnvVars::LAUNCH_ARGS, list);
 }
 

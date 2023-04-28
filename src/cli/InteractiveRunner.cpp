@@ -80,7 +80,7 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 						auto &mt0 = runner.interpreter();
 						auto path = runner.next_arg();
 
-						ValList args;
+						std::vector<std::string> args;
 						args.push_back(path);
 						while (runner.has_args())
 							args.push_back(runner.next_arg());

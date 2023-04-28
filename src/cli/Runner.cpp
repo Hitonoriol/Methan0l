@@ -35,7 +35,7 @@ int Runner::run_file(int argc, char **argv, int start_from)
 	return -1;
 }
 
-int Runner::run_file(const std::string &path, const ValList &args)
+int Runner::run_file(const std::string &path, const std::vector<std::string> &args)
 {
 	if (load_file(path)) {
 		methan0l.load_args(args);

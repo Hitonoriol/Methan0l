@@ -15,7 +15,7 @@ namespace native
 class String : public ContainerWrapper<std::string>, public Collection
 {
 	public:
-		using iterator_type = DefaultIterator<std::string>;
+		using iterator_type = StringIterator::bound_class;
 
 		using ContainerWrapper<wrapped_type>::ContainerWrapper;
 		String(const std::string &str = empty_string)
