@@ -116,6 +116,12 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 				{
 					runner.print_class_info(runner.next_arg());
 				}
+		},
+		{ "env - list all environment variables",
+				[](auto &runner)
+				{
+					runner.print_env_info();
+				}
 		}
 };
 
@@ -339,6 +345,14 @@ void InteractiveRunner::print_class_info(const std::string &name)
 	OUT("Implements: " << int_str << NL)
 	OUT("Fields" << NL << clazz.get_fields() << NL)
 	OUT("Methods" << NL << clazz.get_methods())
+}
+
+void InteractiveRunner::print_env_info()
+{
+	auto &table = methan0l.get_env_table();
+	out << "Environment variables:" << NL;
+	for (auto &[name, value] : table.managed_map())
+		out << "* " << name << " = " << value << NL;
 }
 
 } /* namespace mtl */
