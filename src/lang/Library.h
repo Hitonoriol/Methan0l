@@ -57,6 +57,12 @@ class Library
 			context->register_func(name, std::move(callable));
 		}
 
+		template<typename T, typename DArgs>
+		inline void function(const std::string &name, const DArgs &default_args, T &&callable)
+		{
+			context->register_func(name, default_args, callable);
+		}
+
 		/* Register an external context-dependent function */
 		template<typename R, typename ...Types>
 		inline void external_function(const std::string &name, R(*func)(Interpreter&, Types...))
@@ -74,6 +80,12 @@ class Library
 		void infix_operator(TokenType, const BinaryOpr&);
 		void postfix_operator(TokenType, const LazyUnaryOpr&);
 		void postfix_operator(TokenType, const UnaryOpr&);
+
+		template<typename ...Types>
+		static constexpr auto default_args(Types &&...args)
+		{
+			return mtl::tuple(std::forward<Types>(args)...);
+		}
 
 	public:
 		Library(Interpreter *context);
