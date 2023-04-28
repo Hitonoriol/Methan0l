@@ -62,7 +62,7 @@ class Object
 		Int id() const;
 
 		Shared<native::String> to_string();
-		std::string to_string_default();
+		Shared<native::String> to_string_default();
 
 		friend bool operator ==(const Object &lhs, const Object &rhs);
 		friend std::ostream& operator <<(std::ostream &stream, Object &obj);

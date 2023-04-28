@@ -131,11 +131,11 @@ Shared<native::String> Object::to_string()
 	return invoke_method(str(Methods::ToString), empty_args).get<Shared<native::String>>();
 }
 
-std::string Object::to_string_default()
+Shared<native::String> Object::to_string_default()
 {
 	sstream ss;
 	ss << *this;
-	return ss.str();
+	return context().make<String>(ss.str());
 }
 
 void Object::deep_copy()
