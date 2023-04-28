@@ -53,20 +53,23 @@ void LibIO::load()
 
 	/* Input Operator with type deduction */
 	prefix_operator(TokenType::IN, LazyUnaryOpr([&](auto rhs) {
-		if_instanceof<IdentifierExpr>(*rhs, [&](auto &named){
+		if_instanceof<IdentifierExpr>(*rhs, [&](auto &named) {
 			named.create_if_nil(*context);
 		});
 
 		std::string input;
 		std::getline(in, input);
-		Value &var = context->referenced_value(rhs);
+		auto &var = context->referenced_value(rhs);
 		var = parse_value(input);
 		return var;
 	}));
 
-	/* String input function: foo = read_line$() */
-	function("read_line", [&] {
-		auto line = context->make<std::string>();
+	/* String input function: foo = read_line([prompt]) */
+	function("read_line", default_args(""), [&](const std::string &prompt) {
+		if (!prompt.empty())
+			out << prompt;
+
+		auto line = context->make<String>();
 		std::getline(in, *line.get<String>());
 		return line;
 	});
