@@ -234,12 +234,6 @@ class Value
 			return is_shared_ptr<TYPE(T)>::value || is_heap_storable<T>();
 		}
 
-		template<typename T>
-		static constexpr bool is_convertible()
-		{
-			return std::is_arithmetic<TYPE(T)>::value;
-		}
-
 		Value& get();
 
 		inline Value& get_ref()

@@ -252,8 +252,8 @@ class Interpreter
 			LOG("eval<T>() for " << type_name<T>() << ", expression: " << expr.info())
 			/* T, but with `const` and `&` / `&&` stripped */
 			using V = TYPE(T);
-			constexpr bool is_allowed = Value::allowed_or_heap<typename std::remove_pointer<V>::type>();
-			constexpr bool is_convertible = Value::is_convertible<V>();
+			constexpr bool is_builtin = Value::allowed_or_heap<typename std::remove_pointer<V>::type>();
+			constexpr bool is_convertible = std::is_arithmetic<V>::value;
 			IFDBG(std::cout << "eval<" << type_name<T>() << ">(expr) / V = " << type_name<V>() << std::endl);
 
 			/* Get as unevaluated expression */
@@ -273,9 +273,9 @@ class Interpreter
 			}
 
 			/* Get as a `&` or `*` to a value of a valid ValueContainer variant alternative */
-			else if constexpr (is_allowed && std::is_reference<T>::value)
+			else if constexpr (is_builtin && std::is_reference<T>::value)
 				return referenced_value(&expr).get<V>();
-			else if constexpr (is_allowed && std::is_pointer<T>::value)
+			else if constexpr (is_builtin && std::is_pointer<T>::value)
 				return &referenced_value(&expr).get<typename std::remove_pointer<V>::type>();
 
 			/* Special case: provide compatibility of mtl::native::String with std::string */
@@ -294,7 +294,7 @@ class Interpreter
 			}
 
 			/* Get as a value of fallback type (std::any) */
-			if constexpr (!is_allowed && !is_convertible) {
+			if constexpr (!is_builtin && !is_convertible) {
 				auto &val = referenced_value(&expr);
 				auto &any = val.is<Object>() ? val.get<Object>().get_native().as_any() : val.as_any();
 				auto &t = any.type();
@@ -331,8 +331,8 @@ class Interpreter
 			/* Otherwise -- evaluate and convert to T (return by value) */
 			else {
 				auto val = eval(expr);
-				/* If T is not in variant's alternative list but is convertible to one of them */
-				if constexpr (!is_allowed && is_convertible) {
+				/* If T is (not) in variant's alternative list but is convertible to one of them */
+				if constexpr (is_convertible) {
 					return val.as<V>();
 				} else
 					return val.get<T>();
