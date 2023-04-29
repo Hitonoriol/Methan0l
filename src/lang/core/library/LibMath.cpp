@@ -17,43 +17,37 @@ void LibMath::load()
 		const double multiplier = std::pow(10.0, decimal_places);
 		return std::ceil(value * multiplier) / multiplier;
 	});
-	function("rad", [&](Args args) {return Value(dbl(args) * DEGREE);});
-	function("deg", [&](Args args) {return Value(dbl(args) * RADIAN);});
+	function("rad", [&](Float deg) {return deg * DEGREE;});
+	function("deg", [&](Float rad) {return rad * RADIAN;});
 
-	function("sin", [&](Args args) {return Value(sin(dbl(args)));});
-	function("cos", [&](Args args) {return Value(cos(dbl(args)));});
-	function("tan", [&](Args args) {return Value(tan(dbl(args)));});
-	function("acos", [&](Args args) {return Value(acos(dbl(args)));});
-	function("asin", [&](Args args) {return Value(asin(dbl(args)));});
-	function("atan", [&](Args args) {return Value(atan(dbl(args)));});
-	function("atan2", [&](Args args) {return Value(atan2(dbl(args, 0), dbl(args, 1)));});
+	function("sin", &sin);
+	function("cos", &cos);
+	function("tan", &tan);
+	function("acos", &acos);
+	function("asin", &asin);
+	function("atan", &atan);
+	function("atan2", &atan2);
 
-	function("abs", [&](Args args) {
-		Value n = arg(args);
-		return n.type() == Type::DOUBLE
-				? Value(fabs(mtl::dbl(n))) : Value(abs(mtl::num(n)));
-	});
-
-	function("pow", [this](Args args) {
-		Value n = arg(args), powr = arg(args, 1);
-		double res = pow(mtl::dbl(n), mtl::dbl(powr));
-		if (!Value::is_double_op(n, powr))
-			n = (Int)res;
-		else
-			n = res;
-		return n;
-	});
-
-	function("sqrt", [&](Args args) {return Value(sqrt(dbl(args)));});
-	function("exp", [&](Args args) {return Value(exp(dbl(args)));});
+	function("sqrt", &sqrt);
+	function("exp", &exp);
 
 	/* logn$(n, x)	<-- log <x> base <n> */
-	function("logn", [&](Args args) {return Value(log(dbl(args, 1)) / log(dbl(args)));});
-	function("log", [&](Args args) {return Value(log(dbl(args)));});
-	function("log10", [&](Args args) {return Value(log10(dbl(args)));});
+	function("logn", [&](Float n, Float x) {return log(x) / log(n);});
+	function("log", &log);
+	function("log10", &log10);
 
-	function("ceil", [&](Args args) {return Value(ceil(dbl(args)));});
-	function("floor", [&](Args args) {return Value(floor(dbl(args)));});
+	function("ceil", &ceil);
+	function("floor", &floor);
+
+	function("abs", [&](Value n) {
+		return n.is<Float>() ?
+			Value(fabs(mtl::dbl(n))) : Value(abs(mtl::num(n)));
+	});
+
+	function("pow", [this](Value n, Value powr) {
+		Value res = pow(mtl::dbl(n), mtl::dbl(powr));
+		return Value::is_double_op(n, powr) ? res : Value(res.as<Int>());
+	});
 }
 
 } /* namespace mtl */

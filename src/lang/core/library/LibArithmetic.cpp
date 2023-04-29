@@ -41,7 +41,8 @@ void LibArithmetic::load()
 
 	/* Unary minus */
 	prefix_operator(TokenType::MINUS, UnaryOpr([this](Value &rhs) {
-		return rhs.type() == Type::INTEGER ? -rhs.get<Int>() : -rhs.get<double>();
+		return rhs.is<Int>() ?
+			Value(-rhs.get<Int>()) : Value(-rhs.get<double>());
 	}));
 
 	/* Prefix & Postfix increment / decrement */

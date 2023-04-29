@@ -32,12 +32,12 @@ METHAN0L_LIBRARY(LibData)
 
 void LibData::load()
 {
-	getter("get_os_name", mtl::str(get_os()));
+	getter("get_os_name", str(get_os()));
 	getter("get_major_version", MAJOR_VERSION);
 	getter("get_release_version", RELEASE_VERSION);
 	getter("get_minor_version", MINOR_VERSION);
 	getter("get_version_code", VERSION_CODE);
-	getter("get_version", VERSION_STR);
+	getter("get_version", str(VERSION_STR));
 
 	/* ref.reset$(new_idfr) */
 	function("reset", [&](Args args) {
@@ -51,7 +51,7 @@ void LibData::load()
 		return Value::NO_VALUE;
 	});
 
-	function("get_args", [&](Args args) {
+	function("get_args", [&] {
 		return context->current_function().get_callargs();
 	});
 
@@ -67,7 +67,7 @@ void LibData::load()
 		return core::range(*context, start, n, step);
 	});
 
-	function("purge", [&](Args args) {
+	function("purge", [&] {
 		context->current_unit()->local().clear();
 		return Value::NO_VALUE;
 	});
@@ -76,10 +76,10 @@ void LibData::load()
 	external_function("convert", core::convert);
 
 	/* ms = now$() */
-	function("now", [&](Args args) {
-		return Value(std::chrono::duration_cast<std::chrono::milliseconds>(
-						std::chrono::system_clock::now().time_since_epoch())
-				.count());
+	function("now", [&] {
+		return std::chrono::duration_cast<std::chrono::milliseconds>(
+			std::chrono::system_clock::now().time_since_epoch()
+		).count();
 	});
 
 	load_operators();
@@ -200,7 +200,7 @@ void LibData::load_operators()
 
 	/* Evaluate and convert to string: $$expr */
 	prefix_operator(TokenType::DOUBLE_DOLLAR, LazyUnaryOpr([&](auto rhs) {
-		return str(rhs->evaluate(*context).to_string());
+		return object(rhs->evaluate(*context).to_string());
 	}));
 
 	prefix_operator(TokenType::NO_EVAL, LazyUnaryOpr([&](auto rhs) {

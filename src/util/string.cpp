@@ -1,5 +1,7 @@
-#include "util.h"
 #include "string.h"
+
+#include "util.h"
+#include "lang/core/class/String.h"
 
 namespace mtl
 {
@@ -77,18 +79,21 @@ std::string indent(std::string &&str)
 	return str;
 }
 
-std::string to_base(UInt value, uint8_t base)
+Shared<native::String> to_base(UInt value, uint8_t base)
 {
-	if (value == 0)
-		return "0";
+	auto result = make<native::String>();
+	if (value == 0) {
+		**result = "0";
+		return result;
+	}
 
-	std::string result;
 	while (value != 0) {
 		UInt digit = value % base;
-		result += (digit > 9 ? 'A' + digit - 10 : digit + '0');
+		**result += (digit > 9 ? 'A' + digit - 10 : digit + '0');
 		value /= base;
 	}
-	std::reverse(result.begin(), result.end());
+
+	std::reverse(result->begin(), result->end());
 	return result;
 }
 

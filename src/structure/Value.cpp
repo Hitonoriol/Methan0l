@@ -210,7 +210,8 @@ Shared<native::String> Value::to_string()
 
 		TYPE_CASE(Type::FUNCTION) {
 			if (is<NativeFunc>())
-				return mtl::make<String>("Native function 0x" + to_base(reinterpret_cast<UInt>(identity()), 16));
+				return mtl::make<String>(
+					"Native function 0x" + *to_base(reinterpret_cast<UInt>(identity()), 16));
 			return mtl::make<String>(get<Function>().to_string());
 		}
 
@@ -224,7 +225,7 @@ Shared<native::String> Value::to_string()
 
 		TYPE_DEFAULT {
 			sstream ss;
-			ss << "{" << type_name() << " @ 0x" << to_base(reinterpret_cast<UInt>(identity()), 16) << "}";
+			ss << "{" << type_name() << " @ 0x" << *to_base(reinterpret_cast<UInt>(identity()), 16) << "}";
 			return mtl::make<String>(ss.str());
 		}
 	)

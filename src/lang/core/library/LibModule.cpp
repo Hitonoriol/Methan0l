@@ -14,7 +14,7 @@ METHAN0L_LIBRARY(LibModule)
 void LibModule::load()
 {
 	/* load(path) */
-	function("load", [&](std::string path) {
+	function("load", [&](const std::string &path) {
 		auto module_v = context->make<Unit>();
 		core::load_module(*context, path, module_v.get<Unit>());
 		return module_v;

@@ -20,14 +20,15 @@ METHAN0L_LIBRARY(LibString)
 void LibString::load()
 {
 	/* int_val.to_base$(base) */
-	function("to_base", [&](Args args) {
-		int base = num(args, 1);
+	function("to_base", default_args(10),
+		[&](const std::string &numstr, Int dest_base, Int src_base) {
+			if (dest_base < 2)
+				throw std::runtime_error("Invalid base");
 
-		if (base < 2)
-			throw std::runtime_error("Invalid base");
-
-		return Value(to_base((unsigned)num(args), base));
-	});
+			Int val = std::stoll(numstr, 0, src_base);
+			return object(to_base(val, dest_base));
+		}
+	);
 
 	load_operators();
 }

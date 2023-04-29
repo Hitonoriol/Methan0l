@@ -26,7 +26,7 @@ std::string indent(std::string&&);
 void replace_all(std::string &str, std::string_view from, const std::string &to,
 		int limit = -1);
 std::vector<std::string> split(const std::string &s, const std::string &delimiter);
-std::string to_base(UInt value, uint8_t base);
+Shared<native::String> to_base(UInt value, uint8_t base);
 
 template<typename T>
 inline auto str(

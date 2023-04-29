@@ -72,6 +72,12 @@ class Library
 			});
 		}
 
+		template<typename C>
+		inline Value object(const Shared<C> &obj)
+		{
+			return context->bind_object(obj);
+		}
+
 		void getter(const std::string &name, Value);
 
 		void prefix_operator(TokenType, const LazyUnaryOpr&);

@@ -33,7 +33,7 @@ void LibInternal::load()
 	context->register_env_getter("get_runpath", EnvVars::RUNPATH);
 	context->register_env_getter("get_rundir", EnvVars::RUNDIR);
 
-	function("get_launch_args", [&](Args args) {
+	function("get_launch_args", [&] {
 		return static_cast<Interpreter*>(context)->get_main().local().get(EnvVars::LAUNCH_ARGS);
 	});
 
@@ -68,39 +68,39 @@ void LibInternal::load()
 		auto start = std::chrono::high_resolution_clock::now();
 		args.front()->execute(*context);
 		auto end = std::chrono::high_resolution_clock::now();
-		return Value(std::chrono::duration<double, std::milli>(end - start).count());
+		return std::chrono::duration<double, std::milli>(end - start).count();
 	});
 
 	/* sync_work_dir() */
-	function("sync_work_dir", [&](Args args) {
+	function("sync_work_dir", [&] {
 		std::filesystem::current_path(context->get_scriptdir());
 		return Value::NO_VALUE;
 	});
 
 	/* pause$(ms) */
-	function("pause", [&](Args args) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(num(args)));
+	function("pause", [&](Int ms) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 		return Value::NO_VALUE;
 	});
 
 	/* err$(err_msg) */
-	function("err", [&](Args args) {
-		std::cerr << str(args) << std::endl;
+	function("err", [&](const std::string &msg) {
+		std::cerr << msg << std::endl;
 		return Value::NO_VALUE;
 	});
 
 	/* die$(exception) */
 	function("die", [&](Args args) {
-		Value exception = !args.empty() ? arg(args) : Value("Stopping program execution");
+		auto exception = !args.empty() ? arg(args) : Value("Stopping program execution");
 		throw exception;
 		return Value::NO_VALUE;
 	});
 
 	/* unit.import$() */
 	function("import", [&](Args args) {
-		Value &module_val = ref(args[0]);
+		auto &module_val = ref(args[0]);
 		module_val.assert_type(Type::UNIT, "import$() can only be applied on a Unit");
-		Unit &module = module_val.get<Unit>();
+		auto &module = module_val.get<Unit>();
 		core::import(context, module);
 		return Value::NO_VALUE;
 	});
@@ -110,38 +110,35 @@ void LibInternal::load()
 		/* If received Unit is referenceable (aka is "behind" an IdfrExpr/IndexExpr) -- modify it
 		 * 			& return Methan0l reference to it */
 		if (instanceof<IdentifierExpr>(args[0].get())) {
-			Value &val = ref(args[0]);
+			auto &val = ref(args[0]);
 			make_box(val);
 			return Value::ref(val);
 		}
 		/* If Unit is non-referenceable, get its copy, modify it & return by copy */
 		else {
-			Value val = arg(args);
+			auto val = arg(args);
 			make_box(val);
 			return val;
 		}
 	});
 
-	function("is_main_unit", [&](Args args) {
-		return Value(&context->get_main() == context->current_unit());
+	function("is_main_unit", [&] {
+		return &context->get_main() == context->current_unit();
 	});
 
 	/* unit.value$("idfr_name")
 		 * value$("idfr_name") -- get idfr's Value from Main Unit */
 	function("value", [&](Args args) {
-		Unit &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : context->get_main();
-		std::string idfr_name = mtl::str(val(args.back()));
-		Value &val = unit.local().get(idfr_name);
+		auto &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : context->get_main();
+		auto idfr_name = mtl::str(val(args.back()));
+		auto &val = unit.local().get(idfr_name);
 		return Value::ref(val);
 	});
 
 	/* unit.local$(action_to_exec) <-- execute Unit <action_to_exec> inside the <unit>'s local scope */
-	function("local", [&](Args args) {
-		args[0]->assert_type<IdentifierExpr>(args[0]->info() + " is not an Identifier");
-		Value &uv = ref(args[0]);
-		Value av = arg(args, 1);
-		Unit unit = uv.get<Unit>();
-		Unit &action = av.get<Unit>();
+	function("local", [&](Value uv, Value av) {
+		auto &unit = uv.get<Unit>();
+		auto &action = av.get<Unit>();
 		action.manage_table(unit);
 		action.set_persisent(true);
 
@@ -156,7 +153,7 @@ void LibInternal::load()
 	});
 
 	/* Stop program execution */
-	function("exit", [&](Args args) {
+	function("exit", [&] {
 		context->stop();
 		return Value::NO_VALUE;
 	});
@@ -190,7 +187,7 @@ void LibInternal::load_operators()
 	 * Nested `.` is parsed as:
 	 * 		(foo.bar).baz
 	 */
-	infix_operator(TokenType::DOT, LazyBinaryOpr([&](auto lhs, auto rhs) -> Value {
+	infix_operator(TokenType::DOT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		Value lval = val(lhs);
 
 		/* Object field access / method invocation */
@@ -202,7 +199,7 @@ void LibInternal::load_operators()
 			if (lval.type() == Type::UNIT && lval.get<Unit>().is_persistent()
 					&& lval.get<Unit>().local().exists(Expression::get_name(rhs))) {
 				context->use(lval.get<Unit>());
-				Value ret = context->evaluate(try_cast<InvokeExpr>(rhs));
+				auto ret = context->evaluate(try_cast<InvokeExpr>(rhs));
 				context->unuse();
 				return ret;
 			} else {
@@ -213,7 +210,7 @@ void LibInternal::load_operators()
 		else {
 			LOG("* Accessing a Box value: " << lval << " / " << rhs->info());
 			lval.assert_type(Type::UNIT, "Invalid dot-operator expression");
-			Unit &unit = lval.get<Unit>();
+			auto &unit = lval.get<Unit>();
 			if (!unit.is_persistent())
 				throw std::runtime_error("Trying to access an idfr in a non-persistent Unit");
 
@@ -225,14 +222,14 @@ void LibInternal::load_operators()
 Value& LibInternal::box_value(Unit &box, ExprPtr expr)
 {
 	context->use(box);
-	Value &result = context->referenced_value(expr);
+	auto &result = context->referenced_value(expr);
 	context->unuse();
 	return result;
 }
 
 void LibInternal::save_return(ExprPtr ret)
 {
-	Unit *unit = context->current_unit();
+	auto *unit = context->current_unit();
 	if (instanceof<IdentifierExpr>(ret)
 			&& IdentifierExpr::get_name(ret) == Token::reserved(Word::BREAK)) {
 		unit->stop(true);
@@ -244,7 +241,7 @@ void LibInternal::save_return(ExprPtr ret)
 void LibInternal::make_box(Value &unit_val)
 {
 	unit_val.assert_type(Type::UNIT, "make_box$() can only be applied on a Unit");
-	Unit &unit = unit_val.get<Unit>();
+	auto &unit = unit_val.get<Unit>();
 	unit.box();
 	context->execute(unit);
 }
@@ -254,7 +251,7 @@ Value LibInternal::object_dot_operator(Object &obj, ExprPtr rhs)
 	LOG("Applying dot opr on: " << obj << " RHS: " << rhs->info())
 
 	if (instanceof<InvokeExpr>(rhs.get())) {
-		InvokeExpr &method = try_cast<InvokeExpr>(rhs);
+		auto &method = try_cast<InvokeExpr>(rhs);
 		auto &method_name = try_cast<IdentifierExpr>(method.get_lhs()).get_name();
 		return obj.invoke_method(method_name, method.arg_list());
 	}
@@ -267,10 +264,9 @@ Value LibInternal::object_dot_operator(Object &obj, ExprPtr rhs)
  */
 Value LibInternal::invoke_pseudo_method(ExprPtr obj, ExprPtr func)
 {
-	if constexpr (DEBUG)
-		out << "Pseudo-method [" << obj->info() << "] . [" << func->info() << "]" << std::endl;
+	LOG("Pseudo-method [" << obj->info() << "] . [" << func->info() << "]")
 
-	InvokeExpr method = try_cast<InvokeExpr>(func);
+	auto &method = try_cast<InvokeExpr>(func);
 	method.arg_list().push_front(obj);
 	return context->evaluate(method);
 }
