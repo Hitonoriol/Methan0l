@@ -31,6 +31,9 @@ void LibMath::load()
 	function("sqrt", &sqrt);
 	function("exp", &exp);
 
+	function("max", [](Value a, Value b) {return a.as<Float>() > b.as<Float>() ? a : b;});
+	function("min", [](Value a, Value b) {return a.as<Float>() > b.as<Float>() ? b : a;});
+
 	/* logn$(n, x)	<-- log <x> base <n> */
 	function("logn", [&](Float n, Float x) {return log(x) / log(n);});
 	function("log", &log);
