@@ -3,8 +3,7 @@
 
 #include <type_traits>
 
-#include <type.h>
-#include <Interpreter.h>
+#include <interpreter/Interpreter.h>
 #include <structure/Value.h>
 #include <structure/DataTable.h>
 #include <util/util.h>
