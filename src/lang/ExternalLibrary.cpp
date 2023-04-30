@@ -1,6 +1,7 @@
-#include <lang/ExternalLibrary.h>
+#include "ExternalLibrary.h"
 
 #include <boost/dll.hpp>
+
 #include <lang/Library.h>
 #include <interpreter/Interpreter.h>
 

@@ -1,17 +1,17 @@
 #ifndef SRC_STRUCTURE_OBJECT_CLASS_H_
 #define SRC_STRUCTURE_OBJECT_CLASS_H_
 
-#include <oop/OOPDefs.h>
+#include "OOPDefs.h"
+
 #include <string>
 #include <set>
 #include <unordered_map>
 #include <typeinfo>
 
-#include "type.h"
-#include "util/cast.h"
-#include "structure/DataTable.h"
-#include "structure/Value.h"
-#include "interpreter/Interpreter.h"
+#include <util/cast.h>
+#include <structure/DataTable.h>
+#include <structure/Value.h>
+#include <interpreter/Interpreter.h>
 
 namespace mtl
 {

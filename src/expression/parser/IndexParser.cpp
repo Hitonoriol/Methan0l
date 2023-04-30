@@ -1,7 +1,8 @@
-#include <parser/Parser.h>
 #include "IndexParser.h"
-#include "expression/Expression.h"
-#include "expression/PrefixExpr.h"
+
+#include <parser/Parser.h>
+#include <expression/Expression.h>
+#include <expression/PrefixExpr.h>
 
 namespace mtl
 {

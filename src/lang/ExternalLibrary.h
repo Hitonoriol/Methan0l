@@ -1,7 +1,7 @@
 #ifndef SRC_LANG_EXTERNALLIBRARY_H_
 #define SRC_LANG_EXTERNALLIBRARY_H_
 
-#include <lang/SharedLibrary.h>
+#include "SharedLibrary.h"
 
 namespace mtl
 {

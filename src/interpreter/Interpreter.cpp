@@ -5,27 +5,27 @@
 #include <filesystem>
 #include <boost/dll.hpp>
 
-#include "util/util.h"
-#include "util/benchmark.h"
+#include <util/util.h>
+#include <util/benchmark.h>
 
-#include "parser/Methan0lParser.h"
-#include "expression/AssignExpr.h"
-#include "expression/BinaryOperatorExpr.h"
-#include "expression/ConditionalExpr.h"
-#include "expression/IdentifierExpr.h"
-#include "expression/PrefixExpr.h"
-#include "expression/PostfixExpr.h"
-#include "expression/UnitExpr.h"
-#include "expression/InvokeExpr.h"
-#include "expression/ListExpr.h"
-#include "expression/IndexExpr.h"
-#include "expression/FunctionExpr.h"
-#include "expression/TryCatchExpr.h"
+#include <parser/Methan0lParser.h>
+#include <expression/AssignExpr.h>
+#include <expression/BinaryOperatorExpr.h>
+#include <expression/ConditionalExpr.h>
+#include <expression/IdentifierExpr.h>
+#include <expression/PrefixExpr.h>
+#include <expression/PostfixExpr.h>
+#include <expression/UnitExpr.h>
+#include <expression/InvokeExpr.h>
+#include <expression/ListExpr.h>
+#include <expression/IndexExpr.h>
+#include <expression/FunctionExpr.h>
+#include <expression/TryCatchExpr.h>
 
-#include "lang/Library.h"
-#include "oop/Class.h"
-#include "CoreLibrary.h"
-#include "Builtins.h"
+#include <lang/Library.h>
+#include <oop/Class.h>
+#include <CoreLibrary.h>
+#include <interpreter/Builtins.h>
 
 namespace mtl
 {

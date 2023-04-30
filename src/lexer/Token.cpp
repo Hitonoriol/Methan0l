@@ -1,17 +1,17 @@
-#include <lexer/Token.h>
+#include "Token.h"
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 
-#include "type.h"
-#include "util/util.h"
-#include "util/array.h"
-
-#include "expression/BinaryOperatorExpr.h"
-#include "expression/IdentifierExpr.h"
-#include "expression/UnitExpr.h"
-#include "expression/FunctionExpr.h"
-#include "expression/InvokeExpr.h"
+#include <type.h>
+#include <util/util.h>
+#include <util/array.h>
+#include <expression/BinaryOperatorExpr.h>
+#include <expression/IdentifierExpr.h>
+#include <expression/UnitExpr.h>
+#include <expression/FunctionExpr.h>
+#include <expression/InvokeExpr.h>
 
 namespace mtl
 {

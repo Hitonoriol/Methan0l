@@ -1,4 +1,4 @@
-#include <interpreter/Builtins.h>
+#include "Builtins.h"
 
 #include <lang/core/class/String.h>
 #include <lang/core/class/List.h>

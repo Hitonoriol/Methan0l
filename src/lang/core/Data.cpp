@@ -1,8 +1,8 @@
 #include "Data.h"
 
-#include <CoreLibrary.h>
-
 #include <cmath>
+
+#include <CoreLibrary.h>
 
 namespace mtl::core
 {

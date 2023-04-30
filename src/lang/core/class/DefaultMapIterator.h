@@ -1,8 +1,8 @@
-
 #ifndef SRC_LANG_CORE_CLASS_DEFAULTMAPITERATOR_H_
 #define SRC_LANG_CORE_CLASS_DEFAULTMAPITERATOR_H_
 
 #include "DefaultIterator.h"
+
 #include <structure/Wrapper.h>
 
 namespace mtl

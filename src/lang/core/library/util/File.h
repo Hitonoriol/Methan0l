@@ -1,7 +1,6 @@
 #ifndef SRC_LANG_CLASS_FILE_H_
 #define SRC_LANG_CLASS_FILE_H_
 
-#include <oop/Class.h>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -9,7 +8,8 @@
 #include <string_view>
 #include <filesystem>
 
-#include "oop/Object.h"
+#include <oop/Class.h>
+#include <oop/Object.h>
 
 namespace mtl
 {

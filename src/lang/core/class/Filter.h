@@ -2,6 +2,7 @@
 #define SRC_LANG_CORE_CLASS_FILTER_H_
 
 #include "Iterable.h"
+#include "Iterator.h"
 
 namespace mtl
 {

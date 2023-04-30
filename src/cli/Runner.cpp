@@ -3,10 +3,9 @@
 #include <iostream>
 #include <string>
 
-#include "interpreter/Interpreter.h"
-#include "structure/Unit.h"
-#include "structure/Value.h"
-#include "type.h"
+#include <interpreter/Interpreter.h>
+#include <structure/Unit.h>
+#include <structure/Value.h>
 
 namespace mtl
 {

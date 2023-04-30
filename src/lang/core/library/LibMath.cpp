@@ -1,10 +1,10 @@
-#include <lang/core/library/LibMath.h>
+#include "LibMath.h"
+
 #include <cmath>
 #include <functional>
 
-#include "interpreter/Interpreter.h"
-#include "structure/Value.h"
-#include "type.h"
+#include <interpreter/Interpreter.h>
+#include <structure/Value.h>
 
 namespace mtl
 {

@@ -2,7 +2,8 @@
 #define SRC_EXPRESSION_PARSER_LISTPARSER_H_
 
 #include "PrefixParser.h"
-#include "../ListExpr.h"
+
+#include <expression/ListExpr.h>
 
 namespace mtl
 {

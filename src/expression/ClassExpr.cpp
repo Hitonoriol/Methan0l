@@ -1,4 +1,3 @@
-#include <oop/Class.h>
 #include "ClassExpr.h"
 
 #include <algorithm>
@@ -6,17 +5,17 @@
 #include <string_view>
 #include <utility>
 
-#include "interpreter/Interpreter.h"
-#include "structure/DataTable.h"
-#include "structure/Function.h"
-#include "interpreter/TypeManager.h"
-#include "structure/Value.h"
-#include "type.h"
-#include "util/util.h"
-#include "parser/MapParser.h"
-#include "IdentifierExpr.h"
-#include "InvokeExpr.h"
-#include "ListExpr.h"
+#include <util/util.h>
+#include <structure/DataTable.h>
+#include <structure/Function.h>
+#include <structure/Value.h>
+#include <oop/Class.h>
+#include <interpreter/Interpreter.h>
+#include <interpreter/TypeManager.h>
+#include <expression/parser/MapParser.h>
+#include <expression/IdentifierExpr.h>
+#include <expression/InvokeExpr.h>
+#include <expression/ListExpr.h>
 
 namespace mtl
 {

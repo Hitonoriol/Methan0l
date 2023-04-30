@@ -1,7 +1,6 @@
 #ifndef SRC_LANG_CORE_CLASS_COLLECTION_H_
 #define SRC_LANG_CORE_CLASS_COLLECTION_H_
 
-#include <type.h>
 #include <except/except.h>
 #include <structure/Value.h>
 #include <lang/core/class/Iterable.h>

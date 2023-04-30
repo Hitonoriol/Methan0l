@@ -3,13 +3,14 @@
 #include <iostream>
 #include <type_traits>
 
-#include "parser/MapParser.h"
-#include "util/hash.h"
-#include "util/meta/type_traits.h"
-#include "PrefixExpr.h"
-#include "lang/core/Data.h"
-#include "RangeExpr.h"
-#include "CoreLibrary.h"
+#include <util/hash.h>
+#include <util/meta/type_traits.h>
+#include <lang/core/Data.h>
+#include <expression/RangeExpr.h>
+#include <expression/PrefixExpr.h>
+#include <expression/LiteralExpr.h>
+#include <expression/parser/MapParser.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

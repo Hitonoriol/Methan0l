@@ -1,10 +1,11 @@
 #ifndef EXPRESSION_PARSER_PREFIXOPERATORPARSER_H_
 #define EXPRESSION_PARSER_PREFIXOPERATORPARSER_H_
 
-#include <parser/Parser.h>
 #include "PrefixParser.h"
-#include "../PrefixExpr.h"
-#include "precedence.h"
+
+#include <parser/Parser.h>
+#include <expression/PrefixExpr.h>
+#include <expression/parser/precedence.h>
 
 namespace mtl
 {

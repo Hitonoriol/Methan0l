@@ -2,8 +2,9 @@
 #define EXPRESSION_LITERALEXPR_H_
 
 #include "Expression.h"
-#include "../util/util.h"
-#include "../structure/Value.h"
+
+#include <util/util.h>
+#include <structure/Value.h>
 
 namespace mtl
 {

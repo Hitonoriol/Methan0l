@@ -1,9 +1,10 @@
 #ifndef EXPRESSION_PARSER_PREFIXPARSER_H_
 #define EXPRESSION_PARSER_PREFIXPARSER_H_
 
-#include "type.h"
-#include "precedence.h"
 #include "ExprParser.h"
+
+#include <type.h>
+#include <expression/parser/precedence.h>
 
 namespace mtl
 {

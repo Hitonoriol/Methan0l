@@ -1,13 +1,13 @@
 #include "Methan0l.h"
 
-#include "interpreter/Interpreter.h"
-#include "Runner.h"
-#include "InteractiveRunner.h"
-#include "util/global.h"
-#include "version.h"
-
 #include <iomanip>
 #include <charconv>
+
+#include <version.h>
+#include <util/global.h>
+#include <interpreter/Interpreter.h>
+#include <cli/Runner.h>
+#include <cli/InteractiveRunner.h>
 
 /* Launch args
  *

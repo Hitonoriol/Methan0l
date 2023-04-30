@@ -1,8 +1,7 @@
 #ifndef SRC_LANG_LIBUNIT_H_
 #define SRC_LANG_LIBUNIT_H_
 
-#include "type.h"
-#include "lang/Library.h"
+#include <lang/Library.h>
 
 namespace mtl
 {

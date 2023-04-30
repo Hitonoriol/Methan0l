@@ -1,10 +1,10 @@
 #include "PostfixExpr.h"
 
-#include <interpreter/Interpreter.h>
-#include <lexer/Token.h>
-#include <type.h>
 #include <iostream>
 
+#include <interpreter/Interpreter.h>
+#include <lexer/Token.h>
+#include <expression/LiteralExpr.h>
 
 namespace mtl
 {

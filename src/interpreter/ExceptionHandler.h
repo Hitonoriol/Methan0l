@@ -1,9 +1,9 @@
 #ifndef SRC_EXCEPTIONHANDLER_H_
 #define SRC_EXCEPTIONHANDLER_H_
 
-#include "structure/Value.h"
-
 #include <stack>
+
+#include <structure/Value.h>
 
 namespace mtl
 {

@@ -6,8 +6,8 @@
 #include <unordered_map>
 #include <deque>
 
-#include "interpreter/Interpreter.h"
-#include "util/StringFormatter.h"
+#include <interpreter/Interpreter.h>
+#include <util/StringFormatter.h>
 
 namespace mtl
 {

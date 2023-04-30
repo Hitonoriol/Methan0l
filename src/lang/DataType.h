@@ -1,9 +1,9 @@
 #ifndef SRC_LANG_DATATYPE_H_
 #define SRC_LANG_DATATYPE_H_
 
-#include <structure/TypeID.h>
 #include <unordered_map>
 
+#include <structure/TypeID.h>
 #include <type.h>
 
 namespace mtl

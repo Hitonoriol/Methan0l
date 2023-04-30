@@ -1,13 +1,13 @@
-#include <lang/core/library/LibArithmetic.h>
-#include <lexer/Token.h>
+#include "LibArithmetic.h"
+
 #include <iterator>
 #include <variant>
 #include <type_traits>
 
-#include "util/array.h"
-#include "util/meta/for_each.h"
-#include "structure/Value.h"
-#include "type.h"
+#include <lexer/Token.h>
+#include <util/array.h>
+#include <util/meta/for_each.h>
+#include <structure/Value.h>
 
 namespace mtl
 {

@@ -1,13 +1,13 @@
 #ifndef SRC_LANG_CORE_CLASS_SET_H_
 #define SRC_LANG_CORE_CLASS_SET_H_
 
-#include <type.h>
-#include <lang/core/class/Collection.h>
-#include <oop/NativeClass.h>
-#include <structure/Wrapper.h>
-#include <lang/core/class/DefaultIterator.h>
+#include "Collection.h"
+#include "DefaultIterator.h"
 
 #include <algorithm>
+
+#include <oop/NativeClass.h>
+#include <structure/Wrapper.h>
 
 namespace mtl
 {

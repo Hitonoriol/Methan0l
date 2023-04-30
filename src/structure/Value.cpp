@@ -6,17 +6,16 @@
 #include <type_traits>
 #include <memory>
 
-#include "ValueRef.h"
-#include "type.h"
-#include "util/util.h"
-#include "util/hash.h"
-#include "util/meta/type_traits.h"
-#include "util/containers.h"
-#include "expression/LiteralExpr.h"
-#include "CoreLibrary.h"
-
-#include "oop/Class.h"
-#include "oop/Object.h"
+#include <type.h>
+#include <structure/ValueRef.h>
+#include <util/util.h>
+#include <util/hash.h>
+#include <util/meta/type_traits.h>
+#include <util/containers.h>
+#include <expression/LiteralExpr.h>
+#include <oop/Class.h>
+#include <oop/Object.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

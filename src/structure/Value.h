@@ -1,6 +1,9 @@
 #ifndef SRC_STRUCTURE_VALUE_H_
 #define SRC_STRUCTURE_VALUE_H_
 
+#include "ValueRef.h"
+#include "Function.h"
+
 #include <iostream>
 #include <string>
 #include <type_traits>
@@ -9,13 +12,11 @@
 #include <typeinfo>
 #include <any>
 
-#include "ValueRef.h"
-#include "Function.h"
-#include "except/except.h"
-#include "oop/Object.h"
-#include "util/meta/type_traits.h"
-#include "util/cast.h"
-#include "lang/DataType.h"
+#include <except/except.h>
+#include <oop/Object.h>
+#include <util/meta/type_traits.h>
+#include <util/cast.h>
+#include <lang/DataType.h>
 
 #define IS_EMPTY(v) std::is_same<VT(v), NoValue>::value
 #define IS_NIL(v) std::is_same<VT(v), Nil>::value

@@ -1,11 +1,12 @@
-#include <lang/core/Module.h>
+#include "Module.h"
 
-#include "interpreter/Interpreter.h"
-#include "structure/Value.h"
-#include "interpreter/Interpreter.h"
-#include "util/util.h"
 #include <filesystem>
 #include <boost/dll.hpp>
+
+#include <interpreter/Interpreter.h>
+#include <structure/Value.h>
+#include <interpreter/Interpreter.h>
+#include <util/util.h>
 #include <lang/core/File.h>
 
 namespace mtl::core

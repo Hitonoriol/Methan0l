@@ -1,14 +1,14 @@
 #ifndef EXPRESSION_EXPRESSION_H_
 #define EXPRESSION_EXPRESSION_H_
 
-#include <lexer/Token.h>
 #include <iostream>
 
-#include "type.h"
-#include "structure/Value.h"
-#include "util/debug.h"
-#include "util/memory.h"
-#include "util/string.h"
+#include <type.h>
+#include <lexer/Token.h>
+#include <structure/Value.h>
+#include <util/debug.h>
+#include <util/memory.h>
+#include <util/string.h>
 
 /* Operator expression ``type``::is(Expression&, TokenType) definition macro.
  * returns:

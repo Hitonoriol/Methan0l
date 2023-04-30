@@ -5,13 +5,13 @@
 #include <string_view>
 #include <numeric>
 
-#include "lang/Library.h"
-#include "lang/core/Data.h"
+#include <lang/Library.h>
+#include <lang/core/Data.h>
 
-#include "expression/LiteralExpr.h"
-#include "util/meta/type_traits.h"
-#include "util/containers.h"
-#include "util/hash.h"
+#include <expression/LiteralExpr.h>
+#include <util/meta/type_traits.h>
+#include <util/containers.h>
+#include <util/hash.h>
 
 namespace mtl
 {

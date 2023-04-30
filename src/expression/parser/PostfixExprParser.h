@@ -2,7 +2,8 @@
 #define SRC_EXPRESSION_PARSER_POSTFIXEXPRPARSER_H_
 
 #include "InfixParser.h"
-#include "../PostfixExpr.h"
+
+#include "expression/PostfixExpr.h"
 
 namespace mtl
 {

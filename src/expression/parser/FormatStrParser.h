@@ -5,9 +5,9 @@
 
 #include <regex>
 
-#include "../FormatStrExpr.h"
-#include "../LiteralExpr.h"
-#include "util/StringFormatter.h"
+#include <expression/FormatStrExpr.h>
+#include <expression/LiteralExpr.h>
+#include <util/StringFormatter.h>
 
 namespace mtl
 {

@@ -3,6 +3,7 @@
 
 #include "AbstractMap.h"
 #include "DefaultMapIterator.h"
+
 #include <structure/Wrapper.h>
 
 namespace mtl

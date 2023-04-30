@@ -3,9 +3,8 @@
 #include <iostream>
 #include <string>
 
-#include "interpreter/Interpreter.h"
-#include "../type.h"
-#include "LiteralExpr.h"
+#include <interpreter/Interpreter.h>
+#include <expression/LiteralExpr.h>
 
 namespace mtl
 {

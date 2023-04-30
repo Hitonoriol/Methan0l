@@ -1,4 +1,3 @@
-#include <lexer/Token.h>
 #include "LibString.h"
 
 #include <deque>
@@ -6,11 +5,11 @@
 #include <stdexcept>
 #include <string>
 
-#include "structure/Value.h"
-#include "type.h"
-#include "util/util.h"
-#include "util/StringFormatter.h"
-#include "CoreLibrary.h"
+#include <lexer/Token.h>
+#include <structure/Value.h>
+#include <util/util.h>
+#include <util/StringFormatter.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

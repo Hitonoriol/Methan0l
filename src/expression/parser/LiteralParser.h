@@ -1,10 +1,12 @@
 #ifndef SRC_EXPRESSION_PARSER_LITERALPARSER_H_
 #define SRC_EXPRESSION_PARSER_LITERALPARSER_H_
 
-#include <parser/Parser.h>
-#include "../Expression.h"
-#include "../LiteralExpr.h"
 #include "PrefixParser.h"
+
+#include <parser/Parser.h>
+#include <expression/Expression.h>
+#include <expression/LiteralExpr.h>
+
 
 namespace mtl
 {

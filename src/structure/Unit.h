@@ -1,8 +1,8 @@
 #ifndef SRC_STRUCTURE_UNIT_H_
 #define SRC_STRUCTURE_UNIT_H_
 
-#include "../type.h"
-#include "DataTable.h"
+#include <type.h>
+#include <structure/DataTable.h>
 
 namespace mtl
 {

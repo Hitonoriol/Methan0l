@@ -1,8 +1,9 @@
 #ifndef SRC_LANG_CORE_CLASS_DEFAULTITERATOR_H_
 #define SRC_LANG_CORE_CLASS_DEFAULTITERATOR_H_
 
+#include "Iterator.h"
+
 #include <structure/Value.h>
-#include <lang/core/class/Iterator.h>
 #include <util/containers.h>
 
 namespace mtl

@@ -1,10 +1,9 @@
+#include "InfixWordOperatorParser.h"
+
 #include <lexer/Token.h>
 #include <parser/Parser.h>
-#include "expression/parser/InfixWordOperatorParser.h"
-
-#include "expression/BinaryOperatorExpr.h"
-#include "expression/Expression.h"
-#include "type.h"
+#include <expression/BinaryOperatorExpr.h>
+#include <expression/Expression.h>
 
 namespace mtl
 {

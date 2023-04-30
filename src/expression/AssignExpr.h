@@ -1,11 +1,11 @@
 #ifndef EXPRESSION_ASSIGNEXPR_H_
 #define EXPRESSION_ASSIGNEXPR_H_
 
+#include "BinaryOperatorExpr.h"
+
 #include <string>
 
-#include "../type.h"
-#include "Expression.h"
-#include "IdentifierExpr.h"
+#include <type.h>
 
 namespace mtl
 {

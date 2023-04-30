@@ -1,15 +1,15 @@
 #ifndef EXPRESSION_PARSER_INFIXPARSER_H_
 #define EXPRESSION_PARSER_INFIXPARSER_H_
 
-#include <lexer/Token.h>
+#include "ExprParser.h"
+
 #include <stdexcept>
 #include <memory>
 
-#include "type.h"
-#include "util/util.h"
-#include "precedence.h"
-#include "ExprParser.h"
-#include "../IdentifierExpr.h"
+#include <lexer/Token.h>
+#include <expression/parser/precedence.h>
+#include <expression/IdentifierExpr.h>
+#include <util/util.h>
 
 namespace mtl
 {

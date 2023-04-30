@@ -3,7 +3,6 @@
 #include <oop/NativeClass.h>
 #include <CoreLibrary.h>
 
-
 namespace mtl
 {
 

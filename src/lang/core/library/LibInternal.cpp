@@ -1,5 +1,5 @@
-#include <lang/core/library/LibInternal.h>
-#include <lexer/Token.h>
+#include "LibInternal.h"
+
 #include <chrono>
 #include <deque>
 #include <stdexcept>
@@ -7,21 +7,20 @@
 #include <thread>
 #include <filesystem>
 
-#include "interpreter/Interpreter.h"
-#include "expression/IdentifierExpr.h"
-#include "expression/InvokeExpr.h"
-#include "expression/ListExpr.h"
-#include "expression/parser/MapParser.h"
-#include "interpreter/Interpreter.h"
-#include "structure/Unit.h"
-#include "structure/Value.h"
-#include "util/util.h"
-#include "util/process.h"
-#include "util/Heap.h"
-#include "lang/core/Internal.h"
-
-#include "oop/Class.h"
-#include "oop/Object.h"
+#include <lexer/Token.h>
+#include <expression/IdentifierExpr.h>
+#include <expression/InvokeExpr.h>
+#include <expression/ListExpr.h>
+#include <expression/parser/MapParser.h>
+#include <interpreter/Interpreter.h>
+#include <structure/Unit.h>
+#include <structure/Value.h>
+#include <util/util.h>
+#include <util/process.h>
+#include <util/Heap.h>
+#include <lang/core/Internal.h>
+#include <oop/Class.h>
+#include <oop/Object.h>
 
 namespace mtl
 {

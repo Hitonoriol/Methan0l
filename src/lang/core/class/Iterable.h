@@ -1,11 +1,10 @@
 #ifndef SRC_LANG_CORE_CLASS_ITERABLE_H_
 #define SRC_LANG_CORE_CLASS_ITERABLE_H_
 
+#include <lang/core/class/Iterator.h>
 #include <except/except.h>
 #include <oop/NativeClass.h>
 #include <Grammar.h>
-#include <lang/core/class/Iterator.h>
-
 
 namespace mtl
 {

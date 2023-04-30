@@ -1,16 +1,16 @@
-#include <lexer/Token.h>
 #include "Expression.h"
 
 #include <memory>
 #include <string>
 
-#include "util/util.h"
-#include "util/string.h"
-#include "IdentifierExpr.h"
-#include "InvokeExpr.h"
-#include "LiteralExpr.h"
-#include "ListExpr.h"
-#include "PostfixExpr.h"
+#include <lexer/Token.h>
+#include <util/util.h>
+#include <util/string.h>
+#include <expression/IdentifierExpr.h>
+#include <expression/InvokeExpr.h>
+#include <expression/LiteralExpr.h>
+#include <expression/ListExpr.h>
+#include <expression/PostfixExpr.h>
 
 namespace mtl
 {

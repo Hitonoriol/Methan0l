@@ -1,6 +1,7 @@
-#include <lang/core/class/Set.h>
+#include "Set.h"
 
 #include <iterator>
+
 #include <lang/core/class/List.h>
 #include <util/util.h>
 #include <lang/core/Data.h>

@@ -1,8 +1,8 @@
 #include "DataType.h"
 
-#include "oop/Object.h"
-#include "structure/ValueRef.h"
-#include "CoreLibrary.h"
+#include <oop/Object.h>
+#include <structure/ValueRef.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

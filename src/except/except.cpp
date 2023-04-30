@@ -2,12 +2,12 @@
 
 #include <string>
 
-#include "util/util.h"
-#include "structure/Value.h"
-#include "expression/Expression.h"
-#include "util/global.h"
-#include "interpreter/Interpreter.h"
-#include "CoreLibrary.h"
+#include <util/util.h>
+#include <structure/Value.h>
+#include <expression/Expression.h>
+#include <util/global.h>
+#include <interpreter/Interpreter.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

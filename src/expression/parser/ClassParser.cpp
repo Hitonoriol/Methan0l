@@ -1,13 +1,12 @@
-#include <lexer/Token.h>
-#include <parser/Parser.h>
 #include "ClassParser.h"
 
 #include <memory>
 #include <string>
 
-#include "type.h"
-#include "../ClassExpr.h"
-#include "MapParser.h"
+#include <lexer/Token.h>
+#include <parser/Parser.h>
+#include <expression/ClassExpr.h>
+#include <expression/parser/MapParser.h>
 
 namespace mtl
 {

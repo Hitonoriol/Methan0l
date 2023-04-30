@@ -2,7 +2,6 @@
 #define SRC_LANG_CORE_LIBMODULE_H_
 
 #include <lang/Library.h>
-#include <boost/dll.hpp>
 
 namespace mtl
 {

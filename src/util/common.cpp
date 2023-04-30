@@ -1,5 +1,6 @@
 #include "version.h"
-#include "interpreter/Interpreter.h"
+
+#include <interpreter/Interpreter.h>
 
 namespace mtl
 {

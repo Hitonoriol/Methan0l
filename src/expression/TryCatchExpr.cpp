@@ -1,13 +1,13 @@
-#include <expression/TryCatchExpr.h>
-
-#include "interpreter/ExceptionHandler.h"
-#include "interpreter/Interpreter.h"
-#include "util/cast.h"
-#include "structure/Unit.h"
-#include "expression/UnitExpr.h"
-#include "util/util.h"
+#include "TryCatchExpr.h"
 
 #include <iostream>
+
+#include <interpreter/ExceptionHandler.h>
+#include <interpreter/Interpreter.h>
+#include <util/cast.h>
+#include <structure/Unit.h>
+#include <expression/UnitExpr.h>
+#include <util/util.h>
 
 namespace mtl
 {

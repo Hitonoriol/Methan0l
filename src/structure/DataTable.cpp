@@ -5,10 +5,10 @@
 #include <memory>
 #include <utility>
 
-#include "lexer/Token.h"
-#include "expression/IdentifierExpr.h"
-#include "Value.h"
-#include "CoreLibrary.h"
+#include <lexer/Token.h>
+#include <expression/IdentifierExpr.h>
+#include <structure/Value.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

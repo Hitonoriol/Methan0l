@@ -1,7 +1,6 @@
 #ifndef SRC_LANG_CORE_CLASS_ITERATOR_H_
 #define SRC_LANG_CORE_CLASS_ITERATOR_H_
 
-#include <type.h>
 #include <except/except.h>
 #include <structure/Value.h>
 #include <oop/OOPDefs.h>

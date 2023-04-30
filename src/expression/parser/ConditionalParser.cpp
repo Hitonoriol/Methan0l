@@ -2,6 +2,9 @@
 
 #include <expression/parser/UnitParser.h>
 #include <parser/Parser.h>
+#include <expression/ConditionalExpr.h>
+#include <expression/LiteralExpr.h>
+#include <expression/UnitExpr.h>
 
 namespace mtl
 {

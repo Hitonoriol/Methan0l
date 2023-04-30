@@ -1,9 +1,10 @@
 #ifndef SRC_EXPRESSION_CLASSEXPR_H_
 #define SRC_EXPRESSION_CLASSEXPR_H_
 
-#include "MapExpr.h"
 #include "Expression.h"
-#include "../structure/Value.h"
+
+#include <expression/MapExpr.h>
+#include <structure/Value.h>
 
 namespace mtl
 {

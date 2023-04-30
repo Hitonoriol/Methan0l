@@ -1,8 +1,9 @@
 #ifndef SRC_EXPRESSION_PARSER_BINARYOPERATORPARSER_H_
 #define SRC_EXPRESSION_PARSER_BINARYOPERATORPARSER_H_
 
-#include "../BinaryOperatorExpr.h"
 #include "InfixParser.h"
+
+#include <expression/BinaryOperatorExpr.h>
 
 namespace mtl
 {

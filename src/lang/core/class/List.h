@@ -1,10 +1,11 @@
 #ifndef SRC_LANG_CORE_CLASS_LIST_H_
 #define SRC_LANG_CORE_CLASS_LIST_H_
 
-#include <lang/core/class/Collection.h>
+#include "Collection.h"
+#include "DefaultIterator.h"
+
 #include <oop/NativeClass.h>
 #include <structure/Wrapper.h>
-#include <lang/core/class/DefaultIterator.h>
 
 namespace mtl
 {

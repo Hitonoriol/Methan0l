@@ -1,6 +1,11 @@
 #ifndef SRC_UTIL_CAST_H_
 #define SRC_UTIL_CAST_H_
 
+#include "memory.h"
+#include "string.h"
+#include "meta/type_traits.h"
+#include "meta/variant_traits.h"
+
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -8,11 +13,6 @@
 #include <type_traits>
 #include <any>
 #include <cstring>
-
-#include "memory.h"
-#include "string.h"
-#include "meta/type_traits.h"
-#include "meta/variant_traits.h"
 
 namespace mtl
 {

@@ -3,7 +3,7 @@
 
 #include <chrono>
 
-#include "type.h"
+#include <type.h>
 
 #define ENABLE_BENCHMARK false
 

@@ -1,7 +1,7 @@
 #ifndef SRC_LANG_LIBLOGICAL_H_
 #define SRC_LANG_LIBLOGICAL_H_
 
-#include "lang/Library.h"
+#include <lang/Library.h>
 
 namespace mtl
 {

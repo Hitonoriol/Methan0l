@@ -1,14 +1,13 @@
-#include <lexer/Token.h>
 #include "IdentifierExpr.h"
 
 #include <iostream>
 #include <string>
 #include <string_view>
 
-#include "interpreter/Interpreter.h"
-#include "../structure/DataTable.h"
-#include "../structure/Value.h"
-#include "../type.h"
+#include <lexer/Token.h>
+#include <interpreter/Interpreter.h>
+#include <structure/DataTable.h>
+#include <structure/Value.h>
 
 namespace mtl
 {

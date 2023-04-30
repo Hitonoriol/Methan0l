@@ -1,11 +1,11 @@
-#include <lexer/Token.h>
 #include "LibLogical.h"
 
 #include <iterator>
 
-#include "structure/Value.h"
-#include "util/array.h"
-#include "lang/core/Logic.h"
+#include <lexer/Token.h>
+#include <structure/Value.h>
+#include <util/array.h>
+#include <lang/core/Logic.h>
 
 namespace mtl
 {

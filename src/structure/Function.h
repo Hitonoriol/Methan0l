@@ -1,10 +1,10 @@
 #ifndef SRC_STRUCTURE_FUNCTION_H_
 #define SRC_STRUCTURE_FUNCTION_H_
 
+#include "Unit.h"
+
 #include <string>
 #include <vector>
-
-#include "Unit.h"
 
 namespace mtl
 {

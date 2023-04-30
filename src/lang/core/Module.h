@@ -1,8 +1,9 @@
 #ifndef SRC_LANG_CORE_MODULE_H_
 #define SRC_LANG_CORE_MODULE_H_
 
-#include "type.h"
 #include <boost/dll.hpp>
+
+#include <type.h>
 
 /* `boost::dll::import` was renamed to `boost::dll::import_symbol`
  * in Boost 1.76 to avoid collision with C++20 `import` keyword */

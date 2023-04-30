@@ -1,12 +1,13 @@
 #ifndef SRC_STRUCTURE_OBJECT_H_
 #define SRC_STRUCTURE_OBJECT_H_
 
-#include <oop/OOPDefs.h>
+#include "OOPDefs.h"
+
 #include <string>
 #include <any>
 
-#include "structure/DataTable.h"
-#include "util/cast.h"
+#include <structure/DataTable.h>
+#include <util/cast.h>
 
 namespace mtl
 {

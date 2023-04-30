@@ -1,9 +1,10 @@
+#include "BinaryOperatorParser.h"
+
+#include <memory>
+
 #include <expression/Expression.h>
-#include <expression/parser/BinaryOperatorParser.h>
 #include <lexer/Token.h>
 #include <parser/Parser.h>
-#include <type.h>
-#include <memory>
 
 namespace mtl
 {

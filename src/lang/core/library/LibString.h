@@ -3,7 +3,7 @@
 
 #include <regex>
 
-#include "lang/Library.h"
+#include <lang/Library.h>
 
 namespace mtl
 {

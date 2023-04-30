@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_PARSER_INFIXWORDOPERATORPARSER_H_
 #define SRC_EXPRESSION_PARSER_INFIXWORDOPERATORPARSER_H_
 
-#include <expression/parser/BinaryOperatorParser.h>
+#include "BinaryOperatorParser.h"
 
 namespace mtl
 {

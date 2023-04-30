@@ -1,4 +1,4 @@
-#include <lang/core/library/util/Random.h>
+#include "Random.h"
 
 #include <functional>
 #include <limits>
@@ -6,11 +6,10 @@
 #include <unordered_map>
 #include <utility>
 
-#include "expression/Expression.h"
-#include "interpreter/Interpreter.h"
-#include "oop/Object.h"
-#include "structure/Value.h"
-#include "type.h"
+#include <expression/Expression.h>
+#include <interpreter/Interpreter.h>
+#include <oop/Object.h>
+#include <structure/Value.h>
 
 namespace mtl
 {

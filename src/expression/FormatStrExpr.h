@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_FORMATSTREXPR_H_
 #define SRC_EXPRESSION_FORMATSTREXPR_H_
 
-#include <expression/Expression.h>
+#include "Expression.h"
 
 namespace mtl
 {

@@ -1,7 +1,8 @@
-#include <lexer/Lexer.h>
+#include "Lexer.h"
+
 #include <bitset>
 
-#include "util/util.h"
+#include <util/util.h>
 
 namespace mtl
 {

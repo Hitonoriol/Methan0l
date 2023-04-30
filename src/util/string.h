@@ -1,7 +1,6 @@
 #ifndef SRC_UTIL_STRING_H_
 #define SRC_UTIL_STRING_H_
 
-#include <type.h>
 #include <functional>
 #include <sstream>
 #include <string>
@@ -11,6 +10,8 @@
 #include <cwchar>
 #include <algorithm>
 #include <cctype>
+
+#include <type.h>
 
 namespace mtl
 {

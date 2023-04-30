@@ -4,14 +4,13 @@
 #include <memory>
 #include <utility>
 
-#include "interpreter/Interpreter.h"
-#include "structure/DataTable.h"
-#include "structure/Value.h"
-#include "type.h"
-#include "util/util.h"
-#include "util/hash.h"
-#include "CoreLibrary.h"
-#include "expression/parser/MapParser.h"
+#include <interpreter/Interpreter.h>
+#include <structure/DataTable.h>
+#include <structure/Value.h>
+#include <util/util.h>
+#include <util/hash.h>
+#include <CoreLibrary.h>
+#include <expression/parser/MapParser.h>
 
 namespace mtl
 {

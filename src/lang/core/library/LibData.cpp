@@ -1,4 +1,3 @@
-#include <lexer/Token.h>
 #include "LibData.h"
 
 #include <deque>
@@ -11,19 +10,18 @@
 #include <numeric>
 #include <thread>
 
-#include "expression/IdentifierExpr.h"
-#include "expression/ListExpr.h"
-#include "expression/InvokeExpr.h"
-#include "expression/parser/MapParser.h"
-#include "expression/RangeExpr.h"
-#include "interpreter/Interpreter.h"
-#include "structure/Value.h"
-#include "type.h"
-#include "version.h"
-
-#include "oop/Class.h"
-#include "oop/Object.h"
-#include "CoreLibrary.h"
+#include <version.h>
+#include <lexer/Token.h>
+#include <expression/IdentifierExpr.h>
+#include <expression/ListExpr.h>
+#include <expression/InvokeExpr.h>
+#include <expression/parser/MapParser.h>
+#include <expression/RangeExpr.h>
+#include <interpreter/Interpreter.h>
+#include <structure/Value.h>
+#include <oop/Class.h>
+#include <oop/Object.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

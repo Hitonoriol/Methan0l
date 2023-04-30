@@ -1,7 +1,7 @@
 #ifndef SRC_RUNNER_H_
 #define SRC_RUNNER_H_
 
-#include "interpreter/Interpreter.h"
+#include <interpreter/Interpreter.h>
 
 namespace mtl
 {

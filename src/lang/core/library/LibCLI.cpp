@@ -1,4 +1,4 @@
-#include <lang/core/library/LibCLI.h>
+#include "LibCLI.h"
 
 #include <parser/Parser.h>
 #include <expression/IdentifierExpr.h>

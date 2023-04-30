@@ -1,12 +1,13 @@
 #ifndef SRC_LANG_LIBRARY_H_
 #define SRC_LANG_LIBRARY_H_
 
+#include "SharedLibrary.h"
+
 #include <string>
 #include <memory>
 #include <boost/dll.hpp>
 
 #include <interpreter/Interpreter.h>
-#include <lang/SharedLibrary.h>
 
 #define LIB_OPERATOR_DEF(type, functor) \
 	void Library::type##_operator(TokenType tok, const functor &opr) \

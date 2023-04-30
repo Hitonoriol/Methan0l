@@ -1,5 +1,7 @@
 #include "ConditionalExpr.h"
-#include "UnitExpr.h"
+
+#include <expression/LiteralExpr.h>
+#include <expression/UnitExpr.h>
 
 namespace mtl
 {

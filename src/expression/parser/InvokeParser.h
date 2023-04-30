@@ -1,10 +1,11 @@
 #ifndef EXPRESSION_PARSER_INVOKEPARSER_H_
 #define EXPRESSION_PARSER_INVOKEPARSER_H_
 
-#include "../ListExpr.h"
-#include "ListParser.h"
-#include "../InvokeExpr.h"
 #include "InfixParser.h"
+
+#include <expression/ListExpr.h>
+#include <expression/parser/ListParser.h>
+#include <expression/InvokeExpr.h>
 
 namespace mtl
 {

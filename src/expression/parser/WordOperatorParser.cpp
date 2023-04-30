@@ -1,13 +1,12 @@
-#include <lexer/Token.h>
-#include <parser/Parser.h>
 #include "WordOperatorParser.h"
 
 #include <memory>
 
-#include "type.h"
-#include "../Expression.h"
-#include "../ListExpr.h"
-#include "../PrefixExpr.h"
+#include <lexer/Token.h>
+#include <parser/Parser.h>
+#include <expression/Expression.h>
+#include <expression/ListExpr.h>
+#include <expression/PrefixExpr.h>
 
 namespace mtl
 {

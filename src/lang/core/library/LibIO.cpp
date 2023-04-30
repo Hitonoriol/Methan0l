@@ -1,14 +1,14 @@
-#include <lexer/Token.h>
 #include "LibIO.h"
 
 #include <iostream>
 #include <string>
 
-#include "expression/IdentifierExpr.h"
-#include "interpreter/Interpreter.h"
-#include "oop/Object.h"
-#include "structure/Value.h"
-#include "CoreLibrary.h"
+#include <lexer/Token.h>
+#include <expression/IdentifierExpr.h>
+#include <interpreter/Interpreter.h>
+#include <oop/Object.h>
+#include <structure/Value.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

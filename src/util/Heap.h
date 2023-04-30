@@ -1,10 +1,11 @@
 #ifndef SRC_UTIL_HEAP_H_
 #define SRC_UTIL_HEAP_H_
 
-#include "util/debug.h"
-#include "util/string.h"
-#include "util/global.h"
 #include <memory_resource>
+
+#include <util/debug.h>
+#include <util/string.h>
+#include <util/global.h>
 
 namespace mtl
 {

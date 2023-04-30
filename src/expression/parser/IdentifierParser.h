@@ -1,10 +1,11 @@
 #ifndef EXPRESSION_PARSER_IDENTIFIERPARSER_H_
 #define EXPRESSION_PARSER_IDENTIFIERPARSER_H_
 
-#include <parser/Parser.h>
-#include "../Expression.h"
-#include "../IdentifierExpr.h"
 #include "PrefixParser.h"
+
+#include <parser/Parser.h>
+#include <expression/Expression.h>
+#include <expression/IdentifierExpr.h>
 
 namespace mtl
 {

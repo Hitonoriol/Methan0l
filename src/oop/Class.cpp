@@ -1,4 +1,5 @@
-#include <oop/Class.h>
+#include "Class.h"
+
 #include <array>
 #include <deque>
 #include <iostream>
@@ -9,14 +10,14 @@
 #include <utility>
 #include <variant>
 
-#include "interpreter/Interpreter.h"
-#include "CoreLibrary.h"
-#include "Object.h"
-#include "lang/Library.h"
-#include "expression/LiteralExpr.h"
-#include "structure/Function.h"
-#include "structure/Value.h"
-#include "util/hash.h"
+#include <util/hash.h>
+#include <oop/Object.h>
+#include <lang/Library.h>
+#include <expression/LiteralExpr.h>
+#include <structure/Function.h>
+#include <structure/Value.h>
+#include <interpreter/Interpreter.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

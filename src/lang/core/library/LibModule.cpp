@@ -1,10 +1,10 @@
 #include "LibModule.h"
 
-#include "util/util.h"
-#include "structure/Value.h"
-#include "interpreter/Interpreter.h"
-#include "lang/core/Module.h"
-#include "lang/core/Internal.h"
+#include <util/util.h>
+#include <structure/Value.h>
+#include <interpreter/Interpreter.h>
+#include <lang/core/Module.h>
+#include <lang/core/Internal.h>
 
 namespace mtl
 {

@@ -1,6 +1,7 @@
-#include <parser/Parser.h>
 #include "RangeParser.h"
-#include "expression/RangeExpr.h"
+
+#include <parser/Parser.h>
+#include <expression/RangeExpr.h>
 
 namespace mtl
 {

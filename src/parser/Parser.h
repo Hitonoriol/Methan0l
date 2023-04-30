@@ -1,8 +1,6 @@
 #ifndef PARSER_H_
 #define PARSER_H_
 
-#include <lexer/Lexer.h>
-#include <lexer/Token.h>
 #include <utility>
 #include <vector>
 #include <deque>
@@ -11,10 +9,12 @@
 #include <memory>
 #include <stack>
 
-#include "expression/Expression.h"
-#include "expression/parser/InfixParser.h"
-#include "expression/parser/PrefixParser.h"
-#include "type.h"
+#include <type.h>
+#include <lexer/Lexer.h>
+#include <lexer/Token.h>
+#include <expression/Expression.h>
+#include <expression/parser/InfixParser.h>
+#include <expression/parser/PrefixParser.h>
 
 namespace mtl
 {

@@ -1,10 +1,12 @@
-#include "type.h"
-#include "util/util.h"
-#include "util/string.h"
-#include <util/StringFormatter.h>
+#include "StringFormatter.h"
+
 #include <iostream>
 #include <regex>
 #include <stdexcept>
+
+#include <type.h>
+#include <util/util.h>
+#include <util/string.h>
 
 namespace mtl
 {

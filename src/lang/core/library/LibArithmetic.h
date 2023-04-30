@@ -3,7 +3,7 @@
 
 #include <lexer/Token.h>
 #include <lang/Library.h>
-#include "structure/Value.h"
+#include <structure/Value.h>
 
 namespace mtl
 {

@@ -4,16 +4,15 @@
 #include <stdexcept>
 #include <string>
 
-#include "interpreter/Interpreter.h"
-#include "structure/DataTable.h"
-#include "structure/Unit.h"
-#include "structure/Value.h"
-#include "type.h"
-#include "IdentifierExpr.h"
-#include "UnitExpr.h"
-#include "util/util.h"
-#include "util/meta/type_traits.h"
-#include "CoreLibrary.h"
+#include <util/util.h>
+#include <util/meta/type_traits.h>
+#include <expression/IdentifierExpr.h>
+#include <expression/UnitExpr.h>
+#include <structure/DataTable.h>
+#include <structure/Unit.h>
+#include <structure/Value.h>
+#include <interpreter/Interpreter.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

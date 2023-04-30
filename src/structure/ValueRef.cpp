@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "Value.h"
-#include "../util/util.h"
+#include <structure/Value.h>
+#include <util/util.h>
 
 #define UNWRAP_NESTED(vptr) (vptr)->is<ValueRef>() ? (vptr)->get<ValueRef>().val : vptr
 

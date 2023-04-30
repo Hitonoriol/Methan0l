@@ -1,13 +1,12 @@
 #include "GroupParser.h"
 
+#include <memory>
+
 #include <lexer/Token.h>
 #include <parser/Parser.h>
-#include <type.h>
-#include <memory>
-#include "util/cast.h"
-
 #include <expression/LiteralExpr.h>
 #include <expression/TypeRefExpr.h>
+#include <util/cast.h>
 
 namespace mtl
 {

@@ -11,17 +11,16 @@
 #include <utility>
 #include <filesystem>
 
-#include "type.h"
-#include "util/util.h"
-#include "util/global.h"
-#include "interpreter/Interpreter.h"
-#include "expression/LiteralExpr.h"
-#include "expression/Expression.h"
-#include "interpreter/Interpreter.h"
-#include "structure/Function.h"
-#include "oop/Object.h"
-#include "structure/Value.h"
-#include "lang/core/File.h"
+#include <util/util.h>
+#include <util/global.h>
+#include <interpreter/Interpreter.h>
+#include <expression/LiteralExpr.h>
+#include <expression/Expression.h>
+#include <interpreter/Interpreter.h>
+#include <structure/Function.h>
+#include <oop/Object.h>
+#include <structure/Value.h>
+#include <lang/core/File.h>
 
 namespace mtl
 {

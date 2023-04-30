@@ -1,5 +1,3 @@
-#include <lexer/Token.h>
-#include <parser/Parser.h>
 #include "MapParser.h"
 
 #include <iostream>
@@ -9,15 +7,17 @@
 #include <unordered_map>
 #include <utility>
 
-#include "structure/Value.h"
-#include "util/util.h"
-#include "CoreLibrary.h"
+#include <lexer/Token.h>
+#include <parser/Parser.h>
+#include <structure/Value.h>
+#include <util/util.h>
+#include <CoreLibrary.h>
 
-#include "expression/BinaryOperatorExpr.h"
-#include "expression/IdentifierExpr.h"
-#include "expression/LiteralExpr.h"
-#include "expression/PrefixExpr.h"
-#include "expression/MapExpr.h"
+#include <expression/BinaryOperatorExpr.h>
+#include <expression/IdentifierExpr.h>
+#include <expression/LiteralExpr.h>
+#include <expression/PrefixExpr.h>
+#include <expression/MapExpr.h>
 
 namespace mtl
 {

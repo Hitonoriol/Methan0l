@@ -2,10 +2,11 @@
 #define EXPRESSION_IDENTIFIEREXPR_H_
 
 #include "Expression.h"
-#include "LiteralExpr.h"
-#include "structure/Unit.h"
-#include "util/util.h"
-#include "BinaryOperatorExpr.h"
+
+#include <structure/Unit.h>
+#include <util/util.h>
+#include <expression/LiteralExpr.h>
+#include <expression/BinaryOperatorExpr.h>
 
 namespace mtl
 {

@@ -1,14 +1,7 @@
-/*
- * TypeRefExpr.h
- *
- *  Created on: Feb 27, 2023
- *      Author: BerNardEr
- */
-
 #ifndef SRC_EXPRESSION_TYPEREFEXPR_H_
 #define SRC_EXPRESSION_TYPEREFEXPR_H_
 
-#include <expression/IdentifierExpr.h>
+#include "IdentifierExpr.h"
 
 namespace mtl
 {

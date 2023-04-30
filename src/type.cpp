@@ -1,8 +1,8 @@
 #include "type.h"
 
-#include "expression/Expression.h"
-#include "structure/Value.h"
-#include "lang/core/class/String.h"
+#include <expression/Expression.h>
+#include <structure/Value.h>
+#include <lang/core/class/String.h>
 
 namespace mtl
 {

@@ -1,11 +1,11 @@
 #ifndef SRC_UTIL_META_FUNCTION_TRAITS_H_
 #define SRC_UTIL_META_FUNCTION_TRAITS_H_
 
-#include <type.h>
-
 #include <type_traits>
 #include <utility>
 #include <functional>
+
+#include <type.h>
 
 namespace mtl
 {

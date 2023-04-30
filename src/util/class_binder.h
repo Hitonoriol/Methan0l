@@ -1,10 +1,10 @@
 #ifndef SRC_UTIL_CLASS_BINDER_H_
 #define SRC_UTIL_CLASS_BINDER_H_
 
-#include "interpreter/Interpreter.h"
-#include "oop/Class.h"
-
 #include <memory>
+
+#include <interpreter/Interpreter.h>
+#include <oop/Class.h>
 
 namespace mtl
 {

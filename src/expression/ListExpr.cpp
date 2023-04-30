@@ -2,9 +2,9 @@
 
 #include <deque>
 
-#include "interpreter/Interpreter.h"
-#include "structure/Value.h"
-#include "CoreLibrary.h"
+#include <interpreter/Interpreter.h>
+#include <structure/Value.h>
+#include <CoreLibrary.h>
 
 
 namespace mtl

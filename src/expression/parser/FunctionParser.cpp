@@ -1,15 +1,18 @@
 #include "FunctionParser.h"
 
-#include <expression/Expression.h>
-#include <expression/parser/MapParser.h>
-#include <expression/parser/UnitParser.h>
-#include <lexer/Token.h>
-#include <parser/Parser.h>
-#include <type.h>
-#include <util/cast.h>
 #include <deque>
 #include <iostream>
 #include <memory>
+
+#include <expression/Expression.h>
+#include <expression/parser/MapParser.h>
+#include <expression/parser/UnitParser.h>
+#include <expression/MapExpr.h>
+#include <expression/UnitExpr.h>
+#include <expression/FunctionExpr.h>
+#include <lexer/Token.h>
+#include <parser/Parser.h>
+#include <util/cast.h>
 
 namespace mtl
 {

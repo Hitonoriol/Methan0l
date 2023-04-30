@@ -1,4 +1,4 @@
-#include <lang/core/Internal.h>
+#include "Internal.h"
 
 #include <interpreter/Interpreter.h>
 #include <expression/parser/MapParser.h>

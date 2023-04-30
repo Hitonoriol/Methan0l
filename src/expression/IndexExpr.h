@@ -1,8 +1,6 @@
 #ifndef SRC_EXPRESSION_INDEXEXPR_H_
 #define SRC_EXPRESSION_INDEXEXPR_H_
 
-#include "Expression.h"
-#include "LiteralExpr.h"
 #include "IdentifierExpr.h"
 
 namespace mtl

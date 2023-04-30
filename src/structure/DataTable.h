@@ -4,8 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "util/memory.h"
-#include "type.h"
+#include <util/memory.h>
+#include <type.h>
 
 namespace mtl
 {

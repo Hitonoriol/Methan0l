@@ -1,4 +1,4 @@
-#include <lang/core/library/LibUtil.h>
+#include "LibUtil.h"
 
 #include <lang/core/library/util/Random.h>
 #include <lang/core/library/util/File.h>

@@ -5,13 +5,13 @@
 #include <utility>
 #include <sstream>
 
-#include "expression/Expression.h"
-#include "expression/LiteralExpr.h"
-#include "DataTable.h"
-#include "Value.h"
-#include "interpreter/Interpreter.h"
-#include "util/util.h"
-#include "CoreLibrary.h"
+#include <expression/Expression.h>
+#include <expression/LiteralExpr.h>
+#include <structure/DataTable.h>
+#include <structure/Value.h>
+#include <interpreter/Interpreter.h>
+#include <util/util.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

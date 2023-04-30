@@ -2,7 +2,6 @@
 #define SRC_EXPRESSION_POSTFIXEXPR_H_
 
 #include "Expression.h"
-#include "LiteralExpr.h"
 
 namespace mtl
 {

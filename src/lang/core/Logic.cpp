@@ -1,4 +1,4 @@
-#include <lang/core/Logic.h>
+#include "Logic.h"
 
 #include <lexer/Token.h>
 #include <structure/Value.h>

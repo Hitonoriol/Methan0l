@@ -7,14 +7,13 @@
 #include <sstream>
 #include <variant>
 
-#include "expression/LiteralExpr.h"
-#include "lang/Library.h"
-#include "type.h"
-#include "util/util.h"
-#include "interpreter/TypeManager.h"
-#include "interpreter/Interpreter.h"
-#include "oop/Class.h"
-#include "CoreLibrary.h"
+#include <expression/LiteralExpr.h>
+#include <lang/Library.h>
+#include <util/util.h>
+#include <interpreter/TypeManager.h>
+#include <interpreter/Interpreter.h>
+#include <oop/Class.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {

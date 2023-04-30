@@ -2,8 +2,9 @@
 #define SRC_EXPRESSION_PARSER_INDEXPARSER_H_
 
 #include "InfixParser.h"
-#include "../IndexExpr.h"
-#include "../IdentifierExpr.h"
+
+#include <expression/IndexExpr.h>
+#include <expression/IdentifierExpr.h>
 
 namespace mtl
 {

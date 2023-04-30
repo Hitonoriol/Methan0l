@@ -3,8 +3,8 @@
 
 #include <stdexcept>
 
-#include "type.h"
-#include "lang/DataType.h"
+#include <type.h>
+#include <lang/DataType.h>
 
 #define UNIMPLEMENTED { throw mtl::IllegalOperationException(); }
 

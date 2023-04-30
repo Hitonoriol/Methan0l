@@ -1,14 +1,14 @@
 #include "TryCatchParser.h"
 
+#include <algorithm>
+#include <string>
+
+#include <lexer/Token.h>
+#include <parser/Parser.h>
 #include <expression/parser/UnitParser.h>
 #include <expression/Expression.h>
 #include <expression/TryCatchExpr.h>
 #include <expression/UnitExpr.h>
-#include <lexer/Token.h>
-#include <parser/Parser.h>
-#include <type.h>
-#include <algorithm>
-#include <string>
 
 namespace mtl
 {

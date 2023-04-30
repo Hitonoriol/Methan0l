@@ -4,13 +4,13 @@
 #include <stdexcept>
 #include <utility>
 
-#include "expression/LiteralExpr.h"
-#include "interpreter/Interpreter.h"
-#include "structure/DataTable.h"
-#include "structure/Function.h"
-#include "structure/Value.h"
+#include <expression/LiteralExpr.h>
+#include <interpreter/Interpreter.h>
+#include <structure/DataTable.h>
+#include <structure/Function.h>
+#include <structure/Value.h>
 
-#include "oop/Class.h"
+#include <oop/Class.h>
 
 namespace mtl
 {
