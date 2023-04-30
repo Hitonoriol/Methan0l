@@ -47,7 +47,7 @@ class String : public ContainerWrapper<std::string>, public Collection
 		UInt index_of(Value) override;
 		Boolean contains(Value) override;
 		Boolean is_empty() override;
-		Boolean add(Value) override;
+		Value add(Value) override;
 
 		inline String operator+(const char *rhs)
 		{

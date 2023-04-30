@@ -30,7 +30,7 @@ class List : public ContainerWrapper<ValList>, public Collection
 			contained.push_back(value);
 		}
 
-		Boolean add(Value) override;
+		Value add(Value) override;
 		Value remove_at(UInt) override;
 		Value remove(Value) override;
 		Value get(Int) override;

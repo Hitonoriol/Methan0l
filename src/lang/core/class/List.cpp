@@ -8,6 +8,7 @@ namespace mtl
 NATIVE_CLASS_BINDING(List, {
 	IMPLEMENTS_COLLECTION
 	EQUALITY_COMPARABLE
+	BIND_MUTATOR_METHOD(add)
 	BIND_METHOD(to_string)
 	BIND_METHOD(hash_code)
 })
@@ -15,10 +16,10 @@ NATIVE_CLASS_BINDING(List, {
 namespace native
 {
 
-Boolean List::add(Value val)
+Value List::add(Value val)
 {
 	contained.push_back(val);
-	return true;
+	return Value::NO_VALUE;
 }
 
 Value List::remove_at(UInt idx)

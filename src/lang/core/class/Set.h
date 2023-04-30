@@ -39,7 +39,7 @@ class Set : public ContainerWrapper<ValSet>, public Collection
 		using ContainerWrapper<wrapped_type>::ContainerWrapper;
 		Set(const List&);
 
-		Boolean add(Value) override;
+		Value add(Value) override;
 		Value remove(Value) override;
 		Value remove_at(UInt) override UNIMPLEMENTED
 		UInt size() override;

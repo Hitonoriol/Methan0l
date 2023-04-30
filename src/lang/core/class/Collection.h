@@ -18,7 +18,7 @@ class Collection
 	public:
 		virtual ~Collection() = default;
 
-		virtual Boolean add(Value) UNIMPLEMENTED
+		virtual Value add(Value) UNIMPLEMENTED
 		virtual Value append() UNIMPLEMENTED
 		virtual Value remove(Value) UNIMPLEMENTED
 		virtual Value remove_at(UInt) UNIMPLEMENTED
@@ -39,7 +39,7 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 {
 	public:
 		using IterableAdapter::IterableAdapter;
-		Boolean add(Value elem) override ADAPTER_METHOD(add, elem)
+		Value add(Value elem) override ADAPTER_METHOD(add, elem)
 		Value append() override ADAPTER_METHOD(append)
 		Value remove(Value elem) override ADAPTER_METHOD(remove, elem)
 		Value remove_at(UInt idx) override ADAPTER_METHOD(remove_at, idx)
@@ -73,8 +73,8 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 	METHOD_ALIAS(for_each, IndexOperator::Foreach) \
 	METHOD_ALIAS(slice, IndexOperator::Slice) \
 	/* Compound assignment operator overloads: */ \
-	BIND_METHOD_AS("+=", add) \
-	BIND_METHOD_AS("-=", remove)
+	BIND_MUTATOR_METHOD_AS("+=", add) \
+	BIND_MUTATOR_METHOD_AS("-=", remove)
 
 #define IMPLEMENTS_COLLECTION \
 	IMPLEMENTS(Collection) \

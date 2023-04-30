@@ -71,7 +71,7 @@ Boolean Set::is_empty()
 	return contained.empty();
 }
 
-Boolean Set::add(Value value)
+Value Set::add(Value value)
 {
 	return contained.insert(value).second;
 }

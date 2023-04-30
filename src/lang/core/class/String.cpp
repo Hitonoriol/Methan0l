@@ -12,6 +12,8 @@ NATIVE_CLASS_BINDING(String, {
 
 	BIND_CONSTRUCTOR(const native::String&)
 
+	BIND_MUTATOR_METHOD(add)
+
 	BIND_METHOD(format)
 	BIND_METHOD(repeat)
 	BIND_METHOD(split)
@@ -149,10 +151,10 @@ Boolean String::is_empty()
 	return contained.empty();
 }
 
-Boolean String::add(Value value)
+Value String::add(Value value)
 {
-	contained += value.as<char>();
-	return true;
+	append(*value.to_string());
+	return Value::NO_VALUE;
 }
 
 String& String::append(const String &rhs)
