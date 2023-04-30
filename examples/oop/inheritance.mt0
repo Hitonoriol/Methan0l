@@ -1,0 +1,45 @@
+interface: Drawable {
+	draw => method: () -> nil
+}
+
+class: Shape base: Drawable {
+	x, y
+
+	construct => method: x, y -> this.x = x, this.y = y
+	get_name => method: () -> "Abstract Shape"
+	get_x => method: () -> this.x
+	get_y => method: () -> this.y
+	draw => method: () {
+		<% $"Drawable@draw(): {}" this
+	}
+	to_string => method: () {
+		return: $"{} at ({}, {})" this.get_name(), this.x, this.y
+	}
+}
+
+class: Rectangle base: Shape {
+	w, h
+
+	construct => method: x, y, w, h {
+		this.super(x, y)
+		this.w = w
+		this.h = h
+	}
+	get_name => method: () -> "Rectangle"
+	to_string => method: () {
+		return: Shape@to_string(this) + $", {}x{}" this.w, this.h
+	}
+}
+
+shape = new: Shape(1, 2)
+rect = new: Rectangle(10, 10, 7, 3)
+
+<% "Inheritance" :: newl
+shape.draw()
+rect.draw()
+<% $"rect is a Shape: {}" (rect is: Shape)
+<% $"rect is a Rectangle: {}" (rect is: Rectangle)
+<% $"shape is a Rectangle: {}" (shape is: Rectangle)
+
+/* Interface requirement operator. Throws if any of the requirements are not satisfied. */
+rect require: Shape, Drawable

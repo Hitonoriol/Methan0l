@@ -1,0 +1,29 @@
+/*
+ * Word operators use the following syntax:
+ * 	operator: expr
+ */
+<% "Word operators" :: newl
+
+foo = 42
+bar = -1.111
+lst = [foo, "bar", [1, 2, 3], true, false, 0.075]
+str = "Blah blah blah"
+unt = {0.75 * x + 0.25 * y!}
+some_flag = false
+
+/* Type ids can be obtained from type names by using the type reference expression: `(TypeName)` */
+<% "Type id of String: " :: (String)
+
+/* Type operator; can be compared to type ids */
+<% lst :: " is string: " :: ((typeid: lst) == (String))
+<% foo :: " is integer: " :: ((typeid: foo) == (Int))
+<% bar :: " is float: " :: ((typeid: bar) == (Float))
+<% lst :: " is list: " :: ((typeid: lst) == (List))
+<% str :: " is string: " :: ((typeid: str) == (String))
+<% unt :: " is unit: " :: ((typeid: unt) == (Unit))
+<% some_flag :: "is boolean: " :: ((typeid: some_flag) == (Boolean))
+<% newl
+
+/* delete operator */
+delete: lst
+<% "Deleted list: " :: lst

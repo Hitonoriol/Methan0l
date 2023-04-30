@@ -1,41 +1,39 @@
-"Methan0l | Basic Syntax" :: newl
-/* Semicolons can be omitted, but must be used to write more than 1 expr on one line */
+/* Basic Methan0l syntax demonstration */
 
 /* Output operator */
-%%("Test" :: newl :: newl)	/* "newl" is a reserved identifier for the new line character */
+%% "Hello, Methan0l!" :: newl	/* "newl" is a reserved identifier for the new line character */
+
+/* `<%` prints with a trailing newline */
+<% "Foo! Bar?"
 
 /* Variable assignment */
 foo = 123			/* Integer (signed 64-bit) */
-bar = 456.5			/* Float */
+bar = 456.5			/* Float (64-bit) */
 baz = true			/* Boolean */
-str = "Hello, Methan0l!"	/* String */
+str = "Hello, Methan0l!"	/* String (class type) */
 
-/* Algebraic operators, if at least one of the operands in expr is Float, then the eval'd result is also Float */
+<% "Arithmetic operators"
 calc = ((foo + bar) * (foo / 25.375)) / 10
-%%("Calculation result: " :: calc :: newl)
+<% "Calculation result: " :: calc
 
 /* String concatenation with automatic type conversion */
-%%("Concatenation test: " :: str :: " " :: foo :: " " :: bar :: " " :: baz :: newl)
+<% "String concatenation: \"" :: str :: " " :: foo :: " " :: bar :: " " :: baz :: "\""
 
-"Logical operators"
-%%("Equivalent string literals: " :: ("equality test" == "equality test") :: newl)
-a = 42; b = 42
-%%(a :: " == " :: b :: " : " :: (a == b) :: newl)
-a = a / 50.0
-%%(a :: " < " :: b :: " : " :: (a < b) :: newl)
+<% "Comparison operators"
+<% "Equivalent strings: " :: ("equality test" == "equality test")
+a = 42; b = 42 /* Semicolons can be omitted, but must be used to write more than 1 expression on one line */
+<% a :: " == " :: b :: " : " :: (a == b)
+a /= 50.0
+<% a :: " < " :: b :: " : " :: (a < b)
 c = -100
-%%(c :: " <= " :: a :: " <= " :: b :: " : " :: ((c <= a) & (a <= b)) :: newl)
-%%("!false = " :: !false :: newl)
+<% c :: " <= " :: a :: " <= " :: b :: " : " :: ((c <= a) & (a <= b))
+<% "!false = " :: !false :: newl
 
-"Input operator"
-%%("* Enter something: ")
-%>test
-<%("Your input: \"" :: test :: "\"") /* `<%` prints with a trailing newline */
+<% "Input operator with type deduction"
+%% "Enter something: "
+%> test
+<% "Your input: \"" :: test :: "\" is of type: " :: typename: test
 
-"Bulk local variable definition"
-@(x => "some value", y, z => 0.5)
-%%("x = " :: x :: ", y = " :: y :: ", z = " :: z :: newl)
-
-/* Return operator; Any Unit can return a value
- * 	(though Main Unit must return an Integer or Integer-convertible Value). */
-foo!
+/* Return operator: `return: expr`. Any Unit can return a value. 
+ * Main Unit must return a numeric value if launched via the CLI. */
+return: foo

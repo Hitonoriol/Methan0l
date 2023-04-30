@@ -1,0 +1,31 @@
+<% "Const expressions" :: newl
+
+/* You can define parse-time constants using the `const: ...` expression.
+ * Constants can then be referenced using the `$name` operator or `const: ...`.
+ * All const-expressions are replaced with their evaluation results during parsing. */
+
+const: FPS = 1.0 / 60
+
+/* Block expressions are also allowed.
+ * All blocks share the same data table and can modify each other's values.
+ * Non-returning const blocks are removed from the program after const-evaluation.*/
+const: {
+	N = (1..10).sum()
+	STR = "String Constant"
+}
+
+for (i, 1..10) {
+	/* `$STR` and `$N` expressions don't exist in program's intermediate representation -
+	 * they're replaced by literal values containing values computed at parse-time */
+	<% $"[{}] N + {} = {}", $STR, i, $N + i
+}
+
+/* Const blocks can also return a value.
+ * Returned value will replace the entire block after const-evaluation. */
+foo = const: {
+	a = 5..10
+	b = 25..30
+	return: a.sum() + b.sum()
+}
+
+<% $"foo = {}", foo

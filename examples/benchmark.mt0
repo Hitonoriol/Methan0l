@@ -6,7 +6,7 @@ set_max_mem(0x8000000)
 
 <% "Unit execution overhead: " ::
 	{
-		rep = 1 000 000
+		rep = 1_000_000
 		msec = 0.0
 		for (i, range(rep)) msec += measure_time({})
 		#time += msec
@@ -14,18 +14,17 @@ set_max_mem(0x8000000)
 	}()
 :: "ms"
 
-execution_time = func @(action, times) {
-	tlist = $()
-	for (i, range(times)) -> {
+execution_time = func: action, times {
+	tlist = []
+	for (i, range(times))
 		tlist[] = measure_time(action())
-	}
 	mean = 0.0
 	for (n, tlist) {mean += n}
 	#time += mean
 	return: mean / tlist.size()
 }
 
-benchmark = func @(bench_name, action, times => 10) {
+benchmark = func: bench_name, action, times => 10 {
 	mem = mem_in_use()
 	<% "\n* " :: bench_name :: ":"
 	%% '\t' :: ">> "; mem_info()
@@ -38,56 +37,57 @@ benchmark = func @(bench_name, action, times => 10) {
 	}
 }
 
-class: Test @(
+class: Test {
 	n
 	foo => method: n {
 		this.n = n
 	}
-)
+}
 
 obj = new: Test()
 
-rec = func @(n) {
+rec = func: n {
 	if (n < 1) ? break!
 	rec(n - 1)
 }
 
-benchmark("Recursion, 1000 calls deep",	{
+benchmark("Recursion, 1000 calls deep", {
 	rec(1000)
 })
 
-benchmark("range(1 000 000)",	{
-	range(1 000 000)
+/* This was written when ranges evaluated to Lists */
+benchmark("range(1 000 000)", {
+	range(1_000_000)
 })
 
-benchmark("For loop, 1m iters",	{
-	for (i = 0, i < 1 000 000, ++i) {}
+benchmark("For loop, 1m iters", {
+	for (i = 0, i < 1_000_000, ++i) {}
 })
 
 benchmark("While loop, 1m iters", {
 	i = 0
-	while (i < 1 000 000) { ++i }
+	while (i < 1_000_000) { ++i }
 })
 
 benchmark("For-each loop, 1m iters", {
-	for (i, range(1 000 000)) {}
+	for (i, range(1_000_000)) {}
 })
 
 benchmark("Functional for-each, 1m iters", {
-	range(1 000 000).for_each(@: (){})
+	range(1_000_000).for_each(f: (){})
 })
 
 benchmark("List mapping, 1m elements", {
-	range(1 000 000).map(func @(n){n + 1!})
+	range(1_000_000).map(f: n -> n + 1)
 })
 
-benchmark("Pseudo-method call",	{
+benchmark("Pseudo-method call", {
 	123.sqrt()
-}, 1 000 000)
+}, 1_000_000)
 	
 benchmark("Class method call", {
 	#obj.foo(42)
-}, 1 000 000)
+}, 1_000_000)
 
 time_total = (now() - start) / 1000.0
 <% newl :: "All benchmarks finished. [" :: time :: " ms spent on tests / " :: time_total :: " secs spent in total]"

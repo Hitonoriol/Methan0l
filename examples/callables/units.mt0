@@ -1,0 +1,48 @@
+<% "Units" :: newl
+
+/* Unit is an expression block with it's own local visibility scope (a function, loop, conditional expression, ...)
+ * (in fact, this whole program is a Unit itself)
+ *
+ * Visibility scopes: see the "scopes.mt0" example.
+ *
+ * Return behavior:
+ * Units can return values either by using the postfix `expr!` operator or the prefix `return: expr`
+ * There's 2 types of Unit behavior on return:
+ *	1. Expression blocks / regular units (functions, class methods, plain units)
+ *	     stop their own execution and return a value. Then the Unit's parent (if any) resumes its execution.
+ *	2. Control blocks (loop / conditional operator / lambda / try-catch expression bodies)
+ *	     stop their own execution, return value and cause their parent unit to also stop execution and "carry" the child return value to the upper scope.
+ *	
+ * Nested control blocks cause each other to stop execution & carry return value until execution reaches a Regular Unit.
+ *	
+ * Plain units can also be defined and used in programs:
+ *	1. Regular: `unit = {...}` 
+ *	2. Weak (not a control block): `unit = -> {...}`
+ */
+ {
+	calls = 0
+	unit = {
+		local_var = "Blah blah" /* Shouldn't be accesible from the global scope */
+		%% "Boom! A Unit has been called! [" :: ++#calls :: " time(s)] "
+		%% "(my local var: " :: local_var :: ")"
+		%% newl
+		#calls * 10!
+		<% "Some dead code" /* Execution won't reach this point */
+	}
+
+	/* Execute defined unit, this way the return is discarded */
+	unit
+
+	%% "Unit's local var as seen from the outer scope: " :: local_var :: newl
+
+	/* Capturing plain unit's return value: */
+	ret = unit()
+	%% "Unit returned: " :: ret :: newl
+
+	/* You can pass a single pseudo-arg Unit (aka init block) as an argument when invoking another plain unit.
+	 * Its expressions will be evaluated & Data Table will be shared with the invoked Unit.
+	 * There's no practical use case for this, just a thing from the times when there was no such thing as function in the language. */
+	arg_unit = {x + y!}
+	result = arg_unit({x = 3.5; y = 6.5})
+	%% "Pseudo-function returned: " :: result :: newl
+}

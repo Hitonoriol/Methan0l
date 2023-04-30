@@ -1,0 +1,87 @@
+/* Legacy form of defining anonymous objects,
+ * 	boxes are just persistent Units under the hood (TODO: remove this) */
+ 
+my_box = defbox {
+	sqrt = func: n
+		n.pow(0.5)!
+
+	factorial = func: n {
+		if (n >= 1) ?
+			n * selfinvoke(n - 1)!
+		else:
+			1!
+	}
+	
+	/* This was written when the real `Iterable`s didn't exist */
+	reverse = func: iterable {
+		@(rev, type => typeid: iterable)
+		
+		if (type == (List)) ?
+			rev = $()
+		else: if (type == (String)) ?
+			rev = ""
+		else:
+			die("Unsupported type")
+		
+		for (i = iterable.size() - 1, i >= 0, --i)
+			rev[] = iterable[i]
+
+		return: rev
+	}
+}
+
+<% "Using a Box Unit w/o importing"
+{
+	global: my_box
+	<% "Sqrt: " :: my_box.sqrt(9)
+	<% "Factorial: " :: my_box.factorial(6)
+	<% "Reverse list: " :: my_box.reverse([1, 2, 3, 4, 5, 6])
+	<% "Reverse string: " :: my_box.reverse("foo bar baz")
+}
+<% ""
+
+<% "Importing a Box Unit"
+{
+	#my_box.import()
+	<% "Sqrt: " :: sqrt(9)
+	<% "Factorial: " :: factorial(6)
+	<% "Reverse list: " :: reverse([1, 2, 3, 4, 5, 6])
+	<% "Reverse string: " :: reverse("foo bar baz")
+}
+<% ""
+
+<% "Proper anonymous object definition"
+/* These ideally should only be used to store fields and non-method functions.
+ * Anonymous object methods must have explicit `this` argument in their parameter list. */
+{
+	obj = new: @[
+		x => 123
+		y => "some text"
+
+		some_func => func: x
+			return: x * 10
+
+		foo => method: this, n
+			return: this.x * n
+	]
+
+	<% "obj.x = " :: obj.x
+	<% "Anonymous object method call: " :: obj.foo(2)
+
+	/* `obj.some_func(...)` can't be used because it will be interpreted as a method call */
+	<% "Regular function: " :: obj.get_field("some_func")(42)
+}
+<% ""
+
+/* This is just a parser test */
+<% "`.` + subscript + invocation operators combination test"
+{
+	module = defbox {
+		list = [(@: x -> x.sqrt()), "abc", "foo bar"]
+		foo = func: ()
+			return: [1, 2, 3]
+	}
+
+	<% "Indexing a list returned from function call: " :: module.foo()[1]
+	<% "Calling a function from list: " :: module.list[0](81)
+}

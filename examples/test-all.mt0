@@ -1,29 +1,32 @@
-"Loading & Running all examples" :: newl
-start = now()
-this = new: File(get_launch_args()[0]).filename()
-root = new: File("examples")
-if (!root.exists() || !root.is_dir()) ? -> {
-	die("Failed to open examples directory")
-}
+<% "Running all examples" :: newl
 
-create_title = func @(char, str => "", width => 50) {
+start = now()
+this = File@filename(get_launch_args()[0])
+root = new: File("examples")
+
+if (!root.exists() || !root.is_dir()) ?
+	die("Failed to open examples directory")
+
+title = func: char, str => "", width => 50 {
 	pad = char.repeat((width - str.size()) / 2 - 2)
 	space = str.is_empty() ? "" : " "
 	title = pad :: space :: str :: space :: pad
-	if ((n = width - title.size()) > 0) -> {
+	if ((n = width - title.size()) > 0)
 		title[] = char.repeat(n)
-	}
+
 	return: title
 }
 
 tmp = new: File("")
-root.for_each(func @(file) {
-	#tmp.set(file)
-	if (#tmp.extension() != ".mt0" || #tmp.filename() == #this) ? -> {
+count = 0
+root.for_each(func: file, %tmp, %count {
+	tmp.set(file)
+	if (tmp.extension() != ".mt0" || tmp.filename() == #this) ?
 		void!
-	}
-	<% newl :: #create_title("v", file)
-	time = measure_time(->{ load(file)() })
-	<% #create_title("^", "Finished in {} secs".format(time / 1000.0)) :: newl
+
+	<% newl :: title("v", file)
+	time = measure_time(load(file))
+	<% title("^", "Finished in {} secs".format(time / 1000.0)) :: newl
+	++count
 })
-<% "Done running examples. " :: (now() - start) / 1000.0 :: " secs elapsed."
+<% $"Done running examples ({} in total). {} secs elapsed." count, (now() - start) / 1000.0

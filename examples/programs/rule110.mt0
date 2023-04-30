@@ -1,0 +1,24 @@
+/* Adapted from gist.github.com/rexim/c595009436f87ca076e7c4a2fb92ce10 */
+rule110 = func: size => 50 {
+	chars = " *"
+	board = [].fill(0, size)
+
+	board[size - 2] = 1
+
+	for (i = 0, i < size - 2, ++i) {
+		for (j = 0, j < size, ++j) {
+			%% chars[board[j]]
+		}
+		%% '\n'
+
+		pattern = (board[0] << 1) | board[1]
+		for (j = 1, j < size - 1, ++j) {
+			pattern = ((pattern << 1) & 7) | board[j + 1]
+			board[j] = (110 >> pattern) & 1
+		}
+	}
+}
+
+if (is_main_unit()) ? {
+	rule110()
+}

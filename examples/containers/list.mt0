@@ -1,0 +1,88 @@
+<% "Lists" :: newl
+
+/* List definition syntax */
+list = [1, 2, 3, "abc", 0.5]
+list_str = {("List: " :: #list)!}
+view_lst = {%% list_str() :: newl}
+
+view_lst
+
+/* `List` implements the `Collection` interface, which implements `Iterable` */
+<% $"Is List a Collection: {}" list is: Collection
+<% $"Is List an Iterable: {}" list is: Iterable
+<% $"All methods of List: {}" List@get_methods()
+
+<% "List size: " ::
+	list.size()
+<% "Test if list is empty: " ::
+	list.is_empty()
+<% "Add a new element:"
+	list.add("stuff")
+	list.add(999)
+	view_lst
+<% "Append a new element:" /* (This adds a new element and returns a reference to it) */
+	list.append() = 1337
+<% "Remove by index: "
+	list.remove_at(1)
+	view_lst
+<% "Remove by value:"
+	list.remove("abc")
+	view_lst
+
+/* Lists also have all index operator variations overloaded */
+<% "Index operator overloads"
+
+<% "Append a new element"
+list[] = "New element"
+view_lst
+<% ""
+
+<% "Remove element at index"
+list[~2]
+view_lst
+<% ""
+
+<% "List indexing operator"
+<% "Third element: " :: list[2]
+list[0] = "The first element"
+list[5] = -64
+view_lst
+<% ""
+
+<% "Clear a list"
+list[~]
+<% list
+<% ""
+
+"Populating a list using recursion..."
+/* This can be done in a more sane way, but I wanted to demonstrate how recursive unit calls work in Methan0l */
+list_populator = {
+	if (++i > max) ? {new_list!}
+	new_list[] = 1.0 / i
+	return: list_populator({i = #i; max = #max; new_list = #new_list})
+	/* # means global scope lookup, this ^^^ effectively copies the variables
+	 * from our current recursive call's scope to the next one's */
+}
+
+/* Using pseudo-function syntax for initialization
+ * (basically just injecting values into the unit's local scope) (see callables/pseudo_func.mt0) */
+list = list_populator({i = 0; max = 10; new_list = []})
+<% "New " :: list_str({list = #ret})
+<% ""
+
+/* Ways to iterate over a List */
+
+<% "Foreach loop"
+for (val, list) {
+	<% "* " :: val
+}
+<% ""
+
+<% "Functional foreach"
+list.for_each(f: x -> %% (x *= 2) :: " ")
+<% newl
+
+<% "Bracketed foreach"
+list[do: f: x -> x += 100]
+<% list
+<% ""

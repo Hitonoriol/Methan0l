@@ -1,0 +1,53 @@
+<% "Maps" :: newl
+
+map = @[
+	"key1" => 123,
+	"another key" => 0.5,
+	"valueless key",
+	1337 => "numeric key",
+	"some_list" => [1, 3, 5, 7],
+	"another map" => @["foo" => "bar"],
+	"bar" => "baz",
+	"blah" => false
+]
+
+<% "Map: " :: map :: newl
+
+/* Commas can also be omitted when defining maps */
+map2 = @[
+	a => 1
+	b => 3
+	c => 5
+]
+<% map2
+
+/* You can also create an empty map by inoking the constructor */
+my_map = new: Map()
+<% "Empty map: " :: my_map
+
+/* `Map` implements `AbstractMap` interface, which implements `Iterable` */
+<% $"Is Map an AbstractMap: {}" map is: AbstractMap
+<% $"Is Map an Iterable: {}" map is: Iterable
+<% $"All methods of Map: {}" Map@get_methods()
+
+<% "Accessing an element: " :: map["key1"]
+
+<% "Deleting an element..."
+map[~1337]
+<% "After deletion: " :: map
+
+<% "Nested element access: "
+	:: map["some_list"][2]
+	:: " | "
+	:: map["another map"]["foo"]
+
+<% "Iterating over a map"
+for (entry, map) {
+	<% "Key: " :: entry.key() :: ", Value: " :: entry.value()
+}
+<% ""
+
+<% "Iterating over values using Iterable@map(Function) and for_each"
+map.map(f: entry -> entry.value())
+   .for_each(f: value -> <% "Value: " :: value)
+<% ""

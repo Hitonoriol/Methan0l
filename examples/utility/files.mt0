@@ -1,0 +1,20 @@
+<% "Files" :: newl
+
+file = new: File("#:/file.txt") /* `#:/` expands into the script run directory */
+<% "Info about \"" :: file.absolute_path() :: "\":"
+<% "Exists: " :: file.exists()
+<% "Is directory: " :: file.is_dir()
+<% "Size: " :: file.size() :: "B"
+<% "Extension: " :: file.extension()
+
+<% newl :: "Reading file..."
+
+file.open()
+i = 1
+while (!file.is_eof())
+	<% "Line #" :: (i++) :: ": " :: file.read_line()
+<% "End of file"
+file.close()
+
+<% newl :: "Full contents:"
+<% file.read_contents()

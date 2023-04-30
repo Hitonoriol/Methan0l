@@ -1,0 +1,23 @@
+<% "Pair" :: newl
+
+pair_a = new: Pair(123, 456)
+pair_b = new: Pair("first string", "second string")
+n = 1
+
+show = f: ()
+	<% $"({}) a: {}\n    b: {}\n" n++, pair_a, pair_b
+
+show()
+
+/* `Pair@swap(Pair)` is a binding to `std::pair<Value, Value>::swap(std::pair<Value, Value>&)` */
+pair_a.swap(pair_b)
+show()
+
+/* `Pair@x()` and `Pair@y()` are first and second pair element getters (by reference) */
+pair_b.x() *= 2
+pair_a.y().replace("string", "thingy")
+show()
+
+/* `Pair@swap_contents()` swaps first and second elements */
+pair_a.swap_contents()
+show()

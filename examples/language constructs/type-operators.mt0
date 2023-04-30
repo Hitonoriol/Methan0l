@@ -1,0 +1,43 @@
+<% "Type operators" :: newl
+
+x = 1
+bool = false
+str = ""
+
+print = -> {
+	<% "x = " :: x
+	<% "bool = " :: bool
+	<% "str = \"" :: str :: "\""
+}
+
+print()
+
+/* Type-keeping assignment -- converts RHS to LHS' type */
+x := 5.678
+bool := 1
+str := 0x1000
+print()
+
+/* Type assertion: `val require: type_expr` - throws an exception if:
+ * - LHS is not of RHS type
+ * - LHS does not inherit any of classes / interfaces on the RHS */
+list = new: List()
+list require: Collection, Iterable
+bool require: Boolean
+
+/* Type check: `val is: type_expr` */
+<% "Is x an Int: " :: x is: Int
+<% "Is x a String: " :: x is: String
+
+/* Type id getter: `typeid: val` */
+<% "Type id of x: " :: typeid: x
+<% "Type id of bool: " :: typeid: bool
+
+/* Type name getter: `typename: val` */
+<% "Type name of x: " :: typename: x
+<% "Type name of list: " :: typename: list
+
+/* Type reference expression: `(TypeName)` - evaluates to type id of `TypeName` */
+<% "Type id of List: " :: (List)
+<% "Type id of Int: " :: (Int)
+<% "Alternative way to compare types [is list a List?]: " :: (List) == typeid: list

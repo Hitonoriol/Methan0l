@@ -1,0 +1,11 @@
+pause_on_exit(true)
+on_exit({ <% "First on_exit task" })
+on_exit({ <% "Second on_exit task" })
+
+<% "Doing stuff"
+for (_, 1..3) {
+	pause(500)
+	%% "."
+}
+pause(500)
+<% newl

@@ -1,0 +1,22 @@
+<% "Lazy evaluation" :: newl
+
+<% "Example:"
+{
+	x = noeval: y * 2
+	y = 2
+	<% "Result: " :: (x += y) 	/* Equivalent to x = 2 + 2 * 2 */
+}
+<% ""
+
+<% "A noeval \"loop\":"
+{
+	x = noeval: [
+		[
+			i == nil ? i = 10,
+			--i,
+			i > 0 ? %% x :: " "
+		][1],
+		delete: i
+	][0]
+	x
+}

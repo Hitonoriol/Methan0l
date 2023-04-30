@@ -1,0 +1,17 @@
+import: "$:/modules/ncurses"
+
+print_center = func: msg {
+	mx = getmaxx(#screen)
+	my = getmaxy(#screen)
+	mvprintw(my / 2, (mx - msg.size()) / 2 - 1, " " :: msg)
+	/* This, for some reason, mangles the first character if it's not a whitespace... */
+}
+
+screen = initscr()
+noecho()
+start_color()
+attron(A_REVERSE)
+print_center("Hello, ncurses!")
+refresh()
+getch()
+endwin()

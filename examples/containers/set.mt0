@@ -1,0 +1,47 @@
+<% "Sets" :: newl
+rnd = new: Random(42)
+
+set_a = new: Set([5, 1, 3, 11, 11, 5, 7, 9, 11, 5])
+set_b = range(15)
+	.map(f: n -> rnd.next_int(15))
+	.collect(new: Set([]))
+
+/* `Set` implements the `Collection` interface, which implements `Iterable` */
+<% $"Is Set a Collection: {}" set_a is: Collection
+<% $"Is Set an Iterable: {}" set_a is: Iterable
+<% $"All methods of Set: {}" Set@get_methods()
+
+/* Test if `set` contains element `n`: set[n]  */
+contains = func @(set, n)
+	return: "* Contains `" :: n :: "`: " :: set[n]
+
+/* Insert a new element `n` into `set`: set[->n]
+ * Returns true if `n` was successfully inserted, false otherwise. */
+insert = func @(set, n)
+	return: "* Inserting `" :: n :: "`: " :: set[->n]
+
+/* Remove element `n` from `set`: set[~n] */
+remove = func @(set, n)
+	return: "* Removing `" :: n :: "`: " :: set[~n]
+
+<% "Set A: " :: set_a
+<% contains(set_a, 123)
+<% contains(set_a, 11)
+<% insert(set_a, "foo")
+<% remove(set_a, 1)
+<% "Set after modifications: " :: set_a
+<% ""
+
+<% "Using set operations (result is always a new set):"
+<% "Set A: " :: set_a
+<% "Set B: " :: set_b
+<% "A union B: " :: set_a.union(set_b)
+<% "A intersect B: " :: set_a.intersect(set_b)
+<% "A \\ B: " :: set_a.diff(set_b)
+<% "A symmetric \\ B: " :: set_a.symdiff(set_b)
+<% ""
+
+<% "Using mutating methods provided by Collection:"
+<% "In-place union [A u B]: " :: set_a.add_all(set_b)
+<% "In-place difference [A \\ B]: " :: set_a.remove_all(set_b)
+<% "In-place intersect [A ^ B]: " :: set_a.retain_all(set_b)
