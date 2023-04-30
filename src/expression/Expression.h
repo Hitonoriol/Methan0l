@@ -103,6 +103,61 @@ inline RawExprList as_raw_list(ExprList &list)
 	return raw_lst;
 }
 
+struct EvaluatingIterator
+{
+	using iterator_category = std::forward_iterator_tag;
+	using difference_type = std::ptrdiff_t;
+	using value_type = Value;
+	using pointer = value_type*;
+	using reference = value_type&;
+
+	private:
+		Interpreter &context;
+		ExprList::iterator expr;
+		ExprList::iterator end;
+		Value val;
+
+		inline void changed()
+		{
+			if (expr == end)
+				return;
+			val = (*expr)->evaluate(context);
+		}
+
+	public:
+		EvaluatingIterator(Interpreter &context, ExprList::iterator it)
+			: context(context), expr(it) {}
+
+		inline reference operator*() { return val; }
+		inline pointer operator->() { return &val; }
+
+		inline EvaluatingIterator& operator++()
+		{
+			++expr;
+			changed();
+			return *this;
+		}
+
+		inline EvaluatingIterator operator++(int)
+		{
+			auto tmp = *this;
+			++(*this);
+			changed();
+			return tmp;
+		}
+
+		inline friend bool operator==(const EvaluatingIterator &l, const EvaluatingIterator &r)
+		{
+			return l.expr == r.expr;
+		}
+
+		inline friend bool operator!=(const EvaluatingIterator &l, const EvaluatingIterator &r)
+		{
+			return l.expr != r.expr;
+		}
+
+};
+
 } /* namespace mtl */
 
 #endif /* EXPRESSION_EXPRESSION_H_ */

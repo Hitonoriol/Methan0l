@@ -68,6 +68,11 @@ class Proxy
 
 		Proxy(T &obj) : obj(obj) {}
 
+		inline T& contained()
+		{
+			return obj;
+		}
+
 		inline T* operator->()
 		{
 			return &obj;
@@ -88,7 +93,22 @@ struct Context : public Proxy<Interpreter>
 /* Tag type for capturing all callargs passed to a function */
 struct CallArgs : public Proxy<ExprList>
 {
-	using Proxy<type>::Proxy;
+	using iterator = EvaluatingIterator;
+
+	private:
+		Interpreter &context;
+
+	public:
+		CallArgs(Interpreter &context, ExprList& args)
+			: Proxy<type>::Proxy(args), context(context) {}
+
+		Value first()
+		{
+			return contained().front()->evaluate(context);
+		}
+
+		iterator begin() { return {context, (*this)->begin()}; }
+		iterator end() { return {context, (*this)->end()}; }
 };
 
 class Interpreter
@@ -381,7 +401,7 @@ class Interpreter
 
 					/* Inject all callargs as expression list into the argument list if bound function's signature
 					 * contains a `mtl::CallArgs` argument. */
-					inject_callarg<CallArgs>(c, unconst(c));
+					inject_callarg<CallArgs>(c, context, unconst(c));
 				}
 
 				if (c.size() < N)
