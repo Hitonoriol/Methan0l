@@ -1,8 +1,0 @@
-M_LINK_STATIC:= 
-M_LINK_DYNAMIC:=-lncurses
-MOD_FLAGS= 
-
-ifeq ($(OS),Windows_NT)
-	M_LINK_STATIC+=$(M_LINK_DYNAMIC)
-	M_LINK_DYNAMIC= 
-endif

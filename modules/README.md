@@ -3,15 +3,15 @@
 ### Build individual modules
 
 ```
-cd modules && make module-name
+cd module && make
 ```  
 
-Where `name` is the name of the folder which contains the module's sources.  
+Where `module` is the name of the folder which contains the module's sources.  
 
 ### Build all modules  
 
 ```
-cd modules && make clean && make all
+make
 ```
 
 ### Use modules inside Methan0l
@@ -26,8 +26,8 @@ Where `.so` / `.mt0` extension or even the filename of the module binary / scrip
 
 Everything defined inside the `module` can then be used by accessing its scope: `module.foo(...)` or by importing its contents into the current scope: `module.import()`.  
 \
-Modules can also be imported in single expression:  
+Modules can also be imported in a single expression:  
 ```
-using_module: path
+import: path
 ```  
 This effectively loads a module from `path` and imports its contents into the current scope.

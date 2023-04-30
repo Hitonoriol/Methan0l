@@ -38,7 +38,7 @@ LIB_NAME = libmethan0l.so
 LINK_STATIC := -lboost_filesystem -lboost_system
 LINK_DYNAMIC :=
 
-FLAGS:=-std=c++17 -Wall -O3
+FLAGS:=-std=c++17 -Wall -Wextra -Wno-unused-parameter -O3
 
 INSTALL_DIR=/opt/methan0l
 
@@ -65,7 +65,7 @@ install: all lib-headers
 	    mkdir -p $(INSTALL_DIR); \
 	    cp -f $(LIB_NAME) $(INSTALL_DIR) && \
 	    cp -f $(CLI_BIN_NAME) $(INSTALL_DIR) && \
-	    cp -rf ../modules $(INSTALL_DIR) && \
+	    cp -rf modules $(INSTALL_DIR) && \
 	    cp -rf $(MODULE_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(STDLIB_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(INCLUDE_DIR) $(INSTALL_DIR) && \
@@ -85,7 +85,7 @@ release: all lib-headers modules
 
 modules: lib lib-headers
 	@echo 'Building modules...'
-	cd ../modules; make clean; make || true
+	cd ../modules && make
 	@echo 'Finished building modules'
 	@echo ' '
 
