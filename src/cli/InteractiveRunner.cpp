@@ -30,7 +30,7 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 		{ "version - print methan0l version string",
 				[](auto&)
 					{
-						std::cout << FULL_VERSION_STR << std::endl;
+						std::cout << VERSION_STR << std::endl;
 					}
 		},
 		{ "info - print info about the interpreter",
@@ -284,8 +284,9 @@ void InteractiveRunner::run()
 
 void InteractiveRunner::start()
 {
-	std::cout << FULL_VERSION_STR << " on " << get_os() << ".\n"
-			<< "Use \"" << cmd_prefix << "help\" to view command list." << std::endl;
+	std::cout << FULL_VERSION_STR << ". " << NL
+		<< "Platform: " << BUILD_PLATFORM << "." << NL
+		<< "Use \"" << cmd_prefix << "help\" to view command list." << NL;
 
 	/* Print CAS mode toggle message if started with --cas flag */
 	if (cas_mode)

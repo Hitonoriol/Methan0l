@@ -31,10 +31,11 @@ METHAN0L_LIBRARY(LibData)
 void LibData::load()
 {
 	getter("get_os_name", str(get_os()));
+	getter("get_arch", str(get_architecture()));
 	getter("get_major_version", MAJOR_VERSION);
 	getter("get_release_version", RELEASE_VERSION);
 	getter("get_minor_version", MINOR_VERSION);
-	getter("get_version_code", VERSION_CODE);
+	getter("get_version_code", get_version_code());
 	getter("get_version", str(VERSION_STR));
 
 	/* ref.reset$(new_idfr) */
