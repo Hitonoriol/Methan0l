@@ -21,7 +21,7 @@ ExprPtr GroupParser::parse(Parser &parser, Token token)
 		return std::make_shared<LiteralExpr>();
 
 	/* Type reference expression: (TypeName) */
-	else if (parser.peek(TokenType::IDENTIFIER)) {
+	else if (parser.peek(TokenType::IDENTIFIER) && parser.peek(TokenType::PAREN_R, 1)) {
 		auto type_tok = parser.consume(TokenType::IDENTIFIER);
 		parser.consume(TokenType::PAREN_R);
 		return make_expr<TypeRefExpr>(line(token), type_tok.get_value());
