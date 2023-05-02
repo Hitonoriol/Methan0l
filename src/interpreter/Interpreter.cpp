@@ -765,7 +765,7 @@ bool Interpreter::load_program(const std::string &path)
 
 Unit Interpreter::load_file(const std::string &path)
 {
-	std::ifstream src_file(path, std::ios::binary | std::ios::ate);
+	std::ifstream src_file(core::path(*this, path), std::ios::binary | std::ios::ate);
 
 	if (!src_file.is_open()) {
 		std::cerr << "Failed to open file: \"" + path + "\"" << std::endl;
