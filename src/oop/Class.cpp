@@ -120,6 +120,10 @@ void Class::inherit(Class *parent)
 
 void Class::implement(Class *interface)
 {
+	if (!interface->proto_object_data.empty())
+		throw std::runtime_error(get_name() + "is unable to implement "
+			"a non-interface: " + interface->get_name());
+
 	interfaces.push_back(interface);
 	add_base_class(interface);
 }
