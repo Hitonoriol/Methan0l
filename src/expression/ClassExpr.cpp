@@ -29,17 +29,18 @@ void ClassExpr::execute(Interpreter &context)
 	auto &type_mgr = context.get_type_mgr();
 	auto &obj_data = clazz->get_object_data();
 
-	if (!base.empty()) {
-		auto it = base.begin();
-		clazz->inherit(&type_mgr.get_class(*it++));
-		for (; it != base.end(); ++it) {
-			auto &base_class = type_mgr.get_class(*it);
-			clazz->implement(&base_class);
+	if (!base.empty())
+		clazz->inherit(&type_mgr.get_class(base));
+
+	if (!interfaces.empty()) {
+		for (auto &name : interfaces) {
+			auto &interface = type_mgr.get_class(name);
+			clazz->implement(&interface);
 		}
 	}
 
 	for (auto& [name, rhs] : body) {
-		Value rval = rhs->evaluate(context);
+		auto rval = rhs->evaluate(context);
 		if (rval.is<Function>())
 			clazz->register_method(name, rval.get<Function>());
 		else if (rval.is<NativeFunc>())
@@ -49,6 +50,16 @@ void ClassExpr::execute(Interpreter &context)
 	}
 
 	type_mgr.register_type(clazz);
+}
+
+void ClassExpr::set_base(const std::string &name)
+{
+	base = name;
+}
+
+void ClassExpr::set_interfaces(std::vector<std::string> &&interfaces)
+{
+	this->interfaces = std::move(interfaces);
 }
 
 std::ostream& ClassExpr::info(std::ostream &str)

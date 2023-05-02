@@ -15,14 +15,18 @@ class ClassExpr: public Expression
 
 	private:
 	std::string name;
-	std::vector<std::string> base;
+	std::string base;
+	std::vector<std::string> interfaces;
 	ExprMap body;
 
 	std::shared_ptr<Class> clazz;
 
 	public:
-		ClassExpr(std::string name, const std::vector<std::string> base, const ExprMap &body)
-			: name(name), base(base), body(body) {}
+		ClassExpr(std::string name, const ExprMap &body)
+			: name(name), body(body) {}
+
+		void set_base(const std::string&);
+		void set_interfaces(std::vector<std::string>&&);
 
 		void execute(mtl::Interpreter &context) override;
 

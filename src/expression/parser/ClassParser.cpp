@@ -12,22 +12,26 @@ namespace mtl
 {
 
 /*
- * class: ClassName [base: Foo, Bar, ...] [=] @( ... )
+ * class: ClassName [base: Foo] [implements: Bar, Baz, ...] { ... }
  */
 ExprPtr ClassParser::parse(Parser &parser, mtl::Token token)
 {
 	parser.consume(TokenType::COLON);
 	std::string name = parser.consume(TokenType::IDENTIFIER).get_value();
 
-	std::vector<std::string> base;
+	std::string base;
+	std::vector<std::string> interfaces;
 	if (parser.match(TokenType::BASE_CLASS)) {
-		parser.consume(TokenType::COLON);
-		do {
-			base.push_back(parser.consume(TokenType::IDENTIFIER).get_value());
-		} while (parser.match(TokenType::COMMA));
+		parser.consume(TokenType::COMMA);
+		base = parser.consume(TokenType::IDENTIFIER).get_value();
 	}
 
-	parser.match(TokenType::ASSIGN);
+	if (parser.match(TokenType::IMPLEMENT)) {
+		parser.consume(TokenType::COLON);
+		do {
+			interfaces.push_back(parser.consume(TokenType::IDENTIFIER).get_value());
+		} while (parser.match(TokenType::COMMA));
+	}
 
 	auto end_token = TokenType::PAREN_R;
 	if (!parser.match(TokenType::MAP_DEF_L)) {
@@ -39,7 +43,11 @@ ExprPtr ClassParser::parse(Parser &parser, mtl::Token token)
 	MapParser::parse(parser, [&body_map](auto name_expr, auto expr) {
 		body_map.emplace(MapParser::key_string(name_expr), expr);
 	}, end_token);
-	return make_expr<ClassExpr>(line(token), name, base, body_map);
+
+	auto class_expr = make_expr<ClassExpr>(line(token), name, body_map);
+	class_expr->set_base(base);
+	class_expr->set_interfaces(std::move(interfaces));
+	return class_expr;
 }
 
 } /* namespace mtl */
