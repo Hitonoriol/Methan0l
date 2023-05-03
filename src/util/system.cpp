@@ -1,7 +1,8 @@
-#include "process.h"
+#include "system.h"
 
 #include <array>
 #include <cstdio>
+#include <cstdlib>
 #include <cwchar>
 #include <memory>
 #include <stdexcept>
@@ -26,6 +27,13 @@ int exec(const std::string &cmd, std::string &output)
 	} while (count > 0);
 
 	return pclose(pipe);
+}
+
+std::string get_env(std::string_view name)
+{
+	if (auto cstr = std::getenv(name.data()))
+		return cstr;
+	return {};
 }
 
 }

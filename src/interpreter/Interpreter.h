@@ -27,6 +27,9 @@
 #define STRINGS(...) const std::string JOIN(__VA_ARGS__);
 #define STRING_ENUM(name, ...) struct name { static STRINGS(__VA_ARGS__) };
 
+#define STRING_VIEWS(...) constexpr std::string_view JOIN(__VA_ARGS__);
+#define STRING_VIEW_ENUM(name, ...) struct name { static STRING_VIEWS(__VA_ARGS__) };
+
 namespace boost::dll
 {
 	class shared_library;
@@ -51,10 +54,15 @@ class Library;
 class TypeManager;
 class Expression;
 
+STRING_VIEW_ENUM(SystemEnv,
+	MTL_HOME = "METHAN0L_HOME"
+)
+
 STRING_ENUM(EnvVars,
 	RUNPATH, RUNDIR,
 	LAUNCH_ARGS,
-	SCRDIR
+	SCRDIR,
+	BIN_PATH, HOME_DIR
 )
 
 template<typename T>
@@ -712,6 +720,8 @@ class Interpreter
 
 		const std::string& get_runpath();
 		const std::string& get_rundir();
+		const std::string& get_bin_path();
+		const std::string& get_home_dir();
 
 		template<typename T>
 		bool try_load(T &&loader)

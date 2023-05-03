@@ -7,6 +7,7 @@
 
 #include <util/util.h>
 #include <util/benchmark.h>
+#include <util/system.h>
 
 #include <parser/Methan0lParser.h>
 #include <expression/AssignExpr.h>
@@ -36,7 +37,10 @@ STRINGS(
 		EnvVars::LAUNCH_ARGS(".argv"),
 		EnvVars::SCRDIR(".scrdir"),
 		EnvVars::RUNPATH(".rp"),
-		EnvVars::RUNDIR(".rd")
+		EnvVars::RUNDIR(".rd"),
+		EnvVars::BIN_PATH(".bp"),
+		EnvVars::HOME_DIR(".hd")
+
 )
 
 Interpreter::Interpreter()
@@ -71,15 +75,28 @@ Interpreter::~Interpreter()
 
 void Interpreter::set_runpath(std::string_view runpath)
 {
+	/* Path to the working directory from which the interpreter
+	 * (or a program that uses the interpreter in embedded setting) has been launched. */
 	auto rpath = std::filesystem::absolute(runpath);
 	set_env_var(EnvVars::RUNPATH, rpath.string());
 	set_env_var(EnvVars::RUNDIR, rpath.parent_path().string());
+
+	/* Path to the binary using the interpreter. */
+	auto bin_path = boost::dll::program_location();
+	set_env_var(EnvVars::BIN_PATH, bin_path.string());
+
+	/* If interpreter home environment variable is defined, use it as this interpreter's
+	 * home directory. Otherwise, use the directory of the binary using this interpreter. */
+	auto env_path = mtl::get_env(SystemEnv::MTL_HOME);
+	set_env_var(EnvVars::HOME_DIR,
+		env_path.empty() ? bin_path.parent_path().string() : env_path
+	);
 }
 
 void Interpreter::load_libraries()
 {
 	namespace fs = std::filesystem;
-	auto libdir = fs::path(get_rundir());
+	auto libdir = fs::path(get_home_dir());
 	append(libdir, "/" + std::string(LIBRARY_PATH));
 	for(auto& entry: fs::directory_iterator(libdir)) {
 		auto &path = entry.path();
@@ -156,6 +173,16 @@ const std::string& Interpreter::get_runpath()
 const std::string& Interpreter::get_rundir()
 {
 	return get_env_var(EnvVars::RUNDIR).get<String>();
+}
+
+const std::string& Interpreter::get_bin_path()
+{
+	return get_env_var(EnvVars::BIN_PATH).get<String>();
+}
+
+const std::string& Interpreter::get_home_dir()
+{
+	return get_env_var(EnvVars::HOME_DIR).get<String>();
 }
 
 const std::string& Interpreter::get_scriptpath()
@@ -760,7 +787,10 @@ void Interpreter::preserve_data(bool val)
 
 bool Interpreter::load_program(const std::string &path)
 {
-	return load(load_file(path));
+	bool loaded = load(load_file(path));
+	if (loaded)
+		std::filesystem::current_path(path);
+	return loaded;
 }
 
 Unit Interpreter::load_file(const std::string &path)

@@ -16,7 +16,6 @@
 #include <structure/Unit.h>
 #include <structure/Value.h>
 #include <util/util.h>
-#include <util/process.h>
 #include <util/Heap.h>
 #include <lang/core/Internal.h>
 #include <oop/Class.h>
@@ -31,6 +30,8 @@ void LibInternal::load()
 {
 	context->register_env_getter("get_runpath", EnvVars::RUNPATH);
 	context->register_env_getter("get_rundir", EnvVars::RUNDIR);
+	context->register_env_getter("get_home_dir", EnvVars::HOME_DIR);
+	context->register_env_getter("get_bin_path", EnvVars::BIN_PATH);
 
 	function("get_launch_args", [&] {
 		return static_cast<Interpreter*>(context)->get_main().local().get(EnvVars::LAUNCH_ARGS);

@@ -8,7 +8,7 @@ namespace mtl::core
 
 /*
  * Expands `path aliases`:
- * 		`$:` - expands into interpreter root directory
+ * 		`$:` - expands into interpreter home directory
  * 		`#:` - expands into script run directory
  * And prepends the result to the rest of the `pathstr`
  * Example: `$:/modules/ncurses` becomes: `/path/to/binary/modules/ncurses`
@@ -19,7 +19,7 @@ std::string absolute_path(Interpreter &context, const std::string &pathstr)
 	auto alias = std::string_view(pathstr).substr(0, 2);
 	std::string retpath = pathstr;
 	if (alias == PathPrefix::RUNDIR)
-		replace_all(retpath, alias, context.get_rundir());
+		replace_all(retpath, alias, context.get_home_dir());
 	else if (alias == PathPrefix::SCRDIR)
 		replace_all(retpath, alias, context.get_scriptdir());
 	else
