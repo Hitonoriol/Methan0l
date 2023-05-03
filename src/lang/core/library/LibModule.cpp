@@ -36,6 +36,10 @@ void LibModule::load()
 		return Value::NO_VALUE;
 	}));
 
+	/* For testing purposes */
+	function("resolve_module", [&](const std::string &path) {
+		return str(core::find_module(*context, path));
+	});
 }
 
 } /* namespace mtl */

@@ -11,9 +11,9 @@ inline std::filesystem::path &append(std::filesystem::path &path, const std::str
 	return path.assign(path.string() + apx).make_preferred();
 }
 
-inline std::filesystem::path &append(std::filesystem::path &path, std::string_view apx)
+inline std::filesystem::path concat(const std::filesystem::path &path, const std::string &apx)
 {
-	return append(path, std::string(apx));
+	return std::filesystem::path(path.string() + apx).make_preferred();
 }
 
 }

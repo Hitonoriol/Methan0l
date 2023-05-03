@@ -12,6 +12,8 @@
 namespace mtl::core
 {
 
+namespace fs = std::filesystem;
+
 const std::string
 	ModuleSymbols::NAME_FIELD = ".module_name",
 	ModuleSymbols::REFERENCE_FIELD = ".mref";
@@ -20,7 +22,9 @@ const std::string
 void load_module(Interpreter &context, const std::string &path, Unit &unit)
 {
 	unit.box();
-	std::string name = find_module(context, path);
+	auto name = find_module(context, path);
+	if (name.empty())
+		throw std::runtime_error("Couldn't find module: " + path);
 
 	/* Load Methan0l src file */
 	if (ends_with(name, PROGRAM_EXT)) {
@@ -51,25 +55,50 @@ void load_module(Interpreter &context, const std::string &path, Unit &unit)
 		throw std::runtime_error("Couldn't load module " + name);
 }
 
+std::string resolve_module_file(const fs::path &path)
+{
+	/* Passed path doesn't contain an extension --> try to resolve it
+	 * as a Methan0l script first, and if no such script exists, resolve it as native library. */
+	if (!path.has_extension()) {
+		if (fs::exists(concat(path, str(PROGRAM_EXT))))
+			return path.string() + str(PROGRAM_EXT);
+		else if (fs::exists(concat(path, str(LIBRARY_EXT))))
+			return path.string() + str(LIBRARY_EXT);
+	}
+
+	if (fs::exists(path))
+		return path.string();
+
+	return {};
+}
+
 std::string find_module(Interpreter &context, const std::string &path_str)
 {
-	std::filesystem::path path(core::absolute_path(context, path_str));
-	const bool exists = std::filesystem::exists(path);
+	fs::path path(core::absolute_path(context, path_str));
+	const bool exists = fs::exists(path);
+
+	/* Valid path has been passed */
 	if (exists) {
-		if (!std::filesystem::is_directory(path))
+		if (!fs::is_directory(path)) // Extension is specified
 			return path_str;
 		else
-			return find_module(context, append(path, "/" + path.filename().string()).string());
+			return find_module(context, concat(path, "/" + path.filename().string()).string());
 	}
 
-	if (!exists && !path.has_extension()) {
-		if (std::filesystem::exists(append(path, PROGRAM_EXT)))
-			return path.string();
-		else if (std::filesystem::exists(append(path.assign(path_str), LIBRARY_EXT)))
-			return path.string();
+	auto module_file = resolve_module_file(path);
+	if (!module_file.empty())
+		return module_file;
+
+	/* Passed path is not valid and is in relative form --> search it
+	 * relative to the interpreter home directory. */
+	if (fs::path(path_str).is_relative()) {
+		fs::path home_modules(context.get_home_dir() + "/" + str(Paths::MODULE_DIR) + "/" + path_str);
+		auto home_loc = find_module(context, fs::absolute(home_modules).string());
+		if (!home_loc.empty())
+			return home_loc;
 	}
 
-	throw std::runtime_error("Couldn't find module: " + path_str);
+	return {};
 }
 
 } /* namespace mtl */
