@@ -154,7 +154,7 @@ Value Class::extract_names(const DataTable &table)
 	auto &list = names.get<List>();
 	for (auto&& [name, method] : table.managed_map()) {
 		if (name[0] != '.')
-			list->push_back(name);
+			list->push_back(context.make<String>(name));
 	}
 	return names;
 }
