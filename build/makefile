@@ -61,17 +61,17 @@ all: $(CLI_BIN_NAME)
 
 install: all lib-headers
 	@if [ "$(OS_NAME)" = "Linux" ]; then \
-	    echo "Installing $(CLI_BIN_NAME)..."; \
-	    mkdir -p $(INSTALL_DIR); \
+	    echo "Installing $(CLI_BIN_NAME)..." && \
+	    mkdir -p $(INSTALL_DIR) && \
 	    cp -f $(LIB_NAME) $(INSTALL_DIR) && \
 	    cp -f $(CLI_BIN_NAME) $(INSTALL_DIR) && \
-	    cp -rf modules $(INSTALL_DIR) && \
 	    cp -rf $(MODULE_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(STDLIB_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(INCLUDE_DIR) $(INSTALL_DIR) && \
 	    ln -sf $(INSTALL_DIR)/$(CLI_BIN_NAME) /usr/local/bin/$(CLI_BIN_NAME) && \
 	    ln -sf $(INSTALL_DIR)/$(LIB_NAME) /usr/local/lib/$(LIB_NAME) && \
 	    ln -sf $(INSTALL_DIR)/$(INCLUDE_DIR) /usr/local/include/methan0l && \
+	    echo "export METHAN0L_HOME=$(INSTALL_DIR)" > /etc/profile.d/methan0l.sh && \
 	    echo "Installation finished successfully" || echo "Installation failed"; \
 	fi
 
