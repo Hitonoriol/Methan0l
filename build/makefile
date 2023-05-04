@@ -68,6 +68,7 @@ install: all lib-headers
 	    cp -rf $(MODULE_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(STDLIB_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(INCLUDE_DIR) $(INSTALL_DIR) && \
+	    cp -rf ../examples $(INSTALL_DIR) && \
 	    ln -sf $(INSTALL_DIR)/$(CLI_BIN_NAME) /usr/local/bin/$(CLI_BIN_NAME) && \
 	    ln -sf $(INSTALL_DIR)/$(LIB_NAME) /usr/local/lib/$(LIB_NAME) && \
 	    ln -sf $(INSTALL_DIR)/$(INCLUDE_DIR) /usr/local/include/methan0l && \
