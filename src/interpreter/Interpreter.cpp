@@ -788,8 +788,11 @@ void Interpreter::preserve_data(bool val)
 bool Interpreter::load_program(const std::string &path)
 {
 	bool loaded = load(load_file(path));
-	if (loaded)
-		std::filesystem::current_path(path);
+	if (loaded) {
+		std::filesystem::current_path(
+			std::filesystem::path(core::path(*this, path)).parent_path()
+		);
+	}
 	return loaded;
 }
 
