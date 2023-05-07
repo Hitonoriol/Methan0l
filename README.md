@@ -1,12 +1,13 @@
 # Methan0l  
 
+Embeddable AST (tree-walking) interpreter for Methan0l, a dynamically-typed multi-paradigm interpreted programming language.  
 
-## Documentation  
+## Language Reference Documentation  
 
-Available in the [Wiki Section](https://github.com/Hitonoriol/Methan0l/wiki)  
+Available [here](https://hitonoriol.github.io/methan0l-docs/).  
 
 
-## How to use
+## How to Use the Interpreter CLI
 
 **Execute a program**:  
 ```
@@ -21,9 +22,14 @@ Available in the [Wiki Section](https://github.com/Hitonoriol/Methan0l/wiki)
 \
 **Interpreter arguments:**  
 
+* Pause after program execution (by requesting user input):  
+  `--no-exit`  
+
+* Launch interactive session in CAS mode (save and print out evalution result for each expression):  
+  `--cas`
+
 * Set max allocatable heap capacity (in bytes):  
-`--max-mem=123`
-    
+  `--max-mem=123`  
   
 * Set initial heap capacity (in bytes):  
   `--initial-mem=123`  
@@ -31,7 +37,7 @@ Available in the [Wiki Section](https://github.com/Hitonoriol/Methan0l/wiki)
 * Allocate the whole heap fully (capacity is determined by the `--max-mem` value) on interpreter launch:  
   `--allocate-fully`
 
-* Disable the heap limit. Effectively just stops the interpreter from throwing an exception on allocating more than max heap capacity:  
+* Disable the heap limit. Stops the interpreter from throwing an exception on allocating more than max heap capacity:  
   `--no-heap-limit`
 
 * Disable monotonic buffer upstream for heap allocations (for testing purposes, may get removed):  
@@ -44,9 +50,9 @@ Available in the [Wiki Section](https://github.com/Hitonoriol/Methan0l/wiki)
 ## Building Methan0l
 
 **Build requirements:**  
-* `GNU make`
-* `g++10` or newer
-* `libboost` (for `boost::dll` and its dependencies)  
+* `GNU make` **4.2+**
+* `g++` **10+**
+* `libboost`
 
 For Windows machines you need to have ports of everything listed above installed and added to `PATH` ([MSYS2](https://msys2.org/) ports are recommended).  
 
@@ -73,7 +79,7 @@ cd build && make modules
 ```
 or to build a specific module:
 ```
-cd modules && make module-[module_name]
+cd modules/[module_name] && make
 ```
 where `[module_name]` is the name of the directory that contains the module's sources.
 
