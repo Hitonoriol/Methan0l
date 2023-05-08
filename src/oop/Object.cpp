@@ -90,6 +90,11 @@ Value& Object::get_native()
 	return field(Fields::NATIVE_OBJ);
 }
 
+bool Object::is_native()
+{
+	return data.exists(str(Fields::NATIVE_OBJ));
+}
+
 void Object::set_native(Value native_obj)
 {
 	def(Fields::NATIVE_OBJ) = native_obj;

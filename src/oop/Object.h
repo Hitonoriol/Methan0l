@@ -54,6 +54,7 @@ class Object
 		std::any& get_native_any();
 		Value& get_native();
 		void set_native(Value);
+		bool is_native();
 
 		Class* get_class() const;
 		Interpreter& context() const;

@@ -217,6 +217,10 @@ void LibInternal::load_operators()
 			return Value::ref(box_value(unit, rhs));
 		}
 	}));
+
+	prefix_operator(TokenType::IDENTITY, LazyUnaryOpr([&](ExprPtr rhs) {
+		return reinterpret_cast<Int>(ref(rhs).identity());
+	}));
 }
 
 Value& LibInternal::box_value(Unit &box, ExprPtr expr)

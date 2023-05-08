@@ -296,7 +296,10 @@ void* Value::identity()
 	return accept([&](auto &v) -> void* {
 		if constexpr (is_heap_type<VT(v)>())
 			return v.get();
-		else
+		else if constexpr (std::is_same_v<VT(v), Object>) {
+			auto &obj = get<Object>();
+			return obj.is_native() ? &obj.get_native_any() : reinterpret_cast<void*>(obj.id());
+		} else
 			return this;
 	});
 }
