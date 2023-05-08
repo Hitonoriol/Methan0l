@@ -170,6 +170,10 @@ class Interpreter
 
 		void on_exit();
 
+		std::pair<DataMap::iterator, DataMap::iterator> find_operator_overload(
+			Object &obj, TokenType op
+		);
+
 		/*
 		 * Main operator application dispatcher.
 		 * Args:
@@ -200,10 +204,13 @@ class Interpreter
 			/* Invoke object operator overload, if any */
 			if (operand_a.get().is<Object>()) {
 				auto &obj = operand_a.get<Object>();
-				ExprList args;
-				if constexpr (Optype == OperatorType::BINARY)
-					args.push_back(b);
-				return obj.invoke_method(Token::to_string(op), args);
+				auto [method_it, end] = find_operator_overload(obj, op);
+				if (method_it != end) {
+					ExprList args;
+					if constexpr (Optype == OperatorType::BINARY)
+						args.push_back(b);
+					return invoke_method(obj, method_it->second, args);
+				}
 			}
 
 			if constexpr (Optype == OperatorType::UNARY) {

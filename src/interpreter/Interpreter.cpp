@@ -152,6 +152,14 @@ Value Interpreter::evaluate(PrefixExpr &opr)
 	return apply_prefix(opr.get_operator(), opr.get_rhs());
 }
 
+std::pair<DataMap::iterator, DataMap::iterator> Interpreter::find_operator_overload(
+	Object &obj, TokenType op
+)
+{
+	auto &map = *obj.get_class()->get_class_data().map_ptr();
+	return {map.find(Token::to_string(op)), map.end()};
+}
+
 void Interpreter::load_main(Unit &main)
 {
 	if (!exec_stack.empty())
