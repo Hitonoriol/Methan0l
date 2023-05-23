@@ -4,7 +4,7 @@ Embeddable AST (tree-walking) interpreter for Methan0l, a dynamically-typed mult
 
 ## Language Reference Documentation  
 
-Available [here](https://hitonoriol.github.io/methan0l-docs/).  
+Available [here](https://methan0l.github.io/docs/).  
 
 
 ## How to Use the Interpreter CLI
