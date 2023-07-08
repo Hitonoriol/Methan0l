@@ -612,7 +612,7 @@ class Value
 };
 
 const Value __ = Value::NO_VALUE;
-const Value NEW_LINE = Value(std::string(1, '\n'));
+const Value NEW_LINE = Value('\n');
 
 }
 
