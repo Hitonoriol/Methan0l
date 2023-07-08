@@ -26,7 +26,7 @@ LIB_OPERATOR_DEF(infix, BinaryOpr)
 
 std::string Library::str(ExprList args, int idx)
 {
-	return mtl::str(arg(args, idx));
+	return *mtl::str(arg(args, idx));
 }
 
 Value Library::str(std::string_view str)

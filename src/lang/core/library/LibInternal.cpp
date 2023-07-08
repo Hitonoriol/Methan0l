@@ -20,6 +20,7 @@
 #include <lang/core/Internal.h>
 #include <oop/Class.h>
 #include <oop/Object.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {
@@ -130,7 +131,7 @@ void LibInternal::load()
 		 * value$("idfr_name") -- get idfr's Value from Main Unit */
 	function("value", [&](Args args) {
 		auto &unit = args.size() > 2 ? ref(args[0]).get<Unit>() : context->get_main();
-		auto idfr_name = mtl::str(val(args.back()));
+		auto idfr_name = *mtl::str(val(args.back()));
 		auto &val = unit.local().get(idfr_name);
 		return Value::ref(val);
 	});

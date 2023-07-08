@@ -21,6 +21,7 @@
 #include <oop/Object.h>
 #include <structure/Value.h>
 #include <lang/core/File.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {
@@ -126,21 +127,21 @@ File::File(Interpreter &context) : Class(context, "File")
 	/* file.equivalent$(path) */
 	register_method("equivalent", [&](Args &args) {
 		std::string file = path(args);
-		std::string rhs = str(args[1]->evaluate(context));
+		std::string rhs = *mtl::str(args[1]->evaluate(context));
 		return fs::equivalent(file, rhs);
 	});
 
 	/* file.copy_to$(dest_path) */
 	register_method("copy_to", [&](Args &args) {
 		std::string from = path(args);
-		std::string to = str(args[1]->evaluate(context));
+		std::string to = *mtl::str(args[1]->evaluate(context));
 		fs::copy(from, to);
 		return Value::NO_VALUE;
 	});
 
 	/* file.rename$(new_path) */
 	register_method("rename", [&](Args &args) {
-		fs::rename(path(args), str(args[1]->evaluate(context)));
+		fs::rename(path(args), std::string(*mtl::str(args[1]->evaluate(context))));
 		return Value::NO_VALUE;
 	});
 
@@ -167,7 +168,7 @@ File::File(Interpreter &context) : Class(context, "File")
 	register_method("write_contents", [&](Args &args) {
 		auto fname = path(args);
 		std::ofstream file(fname, std::ios::trunc);
-		file << str(args[1]->evaluate(context));
+		file << *mtl::str(args[1]->evaluate(context));
 		file.close();
 		return Value::NO_VALUE;
 	});
@@ -179,7 +180,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.write_line$(expr) */
 	register_method("write_line", [&](Args &args) {
-		write_line(Object::get_this(args), str(args[1]->evaluate(context)));
+		write_line(Object::get_this(args), *mtl::str(args[1]->evaluate(context)));
 		return Value::NO_VALUE;
 	});
 
@@ -204,7 +205,9 @@ File::File(Interpreter &context) : Class(context, "File")
 
 void File::set_path(Args &args)
 {
-	Object::get_this(args).def(FNAME) = core::path(context, mtl::str(args[1]->evaluate(context)));
+	auto &obj = Object::get_this(args);
+	auto path = core::path(context, *mtl::str(args[1]->evaluate(context)));
+	obj.def(FNAME) = context.make<String>(path);
 }
 
 void File::reset(std::fstream &file)
@@ -233,15 +236,15 @@ std::string File::path(Args &args)
 	if (Class::static_call(args)) {
 		Value p = args[1]->evaluate(context);
 //		args.erase(std::next(args.begin()));
-		return core::path(context, p);
+		return core::path(context, p.get<String>());
 	}
 
-	return str(Object::get_this(args).field(FNAME));
+	return Object::get_this(args).field(FNAME).get<String>();
 }
 
 bool File::open(Object &obj)
 {
-	auto file = std::make_shared<std::fstream>(str(obj.field(FNAME)));
+	auto file = std::make_shared<std::fstream>(*mtl::str(obj.field(FNAME)));
 	bool open = file->is_open();
 	if (bln(obj.def(IS_OPEN) = open)) {
 		obj.def(FILE) = file;

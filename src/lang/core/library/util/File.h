@@ -16,7 +16,14 @@ namespace mtl
 
 class Interpreter;
 
-class File: public Class
+/*
+ * File class.
+ * Abstracts read / write access to files as well as access to their properties.
+ *
+ * This is an example of a fully manual native class binding.
+ * NativeClass<T> helper as well as class binding macros are not used here.
+ */
+class File : public Class
 {
 	private:
 		using fhandle = std::shared_ptr<std::fstream>;

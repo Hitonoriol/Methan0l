@@ -141,7 +141,7 @@ constexpr char NL = '\n', TAB = '\t', UNTAB = '\b';
 constexpr std::string_view NLTAB = "\n\t";
 
 Value val(Interpreter&, ExprPtr);
-std::string str(Value);
+Shared<native::String> str(Value);
 std::string& str(Shared<native::String>);
 
 double dbl(Value);

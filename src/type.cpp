@@ -14,9 +14,9 @@ Value val(Interpreter &context, ExprPtr expr)
 	return expr->evaluate(context).get();
 }
 
-std::string str(Value val)
+Shared<native::String> str(Value val)
 {
-	return val.as<std::string>();
+	return val.to_string();
 }
 
 double dbl(Value val)

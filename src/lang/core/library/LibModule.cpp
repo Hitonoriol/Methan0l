@@ -5,6 +5,7 @@
 #include <interpreter/Interpreter.h>
 #include <lang/core/Module.h>
 #include <lang/core/Internal.h>
+#include <CoreLibrary.h>
 
 namespace mtl
 {
@@ -31,7 +32,7 @@ void LibModule::load()
 
 	prefix_operator(TokenType::USING_MODULE, LazyUnaryOpr([&](auto rhs) {
 		Unit module;
-		core::load_module(*context, mtl::str(val(rhs)), module);
+		core::load_module(*context, *mtl::str(val(rhs)), module);
 		core::import(context, module);
 		return Value::NO_VALUE;
 	}));
