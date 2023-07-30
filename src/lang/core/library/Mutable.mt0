@@ -1,0 +1,76 @@
+/*
+ * Wrapper class for mutable primitives.
+ */
+class: Mutable {
+	/* Contained value */
+	value => nil
+	
+	construct => method: value -> this.value = value
+	
+	_get => method: other => nil -> (other is: Mutable) ? other.value : other
+	
+	get => method: () -> this.value
+	set => method: value {
+		this.value = value
+		return: this
+	}
+	
+	to_string => method: () -> $$this.value
+	
+	/* Operator overloads - return non-wrapped values */
+	`+` => method: rhs -> this.value + this._get(rhs)
+	`-` => method: rhs -> this.value - this._get(rhs)
+	`*` => method: rhs -> this.value * this._get(rhs)
+	`/` => method: rhs -> this.value / this._get(rhs)
+	`%` => method: rhs -> this.value % this._get(rhs)
+	`>>` => method: rhs -> this.value >> this._get(rhs)
+	`<<` => method: rhs -> this.value << this._get(rhs)
+	`^` => method: rhs -> this.value ^ this._get(rhs)
+	`|` => method: rhs -> this.value | this._get(rhs)
+	`&` => method: rhs -> this.value & this._get(rhs)
+	`&&` => method: rhs -> this.value && this._get(rhs)
+	`||` => method: rhs -> this.value || this._get(rhs)
+	`!` => method: () -> !this.value
+	`++` => method: () -> ++this.value
+	`--` => method: () -> --this.value
+	
+	/* Compound assignment overloads - return this */
+	`+=` => method: rhs -> this.value += this._get(rhs), return: this
+	`-=` => method: rhs -> this.value -= this._get(rhs), return: this
+	`*=` => method: rhs -> this.value *= this._get(rhs), return: this
+	`/=` => method: rhs -> this.value /= this._get(rhs), return: this
+	`%=` => method: rhs -> this.value %= this._get(rhs), return: this
+	`>>=` => method: rhs -> this.value >>= this._get(rhs), return: this
+	`<<=` => method: rhs -> this.value <<= this._get(rhs), return: this
+	`^=` => method: rhs -> this.value ^= this._get(rhs), return: this
+	`|=` => method: rhs -> this.value |= this._get(rhs), return: this
+	`&=` => method: rhs -> this.value &= this._get(rhs), return: this
+}
+
+class: MutableInt base: Mutable {
+	construct => method: value => 0 -> this.super(value)
+}
+
+class: MutableFloat base: Mutable {
+	construct => method: value => 0.0 -> this.super(value)
+}
+
+class: MutableBoolean base: Mutable {
+	construct => method: value => false -> this.super(value)
+}
+
+class: MutableCharacter base: Mutable {
+	construct => method: value => '\0' -> this.super(value)
+}
+
+class: MutableUnit base: Mutable {
+	construct => method: value => {} -> this.super(value)
+}
+
+class: MutableFunction base: Mutable {
+	construct => method: value => func: () -> {} -> this.super(value)
+}
+
+class: MutableExpression base: Mutable {
+	construct => method: value => (noeval: nil) -> this.super(value)
+}
