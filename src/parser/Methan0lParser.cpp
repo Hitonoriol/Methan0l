@@ -97,9 +97,6 @@ Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 	alias_prefix(TokenType::CLASS, TokenType::INTERFACE);
 	register_parser(TokenType::TRY, new TryCatchParser()); // try { ... } catch: ex_name { ... }
 
-	/* Reference operator */
-	register_prefix_opr(TokenType::REF); // ref = **idfr
-
 	/* Map definition */
 	register_parser(TokenType::MAP_DEF_L, new MapParser());
 	alias_prefix(TokenType::MAP_DEF_L, TokenType::MAP_DEF_L_ALT);
@@ -114,8 +111,6 @@ Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
 	/* Return operators */
 	register_postfix_opr(TokenType::EXCLAMATION, Precedence::IO);				// expr!
 	register_word(TokenType::RETURN, Precedence::IO);					// return: expr
-
-	register_postfix_opr(TokenType::DOUBLE_EXCL);			// expr!!
 
 	/* Logical oprs */
 	register_prefix_opr(TokenType::EXCLAMATION);

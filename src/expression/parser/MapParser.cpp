@@ -53,15 +53,7 @@ void MapParser::parse(Parser &parser,
 		auto key_expr = parser.parse();
 		/* If there's no `=>`, this is just a key with no value specified */
 		if (!parser.match(TokenType::KEYVAL)) {
-			/* Capture expression: `%var_name`
-			 * (behaves the same as: var_name => **var_name) */
-			if (PrefixExpr::is(*key_expr, TokenType::PERCENT)) {
-				auto idfr = try_cast<PrefixExpr>(key_expr).get_rhs();
-				collector(idfr, make_expr<PrefixExpr>(0, Token(TokenType::REF), idfr));
-				continue;
-			}
-			else
-				collector(key_expr, LiteralExpr::empty());
+			collector(key_expr, LiteralExpr::empty());
 			continue;
 		}
 

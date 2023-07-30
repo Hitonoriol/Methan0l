@@ -128,11 +128,6 @@ void LibData::load_operators()
 		return core::convert(*context, src, *rhs);
 	}));
 
-	/* Dereference value */
-	postfix_operator(TokenType::DOUBLE_EXCL, LazyUnaryOpr([&](auto lhs) {
-		return val(lhs);
-	}));
-
 	/* Unwrap a named reference, e.g. x = **y; unwrap: x
 	 * `x` becomes a copy of `y` instead of the reference to its value
 	 */
@@ -256,11 +251,6 @@ void LibData::load_operators()
 		}
 		else
 			throw std::runtime_error("`objcopy` can only be applied on an Object or a Box Unit");
-	}));
-
-	/* Reference operator */
-	prefix_operator(TokenType::REF, LazyUnaryOpr([&](ExprPtr rhs) {
-		return Value::ref(context->referenced_value(rhs));
 	}));
 
 	/* typeid: val */
