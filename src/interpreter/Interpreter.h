@@ -199,10 +199,10 @@ class Interpreter
 					return lazy->second(a, b);
 			}
 
-			Value operand_a = Token::is_ref_opr(op) ? Value::ref(referenced_value(a)) : eval(a);
+			Value operand_a = Token::is_ref_opr(op) ? Value::ref(referenced_value(a)) : eval(a).get();
 
 			/* Invoke object operator overload, if any */
-			if (operand_a.get().is<Object>()) {
+			if (operand_a.is<Object>()) {
 				auto &obj = operand_a.get<Object>();
 				auto [method_it, end] = find_operator_overload(obj, op);
 				if (method_it != end) {
