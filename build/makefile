@@ -20,6 +20,7 @@ SRCS = $(call rwildcard,../src,*.cpp)
 DEPS = $(patsubst ../src/%.cpp,./obj/%.d,$(SRCS))
 
 STDLIB_PATH = lang/core/library
+STDLIB_SCRIPTS = $(patsubst ../src/$(STDLIB_PATH)/%,$(STDLIB_DIR)/%,$(call rwildcard,../src/$(STDLIB_PATH),*.mt0))
 STDLIB_SRCS = $(call rwildcard,../src/$(STDLIB_PATH),*.cpp)
 STDLIB_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o.pic,$(STDLIB_SRCS)))
 STDLIB_BINS = $(patsubst ../src/$(STDLIB_PATH)/%.cpp,./$(STDLIB_DIR)/%.so,$(wildcard ../src/$(STDLIB_PATH)/*.cpp))
@@ -127,7 +128,7 @@ read_stdlib_deps=$(patsubst %,obj/$(STDLIB_PATH)/%.o.pic,$(file < ../src/$(STDLI
 $(STDLIB_DIR):
 	mkdir -p $(STDLIB_DIR)
 
-stdlib: $(STDLIB_DIR) lib lib-headers $(STDLIB_BINS)
+stdlib: $(STDLIB_DIR) lib lib-headers $(STDLIB_BINS) $(STDLIB_SCRIPTS)
 	@echo 'Finished building methan0l core libraries'
 	@echo ' '
 
@@ -139,6 +140,10 @@ $(STDLIB_DIR)/%.so: obj/$$(STDLIB_PATH)/%.o.pic lib $$(call read_stdlib_deps,%)
 	g++ $(lib_obj) $(lib_dep) -shared -L./ -l:$(LIB_NAME) -o $@ $(RPATH)
 	@echo 'Finished building core library: $@'
 	@echo ' '
+
+$(STDLIB_DIR)/%.mt0: ../src/$(STDLIB_PATH)/%.mt0
+	@mkdir -p $(dir $@)
+	cp -rf $< $@
 
 # cli targets
 cli: $(CLI_BIN_NAME)
