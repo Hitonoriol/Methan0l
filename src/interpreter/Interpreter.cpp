@@ -24,6 +24,8 @@
 #include <expression/TryCatchExpr.h>
 
 #include <lang/Library.h>
+#include <lang/core/Module.h>
+#include <lang/core/Internal.h>
 #include <oop/Class.h>
 #include <CoreLibrary.h>
 #include <interpreter/Builtins.h>
@@ -98,15 +100,28 @@ void Interpreter::load_libraries()
 	namespace fs = std::filesystem;
 	auto libdir = fs::path(get_home_dir());
 	append(libdir, "/" + std::string(LIBRARY_PATH));
-	for(auto& entry: fs::directory_iterator(libdir)) {
+	for (auto &entry : fs::directory_iterator(libdir)) {
 		auto &path = entry.path();
-		if (path.extension() != LIBRARY_EXT)
-			continue;
+		auto ext = path.extension();
 
-		try {
-			load_shared<ExternalLibrary>(path.string());
-		} catch (std::exception &e) {
-			std::cerr << "Skipping library " << path << ": " << e.what() << NL;
+		// Load a native library
+		if (ext == LIBRARY_EXT) {
+			try {
+				load_shared<ExternalLibrary>(path.string());
+			} catch (std::exception &e) {
+				std::cerr << "Failed to load library " << path << ": " << e.what() << NL;
+			}
+		}
+		// Load a methan0l module
+		else if (ext == PROGRAM_EXT) {
+			try {
+				Unit module;
+				core::load_module(*this, path.string(), module);
+				execute(module);
+				core::import(this, module);
+			} catch (...) {
+				std::cerr << "Failed to load library " << path << NL;
+			}
 		}
 	}
 }
@@ -510,10 +525,6 @@ Value& Interpreter::referenced_value(Expression *expr, bool follow_refs)
 	if (instanceof<IdentifierExpr>(expr))
 		return get(try_cast<IdentifierExpr>(expr), follow_refs);
 
-	/* Unwrap reference operaor in-place */
-	else if (PrefixExpr::is(*expr, TokenType::REF))
-		return referenced_value(try_cast<PrefixExpr>(expr).get_rhs());
-
 	/* Create a temporary value and reference it if `expr` is not an access expression */
 	else if (!BinaryOperatorExpr::is(*expr, TokenType::DOT))
 		return expr->evaluate(*this).get_ref();
@@ -550,15 +561,10 @@ void Interpreter::exec(Expression &expr)
 	return expr.execute(*this);
 }
 
-/* Used when assigning to identifiers.
- * References can only be assigned via explicitly using the `**` operator,
- * even if RHS expression evaluates to a reference without it. */
+/* Used when assigning to identifiers. */
 Value Interpreter::unwrap_or_reference(Expression &expr)
 {
-	Value val = expr.evaluate(*this);
-	if (PrefixExpr::is(expr, TokenType::REF))
-		return val;
-	return val.get();
+	return expr.evaluate(*this).get();
 }
 
 Value Interpreter::evaluate(AssignExpr &expr)
