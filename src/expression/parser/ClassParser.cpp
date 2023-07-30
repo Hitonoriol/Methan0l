@@ -22,7 +22,7 @@ ExprPtr ClassParser::parse(Parser &parser, mtl::Token token)
 	std::string base;
 	std::vector<std::string> interfaces;
 	if (parser.match(TokenType::BASE_CLASS)) {
-		parser.consume(TokenType::COMMA);
+		parser.consume(TokenType::COLON);
 		base = parser.consume(TokenType::IDENTIFIER).get_value();
 	}
 
