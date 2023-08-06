@@ -139,8 +139,10 @@ TypeID Value::type() const
 
 	/* Heap-stored types */
 
-	else if (is<Object>())
-		return unconst(*this).as_any().type();
+	else if (is<Object>()) {
+		auto &obj = unconst(*this).get<Object>();
+		return obj.get_class()->get_native_id();
+	}
 
 	else if (is<VUnit>())
 		return Type::UNIT;
