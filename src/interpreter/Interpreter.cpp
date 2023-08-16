@@ -799,13 +799,18 @@ void Interpreter::preserve_data(bool val)
 	main.set_persisent(val);
 }
 
-bool Interpreter::load_program(const std::string &path)
+bool Interpreter::load_program(const std::string &path, bool change_cwd)
 {
 	bool loaded = load(load_file(path));
 	if (loaded) {
-		std::filesystem::current_path(
-			std::filesystem::path(core::path(*this, path)).parent_path()
-		);
+		auto program_path = core::path(*this, path);
+		auto program_path_abs = core::absolute_path(*this, path);
+		set_program_globals(std::filesystem::path(program_path_abs).string());
+		if (change_cwd) {
+			std::filesystem::current_path(
+				std::filesystem::path(program_path).parent_path()
+			);
+		}
 	}
 	return loaded;
 }
@@ -901,25 +906,30 @@ void Interpreter::load_args(int argc, char **argv, int start_from)
 {
 	std::vector<std::string> list;
 	for (int i = start_from; i < argc; ++i)
-		list.push_back(std::string(argv[i]));
+		list.emplace_back(argv[i]);
 
 	load_args(list);
 }
 
 void Interpreter::load_args(const std::vector<std::string> &args)
 {
-	set_env_globals(args[0]);
 	auto list = make_as<List>([&](auto &list) {
-		for (auto &&arg : args)
-			list.push_back(make<String>(std::move(arg)));
+		// This path is set after loading a program
+		std::string launch_path_str(main.local().get(EnvVars::SCRDIR, true).get<String>());
+		std::string scr_name(std::filesystem::path(core::path(*this, args[0])).filename().string());
+		auto launch_path = make<String>(std::filesystem::path(launch_path_str + "/" + scr_name).make_preferred().string());
+		list.push_back(launch_path);
+		for (auto it = std::next(args.begin()); it != args.end(); ++it) {
+			list.push_back(make<String>(*it));
+		}
 	});
 	main.local().set(EnvVars::LAUNCH_ARGS, list);
 }
 
-void Interpreter::set_env_globals(const std::string &scrpath)
+void Interpreter::set_program_globals(const std::string &scrpath)
 {
 	auto &table = main.local();
-	table.set(EnvVars::SCRDIR, std::filesystem::absolute(scrpath).parent_path().string());
+	table.set(EnvVars::SCRDIR, make<String>(std::filesystem::absolute(scrpath).parent_path().string()));
 }
 
 void Interpreter::syntax_error(const std::exception &e)

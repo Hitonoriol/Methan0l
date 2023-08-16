@@ -750,7 +750,14 @@ class Interpreter
 		void lex(std::string &code);
 		bool load();
 
-		bool load_program(const std::string&);
+		/* Loads a methan0l program from the given path and sets it as this
+		 * Interpreter's main unit.
+		 * The program can then be run by calling the Interpreter::run() method.
+		 *
+		 * - path : path to the program
+		 * - change_cwd : if true, working directory of the current process
+		 *   is changed to the program's parent directory. */
+		bool load_program(const std::string &path, bool change_cwd = false);
 
 		Unit load_file(const std::string &path);
 		bool load(const Unit &main);
@@ -761,7 +768,7 @@ class Interpreter
 
 		void load_args(int argc, char **argv, int start_from = 1);
 		void load_args(const std::vector<std::string> &args);
-		void set_env_globals(const std::string &scrpath);
+		void set_program_globals(const std::string &scrpath);
 
 		void preserve_data(bool val);
 		Unit& program();

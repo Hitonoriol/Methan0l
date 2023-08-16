@@ -15,7 +15,7 @@ Runner::Runner(Interpreter &methan0l)
 
 bool Runner::load_file(const std::string &path)
 {
-	if (methan0l.load_program(path))
+	if (methan0l.load_program(path, true))
 		return true;
 	else {
 		out << "Failed to load " << std::quoted(path) << " (or the file is empty)." << NL;
