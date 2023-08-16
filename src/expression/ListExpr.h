@@ -3,9 +3,7 @@
 
 #include "Expression.h"
 
-#include <util/hash.h>
-#include <util/containers.h>
-#include <interpreter/Interpreter.h>
+#include <type.h>
 
 namespace mtl
 {
@@ -15,16 +13,6 @@ class ListExpr: public Expression
 	private:
 		ExprList exprs;
 		bool as_set;
-
-		template<typename T>
-		Value create_and_populate(Interpreter &context)
-		{
-			auto container = context.make<T>();
-			return container.template as<T>([&](auto &ctr) {
-				for (auto &expr : exprs)
-					insert(ctr, expr->evaluate(context));
-			});
-		}
 
 	public:
 		ListExpr(ExprList exprs, bool as_set = false);
