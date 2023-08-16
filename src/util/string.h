@@ -129,6 +129,8 @@ inline constexpr std::string_view strip_name_scope(std::string_view full_name)
 	return full_name.substr(idx + 1);
 }
 
+bool is_numeric_string(const std::string& str, bool floating_point = false);
+
 }
 
 #endif /* SRC_UTIL_STRING_H_ */

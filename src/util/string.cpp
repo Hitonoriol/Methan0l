@@ -97,4 +97,16 @@ Shared<native::String> to_base(UInt value, uint8_t base)
 	return result;
 }
 
+bool is_numeric_string(const std::string& str, bool floating_point)
+{
+	if (str.empty())
+		return false;
+
+	bool numeric = std::all_of(str.begin(), str.end(), [](auto &s) {return std::isdigit(s);});
+	if (!floating_point)
+		return numeric;
+
+	return numeric && std::count(str.begin(), str.end(), '.') <= 1;
+}
+
 }

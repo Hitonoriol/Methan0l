@@ -94,7 +94,7 @@ class StringFormatter
 					if (value.empty())
 						value = fmt.get_arg(fmt.last_idx + 1);
 
-					if (contains(value, '.') && std::isdigit(value.back()))
+					if (mtl::is_numeric_string(value, true))
 						set_precision(value, precision);
 
 					if (width != 0)
