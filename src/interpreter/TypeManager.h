@@ -9,6 +9,7 @@
 #include <util/hash.h>
 #include <oop/Object.h>
 #include <structure/TypeID.h>
+#include <expression/ListExpr.h>
 
 namespace mtl
 {
@@ -28,24 +29,6 @@ class TypeManager
 		NativeIndex native_classes;
 		Interpreter &context;
 		std::shared_ptr<Anonymous> root;
-
-		template<typename Type, typename ...Args>
-		Object make_new_object(Args &&...ctor_args)
-		{
-			auto native_id = TypeID::of<Type>();
-			auto entry = native_classes.find(native_id);
-			if (entry == native_classes.end())
-				throw std::runtime_error("Cannot instantiate an object "
-						"of unregistered native type: " + str(mtl::type_name<Type>())
-						+ " (" + mtl::str(native_id.type_name()) + ")");
-
-			auto obj = create_uninitialized_object(entry->second);
-			auto native_obj = std::allocate_shared<Type>(
-					std::pmr::polymorphic_allocator<Type> {},
-					std::forward<Args>(ctor_args)...);
-			obj.set_native(native_obj);
-			return obj;
-		}
 
 	public:
 		TypeManager(Interpreter &context);
@@ -95,13 +78,13 @@ class TypeManager
 		template<typename ...Args>
 		inline Object new_object(const std::string &type_name, Args &&...ctor_args)
 		{
-			return create_object(type_name, {ctor_args...});
+			return create_object(type_name, {Value::wrapped(ctor_args)...});
 		}
 
 		template<typename ...Args>
 		inline Object new_object(TypeID type_id, Args &&...ctor_args)
 		{
-			return create_object(type_id.type_id(), {ctor_args...});
+			return create_object(type_id.type_id(), {Value::wrapped(ctor_args)...});
 		}
 
 		inline Object bind_object(TypeID class_id, const Value &raw_obj)
@@ -129,7 +112,7 @@ class TypeManager
 		Value invoke_method(Object &obj, const std::string &name, Args &args);
 
 		Object create_object(const std::string &type_name, Args &args);
-		Object create_object(size_t type_id, Args &args);
+		Object create_object(class_id type_id, Args &args);
 		Object create_uninitialized_object(Class*);
 
 		Class* get_root();
@@ -141,6 +124,36 @@ class TypeManager
 			for (auto &&[name, clazz] : class_index)
 				classes.push_back(clazz);
 			return classes;
+		}
+
+	private:
+		template<typename Type, typename ...Args>
+		Object make_new_object(Args &&...ctor_args)
+		{
+			auto native_id = TypeID::of<Type>();
+			auto entry = native_classes.find(native_id);
+			if (entry == native_classes.end()) {
+				// Create a non-native class object
+				if (classes.find(native_id.type_id()) != classes.end())
+					return new_object(native_id, std::forward<Args>(ctor_args)...);
+
+				throw std::runtime_error("Cannot instantiate an object "
+						"of unregistered type: " + str(mtl::type_name<Type>())
+						+ " (" + mtl::str(native_id.type_name()) + ")");
+			}
+
+			// Create a native class object
+			IF (std::is_constructible_v<Type, Args...>) {
+				auto obj = create_uninitialized_object(entry->second);
+				auto native_obj = std::allocate_shared<Type>(
+						std::pmr::polymorphic_allocator<Type> { },
+						std::forward<Args>(ctor_args)...);
+				obj.set_native(native_obj);
+				return obj;
+			} else {
+				// Unreachable
+				throw std::runtime_error("TypeManager::make_new_object");
+			}
 		}
 };
 

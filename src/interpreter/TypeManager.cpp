@@ -94,7 +94,7 @@ Value TypeManager::invoke_method(Object &obj, const std::string &name, Args &arg
 	return type.invoke_method(obj, name, args);
 }
 
-Object TypeManager::create_object(size_t type_id, Args &args)
+Object TypeManager::create_object(class_id type_id, Args &args)
 {
 	return get_class(type_id).create(args);
 }
