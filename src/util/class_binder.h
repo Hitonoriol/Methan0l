@@ -54,11 +54,11 @@ struct Factory: private FactoryImpl<T, Types...>::OptCall
 				return ((&obj)->*func)(args...); \
 			}; \
 		} \
-		template<class C, typename R, typename ...Args> \
+		template<class ThisClass, class C, typename R, typename ...Args> \
 		constexpr auto mutator_method(sig) \
 		{ \
 			return [func](const mtl::Value& obj, Args ...args) -> mtl::Value { \
-				((&(mtl::unconst(obj).get<C>()))->*func)(args...); \
+				((&(mtl::unconst(obj).get<ThisClass>()))->*func)(args...); \
 				return obj;\
 			}; \
 		}
@@ -154,7 +154,7 @@ class ClassBinder
 		template<typename F>
 		inline void bind_mutator_method(std::string_view name, F &&method)
 		{
-			clazz->register_method(name, context.bind_func(mtl::mutator_method(method)));
+			clazz->register_method(name, context.bind_func(mtl::mutator_method<bound_class>(method)));
 		}
 
 		template<typename F>
