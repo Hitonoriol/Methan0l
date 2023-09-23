@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <CoreLibrary.h>
+#include <lang/core/class/String.h>
 
 namespace mtl::core
 {

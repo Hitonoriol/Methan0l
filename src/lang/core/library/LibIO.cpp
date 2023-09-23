@@ -23,7 +23,7 @@ Value parse_value(const std::string &str)
 		if (is_dbl)
 			value = std::stod(str);
 		else
-			value = (Int) std::stol(str);
+			value = (Int) std::stoull(str);
 	}
 
 	else if (str == Token::reserved(Word::TRUE)

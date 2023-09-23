@@ -212,7 +212,7 @@ Shared<native::String> Value::to_string()
 		TYPE_CASE(Type::FUNCTION) {
 			if (is<NativeFunc>())
 				return mtl::make<String>(
-					"Native function 0x" + *to_base(reinterpret_cast<UInt>(identity()), 16));
+					"Native function 0x" + to_base(reinterpret_cast<UInt>(identity()), 16));
 			return mtl::make<String>(get<Function>().to_string());
 		}
 
@@ -226,7 +226,7 @@ Shared<native::String> Value::to_string()
 
 		TYPE_DEFAULT {
 			sstream ss;
-			ss << "{" << type_name() << " @ 0x" << *to_base(reinterpret_cast<UInt>(identity()), 16) << "}";
+			ss << "{" << type_name() << " @ 0x" << to_base(reinterpret_cast<UInt>(identity()), 16) << "}";
 			return mtl::make<String>(ss.str());
 		}
 	)
@@ -238,7 +238,7 @@ Int Value::to_dec() const
 		return convert_numeric<Int>();
 
 	else if (is<std::string>())
-		return std::stol(cget<String>());
+		return std::stoull(cget<String>());
 
 	else
 		throw InvalidTypeException(*this, Type::INTEGER);

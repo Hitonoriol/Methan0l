@@ -24,8 +24,8 @@ void LibString::load()
 			if (dest_base < 2)
 				throw std::runtime_error("Invalid base");
 
-			Int val = std::stoll(numstr, 0, src_base);
-			return object(to_base(val, dest_base));
+			Int val = std::stoull(numstr, 0, src_base);
+			return context->make<String>(to_base(val, dest_base));
 		}
 	);
 

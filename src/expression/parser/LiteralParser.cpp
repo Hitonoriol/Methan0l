@@ -18,7 +18,7 @@ ExprPtr LiteralParser::parse(Parser &parser, Token token)
 	auto &tokstr = unconst(token.get_value());
 
 	if (type == Type::INTEGER)
-		value = std::stol(tokstr);
+		value = std::stoull(tokstr);
 
 	else if (type == Type::DOUBLE)
 		value = std::stod(tokstr);

@@ -27,7 +27,7 @@ std::string indent(std::string&&);
 void replace_all(std::string &str, std::string_view from, const std::string &to,
 		int limit = -1);
 std::vector<std::string> split(const std::string &s, const std::string &delimiter);
-Shared<native::String> to_base(UInt value, uint8_t base);
+std::string to_base(UInt value, uint8_t base);
 
 template<typename T>
 inline auto str(
@@ -130,6 +130,16 @@ inline constexpr std::string_view strip_name_scope(std::string_view full_name)
 }
 
 bool is_numeric_string(const std::string& str, bool floating_point = false);
+
+template<typename T>
+inline std::string stringify_container(const T &ctr)
+{
+	auto it = std::begin(ctr), end = std::end(ctr);
+	return stringify([&] {
+		if (it == end) return empty_string;
+		return mtl::str(unconst(*(it++)).to_string());
+	});
+}
 
 }
 

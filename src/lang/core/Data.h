@@ -5,7 +5,6 @@
 #include <interpreter/Interpreter.h>
 #include <expression/LiteralExpr.h>
 #include <lang/core/class/Collection.h>
-#include <lang/core/class/String.h>
 
 namespace mtl
 {
@@ -69,16 +68,6 @@ Value fill(Object &collection_obj, Value elem, size_t size);
 Value add_all(Object &to_obj, Object from_obj);
 Value remove_all(Object &remove_from_obj, Object lookup_in_obj);
 Value retain_all(Object &retain_in_obj, Object lookup_in_obj);
-
-template<typename T>
-inline Value stringify_container(Interpreter &context, const T &ctr)
-{
-	auto it = std::begin(ctr), end = std::end(ctr);
-	return context.make<String>(std::move(stringify([&] {
-		if (it == end) return empty_string;
-		return mtl::str(unconst(*(it++)).to_string());
-	})));
-}
 
 }
 
