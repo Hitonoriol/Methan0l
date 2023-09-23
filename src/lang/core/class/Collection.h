@@ -18,6 +18,7 @@ class Collection
 		virtual ~Collection() = default;
 
 		virtual Value add(Value) UNIMPLEMENTED
+		virtual Value insert(Int, Value) UNIMPLEMENTED
 		virtual Value append() UNIMPLEMENTED
 		virtual Value remove(Value) UNIMPLEMENTED
 		virtual Value remove_at(UInt) UNIMPLEMENTED
@@ -39,6 +40,7 @@ class CollectionAdapter : public native::Collection, public IterableAdapter
 	public:
 		using IterableAdapter::IterableAdapter;
 		Value add(Value elem) override ADAPTER_METHOD(add, elem)
+		Value insert(Int idx, Value elem) override ADAPTER_METHOD(insert, idx, elem)
 		Value append() override ADAPTER_METHOD(append)
 		Value remove(Value elem) override ADAPTER_METHOD(remove, elem)
 		Value remove_at(UInt idx) override ADAPTER_METHOD(remove_at, idx)
