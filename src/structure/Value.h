@@ -353,7 +353,8 @@ class Value
 			});
 		}
 
-		/* Provides access to contained values */
+		/* Provides access to contained values.
+		 * This method gets invoked when casting mtl::Value to any other type. */
 		template<typename T>
 		inline auto get() -> std::enable_if_t<!is_class_binding<T>::value, T&>
 		{
@@ -362,10 +363,13 @@ class Value
 				using VType = VT(v);
 				/* If underlying value is an Object, but the requested type T is not Object */
 				IF (std::is_same_v<VType, Object> && !std::is_same_v<Requested, Object>) {
+					// Access the native any
 					IF (std::is_same_v<Requested, std::any>)
 						return as_any();
+					// Access the shared ptr to the native object inside the native any
 					ELIF (is_shared_ptr<Requested>::value)
 						return mtl::any_cast<Requested&>(as_any());
+					// The shared ptr was ommitted from the requested type, so provide the access to the native value itself
 					else
 						return *mtl::any_cast<std::shared_ptr<Requested>&>(as_any());
 				}
@@ -376,6 +380,19 @@ class Value
 				IF (!std::is_same<Requested, ValueRef>::value) {
 					if (std::holds_alternative<ValueRef>(value))
 						return get<ValueRef>().value().get<T>();
+				}
+
+				/*   If both requested and contained types are arithmetic, provide access to contained value as
+				 * if it were of the requested type.
+				 *   Only works if the requested type is the same or narrower than the contained one.
+				 *   May lead to floating point values being interpreted as integers, but we assume that
+				 * the user knows what they're doing. */
+				IF (!std::is_pointer_v<Requested> && std::is_arithmetic_v<Requested> && std::is_arithmetic_v<VType>) {
+					IF (sizeof(Requested) <= sizeof(VType))
+						return reinterpret_cast<Requested&>(mtl::get<VType>(value));
+					else
+						throw std::runtime_error("Cannot access " + mtl::str(mtl::type_name<VType>())
+								+ " as " + mtl::str(mtl::type_name<Requested>()));
 				}
 
 				/*   If requested type T is not built-in, assume that the requested value
