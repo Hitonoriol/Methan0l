@@ -9,6 +9,8 @@
 namespace mtl
 {
 
+NATIVE_CLASS(StringIterator, native::DefaultIterator<std::string>)
+
 namespace native
 {
 

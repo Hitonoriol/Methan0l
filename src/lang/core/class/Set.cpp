@@ -25,6 +25,11 @@ NATIVE_CLASS_BINDING(Set, {
 	BIND_METHOD(hash_code)
 })
 
+NATIVE_CLASS_BINDING(SetIterator, {
+	IMPLEMENTS(Iterator)
+	ITERATOR_BINDINGS
+})
+
 namespace native
 {
 
@@ -33,7 +38,7 @@ Set::Set(const List &list)
 
 Value Set::to_string(Context context)
 {
-	return core::stringify_container(*context, contained);
+	return context->make<String>(mtl::stringify_container(contained));
 }
 
 Value Set::remove(Value value)

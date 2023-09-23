@@ -12,6 +12,8 @@
 namespace mtl
 {
 
+NATIVE_CLASS(SetIterator, native::DefaultIterator<ValSet>)
+
 namespace native
 {
 

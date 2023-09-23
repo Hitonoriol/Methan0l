@@ -36,6 +36,11 @@ NATIVE_CLASS_BINDING(String, {
 	BIND_METHOD(hash_code)
 })
 
+NATIVE_CLASS_BINDING(StringIterator, {
+	IMPLEMENTS(Iterator)
+	ITERATOR_BINDINGS
+})
+
 namespace native
 {
 

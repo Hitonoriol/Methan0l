@@ -43,6 +43,7 @@ class DefaultIterator : public Iterator
 					std::is_same_v<value_type, Value>
 				 || std::is_same_v<value_type, std::pair<const Value, Value>>
 				 || Value::allowed_type<value_type>()
+				 || std::is_arithmetic_v<value_type>
 			);
 		}
 
@@ -121,10 +122,6 @@ class DefaultIterator : public Iterator
 };
 
 }
-
-NATIVE_CLASS(ListIterator, native::DefaultIterator<ValList>)
-NATIVE_CLASS(SetIterator, native::DefaultIterator<ValSet>)
-NATIVE_CLASS(StringIterator, native::DefaultIterator<std::string>)
 
 } /* namespace mtl */
 
