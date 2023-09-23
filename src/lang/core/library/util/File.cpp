@@ -21,7 +21,6 @@
 #include <oop/Object.h>
 #include <structure/Value.h>
 #include <lang/core/File.h>
-#include <CoreLibrary.h>
 
 namespace mtl
 {
@@ -86,7 +85,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.extension$() */
 	register_method("extension", [&](Args &args) {
-		return fs::path(path(args)).extension().string();
+		return context.make<String>(fs::path(path(args)).extension().string());
 	});
 
 	/* file.size$() */
@@ -96,7 +95,13 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.absolute_path$() */
 	register_method("absolute_path", [&](Args &args) {
-		return core::absolute_path(context, path(args));
+		return context.make<String>(core::absolute_path(context, path(args)));
+	});
+
+	/* file.absolute$() */
+	register_method("absolute", [&](Args &args) {
+		auto file_path = context.make<String>(core::absolute_path(context, path(args)));
+		return context.make<File>(file_path);
 	});
 
 	/* file.path$() */
@@ -106,7 +111,18 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.filename$() */
 	register_method("filename", [&](Args &args) {
-		return fs::path(path(args)).filename().string();
+		return context.make<String>(fs::path(path(args)).filename().string());
+	});
+
+	/* file.parent_path() */
+	register_method("parent_path", [&](Args &args) {
+		return context.make<String>(fs::path(path(args)).parent_path().string());
+	});
+
+	/* file.parent() */
+	register_method("parent", [&](Args &args) {
+		auto parent_path = context.make<String>(fs::path(path(args)).parent_path().string());
+		return context.make<File>(parent_path);
 	});
 
 	/* file.is_dir$() */
@@ -152,24 +168,46 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* ***** Read/Write Operations ***** */
 
+	/* file.read_buffer() */
+	register_method("read_buffer", [&](Args &args) {
+		return read_contents<Buffer>(path(args));
+	});
+
+	/* file.write_buffer(Buffer) */
+	register_method("write_buffer", [&](Args &args) {
+		auto buffer_v = args[1]->evaluate(context);
+		write_contents<Buffer>(path(args), buffer_v);
+		return Value::NO_VALUE;
+	});
+
+	/* file.read(Buffer, [length = Buffer.size()]) */
+	register_method("read", [&](Args &args) {
+		auto buffer = args[1]->evaluate(context);
+		Int max_bytes;
+		if (args.size() >= 3) {
+			max_bytes = mtl::num(args[2]->evaluate(context));
+		} else {
+			max_bytes = buffer.get<Buffer>()->size();
+		}
+		return read_buffer(Object::get_this(args), buffer, max_bytes);
+	});
+
+	/* file.write(Buffer) */
+	register_method("write", [&](Args &args) {
+		auto buffer = args[1]->evaluate(context);
+		write_buffer(Object::get_this(args), buffer);
+		return Value::NO_VALUE;
+	});
+
 	/* file.read_contents$() */
 	register_method("read_contents", [&](Args &args) {
-		std::string fname = path(args);
-		std::ifstream file(fname);
-		if (!file.is_open())
-			throw std::runtime_error("Failed to open " + fname);
-		auto contents = context.make<std::string>();
-		contents.move_in(std::string {std::istreambuf_iterator {file}, {}});
-		file.close();
-		return contents;
+		return read_contents<String>(path(args));
 	});
 
 	/* file.write_contents$(str) */
 	register_method("write_contents", [&](Args &args) {
-		auto fname = path(args);
-		std::ofstream file(fname, std::ios::trunc);
-		file << *mtl::str(args[1]->evaluate(context));
-		file.close();
+		auto buffer_v = args[1]->evaluate(context);
+		write_contents<String>(path(args), buffer_v);
 		return Value::NO_VALUE;
 	});
 
@@ -193,7 +231,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* File@cwd$() */
 	register_method("cwd", [&](Args &args) {
-		return fs::current_path().string();
+		return context.make<String>(fs::current_path().string());
 	});
 
 	/* file.cd$() */
@@ -216,11 +254,11 @@ void File::reset(std::fstream &file)
 	file.seekg(0, std::ios::beg);
 }
 
-std::string File::read_line(Object &obj)
+Value File::read_line(Object &obj)
 {
-	std::string line;
+	auto line = context.make<String>();
 	auto &file = managed_file(obj);
-	std::getline(file, line);
+	std::getline(file, *line.get<String>());
 	obj.field(IS_EOF) = file.peek() == EOF;
 	return line;
 }
@@ -228,6 +266,26 @@ std::string File::read_line(Object &obj)
 void File::write_line(Object &obj, const std::string &line)
 {
 	managed_file(obj) << line << std::endl;
+}
+
+Int File::read_buffer(Object &obj, Value out_buffer, Int max_bytes)
+{
+	auto &buffer = out_buffer.get<Buffer>();
+	if (buffer->size() < static_cast<size_t>(max_bytes)) {
+		buffer->resize(max_bytes);
+	}
+
+	auto &file = managed_file(obj);
+	obj.def(IS_EOF) = !!file.read(reinterpret_cast<char*>(buffer->data()), max_bytes);
+	return file.gcount();
+
+}
+
+void File::write_buffer(Object &obj, Value in_buffer)
+{
+	auto &buffer = in_buffer.get<Buffer>();
+	auto &file = managed_file(obj);
+	file.write(reinterpret_cast<char*>(buffer->data()), buffer->size());
 }
 
 std::string File::path(Args &args)
