@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include <type.h>
-#include <lang/DataType.h>
+#include <core/DataType.h>
 
 #define UNIMPLEMENTED { throw mtl::IllegalOperationException(); }
 

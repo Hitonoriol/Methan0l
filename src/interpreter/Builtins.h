@@ -1,7 +1,7 @@
 #ifndef SRC_INTERPRETER_BUILTINS_H_
 #define SRC_INTERPRETER_BUILTINS_H_
 
-#include <lang/Library.h>
+#include <core/Library.h>
 
 namespace mtl
 {

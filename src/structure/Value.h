@@ -16,7 +16,7 @@
 #include <oop/Object.h>
 #include <util/meta/type_traits.h>
 #include <util/cast.h>
-#include <lang/DataType.h>
+#include <core/DataType.h>
 
 #define IS_EMPTY(v) std::is_same<VT(v), NoValue>::value
 #define IS_NIL(v) std::is_same<VT(v), Nil>::value

@@ -23,9 +23,9 @@
 #include <expression/FunctionExpr.h>
 #include <expression/TryCatchExpr.h>
 
-#include <lang/Library.h>
-#include <lang/core/Module.h>
-#include <lang/core/Internal.h>
+#include <core/Library.h>
+#include <core/Module.h>
+#include <core/Internal.h>
 #include <oop/Class.h>
 #include <CoreLibrary.h>
 #include <interpreter/Builtins.h>

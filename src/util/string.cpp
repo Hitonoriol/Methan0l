@@ -1,7 +1,7 @@
 #include "string.h"
 #include "util.h"
 
-#include <lang/core/class/String.h>
+#include <core/class/String.h>
 
 namespace mtl
 {

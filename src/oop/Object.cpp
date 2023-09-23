@@ -8,7 +8,7 @@
 #include <variant>
 
 #include <expression/LiteralExpr.h>
-#include <lang/Library.h>
+#include <core/Library.h>
 #include <util/util.h>
 #include <interpreter/TypeManager.h>
 #include <interpreter/Interpreter.h>

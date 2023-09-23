@@ -12,7 +12,7 @@
 
 #include <util/hash.h>
 #include <oop/Object.h>
-#include <lang/Library.h>
+#include <core/Library.h>
 #include <expression/LiteralExpr.h>
 #include <structure/Function.h>
 #include <structure/Value.h>

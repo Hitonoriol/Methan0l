@@ -19,7 +19,7 @@ MODULE_DIR=modules
 SRCS = $(call rwildcard,../src,*.cpp)
 DEPS = $(patsubst ../src/%.cpp,./obj/%.d,$(SRCS))
 
-STDLIB_PATH = lang/core/library
+STDLIB_PATH = stdlib
 STDLIB_SCRIPTS = $(patsubst ../src/$(STDLIB_PATH)/%,$(STDLIB_DIR)/%,$(call rwildcard,../src/$(STDLIB_PATH),*.mt0))
 STDLIB_SRCS = $(call rwildcard,../src/$(STDLIB_PATH),*.cpp)
 STDLIB_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o.pic,$(STDLIB_SRCS)))

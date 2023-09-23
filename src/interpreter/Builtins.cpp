@@ -1,7 +1,7 @@
 #include "Builtins.h"
 
-#include <lang/core/class/String.h>
-#include <lang/core/class/List.h>
+#include <core/class/String.h>
+#include <core/class/List.h>
 
 namespace mtl
 {

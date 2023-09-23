@@ -14,7 +14,7 @@
 #include <lexer/Token.h>
 #include <lexer/Lexer.h>
 #include <structure/Function.h>
-#include <lang/ExternalLibrary.h>
+#include <core/ExternalLibrary.h>
 #include <interpreter/TypeManager.h>
 #include <interpreter/ExceptionHandler.h>
 
