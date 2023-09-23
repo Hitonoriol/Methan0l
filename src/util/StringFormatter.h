@@ -56,7 +56,7 @@ class StringFormatter
 
 			inline size_t get_unsigned() const
 			{
-				return (size_t) std::stol(value);
+				return (size_t) std::stoull(value);
 			}
 
 			inline static ModifierType get_type(char mdf)
