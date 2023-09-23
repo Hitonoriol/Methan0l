@@ -9,6 +9,7 @@
 
 #include <lang/core/class/String.h>
 
+#include <lang/core/class/Buffer.h>
 #include <lang/core/class/List.h>
 #include <lang/core/class/Set.h>
 #include <lang/core/class/Map.h>
