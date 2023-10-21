@@ -607,14 +607,4 @@ TokenType Lexer::to_tok(char chr)
 	return Tokens::NONE;
 }
 
-bool Lexer::is_semantic(const TokenType &tok)
-{
-	return contains(semantic_tokens, tok);
-}
-
-bool Lexer::is_transparent(const TokenType &tok)
-{
-	return contains(transparent_tokens, tok);
-}
-
 } /* namespace mtl */

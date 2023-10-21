@@ -116,8 +116,6 @@ ExprPtr Parser::parse(int precedence, bool prefix_only)
 {
 	++nesting_lvl;
 	Token token = consume();
-	if (Lexer::is_semantic(token.get_type()))
-		return parse(get_lookahead_precedence(true));
 
 	LOG("(^" << nesting_lvl << "|#" << precedence << ") [prefix "
 				<< (peeking() ? "peek" : "consume")

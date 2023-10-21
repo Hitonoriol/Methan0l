@@ -5,7 +5,7 @@ namespace mtl
 
 Methan0lLexer::Methan0lLexer()
 {
-	/* Punctuator tokens */
+	/* Non-operator punctuator tokens */
 	register_punctuator(Tokens::PAREN_L);
 	register_punctuator(Tokens::PAREN_R);
 	register_punctuator(Tokens::BRACKET_L);
@@ -19,7 +19,7 @@ Methan0lLexer::Methan0lLexer()
 	register_punctuator(Tokens::SINGLE_QUOTE);
 	register_punctuator(Tokens::QUOTE_ALT);
 
-	/* Operators */
+	/* Punctuator (single-char) operators */
 	register_operator(Tokens::ASSIGN);
 	register_operator(Tokens::PLUS);
 	register_operator(Tokens::MINUS);
@@ -83,6 +83,8 @@ Methan0lLexer::Methan0lLexer()
 	register_operator(Tokens::MAP_DEF_L_ALT);
 
 	/* Soft keywords */
+	register_keyword(Tokens::IF);
+	register_keyword(Tokens::ELSE);
 	register_keyword(Tokens::TYPE_ID);
 	register_keyword(Tokens::DELETE);
 	register_keyword(Tokens::RETURN);
@@ -117,8 +119,6 @@ Methan0lLexer::Methan0lLexer()
 	register_keyword(Tokens::FUNC_DEF, true);
 	register_keyword(Tokens::BOX, true);
 	register_keyword(Tokens::CLASS, true);
-	register_keyword(Tokens::IF, true);
-	register_keyword(Tokens::ELSE, true);
 	register_keyword(Tokens::SET_DEF, true);
 	register_keyword(Tokens::TRY, true);
 	register_keyword(Tokens::CATCH, true);

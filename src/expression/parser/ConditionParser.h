@@ -6,7 +6,7 @@
 namespace mtl
 {
 
-class ConditionParser: public InfixParser
+class ConditionParser : public InfixParser
 {
 	public:
 		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token) override;

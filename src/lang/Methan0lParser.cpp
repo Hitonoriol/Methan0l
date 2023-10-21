@@ -27,6 +27,7 @@
 #include <expression/parser/FormatStrParser.h>
 #include <expression/parser/RangeParser.h>
 #include <expression/parser/ConstParser.h>
+#include <expression/parser/IfElseParser.h>
 
 namespace mtl
 {
@@ -78,6 +79,11 @@ Methan0lParser::Methan0lParser(Interpreter &context)
 	register_parser(Tokens::BRACE_L, new UnitParser()); // {expr1; expr2; expr3}
 	register_parser(Tokens::ARROW_R, new WeakUnitParser()); // ->{expr1; expr2; expr3}
 	register_parser(Tokens::BRACKET_L, new IndexParser()); // list[expr] or list[]
+
+	/* If-else syntax:
+	 * if <condition> <then-branch> [else:] <else-branch>
+	 */
+	register_parser(Tokens::IF, new IfElseParser()); // $name
 
 	/* Loop syntax:
 	 * 1. do (condition_expr) {}

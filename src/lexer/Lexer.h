@@ -124,19 +124,6 @@ class Lexer
 
 		char to_chr(TokenType tok);
 		TokenType to_tok(char chr);
-
-		// ------------------ TODO: Remove ------------------
-		static bool is_semantic(const TokenType &tok);
-		static bool is_transparent(const TokenType &tok);
-
-		static constexpr TokenType semantic_tokens[] = {
-				Tokens::IF, Tokens::ELSE
-		};
-
-		static constexpr TokenType transparent_tokens[] = {
-				Tokens::ELSE
-		};
-		// --------------------------------------------------
 };
 
 } /* namespace mtl */
