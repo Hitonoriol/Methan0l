@@ -84,13 +84,13 @@ class Parser
 		int get_lookahead_precedence(bool prefix = false);
 
 	protected:
-		Lexer lexer;
+		Unique<Lexer> lexer;
 
 	public:
-		Parser(Interpreter&);
-		Parser(const Parser&);
-		Parser& operator=(const Parser&);
+		Parser(Interpreter&, Unique<Lexer>);
 		virtual ~Parser() = default;
+
+		Parser(const Parser&) = delete;
 
 		void set_context(Interpreter&);
 		std::shared_ptr<LiteralExpr> evaluate_const(ExprPtr);

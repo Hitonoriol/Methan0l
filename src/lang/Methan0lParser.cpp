@@ -1,5 +1,7 @@
 #include "Methan0lParser.h"
 
+#include "Methan0lLexer.h"
+
 #include <lexer/Token.h>
 #include <expression/parser/AssignParser.h>
 #include <expression/parser/IdentifierParser.h>
@@ -30,7 +32,8 @@ namespace mtl
 {
 
 /* Grammar definition */
-Methan0lParser::Methan0lParser(Interpreter &context) : Parser(context)
+Methan0lParser::Methan0lParser(Interpreter &context)
+	: Parser(context, std::make_unique<Methan0lLexer>())
 {
 	/* Literals */
 	register_literal_parser(Tokens::BOOLEAN, Type::BOOLEAN);

@@ -21,7 +21,7 @@ class IteratorProvider
 		{
 			auto &native = *this_obj.get_native().get<std::shared_ptr<T>>();
 			auto &context = CONTEXT;
-			return context.new_object<Iter>(native, context);
+			return context.new_object<Iter>(native, std::ref(context));
 		}
 };
 

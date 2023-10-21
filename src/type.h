@@ -70,6 +70,9 @@ class String;
 template<typename T>
 using Shared = std::shared_ptr<T>;
 
+template<typename T>
+using Unique = std::unique_ptr<T>;
+
 template<class T>
 using Allocator = std::pmr::polymorphic_allocator<T>;
 

@@ -5,7 +5,7 @@
 
 #include <version.h>
 #include <util/global.h>
-#include <interpreter/Interpreter.h>
+#include <lang/Methan0l.h>
 #include <cli/Runner.h>
 #include <cli/InteractiveRunner.h>
 
@@ -45,7 +45,7 @@ int cli::run(int argc, char **argv)
 
 	int return_value = 0;
 	{
-		Interpreter methan0l(argv[0]);
+		Methan0l methan0l(argv[0]);
 		init_env(methan0l);
 
 		if (argc - arg_start > 0)

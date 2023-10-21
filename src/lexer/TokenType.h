@@ -12,7 +12,7 @@ class TokenType
 {
 	public:
 		std::string_view name;
-		TokId id;
+		TokId id{};
 
 		constexpr TokenType(std::string_view name)
 			: name(name)

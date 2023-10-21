@@ -16,24 +16,9 @@
 namespace mtl
 {
 
-Parser::Parser(Interpreter &context)
-	: context(&context)
+Parser::Parser(Interpreter &context, Unique<Lexer> lexer)
+	: context(&context), lexer(std::move(lexer))
 {}
-
-Parser::Parser(const Parser &rhs)
-	: infix_parsers(rhs.infix_parsers), prefix_parsers(rhs.prefix_parsers),
-	  root_unit(rhs.root_unit), context(rhs.context), lexer(rhs.lexer)
-{}
-
-Parser& Parser::operator=(const Parser &rhs)
-{
-	infix_parsers = rhs.infix_parsers;
-	prefix_parsers = rhs.prefix_parsers;
-	root_unit = rhs.root_unit;
-	lexer = rhs.lexer;
-	context = rhs.context;
-	return *this;
-}
 
 void Parser::set_context(Interpreter &context)
 {
@@ -197,11 +182,11 @@ void Parser::parse_all()
 	if constexpr (DEBUG)
 		std::cout << "Parsing expressions..." << std::endl;
 
-	if (lexer.has_unclosed_blocks())
+	if (lexer->has_unclosed_blocks())
 		throw std::runtime_error("Source code contains unclosed block or group expressions");
 
 	ExprList &expression_queue = root_unit.expressions();
-	while (!lexer.empty() || look_ahead() != Token::EOF_TOKEN) {
+	while (!lexer->empty() || look_ahead() != Token::EOF_TOKEN) {
 			if constexpr (DEBUG)
 				out << "\nParsing next root expression...\n";
 			reset();
@@ -219,7 +204,7 @@ void Parser::parse_all()
 
 void Parser::load(std::string &code)
 {
-	lexer.lex(code);
+	lexer->lex(code);
 	parse_all();
 }
 
@@ -292,7 +277,7 @@ Token& Parser::look_ahead(size_t n)
 	}
 
 	while (n >= read_queue.size())
-		read_queue.push_back(lexer.next());
+		read_queue.push_back(lexer->next());
 
 	return read_queue[n];
 }
@@ -379,7 +364,7 @@ void Parser::clear()
 
 Lexer& Parser::get_lexer()
 {
-	return lexer;
+	return *lexer;
 }
 /*
  * Preloads `len` tokens into the `read_queue` and prints them to stdout

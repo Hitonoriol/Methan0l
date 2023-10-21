@@ -6,7 +6,7 @@
 namespace mtl
 {
 
-class Methan0lParser: public Parser
+class Methan0lParser : public Parser
 {
 	public:
 		using Parser::Parser;

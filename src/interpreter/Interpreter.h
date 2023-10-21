@@ -159,7 +159,7 @@ class Interpreter
 		bool stopped = false;
 		std::deque<std::function<void(void)>> on_exit_tasks;
 
-		std::shared_ptr<Parser> parser;
+		std::unique_ptr<Parser> parser;
 		Unit main;
 
 		Unit load_unit(std::istream &codestr);
@@ -446,10 +446,10 @@ class Interpreter
 		void unhandled_exception(const std::string&);
 
 	public:
-		Interpreter();
-		Interpreter(const char *runpath);
-		Interpreter(const Interpreter &rhs);
+		Interpreter(Unique<Parser> parser, const char *runpath = nullptr);
 		~Interpreter();
+		
+		Interpreter(const Interpreter &rhs) = delete;
 
 		template<typename T>
 		inline Allocator<T> allocator()

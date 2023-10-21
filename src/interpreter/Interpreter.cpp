@@ -45,29 +45,16 @@ STRINGS(
 
 )
 
-Interpreter::Interpreter()
+Interpreter::Interpreter(Unique<Parser> parser, const char *path)
 	: exec_stack { &main },
-	  parser(std::make_shared<Methan0lParser>(*this))
+	  parser(std::move(parser))
 {
 	init_heap();
 	load_library<Builtins>();
-}
-
-Interpreter::Interpreter(const char *path) : Interpreter()
-{
-	set_runpath(path);
-	load_libraries();
-}
-
-Interpreter::Interpreter(const Interpreter &rhs)
-	: dlls(rhs.dlls),
-	  env_table(rhs.env_table),
-	  exec_stack { &main },
-	  parser(rhs.parser)
-{
-	load_library<Builtins>();
-	for (auto &lib : dlls)
-		lib->load(*this);
+	if (path) {
+		set_runpath(path);
+		load_libraries();
+	}
 }
 
 Interpreter::~Interpreter()
