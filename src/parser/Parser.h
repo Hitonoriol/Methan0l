@@ -68,8 +68,8 @@ class Parser
 				std::unordered_map<TokenType, std::shared_ptr<T>> &parsers)
 		{
 			TokenType tok = look_ahead().get_type();
-			if (Token::is_semantic(tok)) {
-				if (Token::is_transparent(tok)) {
+			if (Lexer::is_semantic(tok)) {
+				if (Lexer::is_transparent(tok)) {
 					consume();
 					return get_lookahead_precedence(parsers);
 				}

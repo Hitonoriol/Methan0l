@@ -17,53 +17,56 @@ class LibArithmetic: public Library
 	private:
 		void apply_unary(Value &val, TokenType op);
 
-		template<TokenType op, typename T>
-		static T apply(T l, T r)
+		template<typename T>
+		static BinaryOpr apply(TokenType op)
 		{
-			IF (op == TokenType::ADD || op == TokenType::PLUS)
-				return l + r;
+			if (op == Tokens::ADD || op == Tokens::PLUS)
+				return [](auto &l, auto &r) {return l.template as<T>() + r.template as<T>();};
 
-			ELIF (op == TokenType::SUB || op == TokenType::MINUS)
-				return l - r;
+			else if (op == Tokens::SUB || op == Tokens::MINUS)
+				return [](auto &l, auto &r) {return l.template as<T>() - r.template as<T>();};
 
-			ELIF (op == TokenType::MUL || op == TokenType::ASTERISK)
-				return l * r;
+			else if (op == Tokens::MUL || op == Tokens::ASTERISK)
+				return [](auto &l, auto &r) {return l.template as<T>() * r.template as<T>();};
 
-			ELIF (op == TokenType::DIV || op == TokenType::SLASH)
-				return l / r;
+			else if (op == Tokens::DIV || op == Tokens::SLASH)
+				return [](auto &l, auto &r) {return l.template as<T>() / r.template as<T>();};
 
-			ELIF (std::is_integral<VT(l)>::value && std::is_integral<VT(r)>::value) {
-				IF (op == TokenType::PERCENT || op == TokenType::COMP_MOD)
-					return l % r;
+			IF (std::is_integral_v<T>) {
+				if (op == Tokens::PERCENT || op == Tokens::COMP_MOD)
+					return [](auto &l, auto &r) {return l.template as<T>() % r.template as<T>();};
 
-				ELIF (op == TokenType::BIT_OR || op == TokenType::COMP_OR)
-					return l | r;
+				else if (op == Tokens::BIT_OR || op == Tokens::COMP_OR)
+					return [](auto &l, auto &r) {return l.template as<T>() | r.template as<T>();};
 
-				ELIF (op == TokenType::BIT_AND || op == TokenType::COMP_AND)
-					return l & r;
+				else if (op == Tokens::BIT_AND || op == Tokens::COMP_AND)
+					return [](auto &l, auto &r) {return l.template as<T>() & r.template as<T>();};
 
-				ELIF (op == TokenType::BIT_XOR || op == TokenType::COMP_XOR)
-					return l ^ r;
+				else if (op == Tokens::BIT_XOR || op == Tokens::COMP_XOR)
+					return [](auto &l, auto &r) {return l.template as<T>() ^ r.template as<T>();};
 
-				ELIF (op == TokenType::SHIFT_L || op == TokenType::COMP_SHIFT_L)
-					return l << r;
+				else if (op == Tokens::SHIFT_L || op == Tokens::COMP_SHIFT_L)
+					return [](auto &l, auto &r) {return l.template as<T>() << r.template as<T>();};
 
-				ELIF (op == TokenType::SHIFT_R || op == TokenType::COMP_SHIFT_R)
-					return l >> r;
+				else if (op == Tokens::SHIFT_R || op == Tokens::COMP_SHIFT_R)
+					return [](auto &l, auto &r) {return l.template as<T>() >> r.template as<T>();};
 			}
 
-			throw std::runtime_error("Arithmetic error: invalid operand type ("
-					+ mtl::str(l) + " " + Token::to_string(op) + " " + mtl::str(r) + ")");
+			return [op](auto&, auto&) {
+				throw std::runtime_error(
+					"Arithmetic error: invalid operand type for operator `" + Token::to_string(op) + "`"
+				);
+				return Value::NO_VALUE;
+			};
 		}
 
-		template<TokenType op>
-		static constexpr BinaryOpr bin_operator()
+		static BinaryOpr bin_operator(TokenType op)
 		{
-			return BinaryOpr([](Value &lhs, Value &rhs) {
-				if (Value::is_double_op(lhs.get(), rhs.get()))
-					lhs.get() = apply<op>(lhs.as<double>(), rhs.as<double>());
-				else
-					lhs.get() = apply<op>(lhs.as<Int>(), rhs.as<Int>());
+			auto dbl_op = apply<Float>(op);
+			auto int_op = apply<Int>(op);
+
+			return BinaryOpr([int_op, dbl_op](Value &lhs, Value &rhs) {
+				lhs.get() = Value::is_double_op(lhs.get(), rhs.get()) ? dbl_op(lhs, rhs) : int_op(lhs, rhs);
 				return lhs;
 			});
 		}

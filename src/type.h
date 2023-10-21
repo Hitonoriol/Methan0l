@@ -41,7 +41,7 @@ namespace mtl
 struct Nil : public std::monostate {};
 struct NoValue : public std::monostate {};
 
-enum class TokenType : uint16_t;
+class TokenType;
 class Token;
 
 class Type;

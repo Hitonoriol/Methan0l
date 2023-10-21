@@ -14,7 +14,7 @@ namespace mtl
 
 ExprPtr ListParser::parse(Parser &parser, Token token)
 {
-	bool as_set = token.get_type() == TokenType::SET_DEF;
+	bool as_set = token.get_type() == Tokens::SET_DEF;
 	if (as_set)
 		parser.consume();
 
@@ -29,7 +29,7 @@ void ListParser::parse(Parser &parser, std::function<void(ExprPtr)> collector, T
 	if (!parser.match(end_token)) {
 		do {
 			collector(parser.parse());
-		} while (parser.match(TokenType::COMMA) || parser.look_ahead() != end_token);
+		} while (parser.match(Tokens::COMMA) || parser.look_ahead() != end_token);
 		parser.consume(end_token);
 	}
 }

@@ -10,11 +10,11 @@ METHAN0L_LIBRARY(LibCLI)
 
 void LibCLI::load()
 {
-	context->get_parser().register_prefix_opr(TokenType::AT);
+	context->get_parser().register_prefix_opr(Tokens::AT);
 
 	/* Access a previously saved value in CAS mode:
 	 * `@n`, where `n` is a positive integer */
-	prefix_operator(TokenType::AT, LazyUnaryOpr([&](auto &expr) {
+	prefix_operator(Tokens::AT, LazyUnaryOpr([&](auto &expr) {
 		auto idx = val(expr);
 		auto &runner = interactive_runner();
 

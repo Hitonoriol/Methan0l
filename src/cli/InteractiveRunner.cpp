@@ -7,13 +7,13 @@
 
 #include <cli/Methan0l.h>
 #include <cli/Runner.h>
-#include <parser/Methan0lParser.h>
 #include <expression/IdentifierExpr.h>
 #include <structure/Unit.h>
 #include <util/memory.h>
 #include <version.h>
 #include <util/memory.h>
 #include <util/class_binder.h>
+#include <lang/Methan0lParser.h>
 
 namespace mtl
 {
@@ -246,7 +246,7 @@ bool InteractiveRunner::load_line(std::string &line)
 	methan0l.lex(line += '\n');
 
 	bool ready = !(lexer.has_unclosed_blocks()
-			|| last == TokenType::SEMICOLON
+			|| last == Tokens::SEMICOLON
 			|| std::isspace(last));
 
 	if (ready)
@@ -303,7 +303,7 @@ void InteractiveRunner::start()
 			ready = load_line(line);
 		}
 		/* Force parse all lexed tokens when a single `\` is received */
-		else if (!ready && (line.size() == 1 && line[0] == TokenType::BACKSLASH)) {
+		else if (!ready && (line.size() == 1 && line[0] == Tokens::BACKSLASH)) {
 			ready = true;
 			parse();
 		}

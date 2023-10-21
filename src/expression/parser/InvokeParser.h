@@ -17,10 +17,10 @@ class InvokeParser: public InfixParser
 		{
 			ExprList args;
 			ListParser::parse(parser, [&](ExprPtr expr) {args.push_back(expr);});
-			if (parser.match(TokenType::COLON)) {
+			if (parser.match(Tokens::COLON)) {
 				do {
 					args.push_back(parser.parse());
-				} while (parser.match(TokenType::COMMA));
+				} while (parser.match(Tokens::COMMA));
 			}
 			return make_expr<InvokeExpr>(line(token), lhs, args);
 		}

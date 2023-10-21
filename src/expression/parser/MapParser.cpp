@@ -26,12 +26,12 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 {
 	ExprExprMap map;
 	auto start_tok = token.get_type();
-	auto end_tok = TokenType::PAREN_R;
+	auto end_tok = Tokens::PAREN_R;
 
 	/* @[...] */
-	if (start_tok != TokenType::MAP_DEF_L) {
-		token.assert_type(TokenType::MAP_DEF_L_ALT);
-		end_tok = TokenType::BRACKET_R;
+	if (start_tok != Tokens::MAP_DEF_L) {
+		token.assert_type(Tokens::MAP_DEF_L_ALT);
+		end_tok = Tokens::BRACKET_R;
 	}
 
 	parse(parser, [&](auto key, auto val) {
@@ -48,11 +48,11 @@ void MapParser::parse(Parser &parser,
 	if (parser.match(ends_with))
 		return;
 
-	bool has_end_tok = ends_with != TokenType::NONE;
+	bool has_end_tok = ends_with != Tokens::NONE;
 	do {
 		auto key_expr = parser.parse();
 		/* If there's no `=>`, this is just a key with no value specified */
-		if (!parser.match(TokenType::KEYVAL)) {
+		if (!parser.match(Tokens::KEYVAL)) {
 			collector(key_expr, LiteralExpr::empty());
 			continue;
 		}
@@ -62,7 +62,7 @@ void MapParser::parse(Parser &parser,
 		collector(key_expr, value_expr);
 
 		/* Look for key-value pair delimiters: `,` or newline / `;` */
-	} while (parser.match(TokenType::COMMA)
+	} while (parser.match(Tokens::COMMA)
 			|| (has_end_tok && parser.look_ahead() != ends_with));
 
 	if (has_end_tok)

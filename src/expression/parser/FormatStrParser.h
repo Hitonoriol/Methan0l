@@ -24,12 +24,12 @@ class FormatStrParser: public PrefixParser
 	public:
 		inline ExprPtr parse(Parser &parser, Token token)
 		{
-			parser.match(TokenType::COMMA);
+			parser.match(Tokens::COMMA);
 			ExprList args;
 			if (StringFormatter::contains_format(token.get_value())) {
 				do {
 					args.push_back(parser.parse());
-				} while (parser.match(TokenType::COMMA));
+				} while (parser.match(Tokens::COMMA));
 				return make_expr<FormatStrExpr>(line(token), strip_quotes(unconst(token.get_value())), args);
 			}
 

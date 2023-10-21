@@ -11,7 +11,7 @@ class WeakUnitParser: public UnitParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			parser.consume(TokenType::BRACE_L);
+			parser.consume(Tokens::BRACE_L);
 			return UnitParser::parse(parser, token);
 		}
 };

@@ -16,27 +16,27 @@ namespace mtl
  */
 ExprPtr ClassParser::parse(Parser &parser, mtl::Token token)
 {
-	parser.consume(TokenType::COLON);
-	std::string name = parser.consume(TokenType::IDENTIFIER).get_value();
+	parser.consume(Tokens::COLON);
+	std::string name = parser.consume(Tokens::IDENTIFIER).get_value();
 
 	std::string base;
 	std::vector<std::string> interfaces;
-	if (parser.match(TokenType::BASE_CLASS)) {
-		parser.consume(TokenType::COLON);
-		base = parser.consume(TokenType::IDENTIFIER).get_value();
+	if (parser.match(Tokens::BASE_CLASS)) {
+		parser.consume(Tokens::COLON);
+		base = parser.consume(Tokens::IDENTIFIER).get_value();
 	}
 
-	if (parser.match(TokenType::IMPLEMENT)) {
-		parser.consume(TokenType::COLON);
+	if (parser.match(Tokens::IMPLEMENT)) {
+		parser.consume(Tokens::COLON);
 		do {
-			interfaces.push_back(parser.consume(TokenType::IDENTIFIER).get_value());
-		} while (parser.match(TokenType::COMMA));
+			interfaces.push_back(parser.consume(Tokens::IDENTIFIER).get_value());
+		} while (parser.match(Tokens::COMMA));
 	}
 
-	auto end_token = TokenType::PAREN_R;
-	if (!parser.match(TokenType::MAP_DEF_L)) {
-		parser.consume(TokenType::BRACE_L);
-		end_token = TokenType::BRACE_R;
+	auto end_token = Tokens::PAREN_R;
+	if (!parser.match(Tokens::MAP_DEF_L)) {
+		parser.consume(Tokens::BRACE_L);
+		end_token = Tokens::BRACE_R;
 	}
 
 	ExprMap body_map;

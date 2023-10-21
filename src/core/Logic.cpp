@@ -9,22 +9,22 @@ namespace mtl::core
 bool logical_operation(Interpreter &context, const ExprPtr &l, TokenType op, const ExprPtr &r)
 {
 	bool lval = bln(val(context, l));
-	switch (op) {
-	case TokenType::OR: {
+	switch (op.id) {
+	case Tokens::OR.id: {
 		if (lval)
 			return true;
 
 		return lval || bln(val(context, r));
 	}
 
-	case TokenType::AND: {
+	case Tokens::AND.id: {
 		if (!lval)
 			return false;
 
 		return lval && bln(val(context, r));
 	}
 
-	case TokenType::XOR:
+	case Tokens::XOR.id:
 		return lval != bln(val(context, r));
 
 	default:
@@ -34,17 +34,17 @@ bool logical_operation(Interpreter &context, const ExprPtr &l, TokenType op, con
 
 bool arithmetic_comparison(double l, TokenType op, double r)
 {
-	switch (op) {
-	case TokenType::GREATER:
+	switch (op.id) {
+	case Tokens::GREATER.id:
 		return l > r;
 
-	case TokenType::LESS:
+	case Tokens::LESS.id:
 		return l < r;
 
-	case TokenType::GREATER_OR_EQ:
+	case Tokens::GREATER_OR_EQ.id:
 		return l >= r;
 
-	case TokenType::LESS_OR_EQ:
+	case Tokens::LESS_OR_EQ.id:
 		return l <= r;
 
 	default:

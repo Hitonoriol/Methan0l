@@ -24,7 +24,7 @@ Value IndexExpr::evaluate(Interpreter &context)
 
 	if (idx != nullptr) {
 		/* Bracketed for-each: list[do: action] */
-		if (PrefixExpr::is(*idx, TokenType::DO)) {
+		if (PrefixExpr::is(*idx, Tokens::DO)) {
 			auto action = try_cast<PrefixExpr>(idx).get_rhs()->evaluate(context);
 			val.invoke_method(IndexOperator::Foreach, action);
 			return val;

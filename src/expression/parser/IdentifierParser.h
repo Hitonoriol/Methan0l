@@ -15,9 +15,9 @@ class IdentifierParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			bool global = token.get_type() == TokenType::HASH;
+			bool global = token.get_type() == Tokens::HASH;
 			if (global)
-				token = parser.consume(TokenType::IDENTIFIER);
+				token = parser.consume(Tokens::IDENTIFIER);
 
 			auto &name = token.get_value();
 			Value reserved(IdentifierExpr::eval_reserved(name));

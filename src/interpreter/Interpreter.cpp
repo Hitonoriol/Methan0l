@@ -9,7 +9,7 @@
 #include <util/benchmark.h>
 #include <util/system.h>
 
-#include <parser/Methan0lParser.h>
+#include <lang/Methan0lParser.h>
 #include <expression/AssignExpr.h>
 #include <expression/BinaryOperatorExpr.h>
 #include <expression/ConditionalExpr.h>
@@ -479,7 +479,7 @@ void Interpreter::del(ExprPtr idfr)
 	else {
 		idfr->assert_type<BinaryOperatorExpr>("Trying to delete an invalid Expression");
 		auto dot_expr = try_cast<BinaryOperatorExpr>(idfr);
-		if (dot_expr.get_operator() != TokenType::DOT)
+		if (dot_expr.get_operator() != Tokens::DOT)
 			throw std::runtime_error("Invalid deletion target");
 		Value &scope = referenced_value(dot_expr.get_lhs());
 		ExprPtr rhs = dot_expr.get_rhs();
@@ -526,14 +526,14 @@ Value& Interpreter::referenced_value(Expression *expr, bool follow_refs)
 		return get(try_cast<IdentifierExpr>(expr), follow_refs);
 
 	/* Create a temporary value and reference it if `expr` is not an access expression */
-	else if (!BinaryOperatorExpr::is(*expr, TokenType::DOT))
+	else if (!BinaryOperatorExpr::is(*expr, Tokens::DOT))
 		return expr->evaluate(*this).get_ref();
 
 	/* Reference an access expression's value */
 	else {
 		auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
 		ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
-		return apply_binary(lhs, TokenType::DOT, rhs).get_ref();
+		return apply_binary(lhs, Tokens::DOT, rhs).get_ref();
 	}
 
 	throw std::runtime_error("Reference error");
@@ -632,7 +632,7 @@ Value Interpreter::evaluate(InvokeExpr &expr)
 	ExprPtr lhs = expr.get_lhs();
 	if (instanceof<IdentifierExpr>(lhs)
 			&& try_cast<IdentifierExpr>(lhs).get_name()
-					== Token::reserved(Word::SELF_INVOKE)) {
+					== ReservedWord::SELF_INVOKE) {
 		return invoke(current_function(), expr.arg_list());
 	}
 
@@ -726,7 +726,7 @@ void Interpreter::on_exit()
 
 void Interpreter::register_exit_task(Value &callable)
 {
-	on_exit_tasks.push_back([=]() mutable {
+	on_exit_tasks.push_back([=, this]() mutable {
 		Args noargs;
 		invoke(callable, noargs);
 	});

@@ -180,7 +180,7 @@ Shared<native::String> Value::to_string()
 	using String = native::String;
 	TYPE_SWITCH(type(),
 		TYPE_CASE(Type::NIL) {
-			return mtl::make<String>(Token::reserved(Word::NIL));
+			return mtl::make<String>(mtl::str(ReservedWord::NIL.name));
 		}
 
 		TYPE_CASE(Type::REFERENCE) {
@@ -201,7 +201,7 @@ Shared<native::String> Value::to_string()
 
 		TYPE_CASE(Type::BOOLEAN) {
 			return mtl::make<String>(
-				Token::reserved(get<bool>() ? Word::TRUE : Word::FALSE)
+				mtl::str(get<bool>() ? ReservedWord::TRUE.name : ReservedWord::FALSE.name)
 			);
 		}
 
@@ -266,7 +266,7 @@ bool Value::to_bool() const
 			return cget<Int>() == 1;
 
 		TYPE_CASE_T(String)
-			return *cget<String>() == Token::reserved(Word::TRUE);
+			return *cget<String>() == ReservedWord::TRUE;
 
 		TYPE_CASE(Type::DOUBLE)
 			return cget<double>() == 1.0;
@@ -293,13 +293,13 @@ char Value::to_char() const
 	)
 }
 
-void* Value::identity()
+const void* Value::identity() const
 {
-	return accept([&](auto &v) -> void* {
+	return unconst(*this).accept([&](auto &v) -> const void* {
 		if constexpr (is_heap_type<VT(v)>())
 			return v.get();
 		else if constexpr (std::is_same_v<VT(v), Object>) {
-			auto &obj = get<Object>();
+			auto &obj = unconst(*this).get<Object>();
 			return obj.is_native() ? &obj.get_native_any() : reinterpret_cast<void*>(obj.id());
 		} else
 			return this;
@@ -401,6 +401,9 @@ bool operator ==(const Value &lhs, const Value &rhs)
 
 		else if constexpr (is_shared_ptr<VT(lv)>::value && is_shared_ptr<VT(rv)>::value)
 			return *lv == *rv;
+
+		else if constexpr (std::is_same_v<VT(lv), std::any> && std::is_same_v<VT(rv), std::any>)
+			return lhs.identity() == rhs.identity();
 
 		else if constexpr (is_equality_comparable<VT(lv), VT(rv)>::value)
 			return lv == rv;

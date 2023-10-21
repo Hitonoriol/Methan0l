@@ -36,10 +36,10 @@ LIB_INC = -I../src
 CLI_BIN_NAME = $(addsuffix $(if $(filter $(OS_NAME),Windows),.exe,),methan0l)
 LIB_NAME = libmethan0l.so
 
-LINK_STATIC := -lboost_filesystem -lboost_system
+LINK_STATIC := -lboost_filesystem-mt -lboost_system-mt
 LINK_DYNAMIC :=
 
-FLAGS:=-std=c++17 -Wall -Wextra -Wno-unused-parameter -O3
+FLAGS:=-std=c++2a -Wall -Wextra -Wno-unused-parameter -Wno-overloaded-virtual -O3
 
 INSTALL_DIR=/opt/methan0l
 
@@ -96,7 +96,7 @@ lib: libmethan0l.so
 
 libmethan0l.so: $(LIB_OBJS)
 	@echo 'Building interpreter library: $@...'
-	g++ $(LIB_OBJS) -shared -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) -o $(LIB_NAME) $(RPATH)
+	g++ $(FLAGS) $(LIB_OBJS) -shared -o $(LIB_NAME) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) $(RPATH)
 	@echo 'Finished building: $@'
 	@echo ' '
 
@@ -150,7 +150,7 @@ cli: $(CLI_BIN_NAME)
 
 $(CLI_BIN_NAME): lib stdlib $(CLI_OBJS)
 	@echo 'Building interpreter cli: $@'
-	g++ -o $(CLI_BIN_NAME) $(CLI_OBJS) -m$(BITS) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic -L./ -l:$(LIB_NAME) $(LINK_DYNAMIC) $(RPATH)
+	g++ $(FLAGS) -o $(CLI_BIN_NAME) $(CLI_OBJS) -m$(BITS) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic -L./ -l:$(LIB_NAME) $(LINK_DYNAMIC) $(RPATH)
 	@echo 'Finished building interpreter cli: $@'
 	@echo ' '
 

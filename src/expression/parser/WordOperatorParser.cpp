@@ -17,13 +17,13 @@ namespace mtl
  */
 ExprPtr WordOperatorParser::parse(Parser &parser, Token token)
 {
-	parser.consume(TokenType::COLON);
+	parser.consume(Tokens::COLON);
 	ExprPtr rhs = parser.parse();
-	if (multiple_args && parser.match(TokenType::COMMA)) {
+	if (multiple_args && parser.match(Tokens::COMMA)) {
 		ExprList args{rhs};
 		do {
 			args.push_back(parser.parse());
-		} while (parser.match(TokenType::COMMA));
+		} while (parser.match(Tokens::COMMA));
 		rhs = make_expr<ListExpr>(line(token), args);
 	}
 
@@ -35,8 +35,8 @@ ExprPtr WordOperatorParser::parse(Parser &parser, Token token)
 
 ExprPtr VarDefParser::parse(Parser &parser, Token token)
 {
-	parser.match(TokenType::COLON);
-	auto rhs = parser.parse_prefix(parser.consume(TokenType::IDENTIFIER));
+	parser.match(Tokens::COLON);
+	auto rhs = parser.parse_prefix(parser.consume(Tokens::IDENTIFIER));
 	return make_expr<PrefixExpr>(line(token), token.get_type(), rhs);
 }
 

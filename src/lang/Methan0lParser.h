@@ -1,7 +1,7 @@
 #ifndef METHAN0LPARSER_H_
 #define METHAN0LPARSER_H_
 
-#include "Parser.h"
+#include <parser/Parser.h>
 
 namespace mtl
 {

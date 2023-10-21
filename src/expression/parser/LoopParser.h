@@ -24,24 +24,24 @@ class LoopParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			if (!parser.match(TokenType::LIST_DEF_L))
-				parser.consume(TokenType::PAREN_L);
+			if (!parser.match(Tokens::LIST_DEF_L))
+				parser.consume(Tokens::PAREN_L);
 
 			ExprList loop_params;
 			ListParser::parse(parser, [&](auto expr) {loop_params.push_back(expr);});
 			ExprPtr body = UnitParser::parse_ctrl_block(parser, false);
 			size_t size = loop_params.size();
 			uint32_t line = mtl::line(token);
-			bool legacy_loop = token == TokenType::DO;
+			bool legacy_loop = token == Tokens::DO;
 
-			if (token == TokenType::FOR || legacy_loop) {
+			if (token == Tokens::FOR || legacy_loop) {
 				if (size == FOR_ARGS)
 					return make_expr<LoopExpr>(line, loop_params, body);
 
 				else if (size == FOREACH_ARGS)
 					return make_expr<LoopExpr>(line, loop_params.front(), loop_params[1], body);
 			}
-			else if ((token == TokenType::WHILE || legacy_loop) && size == WHILE_ARGS)
+			else if ((token == Tokens::WHILE || legacy_loop) && size == WHILE_ARGS)
 				return make_expr<LoopExpr>(line, loop_params.back(), body);
 
 			throw std::runtime_error("Invalid loop expression");

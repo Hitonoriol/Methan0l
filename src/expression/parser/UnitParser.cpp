@@ -10,14 +10,14 @@ namespace mtl
 ExprPtr UnitParser::parse(Parser &parser, Token token)
 {
 	ExprList exprs;
-	if (!parser.match(TokenType::BRACE_R)) {
+	if (!parser.match(Tokens::BRACE_R)) {
 		do {
 			exprs.push_back(parser.parse());
-		} while (!parser.match(TokenType::BRACE_R));
+		} while (!parser.match(Tokens::BRACE_R));
 	}
 	LOG("Parsed a unit with " << exprs.size() << " exprs");
 
-	bool weak = token.get_type() == TokenType::ARROW_R;
+	bool weak = token.get_type() == Tokens::ARROW_R;
 	return make_expr<UnitExpr>(line(token), exprs, weak);
 }
 
@@ -28,11 +28,11 @@ ExprPtr UnitParser::parse_expr_block(Parser &parser, bool unwrap_single_exprs)
 	if (instanceof<UnitExpr>(first_expr))
 		return first_expr;
 
-	if (unwrap_single_exprs && !parser.peek(TokenType::COMMA))
+	if (unwrap_single_exprs && !parser.peek(Tokens::COMMA))
 		return first_expr;
 
 	ExprList block { first_expr };
-	while (parser.match(TokenType::COMMA))
+	while (parser.match(Tokens::COMMA))
 		block.push_back(parser.parse());
 	return make_expr<UnitExpr>(block.front()->get_line(), block);
 }

@@ -131,7 +131,7 @@ ExprPtr Parser::parse(int precedence, bool prefix_only)
 {
 	++nesting_lvl;
 	Token token = consume();
-	if (Token::is_semantic(token.get_type()))
+	if (Lexer::is_semantic(token.get_type()))
 		return parse(get_lookahead_precedence(true));
 
 	LOG("(^" << nesting_lvl << "|#" << precedence << ") [prefix "
@@ -140,7 +140,7 @@ ExprPtr Parser::parse(int precedence, bool prefix_only)
 
 	ExprPtr lhs = parse_prefix(token);
 
-	if (prefix_only || match(TokenType::EXPR_END)) {
+	if (prefix_only || match(Tokens::EXPR_END)) {
 		LOG("* Forced end of expression reached");
 
 		--nesting_lvl;
@@ -392,7 +392,7 @@ void Parser::dump_queue(size_t len)
 	look_ahead(len);
 	for(size_t i = 0; i < len; ++i) {
 		ss << std::setw(3) << i << ": " << read_queue[i] << NL;
-		if (read_queue[i].get_type() == TokenType::END)
+		if (read_queue[i].get_type() == Tokens::END)
 			break;
 	}
 	ss << "..." << UNTAB << NL;

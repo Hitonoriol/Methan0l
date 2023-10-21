@@ -60,11 +60,6 @@ class Wrapper
 		{
 			return contained;
 		}
-
-		virtual bool operator==(const Wrapper<T> &rhs) const
-		{
-			return contained == rhs.contained;
-		}
 };
 
 template<typename T>

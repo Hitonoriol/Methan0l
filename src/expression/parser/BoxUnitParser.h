@@ -13,7 +13,7 @@ class BoxUnitParser: public UnitParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			Token unit_def = parser.consume(TokenType::BRACE_L);
+			Token unit_def = parser.consume(Tokens::BRACE_L);
 			ExprPtr unit = UnitParser::parse(parser, unit_def);
 			try_cast<UnitExpr>(unit).get_unit_ref().box();
 			return unit;

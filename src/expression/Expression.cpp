@@ -44,7 +44,7 @@ std::string Expression::get_name(Expression *expr)
 
 ExprPtr Expression::return_expr(ExprPtr expr)
 {
-	return make_expr<PostfixExpr>(expr->line, expr, TokenType::EXCLAMATION);
+	return make_expr<PostfixExpr>(expr->line, expr, Tokens::EXCLAMATION);
 }
 
 ExprPtr Expression::return_val(Value val)

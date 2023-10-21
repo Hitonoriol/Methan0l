@@ -77,10 +77,14 @@
 #define COMPOUND_ARITHMETIC_NODBL_NOBOOL(op) COMPOUND_ASSIGN(op, COMMA3(!std::is_same<VT(lhs), double>::value && !std::is_same<VT(lhs), bool>::value))
 #define COMPOUND_ARITHMETIC_ALL(op) COMPOUND_ASSIGN(op, true)
 
-#define TYPE_SWITCH(type, ...) { auto _vtype = type; if constexpr (false) {} JOIN(__VA_ARGS__) }
-#define TYPE_CASE(type) else if (_vtype == type)
-#define TYPE_CASE_T(typeT) else if (_vtype.is<typeT>())
-#define TYPE_DEFAULT else
+#define SWITCH(val, ...) { auto _val = val; if constexpr (false) {} JOIN(__VA_ARGS__) }
+#define CASE(val) else if (_val == val)
+#define DEFAULT else
+
+#define TYPE_SWITCH(type, ...) SWITCH(type, JOIN(__VA_ARGS__))
+#define TYPE_CASE(type) CASE(type)
+#define TYPE_CASE_T(typeT) else if (_val.is<typeT>())
+#define TYPE_DEFAULT DEFAULT
 
 namespace mtl
 {
@@ -298,7 +302,7 @@ class Value
 		}
 
 		template<typename F>
-		constexpr decltype(auto) accept(const Value &rhs, F &&visitor)
+		constexpr decltype(auto) accept(const Value &rhs, F &&visitor) const
 		{
 			return std::visit(visitor, value, rhs.value);
 		}
@@ -472,7 +476,7 @@ class Value
 		double to_double() const;
 		bool to_bool() const;
 		char to_char() const;
-		void* identity();
+		const void* identity() const;
 
 		static Value ref(Value &val);
 		inline static Value ref(const Value &val)

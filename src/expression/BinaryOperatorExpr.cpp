@@ -22,7 +22,7 @@ Value BinaryOperatorExpr::evaluate(Interpreter &context)
 void BinaryOperatorExpr::execute(Interpreter &context)
 {
 	Value val = evaluate(context);
-	if (op == TokenType::STRING_CONCAT)
+	if (op == Tokens::STRING_CONCAT)
 		LiteralExpr::exec_literal(context, val);
 }
 

@@ -19,7 +19,7 @@ class ListParser: public PrefixParser
 
 		static void parse(Parser &parser,
 				std::function<void(ExprPtr)> collector,
-				TokenType end_token = TokenType::PAREN_R);
+				TokenType end_token = Tokens::PAREN_R);
 };
 
 } /* namespace mtl */

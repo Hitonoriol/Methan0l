@@ -19,10 +19,10 @@ namespace mtl
 ExprPtr TryCatchParser::parse(Parser &parser, Token token)
 {
 	ExprPtr try_body = UnitParser::parse_ctrl_block(parser, false);
-	parser.consume(TokenType::CATCH);
-	parser.consume(TokenType::COLON);
+	parser.consume(Tokens::CATCH);
+	parser.consume(Tokens::COLON);
 	auto as = parser.parse();
-	std::string catch_as = std::move(Expression::get_name(as));
+	std::string catch_as = Expression::get_name(as);
 	ExprPtr catch_body = UnitParser::parse_ctrl_block(parser, false);
 	return make_expr<TryCatchExpr>(line(token), try_body, catch_body, std::move(catch_as));
 }

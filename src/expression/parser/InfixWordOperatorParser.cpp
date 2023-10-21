@@ -14,7 +14,7 @@ namespace mtl
  */
 ExprPtr InfixWordOperatorParser::parse(Parser &parser, ExprPtr lhs, Token token)
 {
-	parser.consume(TokenType::COLON);
+	parser.consume(Tokens::COLON);
 	auto rhs = parser.parse();
 	return make_expr<BinaryOperatorExpr>(line(token), lhs, token.get_type(), rhs);
 }

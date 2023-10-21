@@ -24,7 +24,7 @@ ExprPtr LiteralParser::parse(Parser &parser, Token token)
 		value = std::stod(tokstr);
 
 	else if (type == Type::BOOLEAN)
-		value = tokstr == Token::reserved(Word::TRUE);
+		value = tokstr == ReservedWord::TRUE;
 
 	else if (type == Type::STRING) {
 		value = parser.get_context().make<String>(strip_quotes(tokstr));

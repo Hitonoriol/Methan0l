@@ -30,7 +30,7 @@ void LibModule::load()
 		unit.local().clear();
 	});
 
-	prefix_operator(TokenType::USING_MODULE, LazyUnaryOpr([&](auto rhs) {
+	prefix_operator(Tokens::USING_MODULE, LazyUnaryOpr([&](auto rhs) {
 		Unit module;
 		core::load_module(*context, *mtl::str(val(rhs)), module);
 		if (!module.expressions().empty())

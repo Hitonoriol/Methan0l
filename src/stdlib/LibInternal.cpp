@@ -165,20 +165,20 @@ void LibInternal::load()
 void LibInternal::load_operators()
 {
 	/* Prefix return operator */
-	prefix_operator(TokenType::RETURN, LazyUnaryOpr([&](auto lhs) {
+	prefix_operator(Tokens::RETURN, LazyUnaryOpr([&](auto lhs) {
 		save_return(lhs);
 		return Value::NO_VALUE;
 	}));
 
 	/* Postfix return operator */
-	postfix_operator(TokenType::EXCLAMATION, LazyUnaryOpr([&](auto lhs) {
+	postfix_operator(Tokens::EXCLAMATION, LazyUnaryOpr([&](auto lhs) {
 		save_return(lhs);
 		return Value::NO_VALUE;
 	}));
 
 	/* Static method invocation: Type@method$(arg1, arg2, ...)
 	 * Static field access: Type@field */
-	infix_operator(TokenType::AT, LazyBinaryOpr([&](auto lhs, auto rhs) {
+	infix_operator(Tokens::AT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		auto &type = context->get_type_mgr().get_class(IdentifierExpr::get_name(lhs));
 		auto &method_expr = try_cast<InvokeExpr>(rhs);
 		auto name = IdentifierExpr::get_name(method_expr.get_lhs());
@@ -189,7 +189,7 @@ void LibInternal::load_operators()
 	 * Nested `.` is parsed as:
 	 * 		(foo.bar).baz
 	 */
-	infix_operator(TokenType::DOT, LazyBinaryOpr([&](auto lhs, auto rhs) {
+	infix_operator(Tokens::DOT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		Value lval = val(lhs);
 
 		/* Object field access / method invocation */
@@ -220,7 +220,7 @@ void LibInternal::load_operators()
 		}
 	}));
 
-	prefix_operator(TokenType::IDENTITY, LazyUnaryOpr([&](ExprPtr rhs) {
+	prefix_operator(Tokens::IDENTITY, LazyUnaryOpr([&](ExprPtr rhs) {
 		return reinterpret_cast<Int>(ref(rhs).identity());
 	}));
 }
@@ -237,7 +237,7 @@ void LibInternal::save_return(ExprPtr ret)
 {
 	auto *unit = context->current_unit();
 	if (instanceof<IdentifierExpr>(ret)
-			&& IdentifierExpr::get_name(ret) == Token::reserved(Word::BREAK)) {
+			&& IdentifierExpr::get_name(ret) == ReservedWord::BREAK) {
 		unit->stop(true);
 	}
 	else

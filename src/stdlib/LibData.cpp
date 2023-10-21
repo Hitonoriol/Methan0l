@@ -123,7 +123,7 @@ void LibData::assert_type(Value &lhs, ExprPtr rhs_expr)
 
 void LibData::load_operators()
 {
-	infix_operator(TokenType::CONVERT, LazyBinaryOpr([&](auto &lhs, auto &rhs){
+	infix_operator(Tokens::CONVERT, LazyBinaryOpr([&](auto &lhs, auto &rhs){
 		auto src = val(lhs);
 		return core::convert(*context, src, *rhs);
 	}));
@@ -131,7 +131,7 @@ void LibData::load_operators()
 	/* Unwrap a named reference, e.g. x = **y; unwrap: x
 	 * `x` becomes a copy of `y` instead of the reference to its value
 	 */
-	prefix_operator(TokenType::DEREF, LazyUnaryOpr([&](ExprPtr rhs) {
+	prefix_operator(Tokens::DEREF, LazyUnaryOpr([&](ExprPtr rhs) {
 		rhs->assert_type<IdentifierExpr>("Attempting to unwrap a non-identifier");
 		Value &val = context->referenced_value(rhs, false);
 		Value copy = val.get();
@@ -140,11 +140,11 @@ void LibData::load_operators()
 		return Value::ref(val);
 	}));
 
-	prefix_operator(TokenType::IS_REF, LazyUnaryOpr([&](ExprPtr rhs) {
+	prefix_operator(Tokens::IS_REF, LazyUnaryOpr([&](ExprPtr rhs) {
 		return context->referenced_value(rhs, false).is<ValueRef>();
 	}));
 
-	prefix_operator(TokenType::GLOBAL, LazyUnaryOpr([&](auto rhs) {
+	prefix_operator(Tokens::GLOBAL, LazyUnaryOpr([&](auto rhs) {
 		if_instanceof<IdentifierExpr>(*rhs, [&](auto &idfr) {
 			import_reference(idfr);
 		});
@@ -167,14 +167,14 @@ void LibData::load_operators()
 	 * Create an instance of object's class (object copy + ctor invocation):
 	 * 		(3) new_obj = new: anon_obj(123)
 	 */
-	prefix_operator(TokenType::NEW, LazyUnaryOpr([&](ExprPtr rhs) {
+	prefix_operator(Tokens::NEW, LazyUnaryOpr([&](ExprPtr rhs) {
 		if (mtl::instanceof<InvokeExpr>(rhs)) {
 			auto &ctor_call = try_cast<InvokeExpr>(rhs);
 			auto lval = val(ctor_call.get_lhs());
 			bool named = mtl::instanceof<IdentifierExpr>(ctor_call.get_lhs());
 			if (named) {
 				auto &mgr = context->get_type_mgr();
-				auto &type_name = IdentifierExpr::get_name(ctor_call.get_lhs());
+				auto type_name = IdentifierExpr::get_name(ctor_call.get_lhs());
 				if (lval.nil()) {
 					return mgr.create_object(type_name, ctor_call.arg_list());
 				} else if (lval.is<Object>()) {
@@ -193,37 +193,37 @@ void LibData::load_operators()
 	}));
 
 	/* Evaluate and convert to string: $$expr */
-	prefix_operator(TokenType::DOUBLE_DOLLAR, LazyUnaryOpr([&](auto rhs) {
+	prefix_operator(Tokens::DOUBLE_DOLLAR, LazyUnaryOpr([&](auto rhs) {
 		return object(rhs->evaluate(*context).to_string());
 	}));
 
-	prefix_operator(TokenType::NO_EVAL, LazyUnaryOpr([&](auto rhs) {
+	prefix_operator(Tokens::NO_EVAL, LazyUnaryOpr([&](auto rhs) {
 		return rhs;
 	}));
 
 	/* hash_code: idfr (overloadable) */
-	prefix_operator(TokenType::HASHCODE, UnaryOpr([&](auto &rhs) {
+	prefix_operator(Tokens::HASHCODE, UnaryOpr([&](auto &rhs) {
 		return rhs.hash_code();
 	}));
 
-	infix_operator(TokenType::TYPE_ASSIGN, LazyBinaryOpr([&](auto lhs, auto rhs) {
+	infix_operator(Tokens::TYPE_ASSIGN, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		return if_not_same(lhs, rhs, true);
 	}));
 
-	infix_operator(TokenType::INSTANCE_OF, LazyBinaryOpr([&](auto lhs, auto rhs) {
+	infix_operator(Tokens::INSTANCE_OF, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		auto l = val(lhs);
 		return instanceof(l, rhs);
 	}));
 
 	/* *["Assertion failed"] assert: condition */
-	infix_operator(TokenType::ASSERT, LazyBinaryOpr([&](auto lhs, auto rhs) {
+	infix_operator(Tokens::ASSERT, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		if (!bln(val(rhs)))
 			throw std::runtime_error(*val(lhs).to_string());
 		return Value::NO_VALUE;
 	}));
 
 	/* obj require: [Interface1, Interface2, ...] */
-	infix_operator(TokenType::REQUIRE, LazyBinaryOpr([&](auto lhs, auto rhs) {
+	infix_operator(Tokens::REQUIRE, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		auto lval = val(lhs);
 		if (mtl::instanceof<ListExpr>(rhs)) {
 			Expression::for_one_or_multiple(rhs, [this, &lval](auto &expr) {
@@ -237,7 +237,7 @@ void LibData::load_operators()
 		return Value::NO_VALUE;
 	}));
 
-	prefix_operator(TokenType::OBJECT_COPY, LazyUnaryOpr([&](auto rhs) -> Value {
+	prefix_operator(Tokens::OBJECT_COPY, LazyUnaryOpr([&](auto rhs) -> Value {
 		Value rval = val(rhs);
 		if (rval.is<Object>())
 			return rval.get<Object>().invoke_method(mtl::str(Methods::Copy), {});
@@ -254,20 +254,20 @@ void LibData::load_operators()
 	}));
 
 	/* typeid: val */
-	prefix_operator(TokenType::TYPE_ID, LazyUnaryOpr([&](ExprPtr rhs) {
+	prefix_operator(Tokens::TYPE_ID, LazyUnaryOpr([&](ExprPtr rhs) {
 		return val(rhs).type_id();
 	}));
 
-	prefix_operator(TokenType::TYPE_NAME, LazyUnaryOpr([&](ExprPtr rhs) {
+	prefix_operator(Tokens::TYPE_NAME, LazyUnaryOpr([&](ExprPtr rhs) {
 		return str(val(rhs).type_name());
 	}));
 
-	prefix_operator(TokenType::VAR, LazyUnaryOpr([&](ExprPtr rhs) {
+	prefix_operator(Tokens::VAR, LazyUnaryOpr([&](ExprPtr rhs) {
 		return Value::ref(context->current_unit()->local().get_or_create(IdentifierExpr::get_name(rhs)));
 	}));
 
 	/* Delete idfr & the Value associated with it */
-	prefix_operator(TokenType::DELETE, LazyUnaryOpr([&](ExprPtr rhs) {
+	prefix_operator(Tokens::DELETE, LazyUnaryOpr([&](ExprPtr rhs) {
 		context->scope_lookup(rhs)->del(IdentifierExpr::get_name(rhs));
 		return Value::NIL;
 	}));

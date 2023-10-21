@@ -1,6 +1,8 @@
 #ifndef TOKEN_TOKEN_H_
 #define TOKEN_TOKEN_H_
 
+#include "TokenType.h"
+
 #include <functional>
 #include <vector>
 #include <memory>
@@ -16,235 +18,25 @@ namespace mtl
 
 class Expression;
 
-enum class TokenType : uint16_t
-{
-	/* Printable characters */
-	ASSIGN = '=',
-	PLUS = '+', MINUS = '-', SLASH = '/', ASTERISK = '*',
-	BACKSLASH = '\\',
-	BIT_XOR = '^',
-	EXCLAMATION = '!',
-	QUESTION = '?',
-	TILDE = '~',
-	GREATER = '>', LESS = '<',
-	BIT_OR = '|',
-	BIT_AND = '&',
-	UNDERSCORE = '_',
-	PERCENT = '%',
-	HASH = '#',
-	AT = '@',
-
-	PAREN_L = '(', PAREN_R = ')',
-	LIST = '$',
-	BRACKET_L = '[', BRACKET_R = ']',
-	BRACE_L = '{', BRACE_R = '}',
-	COLON = ':',
-	SEMICOLON = ';',
-	DOT = '.',
-	COMMA = ',',
-
-	QUOTE = '"',
-	SINGLE_QUOTE = '\'',
-	QUOTE_ALT = '`',
-	NEWLINE = '\n',
-
-	/* Double-char operators */
-	SHIFT_L = 0x7F,		// <<
-	SHIFT_R,			// >>
-	ARROW_R,			// ->
-	ARROW_L,			// <-
-	LIST_DEF_L,			// $(
-	MAP_DEF_L,			// @(
-	EQUALS,				// ==
-	OUT,				// %%
-	STRING_CONCAT,		// ::
-	BLOCK_COMMENT_L,	// /*
-	BLOCK_COMMENT_R,	// */
-	GREATER_OR_EQ,		// >=
-	LESS_OR_EQ,			// <=
-	INCREMENT,			// ++
-	DECREMENT,			// --
-	TYPE_ASSIGN,		// :=
-	KEYVAL,				// =>
-	NOT_EQUALS,			// !=
-	ADD,				// +=
-	SUB,				// -=
-	MUL,				// *=
-	DIV,				// /=
-	AND,				// &&
-	OR,					// ||
-	XOR,				// ^^
-	IN,					// %>
-	OUT_NL,				// <%
-	INFIX_WORD_LHS_L,	// *[
-	FUNC_DEF_SHORT_ALT,	// @:
-	DOUBLE_DOLLAR,		// $$
-	LONG_ARROW_RIGHT,	// -->
-	COMP_XOR,			// ^=
-	COMP_OR,			// |=
-	COMP_AND,			// &=
-	COMP_SHIFT_L,		// <<=
-	COMP_SHIFT_R,		// >>=
-	COMP_MOD,			// %=
-	DOUBLE_SLASH,		// //
-	DOUBLE_DOT,			// ..
-	MAP_DEF_L_ALT,		// @[
-
-	/* Literals */
-	INTEGER = 0x100,
-	DOUBLE,
-	STRING,
-	BOOLEAN,
-	CHAR,
-	FORMAT_STRING,
-	TOKEN,
-
-	IDENTIFIER,
-
-	/* Word operators */
-	DO = 0x200,
-	TYPE_ID,
-	DELETE,
-	FUNC_DEF,
-	BOX,
-	CLASS,
-	IF,
-	ELSE,
-	RETURN,
-	OBJECT_COPY,
-	HASHCODE,
-	TYPE_NAME,
-	NO_EVAL,
-	SET_DEF,
-	WHILE,
-	FOR,
-	TRY,
-	CATCH,
-	USING_MODULE,
-	NEW,
-	GLOBAL,
-	ASSERT,
-	INSTANCE_OF,
-	DEREF,
-	IS_REF,
-	METHOD,
-	FUNC_DEF_SHORT,
-	VAR,
-	IMPORT_MODULE,
-	BASE_CLASS,
-	REQUIRE,
-	INTERFACE,
-	CONST,
-	CONVERT,
-	IMPLEMENT,
-	IDENTITY,
-
-	NONE = 0x500,
-	EXPR_END,
-	END = 0xFFFF
-};
-
-enum class Word : uint8_t
-{
-	NONE,
-	NIL,
-	TRUE,
-	FALSE,
-	RETURNED,
-	NEW_LINE,
-	BREAK,
-	VOID,
-	SELF_INVOKE
-};
-
-bool operator ==(const char, const TokenType&);
-bool operator !=(const char, const TokenType&);
-
 enum class Separator : uint8_t
 {
 	NONE, SPACE, NEWLINE
 };
 
-template<TokenType... tokens>
-using Tokens = StaticList<TokenType, tokens...>;
-
 class Token
 {
 	private:
-		TokenType type = TokenType::NONE;
+		TokenType type = Tokens::NONE;
 		uint32_t line = 0;
 		uint32_t column = 0;
 		std::string value;
 		Separator sep = Separator::NONE;
-
-		static constexpr char punctuators[] = "=+-/\\*^!?~()$@[]{}:%;.,\"'`<>|&\n#";
-
-		static constexpr std::string_view multichar_ops[] = {
-				"<<", ">>", "->", "<-", "$(",
-				"@(", "==", "%%", "::", "/*",
-				"*/", ">=", "<=", "++", "--",
-				":=", "=>", "!=", "+=", "-=",
-				"*=", "/=", "&&", "||", "^^",
-				"%>", "<%", "*[",
-				"@:", "$$", "-->", "^=", "|=",
-				"&=", "<<=", ">>=", "%=", "//",
-				"..", "@["
-		};
-
-		/* Words not in `keywords` array can be user-redefined in some contexts */
-		static constexpr std::string_view word_ops[] = {
-				"do", "typeid", "delete", "func", "defbox",
-				"class", "if", "else", "return",
-				"copy", "hash_code",
-				"typename", "noeval", "defset", "while", "for",
-				"try", "catch", "using_module", "new", "global",
-				"assert", "is", "unwrap", "is_reference",
-				"method", "f", "var", "import", "base", "require",
-				"interface", "const", "to", "implements", "identity"
-		};
-
-		static constexpr std::string_view reserved_words[] = {
-				"", "nil", "true", "false", ".r",
-				"newl", "break", "void", "selfinvoke"
-		};
-
-		/* Can't be redefined inside a program, lexed as their corresponding TokenType */
-		static constexpr TokenType keywords[] = {
-			TokenType::DO, TokenType::FOR, TokenType::WHILE,
-			TokenType::FUNC_DEF, TokenType::BOX, TokenType::CLASS,
-			TokenType::IF, TokenType::ELSE, TokenType::SET_DEF,
-			TokenType::TRY, TokenType::CATCH
-		};
-
-		static constexpr TokenType semantic_tokens[] = {
-				TokenType::IF, TokenType::ELSE
-		};
-
-		static constexpr TokenType transparent_tokens[] = {
-				TokenType::ELSE
-		};
-
-		static constexpr TokenType block_begin_tokens[] = {
-				TokenType::PAREN_L, TokenType::BRACKET_L, TokenType::BRACE_L,
-				TokenType::MAP_DEF_L, TokenType::MAP_DEF_L_ALT,  TokenType::LIST_DEF_L,
-				TokenType::INFIX_WORD_LHS_L
-		};
-
-		static constexpr TokenType block_end_tokens[] = {
-				TokenType::PAREN_R, TokenType::BRACKET_R, TokenType::BRACE_R
-		};
-
-		static const std::unordered_map<char, char> escape_seqs;
-
-		static TokenType deduce_type(std::string &tokstr);
 
 	public:
 		Token();
 		Token(const Token&);
 		Token(Token&&);
 		Token(TokenType type, std::string value = "");
-		Token(char chr);
-		Token(std::string op);
 		Token& operator=(const Token &rhs);
 		void set_type(TokenType);
 		TokenType get_type() const;
@@ -274,41 +66,11 @@ class Token
 
 		void assert_type(TokenType type);
 
-		static TokenType get_multichar_op_type(std::string &tokstr);
-		static char escape_seq(char seq);
-
-		static bool is_blank(char chr);
-		static bool is_punctuator(char chr);
-		static bool is_separator(char chr);
-		static bool is_keyword(TokenType tok);
-		static bool is_semantic(const TokenType &tok);
-		static bool is_transparent(const TokenType &tok);
-		static bool is_block_begin(TokenType tok);
-		static bool is_block_end(char c);
-
-		static char chr(TokenType tok);
-		static TokenType tok(char chr);
-
-		static constexpr std::string_view reserved(const Word &word)
-		{
-			return reserved_words[static_cast<int>(word)];
-		}
-
-		static Word as_reserved(std::string &tokstr);
-		static bool is_reserved(std::string &tokstr);
-		static TokenType as_word_op(std::string &tokstr);
-		static std::string_view word_op(TokenType tok);
-		static std::string_view bichar_op(TokenType tok);
 		static bool is_ref_opr(TokenType opr);
 
 		static const Token END_OF_EXPR;
 		static const Token EOF_TOKEN;
-		static const int LITERAL_START = static_cast<int>(TokenType::INTEGER);
-		static const int WORD_OP_START = static_cast<int>(TokenType::DO);
-		static const int BICHAR_OP_START = static_cast<int>(TokenType::SHIFT_L);
-		static const int MISC_TOKENS_START = static_cast<int>(TokenType::NONE);
-		static const int PRINTABLE_CHARS_END = 0x7F;
-		static const std::string digits, double_digits;
+
 		static bool contains_all(std::string str, std::string substr);
 
 		std::string to_string() const;
@@ -322,7 +84,7 @@ template<> struct std::hash<mtl::Token>
 {
 		size_t operator()(const mtl::Token &tok) const
 		{
-			return static_cast<size_t>(tok.get_type());
+			return std::hash<mtl::TokenType>{}(tok.get_type());
 		}
 };
 

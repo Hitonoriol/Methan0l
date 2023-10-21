@@ -18,7 +18,7 @@ class LiteralParser: public PrefixParser
 
 		inline bool compatible(TokenType next)
 		{
-			return next != TokenType::INCREMENT && next != TokenType::DECREMENT;
+			return next != Tokens::INCREMENT && next != Tokens::DECREMENT;
 		}
 
 	public:

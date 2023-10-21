@@ -7,7 +7,154 @@
 namespace mtl
 {
 
-Lexer::Lexer() : tokens() {}
+const std::string Lexer::digits = "1234567890";
+const std::string Lexer::double_digits = digits + '.';
+
+const std::unordered_map<char, char> Lexer::escape_seqs = {
+		{ 'a', '\a' },
+		{ 'b', '\b' },
+		{ 'f', '\f' },
+		{ 'r', '\r' },
+		{ 'n', '\n' },
+		{ 'v', '\v' },
+		{ 't', '\t' },
+		{ '0', '\0' },
+};
+
+Lexer::Lexer() : tokens()
+{
+	/* Punctuator tokens */
+	register_punctuator(Tokens::PAREN_L);
+	register_punctuator(Tokens::PAREN_R);
+	register_punctuator(Tokens::BRACKET_L);
+	register_punctuator(Tokens::BRACKET_R);
+	register_punctuator(Tokens::BRACE_L);
+	register_punctuator(Tokens::BRACE_R);
+	register_punctuator(Tokens::COLON);
+	register_punctuator(Tokens::SEMICOLON);
+	register_punctuator(Tokens::COMMA);
+	register_punctuator(Tokens::QUOTE);
+	register_punctuator(Tokens::SINGLE_QUOTE);
+	register_punctuator(Tokens::QUOTE_ALT);
+
+	/* Operators */
+	register_operator(Tokens::ASSIGN);
+	register_operator(Tokens::PLUS);
+	register_operator(Tokens::MINUS);
+	register_operator(Tokens::SLASH);
+	register_operator(Tokens::ASTERISK);
+	register_operator(Tokens::BACKSLASH);
+	register_operator(Tokens::BIT_XOR);
+	register_operator(Tokens::EXCLAMATION);
+	register_operator(Tokens::QUESTION);
+	register_operator(Tokens::TILDE);
+	register_operator(Tokens::GREATER);
+	register_operator(Tokens::LESS);
+	register_operator(Tokens::BIT_OR);
+	register_operator(Tokens::BIT_AND);
+	register_operator(Tokens::PERCENT);
+	register_operator(Tokens::HASH);
+	register_operator(Tokens::AT);
+	register_operator(Tokens::LIST);
+	register_operator(Tokens::DOT);
+
+	/* Multi-character operators */
+	register_operator(Tokens::SHIFT_L);
+	register_operator(Tokens::SHIFT_R);
+	register_operator(Tokens::ARROW_R);
+	register_operator(Tokens::ARROW_L);
+	register_operator(Tokens::LIST_DEF_L);
+	register_operator(Tokens::MAP_DEF_L);
+	register_operator(Tokens::EQUALS);
+	register_operator(Tokens::OUT);
+	register_operator(Tokens::STRING_CONCAT);
+	register_operator(Tokens::BLOCK_COMMENT_L);
+	register_operator(Tokens::BLOCK_COMMENT_R);
+	register_operator(Tokens::GREATER_OR_EQ);
+	register_operator(Tokens::LESS_OR_EQ);
+	register_operator(Tokens::INCREMENT);
+	register_operator(Tokens::DECREMENT);
+	register_operator(Tokens::TYPE_ASSIGN);
+	register_operator(Tokens::KEYVAL);
+	register_operator(Tokens::NOT_EQUALS);
+	register_operator(Tokens::ADD);
+	register_operator(Tokens::SUB);
+	register_operator(Tokens::MUL);
+	register_operator(Tokens::DIV);
+	register_operator(Tokens::AND);
+	register_operator(Tokens::OR);
+	register_operator(Tokens::XOR);
+	register_operator(Tokens::IN);
+	register_operator(Tokens::OUT_NL);
+	register_operator(Tokens::INFIX_WORD_LHS_L);
+	register_operator(Tokens::FUNC_DEF_SHORT_ALT);
+	register_operator(Tokens::DOUBLE_DOLLAR);
+	register_operator(Tokens::LONG_ARROW_RIGHT);
+	register_operator(Tokens::COMP_XOR);
+	register_operator(Tokens::COMP_OR);
+	register_operator(Tokens::COMP_AND);
+	register_operator(Tokens::COMP_SHIFT_L);
+	register_operator(Tokens::COMP_SHIFT_R);
+	register_operator(Tokens::COMP_MOD);
+	register_operator(Tokens::DOUBLE_SLASH);
+	register_operator(Tokens::DOUBLE_DOT);
+	register_operator(Tokens::MAP_DEF_L_ALT);
+
+	/* Soft keywords */
+	register_keyword(Tokens::TYPE_ID);
+	register_keyword(Tokens::DELETE);
+	register_keyword(Tokens::RETURN);
+	register_keyword(Tokens::OBJECT_COPY);
+	register_keyword(Tokens::HASHCODE);
+	register_keyword(Tokens::TYPE_NAME);
+	register_keyword(Tokens::NO_EVAL);
+	register_keyword(Tokens::SET_DEF);
+	register_keyword(Tokens::USING_MODULE);
+	register_keyword(Tokens::NEW);
+	register_keyword(Tokens::GLOBAL);
+	register_keyword(Tokens::ASSERT);
+	register_keyword(Tokens::INSTANCE_OF);
+	register_keyword(Tokens::DEREF); // TODO: remove
+	register_keyword(Tokens::IS_REF); // TODO: remove
+	register_keyword(Tokens::METHOD);
+	register_keyword(Tokens::FUNC_DEF_SHORT);
+	register_keyword(Tokens::VAR);
+	register_keyword(Tokens::IMPORT_MODULE);
+	register_keyword(Tokens::BASE_CLASS);
+	register_keyword(Tokens::REQUIRE);
+	register_keyword(Tokens::INTERFACE);
+	register_keyword(Tokens::CONST);
+	register_keyword(Tokens::CONVERT);
+	register_keyword(Tokens::IMPLEMENT);
+	register_keyword(Tokens::IDENTITY);
+
+	/* Hard keywords */
+	register_keyword(Tokens::DO, true);
+	register_keyword(Tokens::FOR, true);
+	register_keyword(Tokens::WHILE, true);
+	register_keyword(Tokens::FUNC_DEF, true);
+	register_keyword(Tokens::BOX, true);
+	register_keyword(Tokens::CLASS, true);
+	register_keyword(Tokens::IF, true);
+	register_keyword(Tokens::ELSE, true);
+	register_keyword(Tokens::SET_DEF, true);
+	register_keyword(Tokens::TRY, true);
+	register_keyword(Tokens::CATCH, true);
+
+	/* Block begin tokens */
+	register_block_begin_token(Tokens::PAREN_L);
+	register_block_begin_token(Tokens::BRACKET_L);
+	register_block_begin_token(Tokens::BRACE_L);
+	register_block_begin_token(Tokens::MAP_DEF_L);
+	register_block_begin_token(Tokens::MAP_DEF_L_ALT);
+	register_block_begin_token(Tokens::LIST_DEF_L);
+	register_block_begin_token(Tokens::INFIX_WORD_LHS_L);
+
+	/* Block end tokens */
+	register_block_end_token(Tokens::PAREN_R);
+	register_block_end_token(Tokens::BRACKET_R);
+	register_block_end_token(Tokens::BRACE_R);
+}
 
 Lexer::Lexer(const Lexer &rhs) : tokens(rhs.tokens) {}
 
@@ -15,6 +162,39 @@ Lexer& Lexer::operator=(const Lexer &rhs)
 {
 	tokens = rhs.tokens;
 	return *this;
+}
+
+void Lexer::register_punctuator(TokenType punctuator)
+{
+	punctuators.insert(punctuator);
+}
+
+void Lexer::register_keyword(TokenType keyword, bool hard)
+{
+	if (hard)
+		hard_word_ops.push_back(keyword);
+	else
+		soft_word_ops.push_back(keyword);
+}
+
+void Lexer::register_operator(TokenType op)
+{
+	if (op->size() > 1)
+		multichar_ops.push_back(op);
+	else {
+		single_char_ops.push_back(op);
+		register_punctuator(op);
+	}
+}
+
+void Lexer::register_block_begin_token(TokenType tok)
+{
+	block_begin_tokens.push_back(tok);
+}
+
+void Lexer::register_block_end_token(TokenType tok)
+{
+	block_end_tokens.push_back(tok);
 }
 
 UInt bin_to_int(const std::string &binstr)
@@ -33,7 +213,7 @@ UInt bin_to_int(const std::string &binstr)
 void Lexer::clear()
 {
 	tokstr.clear();
-	toktype = TokenType::NONE;
+	toktype = Tokens::NONE;
 }
 
 void Lexer::save(char chr)
@@ -43,22 +223,31 @@ void Lexer::save(char chr)
 
 void Lexer::deduce_reserved()
 {
-	Word reserved = Token::as_reserved(tokstr);
-	if (reserved == Word::NONE)
+	auto it = std::find(reserved_words.begin(), reserved_words.end(), tokstr);
+	if (it == reserved_words.end())
 		return;
 
 	/* Boolean literal */
-	else if (reserved == Word::TRUE || reserved == Word::FALSE)
-		toktype = TokenType::BOOLEAN;
+	else if (*it == ReservedWord::TRUE || *it == ReservedWord::FALSE)
+		toktype = Tokens::BOOLEAN;
 }
 
 void Lexer::deduce_word_op()
 {
-	TokenType opr = Token::as_word_op(tokstr);
-	if (opr == TokenType::NONE)
+	auto hard_op = std::find(hard_word_ops.begin(), hard_word_ops.end(), tokstr);
+	auto soft_op = std::find(soft_word_ops.begin(), soft_word_ops.end(), tokstr);
+
+	// Hard keyword - always lexed as its own type, can't be redefined by user
+	if (hard_op != hard_word_ops.end()) {
+		toktype = *hard_op;
 		return;
-	else if (match_next_punctuator(TokenType::COLON) || Token::is_keyword(opr))
-		toktype = opr;
+	}
+
+	if (soft_op != soft_word_ops.end() && match_next_punctuator(Tokens::COLON)) {
+		toktype = *soft_op;
+		return;
+	}
+
 }
 
 void Lexer::push()
@@ -66,19 +255,19 @@ void Lexer::push()
 	if (tokstr.empty())
 		return;
 
-	if (Token::is_block_begin(toktype))
+	if (is_block_begin(toktype))
 		++open_blocks;
 
-	else if (toktype == TokenType::IDENTIFIER) {
+	else if (toktype == Tokens::IDENTIFIER) {
 		deduce_reserved();
 		deduce_word_op();
 	}
 
-	else if (toktype == TokenType::CHAR) {
+	else if (toktype == Tokens::CHAR) {
 		strip_quotes(tokstr);
 	}
 
-	else if (toktype == TokenType::INTEGER && cur_int_literal != IntLiteral::DEC) {
+	else if (toktype == Tokens::INTEGER && cur_int_literal != IntLiteral::DEC) {
 		UInt val;
 		switch (cur_int_literal) {
 		case IntLiteral::HEX:
@@ -108,12 +297,13 @@ void Lexer::push()
 
 void Lexer::push(char chr)
 {
-	if (chr != TokenType::SEMICOLON && chr != TokenType::NEWLINE) {
-		tokens.push(finalize_token(Token(chr)));
+	if (chr != Tokens::SEMICOLON && chr != Tokens::NEWLINE) {
+		auto ctype = to_tok(chr);
+		tokens.push(finalize_token(Token(ctype)));
 
-		if (Token::is_block_begin(Token::tok(chr)))
+		if (is_block_begin(ctype))
 			++open_blocks;
-		else if (Token::is_block_end(chr))
+		else if (is_block_end(ctype))
 			--open_blocks;
 
 		if constexpr (DEBUG)
@@ -132,7 +322,7 @@ Token& Lexer::finalize_token(Token &&tok)
 	cur_sep = Separator::NONE;
 	/* If this token is a token literal (e.g. `token`) */
 	if (token_literal) {
-		tok.set_type(TokenType::TOKEN);
+		tok.set_type(Tokens::TOKEN);
 		next_char(); // Skip the second '`'
 		token_literal = false;
 	}
@@ -154,26 +344,26 @@ bool Lexer::try_save_multichar_op(char chr, char next)
 	op[1] = next;
 
 	/* If characters after `next` are also punctuators, append them to this multi-char opr */
-	for (auto it = std::next(cur_chr, 2); it != input_end && Token::is_punctuator(*it); ++it)
+	for (auto it = std::next(cur_chr, 2); it != input_end && is_punctuator(*it); ++it)
 		op += *it;
 
 	/* Test from longest to shortest possible punctuator combination */
-	TokenType multichar_type = TokenType::NONE;
+	TokenType multichar_type = Tokens::NONE;
 	while(op.length() >= 2) {
-		if ((multichar_type = Token::get_multichar_op_type(op)) != TokenType::NONE)
+		if ((multichar_type = get_multichar_op_type(op)) != Tokens::NONE)
 			break;
 		op.erase(op.length() - 1);
 	}
 
-	if (multichar_type == TokenType::NONE)
+	if (multichar_type == Tokens::NONE)
 		return false;
 
 	/* Skip everything inside a block comment */
-	if (multichar_type == TokenType::BLOCK_COMMENT_L) {
+	if (multichar_type == Tokens::BLOCK_COMMENT_L) {
 		do {
 			next_char();
-		} while (*cur_chr != Token::chr(TokenType::ASTERISK) ||
-				*std::next(cur_chr) != Token::chr(TokenType::SLASH));
+		} while (*cur_chr != Tokens::ASTERISK.chr() ||
+				*std::next(cur_chr) != Tokens::SLASH.chr());
 		next_char();
 		clear();
 		return true;
@@ -191,28 +381,28 @@ void Lexer::begin(char chr)
 {
 	cur_int_literal = IntLiteral::NONE;
 	/* Formatted String literal: $"..." */
-	if (chr == TokenType::LIST && match_next(TokenType::QUOTE)) {
-		toktype = TokenType::FORMAT_STRING;
+	if (chr == Tokens::LIST && match_next(Tokens::QUOTE)) {
+		toktype = Tokens::FORMAT_STRING;
 		next_char();
 		begin(*cur_chr);
 	}
 
 	/* String / Char literal */
-	else if (chr == TokenType::QUOTE || chr == TokenType::SINGLE_QUOTE) {
-		if (toktype != TokenType::FORMAT_STRING)
-			toktype = (chr == TokenType::QUOTE) ? TokenType::STRING : TokenType::CHAR;
+	else if (chr == Tokens::QUOTE || chr == Tokens::SINGLE_QUOTE) {
+		if (toktype != Tokens::FORMAT_STRING)
+			toktype = (chr == Tokens::QUOTE) ? Tokens::STRING : Tokens::CHAR;
 		save(chr);
 	}
 
 	/* Token literal */
-	else if (chr == TokenType::QUOTE_ALT) {
+	else if (chr == Tokens::QUOTE_ALT) {
 		token_literal = true;
 	}
 
 	/* Punctuator / Compound punctuator token */
-	else if (!std::isalnum(chr) && Token::is_punctuator(chr)) {
+	else if (!std::isalnum(chr) && is_punctuator(chr)) {
 		char next = look_ahead();
-		if (Token::is_punctuator(next))
+		if (is_punctuator(next))
 			if (try_save_multichar_op(chr, next))
 				return;
 
@@ -222,12 +412,12 @@ void Lexer::begin(char chr)
 	}
 
 	else if (std::isdigit(chr)) {
-		toktype = TokenType::INTEGER;
+		toktype = Tokens::INTEGER;
 		save(chr);
 	}
 
-	else if (std::isalpha(chr) || chr == TokenType::UNDERSCORE) {
-		toktype = TokenType::IDENTIFIER;
+	else if (std::isalpha(chr) || chr == Tokens::UNDERSCORE) {
+		toktype = Tokens::IDENTIFIER;
 		save(chr);
 	}
 }
@@ -240,13 +430,13 @@ void Lexer::consume()
 	/* Ignore underscores when saving Number literals
 	 * (this allows to separate digits like so: `123_456_789.912_345`)
 	 */
-	if (chr == Token::chr(TokenType::UNDERSCORE)) {
+	if (chr == Tokens::UNDERSCORE.chr()) {
 		if (saving_number())
 			return;
 	}
 
 	/* Deduce floating point literal */
-	if (toktype == TokenType::INTEGER && chr == TokenType::DOT) {
+	if (toktype == Tokens::INTEGER && chr == Tokens::DOT) {
 		if (!std::isdigit(*std::next(cur_chr))) {
 			push();
 			begin(chr);
@@ -254,12 +444,12 @@ void Lexer::consume()
 		}
 
 		save(chr);
-		toktype = TokenType::DOUBLE;
+		toktype = Tokens::DOUBLE;
 		return;
 	}
 
 	/* Deduce integral literal type */
-	else if (toktype == TokenType::INTEGER && cur_int_literal == IntLiteral::NONE) {
+	else if (toktype == Tokens::INTEGER && cur_int_literal == IntLiteral::NONE) {
 		/* A regular Decimal literal */
 		if (!std::isalpha(chr) || *std::prev(cur_chr) != '0') {
 			cur_int_literal = IntLiteral::DEC;
@@ -287,7 +477,7 @@ void Lexer::consume()
 		}
 	}
 
-	else if (saving_number() && Token::is_separator(chr)) {
+	else if (saving_number() && is_separator(chr)) {
 		push();
 		begin(chr);
 		return;
@@ -296,17 +486,17 @@ void Lexer::consume()
 	/* Save String / Character literal char */
 	else if (saving_string()) {
 		/* Save `\` literally when reading a CHAR & ignore unescaped `\` when reading a STRING */
-		if (chr != TokenType::BACKSLASH || escaped(TokenType::BACKSLASH)) {
-			if (match_prev(TokenType::BACKSLASH) && *std::prev(cur_chr, 2) != TokenType::BACKSLASH
+		if (chr != Tokens::BACKSLASH || escaped(Tokens::BACKSLASH)) {
+			if (match_prev(Tokens::BACKSLASH) && *std::prev(cur_chr, 2) != Tokens::BACKSLASH
 					&& std::isalpha(chr))
-				save(Token::escape_seq(chr));
+				save(escape_seq(chr));
 			else
 				save(chr);
 		}
 
-		if (((toktype == TokenType::STRING || toktype == TokenType::FORMAT_STRING)
-				&& unescaped(TokenType::QUOTE))
-				|| (toktype == TokenType::CHAR && unescaped(TokenType::SINGLE_QUOTE)))
+		if (((toktype == Tokens::STRING || toktype == Tokens::FORMAT_STRING)
+				&& unescaped(Tokens::QUOTE))
+				|| (toktype == Tokens::CHAR && unescaped(Tokens::SINGLE_QUOTE)))
 			push();
 
 		return;
@@ -319,7 +509,7 @@ void Lexer::consume()
 	}
 
 	/* Finalize current token if a punctuator is met */
-	else if (Token::is_punctuator(chr)) {
+	else if (is_punctuator(chr)) {
 		push();
 		deduce_separator(*std::prev(cur_chr));
 		begin(chr);
@@ -327,13 +517,13 @@ void Lexer::consume()
 	}
 
 	/* Save non-punctuator characters including `_` */
-	if (std::isalnum(chr) || chr == TokenType::UNDERSCORE)
+	if (std::isalnum(chr) || chr == Tokens::UNDERSCORE)
 		save(chr);
 }
 
 void Lexer::deduce_separator(char chr)
 {
-	if (chr == NL || chr == Token::chr(TokenType::SEMICOLON))
+	if (chr == NL || chr == Tokens::SEMICOLON.chr())
 		cur_sep = Separator::NEWLINE;
 	else if (cur_sep != Separator::NEWLINE && std::isspace(chr))
 		cur_sep = Separator::SPACE;
@@ -347,7 +537,7 @@ void Lexer::deduce_separator()
 /* Consume chrs one-by-one, accumulating them in a buffer & deducing the token type */
 void Lexer::consume_and_deduce()
 {
-	if (toktype == TokenType::NONE)
+	if (toktype == Tokens::NONE)
 		begin(*cur_chr);
 	else
 		consume();
@@ -384,7 +574,7 @@ bool Lexer::has_next()
 
 inline bool Lexer::match_cur(TokenType tok)
 {
-	return *cur_chr == Token::chr(tok);
+	return *cur_chr == tok.chr();
 }
 
 inline bool Lexer::match_prev(TokenType tok)
@@ -402,7 +592,7 @@ bool Lexer::match_next_punctuator(TokenType tok)
 	for (auto it = cur_chr; it != input_end; ++it) {
 		if (*it == tok)
 			return true;
-		if (Token::is_punctuator(*it))
+		if (is_punctuator(*it))
 			return false;
 	}
 	return false;
@@ -410,12 +600,12 @@ bool Lexer::match_next_punctuator(TokenType tok)
 
 inline bool Lexer::unescaped(TokenType tok)
 {
-	return match_cur(tok) && !match_prev(TokenType::BACKSLASH);
+	return match_cur(tok) && !match_prev(Tokens::BACKSLASH);
 }
 
 inline bool Lexer::escaped(TokenType tok)
 {
-	return match_cur(tok) && match_prev(TokenType::BACKSLASH);
+	return match_cur(tok) && match_prev(Tokens::BACKSLASH);
 }
 
 void Lexer::lex(std::string &code, bool preserve_state)
@@ -482,6 +672,82 @@ bool Lexer::empty()
 size_t Lexer::size()
 {
 	return tokens.size();
+}
+
+TokenType Lexer::get_multichar_op_type(std::string_view op)
+{
+	auto it = std::find(multichar_ops.begin(), multichar_ops.end(), op);
+	if (it != multichar_ops.end())
+		return *it;
+	return Tokens::NONE;
+}
+
+bool Lexer::is_hard_keyword(std::string_view typestr)
+{
+	return std::find(hard_word_ops.begin(), hard_word_ops.end(), typestr) != hard_word_ops.end();
+}
+
+bool Lexer::is_soft_keyword(std::string_view typestr)
+{
+	return std::find(soft_word_ops.begin(), soft_word_ops.end(), typestr) != soft_word_ops.end();
+}
+
+bool Lexer::is_keyword(std::string_view typestr)
+{
+	return is_hard_keyword(typestr) || is_soft_keyword(typestr);
+}
+
+bool Lexer::is_block_begin(TokenType tok)
+{
+	return std::find(block_begin_tokens.begin(), block_begin_tokens.end(), tok) != block_begin_tokens.end();
+}
+
+bool Lexer::is_block_end(TokenType tok)
+{
+	return std::find(block_end_tokens.begin(), block_end_tokens.end(), tok) != block_end_tokens.end();
+}
+
+bool Lexer::is_blank(char chr)
+{
+	return std::isspace(chr) || chr == NL;
+}
+
+bool Lexer::is_punctuator(char chr)
+{
+	return contains(punctuators, chr);
+}
+
+bool Lexer::is_separator(char chr)
+{
+	return is_blank(chr) || is_punctuator(chr);
+}
+
+char Lexer::escape_seq(char seq)
+{
+	return escape_seqs.at(seq);
+}
+
+char Lexer::to_chr(TokenType tok)
+{
+	return tok.name[0];
+}
+
+TokenType Lexer::to_tok(char chr)
+{
+	auto it = std::find(punctuators.begin(), punctuators.end(), chr);
+	if (it != punctuators.end())
+		return *it;
+	return Tokens::NONE;
+}
+
+bool Lexer::is_semantic(const TokenType &tok)
+{
+	return contains(semantic_tokens, tok);
+}
+
+bool Lexer::is_transparent(const TokenType &tok)
+{
+	return contains(transparent_tokens, tok);
 }
 
 } /* namespace mtl */

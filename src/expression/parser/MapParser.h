@@ -19,7 +19,7 @@ class MapParser : public PrefixParser
 
 		static void parse(Parser &parser,
 				ExprPairCollector collector,
-				TokenType ends_with = TokenType::PAREN_R);
+				TokenType ends_with = Tokens::PAREN_R);
 
 		static std::string key_string(Expression &expr);
 

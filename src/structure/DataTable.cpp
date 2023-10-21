@@ -13,7 +13,7 @@
 namespace mtl
 {
 
-const std::string DataTable::NIL_IDF(Token::reserved(Word::NIL));
+const std::string DataTable::NIL_IDF(ReservedWord::NIL.name);
 
 ValList DataTable::temp_queue{};
 

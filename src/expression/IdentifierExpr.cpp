@@ -48,10 +48,10 @@ void IdentifierExpr::execute(mtl::Interpreter &context)
 
 Value IdentifierExpr::eval_reserved(const std::string &name)
 {
-	if (name == Token::reserved(Word::NEW_LINE))
+	if (name == ReservedWord::NEW_LINE)
 		return NEW_LINE;
 
-	if (name == Token::reserved(Word::NIL) || name == Token::reserved(Word::VOID))
+	if (name == ReservedWord::NIL || name == ReservedWord::VOID)
 		return Value::NIL;
 
 	return Value::NO_VALUE;
