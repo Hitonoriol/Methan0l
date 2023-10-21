@@ -57,9 +57,9 @@ fname = File@filename(args[1])
 
 baked_program = new: File("#:/" :: fname)
 baked_program.mkdirs()
-baked_program.absolute_path() -> baked_program
+baked_program <- baked_program.absolute_path()
 
-build_script.format(fname, get_rundir(), baked_program, lib_name) -> build_script
+build_script <- build_script.format(fname, get_rundir(), baked_program, lib_name)
 File@write_contents(baked_program :: "/" :: fname :: "-baked.cpp", out.format(src))
 File@write_contents(baked_program :: "/" :: "/bake-" :: fname, build_script)
 
@@ -71,7 +71,7 @@ result = exec(build_script)
 
 if (result[1] != 0) ? {
 	<% "Return code: " :: result[1]
-	<% "Compilation failed. Check if .so library and methan0l-sdk directory are in the same location as the interpreter binary."
+	<% "Compilation failed. Check if .so library and header include directory are in the same location as the interpreter binary."
 } else: {
 	<% "Compilation finished successfully."
 	<% "Copying runtime dependencies..."
