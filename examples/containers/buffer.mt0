@@ -1,0 +1,15 @@
+<% "Byte Buffer" :: newl
+
+buf = new: Buffer()
+
+/* Add single bytes */
+buf.add(0xA)
+buf.add(0xB)
+buf.add(0xC)
+<% buf
+
+/* Add Integer / Float bit patterns */
+buf.add_integer(1337, 2) /* Copy only 2 bytes from the Integer representation of 1337 */
+buf.add_integer(0xDEADBEEFCAFEF00D) /* Copy all bytes from the Integer */
+buf.add_float(123.456)
+<% buf
