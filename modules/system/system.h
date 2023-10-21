@@ -1,3 +1,3 @@
 #include <methan0l.h>
 
-mtl::ValList exec(const std::string &cmd);
+mtl::Value exec(mtl::Context context, const std::string &cmd);

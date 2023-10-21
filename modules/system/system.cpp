@@ -5,9 +5,9 @@
 INIT_MODULE
 
 FUNCTION(exec)
-mtl::ValList exec(const std::string &cmd)
+mtl::Value exec(mtl::Context context, const std::string &cmd)
 {
-	mtl::Value out(mtl::Type::STRING);
-	mtl::Value ret = mtl::exec(cmd, out.get<std::string>());
-	return mtl::ValList{out, ret};
+	auto out = context->make<String>();
+	mtl::Value ret = mtl::exec(cmd, out.get<String>());
+	return context->make<Pair>(out, ret);
 }
