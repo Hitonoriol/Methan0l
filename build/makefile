@@ -4,7 +4,6 @@
 -include ../makeutils.inc
 
 RM=rm -rf
-BITS=64
 
 ifeq ($(OS),Windows_NT) 
     OS_NAME:=Windows
@@ -12,39 +11,59 @@ else
     OS_NAME:=$(shell sh -c 'uname -s 2>/dev/null || echo Unknown')
 endif
 
-INCLUDE_DIR=include
-STDLIB_DIR=libraries
-MODULE_DIR=modules
+# Configurable parameters
+BITS=64
+CONFIGURATION=release
 
-SRCS = $(call rwildcard,../src,*.cpp)
-DEPS = $(patsubst ../src/%.cpp,./obj/%.d,$(SRCS))
+# Build output directories
+OUT_DIR = $(CONFIGURATION)/
+OBJ_DIR = $(OUT_DIR)obj/
+INCLUDE_DIR=$(OUT_DIR)include
+STDLIB_DIR=$(OUT_DIR)libraries
+MODULE_DIR=$(OUT_DIR)modules
 
-STDLIB_PATH = stdlib
-STDLIB_SCRIPTS = $(patsubst ../src/$(STDLIB_PATH)/%,$(STDLIB_DIR)/%,$(call rwildcard,../src/$(STDLIB_PATH),*.mt0))
-STDLIB_SRCS = $(call rwildcard,../src/$(STDLIB_PATH),*.cpp)
-STDLIB_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o.pic,$(STDLIB_SRCS)))
-STDLIB_BINS = $(patsubst ../src/$(STDLIB_PATH)/%.cpp,./$(STDLIB_DIR)/%.so,$(wildcard ../src/$(STDLIB_PATH)/*.cpp))
+# Global inputs
+SRC_DIR = ../src/
+SRCS = $(call rwildcard,$(SRC_DIR),*.cpp)
+DEPS = $(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.d,$(SRCS))
+EXAMPLES_DIR = ../examples/
+
+# Stdlib inputs / outputs
+STDLIB_PATH = stdlib/
+STDLIB_SCRIPTS = $(patsubst $(SRC_DIR)$(STDLIB_PATH)%,$(STDLIB_DIR)/%,$(call rwildcard,$(SRC_DIR)$(STDLIB_PATH),*.mt0))
+STDLIB_SRCS = $(call rwildcard,$(SRC_DIR)$(STDLIB_PATH),*.cpp)
+STDLIB_OBJS = $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(patsubst %.cpp,%.o.pic,$(STDLIB_SRCS)))
+STDLIB_BINS = $(patsubst $(SRC_DIR)$(STDLIB_PATH)%.cpp,$(STDLIB_DIR)/%.so,$(wildcard $(SRC_DIR)$(STDLIB_PATH)*.cpp))
 SRCS:=$(filter-out $(STDLIB_SRCS),$(SRCS))
 
-CLI_SRCS = $(call rwildcard,../src/cli,*.cpp)
-CLI_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o,$(CLI_SRCS)))
-LIB_OBJS = $(patsubst ../src/%,./obj/%,$(patsubst %.cpp,%.o.pic,$(filter-out $(CLI_SRCS),$(SRCS))))
+# CLI inputs / outputs
+CLI_SRCS = $(call rwildcard,$(SRC_DIR)cli,*.cpp)
+CLI_OBJS = $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(patsubst %.cpp,%.o,$(CLI_SRCS)))
+LIB_OBJS = $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(patsubst %.cpp,%.o.pic,$(filter-out $(CLI_SRCS),$(SRCS))))
 RPATH = -Wl,-rpath,'$$ORIGIN'
-LIB_HEADERS = $(patsubst ../src/%,./$(INCLUDE_DIR)/%,$(call rwildcard,../src,*.h))
-LIB_INC = -I../src
+LIB_HEADERS = $(patsubst $(SRC_DIR)%,$(INCLUDE_DIR)/%,$(call rwildcard,$(SRC_DIR),*.h))
+LIB_INC = -I$(SRC_DIR)
 
-CLI_BIN_NAME = $(addsuffix $(if $(filter $(OS_NAME),Windows),.exe,),methan0l)
-LIB_NAME = libmethan0l.so
+# Binary outputs
+CLI_BIN_NAME = $(OUT_DIR)$(addsuffix $(if $(filter $(OS_NAME),Windows),.exe,),methan0l)
+LIB_NAME = $(OUT_DIR)libmethan0l.so
 
+# Static / dynamic library dependencies
 LINK_STATIC := -lboost_filesystem-mt -lboost_system-mt
 LINK_DYNAMIC :=
 
-FLAGS:=-std=c++2a -Wall -Wextra -Wno-unused-parameter -Wno-overloaded-virtual -O3
+# GCC compilation flags
+FLAGS:=-std=c++2a -Wall -Wextra -Wno-unused-parameter -Wno-overloaded-virtual
+ifeq ($(CONFIGURATION),debug)
+	FLAGS += -Og -g
+else
+	FLAGS += -O3
+endif
 
-INSTALL_DIR=/opt/methan0l
-
+# Macros to pass to compiler
 MACROS = -DBITS=$(BITS)
 
+# Pass NO_STATIC variable to make to link everything dynamically
 ifdef NO_STATIC
 	LINK_DYNAMIC+= $(LINK_STATIC)
 	LINK_STATIC=
@@ -60,6 +79,8 @@ endif
 
 all: $(CLI_BIN_NAME)
 
+# Installation target (Linux only)
+INSTALL_DIR=/opt/methan0l
 install: all lib-headers
 	@if [ "$(OS_NAME)" = "Linux" ]; then \
 	    echo "Installing $(CLI_BIN_NAME)..." && \
@@ -69,7 +90,7 @@ install: all lib-headers
 	    cp -rf $(MODULE_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(STDLIB_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(INCLUDE_DIR) $(INSTALL_DIR) && \
-	    cp -rf ../examples $(INSTALL_DIR) && \
+	    cp -rf $(EXAMPLES_DIR) $(INSTALL_DIR) && \
 	    ln -sf $(INSTALL_DIR)/$(CLI_BIN_NAME) /usr/local/bin/$(CLI_BIN_NAME) && \
 	    ln -sf $(INSTALL_DIR)/$(LIB_NAME) /usr/local/lib/$(LIB_NAME) && \
 	    ln -sf $(INSTALL_DIR)/$(INCLUDE_DIR) /usr/local/include/methan0l && \
@@ -82,25 +103,26 @@ install: all lib-headers
 # Full release tarball: cli binary, interpreter library, headers and modules
 release: all lib-headers modules
 	@echo 'Creating release tarball...'
-	tar -czf methan0l-$(OS_NAME)$(BITS).tar.gz $(CLI_BIN_NAME) $(INCLUDE_DIR) $(LIB_NAME) modules $(STDLIB_DIR) ../baker
+	tar -czf methan0l-$(OS_NAME)$(BITS).tar.gz $(CLI_BIN_NAME) $(INCLUDE_DIR) $(LIB_NAME) $(MODULE_DIR) $(STDLIB_DIR) ../baker $(EXAMPLES_DIR)
 	@echo 'Done!'
 
+# (Attempt to) Build all modules
 modules: lib lib-headers
 	@echo 'Building modules...'
 	cd ../modules && make
 	@echo 'Finished building modules'
 	@echo ' '
 
-# Interpreter shared library targets
-lib: libmethan0l.so
+# ---------- Interpreter shared library targets ----------
+lib: $(LIB_NAME)
 
-libmethan0l.so: $(LIB_OBJS)
+$(LIB_NAME): $(LIB_OBJS)
 	@echo 'Building interpreter library: $@...'
 	g++ $(FLAGS) $(LIB_OBJS) -shared -o $(LIB_NAME) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) $(RPATH)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-obj/%.o.pic: ../src/%.cpp
+$(OBJ_DIR)%.o.pic: $(SRC_DIR)%.cpp
 	@echo 'Building target: $@ (file: $<)'
 	@mkdir -p $(dir $@)
 	g++ $(FLAGS) $(MACROS) $(LIB_INC) -c -m$(BITS) -fPIC -MMD -MP -MF"$(@:%.o.pic=%.d)" -MT"$@" -o "$@" "$<"
@@ -111,7 +133,7 @@ lib-headers: $(INCLUDE_DIR) $(LIB_HEADERS)
 	@echo 'Finished copying headers'
 	@echo ' '
 
-$(INCLUDE_DIR)/%.h: ../src/%.h
+$(INCLUDE_DIR)/%.h: $(SRC_DIR)%.h
 	@mkdir -p $(dir $@)
 	cp -rf $< $@
 
@@ -121,9 +143,10 @@ $(INCLUDE_DIR):
 
 lib-clean:
 	-$(RM) $(INCLUDE_DIR) $(LIB_OBJS) $(STDLIB_OBJS)
+# --------------------------------------------------------
 
-# Methan0l core library targets
-read_stdlib_deps=$(patsubst %,obj/$(STDLIB_PATH)/%.o.pic,$(file < ../src/$(STDLIB_PATH)/$(1).deps))
+# ------------ Methan0l core library targets -------------
+read_stdlib_deps=$(patsubst %,$(OBJ_DIR)$(STDLIB_PATH)%.o.pic,$(file < $(SRC_DIR)$(STDLIB_PATH)$(1).deps))
 
 $(STDLIB_DIR):
 	mkdir -p $(STDLIB_DIR)
@@ -132,20 +155,21 @@ stdlib: $(STDLIB_DIR) lib lib-headers $(STDLIB_BINS) $(STDLIB_SCRIPTS)
 	@echo 'Finished building methan0l core libraries'
 	@echo ' '
 
-$(STDLIB_DIR)/%.so: obj/$$(STDLIB_PATH)/%.o.pic lib $$(call read_stdlib_deps,%)
+$(STDLIB_DIR)/%.so: $(OBJ_DIR)$$(STDLIB_PATH)%.o.pic lib $$(call read_stdlib_deps,%)
 	@echo 'Building library: $@'
 	$(eval lib_obj:=$(word 1,$^))
-	$(eval lib_dep:=$(file < $(patsubst obj/%.o.pic,../src/%.deps,$(lib_obj))))
-	$(eval lib_dep:=$(patsubst %,./obj/$(STDLIB_PATH)/%.o.pic,$(lib_dep)))
+	$(eval lib_dep:=$(file < $(patsubst $(OBJ_DIR)%.o.pic,$(SRC_DIR)%.deps,$(lib_obj))))
+	$(eval lib_dep:=$(patsubst %,$(OBJ_DIR)$(STDLIB_PATH)%.o.pic,$(lib_dep)))
 	g++ $(lib_obj) $(lib_dep) -shared -L./ -l:$(LIB_NAME) -o $@ $(RPATH)
 	@echo 'Finished building core library: $@'
 	@echo ' '
 
-$(STDLIB_DIR)/%.mt0: ../src/$(STDLIB_PATH)/%.mt0
+$(STDLIB_DIR)/%.mt0: $(SRC_DIR)$(STDLIB_PATH)%.mt0
 	@mkdir -p $(dir $@)
 	cp -rf $< $@
+# --------------------------------------------------------
 
-# cli targets
+# ---------------------- CLI targets ---------------------
 cli: $(CLI_BIN_NAME)
 
 $(CLI_BIN_NAME): lib stdlib $(CLI_OBJS)
@@ -154,13 +178,14 @@ $(CLI_BIN_NAME): lib stdlib $(CLI_OBJS)
 	@echo 'Finished building interpreter cli: $@'
 	@echo ' '
 
-obj/%.o: ../src/%.cpp
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
 	@echo 'Building target: $@, file: $<'
 	@mkdir -p $(dir $@)
 	g++ $(FLAGS) $(MACROS) $(LIB_INC) -c -Wall -fmessage-length=0 -m$(BITS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $@'
 	@echo ' '
+# --------------------------------------------------------
 
 clean: lib-clean
-	-$(RM) $(CLI_BIN_NAME) $(LIB_NAME) $(DEPS) $(CLI_OBJS) $(STDLIB_DIR)/* obj/*
+	-$(RM) $(CLI_BIN_NAME) $(LIB_NAME) $(DEPS) $(CLI_OBJS) $(STDLIB_DIR)/* $(OBJ_DIR)/*
 	-@echo ' '
