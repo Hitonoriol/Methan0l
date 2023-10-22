@@ -8,7 +8,7 @@ title("Basic function definition syntax & return operators")
 /* Postfix return operator:
  * 	expr! */
 sum = func: a, b, c => 123 { /* `c` has a default value */
-	if (c != 123) ?
+	if: (c != 123)
 		<% "A non-default third arg has been provided!"!
 
 	a + b!

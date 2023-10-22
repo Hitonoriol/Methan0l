@@ -11,7 +11,7 @@
 		/* Block expressions (conditional operators, loops, try-catch) & lambdas
 		 * can access function-local variables without the need of using (1) or (2): */
 		x = 123
-		if (true) ?
+		if: (true)
 			<% $"x = {}" x
 		lambda = f: () -> <% $"I can see x: {}" x
 		lambda()

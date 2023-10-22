@@ -6,7 +6,7 @@ my_box = defbox {
 		n.pow(0.5)!
 
 	factorial = func: n {
-		if (n >= 1) ?
+		if: (n >= 1)
 			n * selfinvoke(n - 1)!
 		else:
 			1!
@@ -16,9 +16,9 @@ my_box = defbox {
 	reverse = func: iterable {
 		@(rev, type => typeid: iterable)
 		
-		if (type == (List)) ?
+		if: (type == (List))
 			rev = $()
-		else: if (type == (String)) ?
+		else: if: (type == (String))
 			rev = ""
 		else:
 			die("Unsupported type")

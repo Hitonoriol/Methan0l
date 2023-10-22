@@ -1,7 +1,7 @@
 <% "Explicit local variables"
 {
 	x = 123
-	if (x == 123) ? {
+	if: (x == 123) {
 		<% $"Outer `x`: {}" x
 		var: x = "foo"
 		<% $"Explicitly local `x`: {}" x

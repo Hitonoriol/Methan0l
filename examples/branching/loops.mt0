@@ -3,7 +3,7 @@
 <% "For Loop"
 for (i = 1, i < 100, ++i) {
 	%% i :: " "
-	if (i % 10 == 0) ?
+	if: (i % 10 == 0)
 		%% newl
 }
 <% newl
@@ -13,9 +13,9 @@ some_list = ["first element", 999, -0.123456, false, -1, false, true, "another e
 <% "List: " :: some_list
 for (elem, some_list) {
 	%% "* " :: elem :: " "
-	if (elem is: String) ?
+	if: (elem is: String)
 		<% "(Length: " :: size(elem) :: ")"
-	else: if ((elem is: Int) || (elem is: Float)) ?
+	else: if: ((elem is: Int) || (elem is: Float))
 		<% "is positive: " :: (elem > 0)
 	else:
 		<% "is a " :: typename: elem

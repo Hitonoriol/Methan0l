@@ -7,7 +7,7 @@ foo = (b > a ? "b" : "a")
 
 /* Can also be used as if-else operator using execution syntax combined
  * with Unit definitions inside then and else arms */
-if (a == nil) ? {
+if: (a == nil) {
 	<% "Then branch"
 } else: {
 	<% "Else branch"
@@ -15,7 +15,7 @@ if (a == nil) ? {
 
 /* If a branch contains only one expression, braces can be omitted: */
 x = -100
-if (x > 0) ?
+if: (x > 0)
 	<% "Won't be executed"
-else: if ((b % 3) >= 1) ?
+else: if: ((b % 3) >= 1)
 	<% "Else-if branch (b mod 3 is >= 1)"

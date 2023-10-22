@@ -11,7 +11,7 @@ f = func: () {
 	x = 100
 	while (x > 0) {
 		%% --x
-		if (x < 91) ? {
+		if: (x < 91) {
 			%% newl
 			return: break
 		} else: {
@@ -21,7 +21,7 @@ f = func: () {
 	
 	/* Return from for loop */
 	for (i = 0, i < 100, ++i) {
-		if (i == 10) ? {
+		if: (i == 10) {
 			return: 123
 		}
 		<% $"I drank {} bottles o' moonshine" i

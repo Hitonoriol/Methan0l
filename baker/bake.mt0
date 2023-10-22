@@ -8,18 +8,18 @@
 using_module: "$:/../modules/system"
 
 args = get_launch_args()
-if (args.size() < 2) ? {
+if: (args.size() < 2) {
 	<% "Usage: bake.mt0 <path/to/src>"
 	<% "(script extension must be omitted)"
 	exit()
 }
 
-if (!File@exists(args[1] :: ".mt0")) ? {
+if: (!File@exists(args[1] :: ".mt0")) {
 	<% "Failed to open \"" :: args[1] :: ".mt0\""
 	exit()
 }
 
-if (exec("g++ --version")[1] != 0) ? {
+if: (exec("g++ --version")[1] != 0) {
 	<% "g++ is required to run this script."
 	exit()
 }
@@ -44,7 +44,7 @@ out =
 		methan0l.load(program);
 		methan0l.load_args(argc, argv, 0);
 		auto ret = methan0l.run();
-		if (!ret.empty() && !ret.nil())
+		if: (!ret.empty() && !ret.nil())
 			return ret.as<mtl::dec>();
 		return 0;
 	}
@@ -69,7 +69,7 @@ File@write_contents(baked_program :: "/" :: "/bake-" :: fname, build_script)
 result = exec(build_script)
 <% "Compilation log:" result[0]
 
-if (result[1] != 0) ? {
+if: (result[1] != 0) {
 	<% "Return code: " :: result[1]
 	<% "Compilation failed. Check if .so library and header include directory are in the same location as the interpreter binary."
 } else: {

@@ -32,7 +32,7 @@ benchmark = func: bench_name, action, times => 10 {
 	<% '\t' :: "Mean of " :: times :: " measurements: " :: time :: "ms"
 
 	delete: bench_name; delete: action; delete: times; delete: time
-	if ((leaked = mem_in_use() - mem) > 0) ? {
+	if: ((leaked = mem_in_use() - mem) > 0) {
 		<% '\t' :: "[!] Leaked " :: leaked :: "b of memory"
 	}
 }
@@ -47,7 +47,7 @@ class: Test {
 obj = new: Test()
 
 rec = func: n {
-	if (n < 1) ? break!
+	if: (n < 1) break!
 	rec(n - 1)
 }
 

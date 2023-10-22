@@ -19,6 +19,6 @@ rule110 = func: size => 50 {
 	}
 }
 
-if (is_main_unit()) ? {
+if: (is_main_unit()) {
 	rule110()
 }

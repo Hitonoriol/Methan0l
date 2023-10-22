@@ -57,7 +57,7 @@ list[~]
 "Populating a list using recursion..."
 /* This can be done in a more sane way, but I wanted to demonstrate how recursive unit calls work in Methan0l */
 list_populator = {
-	if (++i > max) ? {new_list!}
+	if: (++i > max) {new_list!}
 	new_list[] = 1.0 / i
 	return: list_populator({i = #i; max = #max; new_list = #new_list})
 	/* # means global scope lookup, this ^^^ effectively copies the variables

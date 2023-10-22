@@ -1,17 +1,19 @@
 <% "Running all examples" :: newl
 
 start = now()
-this = File@filename(get_launch_args()[0])
-root = new: File("examples")
+args = get_launch_args()
 
-if (!root.exists() || !root.is_dir()) ?
-	die("Failed to open examples directory")
+this = File@filename(args[0])
+root = new: File((new: File(args[0])).parent())
+
+if: (!root.exists() || !root.is_dir())
+	die($"Failed to open directory {}", root)
 
 title = func: char, str => "", width => 50 {
 	pad = char.repeat((width - str.size()) / 2 - 2)
 	space = str.is_empty() ? "" : " "
 	title = pad :: space :: str :: space :: pad
-	if ((n = width - title.size()) > 0)
+	if: ((n = width - title.size()) > 0)
 		title[] = char.repeat(n)
 
 	return: title
@@ -19,13 +21,18 @@ title = func: char, str => "", width => 50 {
 
 tmp = new: File("")
 count = 0
-root.for_each(func: file, %tmp, %count {
+root.for_each(f: file {
 	tmp.set(file)
-	if (tmp.extension() != ".mt0" || tmp.filename() == #this) ?
-		void!
+	if: (tmp.extension() != ".mt0" || tmp.filename() == #this)
+		nil!
 
 	<% newl :: title("v", file)
-	time = measure_time(load(file))
+	try { 
+		time = measure_time(load(file))
+	}
+	catch: ex {
+		<% $"{} threw an exception: ", ex
+	}
 	<% title("^", "Finished in {} secs".format(time / 1000.0)) :: newl
 	++count
 })

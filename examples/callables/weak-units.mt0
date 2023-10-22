@@ -12,7 +12,7 @@ unit = {
 	
 	b = strong()
 	
-	if (a < b) ? {		/* Weak Unit --> will be executed during the conditional evaluation and will cause the parent to return its return value */
+	if: (a < b) {		/* Weak Unit --> will be executed during the conditional evaluation and will cause the parent to return its return value */
 		a + b!
 	}
 

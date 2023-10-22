@@ -16,7 +16,7 @@ field = "Some text"
 /* Recursive loop shortcut, pass <action> and <times> in init block */
 repeat = {
 	action
-	if (--times <= 0) ? -> {nil!}
+	if: (--times <= 0) {nil!}
 	#repeat({action = #action; times = #times})
 }
 
@@ -27,7 +27,7 @@ for_each = {
 	{
 		repeater = {
 			#action({element = #list[#i]})
-			if (++#i >= #end) ? -> {nil!}
+			if: (++#i >= #end) {nil!}
 			#repeater
 		}
 		
@@ -57,7 +57,7 @@ test = -> {
 	<% "Test mean of list: " :: mean([34, 12, 0.5, 2, 45, -1, 7, 11.11])
 }
 
-if (is_main_unit()) ? {
+if: (is_main_unit()) {
 	<% "Module launched as main Unit. Running test()..."
 	test()
 }

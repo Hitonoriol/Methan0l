@@ -2,7 +2,7 @@
 repeat = func: f {
 	range(100).for_each(f: i {
 		%% f() :: " "
-		if ((i + 1) % 10 == 0) ? {%% newl}
+		if: ((i + 1) % 10 == 0) {%% newl}
 	})
 	%% newl
 }

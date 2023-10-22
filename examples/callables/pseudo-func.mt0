@@ -1,7 +1,7 @@
 <% "Pseudo Function Syntax" :: newl
 
 ratio = {
-	if (b == 0) ? {"inf"!}
+	if: (b == 0) {"inf"!}
 	return: (a / b) * 100.0
 }
 
