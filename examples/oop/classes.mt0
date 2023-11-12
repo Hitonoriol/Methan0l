@@ -43,19 +43,19 @@ class: Point {
 	}
 	
 	/* Operator overloads */
-	`+` => @: rhs -> (objcopy: this).add(rhs)
-	`-` => @: rhs -> (objcopy: this).sub(rhs)
-	`*` => @: rhs -> (objcopy: this).mul(rhs)
-	`/` => @: rhs -> (objcopy: this).div(rhs)
-	`+=` => @: rhs -> this.add(rhs)
-	`-=` => @: rhs -> this.sub(rhs)
-	`*=` => @: rhs -> this.mul(rhs)
-	`/=` => @: rhs -> this.div(rhs)
+	`+` => method: rhs -> (objcopy: this).add(rhs)
+	`-` => method: rhs -> (objcopy: this).sub(rhs)
+	`*` => method: rhs -> (objcopy: this).mul(rhs)
+	`/` => method: rhs -> (objcopy: this).div(rhs)
+	`+=` => method: rhs -> this.add(rhs)
+	`-=` => method: rhs -> this.sub(rhs)
+	`*=` => method: rhs -> this.mul(rhs)
+	`/=` => method: rhs -> this.div(rhs)
 
 	/* Called automatically when using String-converting operators */
-	to_string => @: () -> "(" :: this.x :: ", " :: this.y :: ")"
+	to_string => method: () -> "(" :: this.x :: ", " :: this.y :: ")"
 
-	static_method => func: x
+	static_method => fun: x
 		<% $"Static method arg: \"{}\"" x
 }
 
@@ -87,7 +87,7 @@ Point@static_method("Test")
 /* Type checking via class_id() method -- can be called both from an object & statically */
 id = foo.class_id()
 <% "* Is foo an instance of Point: " :: id == Point@class_id()<% "* Is foo an instance of File: " :: id == File@class_id()/* This can also be done using the `is` operator */<% $"foo is: Point -> {}" (foo is: Point)<% $"foo is: Int -> {}" (foo is: Int)<% ""<% "Reflection:"<% "* All methods of `Point`: " :: Point@get_methods()<% "* All fields of `foo`: " :: foo.get_fields()/* Modify object field values by name */foo.get_field("x") = 1337foo.get_field("y") = 7331<% "* foo.get_x() called by name: " :: Point@get_method("get_x")(foo)<% "* foo.y accessed by name: " :: foo.get_field("y")<% ""<% "Inbuilt class `File` test:"workdir = new: File(".")<% "Absolute name of the current working directory: " :: workdir.absolute_path()dirs = total = 0
-workdir.for_each(f: file, %dirs, %total {
+workdir.for_each(f: file {
 	++total
 	if: (File@is_dir(file)) {++dirs}
 })

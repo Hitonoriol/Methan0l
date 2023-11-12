@@ -2,7 +2,7 @@
 {
 	glob = 42
 	
-	foo = func: () {
+	foo = fun: () {
 		++#glob /* (1) One-time global lookup */
 		global: glob /* (2) Global lookup and import by reference, now local `glob` points to the global one. */
 		

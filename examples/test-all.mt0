@@ -9,7 +9,7 @@ root = new: File((new: File(args[0])).parent())
 if: (!root.exists() || !root.is_dir())
 	die($"Failed to open directory {}", root)
 
-title = func: char, str => "", width => 50 {
+title = fun: char, str => "", width => 50 {
 	pad = char.repeat((width - str.size()) / 2 - 2)
 	space = str.is_empty() ? "" : " "
 	title = pad :: space :: str :: space :: pad

@@ -1,6 +1,6 @@
 <% "Try-catch" :: newl
 
-f = func: () {
+f = fun: () {
 	try {
 		<% "Throwing an exception..."
 		/* Any Value can be thrown here, not just Strings */

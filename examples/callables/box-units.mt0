@@ -1,11 +1,11 @@
 /* Legacy form of defining anonymous objects,
  * 	boxes are just persistent Units under the hood (TODO: remove this) */
  
-my_box = defbox {
-	sqrt = func: n
+my_box = box: {
+	sqrt = fun: n
 		n.pow(0.5)!
 
-	factorial = func: n {
+	factorial = fun: n {
 		if: (n >= 1)
 			n * selfinvoke(n - 1)!
 		else:
@@ -13,7 +13,7 @@ my_box = defbox {
 	}
 	
 	/* This was written when the real `Iterable`s didn't exist */
-	reverse = func: iterable {
+	reverse = fun: iterable {
 		@(rev, type => typeid: iterable)
 		
 		if: (type == (List))
@@ -58,7 +58,7 @@ my_box = defbox {
 		x => 123
 		y => "some text"
 
-		some_func => func: x
+		some_func => fun: x
 			return: x * 10
 
 		foo => method: this, n
@@ -76,9 +76,9 @@ my_box = defbox {
 /* This is just a parser test */
 <% "`.` + subscript + invocation operators combination test"
 {
-	module = defbox {
-		list = [(@: x -> x.sqrt()), "abc", "foo bar"]
-		foo = func: ()
+	module = box: {
+		list = [(f: x -> x.sqrt()), "abc", "foo bar"]
+		foo = fun: ()
 			return: [1, 2, 3]
 	}
 

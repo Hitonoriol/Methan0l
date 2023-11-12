@@ -1,5 +1,5 @@
 /* Adapted from gist.github.com/rexim/c595009436f87ca076e7c4a2fb92ce10 */
-rule110 = func: size => 50 {
+rule110 = fun: size => 50 {
 	chars = " *"
 	board = [].fill(0, size)
 

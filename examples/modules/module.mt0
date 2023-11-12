@@ -35,7 +35,7 @@ for_each = {
 	} ({i = 0; end = size(#list)})
 }
 
-mean = func: num_list {
+mean = fun: num_list {
 	sum = 0.0
 	for (n, num_list) {
 		sum += n

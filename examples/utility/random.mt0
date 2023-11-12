@@ -1,5 +1,5 @@
 /* Print the result of f() 100 times */
-repeat = func: f {
+repeat = fun: f {
 	range(100).for_each(f: i {
 		%% f() :: " "
 		if: ((i + 1) % 10 == 0) {%% newl}

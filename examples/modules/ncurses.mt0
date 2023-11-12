@@ -1,6 +1,6 @@
 import: "$:/modules/ncurses"
 
-print_center = func: msg {
+print_center = fun: msg {
 	mx = getmaxx(#screen)
 	my = getmaxy(#screen)
 	mvprintw(my / 2, (mx - msg.size()) / 2 - 1, " " :: msg)

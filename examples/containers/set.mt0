@@ -12,16 +12,16 @@ set_b = range(15)
 <% $"All methods of Set: {}" Set@get_methods()
 
 /* Test if `set` contains element `n`: set[n]  */
-contains = func @(set, n)
+contains = fun: set, n
 	return: "* Contains `" :: n :: "`: " :: set[n]
 
 /* Insert a new element `n` into `set`: set[->n]
  * Returns true if `n` was successfully inserted, false otherwise. */
-insert = func @(set, n)
+insert = fun: set, n
 	return: "* Inserting `" :: n :: "`: " :: set[->n]
 
 /* Remove element `n` from `set`: set[~n] */
-remove = func @(set, n)
+remove = fun: set, n
 	return: "* Removing `" :: n :: "`: " :: set[~n]
 
 <% "Set A: " :: set_a

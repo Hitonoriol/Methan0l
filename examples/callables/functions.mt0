@@ -1,13 +1,13 @@
 <% "Functions" :: newl
 
 delim = "-".repeat(50)
-title = func: text
+title = fun: text
 	<% $"\n{1}\n{2}\n{1}" #delim, text
 
 title("Basic function definition syntax & return operators")
 /* Postfix return operator:
  * 	expr! */
-sum = func: a, b, c => 123 { /* `c` has a default value */
+sum = fun: a, b, c => 123 { /* `c` has a default value */
 	if: (c != 123)
 		<% "A non-default third arg has been provided!"!
 
@@ -16,7 +16,7 @@ sum = func: a, b, c => 123 { /* `c` has a default value */
 
 /* Prefix return operator:
  * 	return: expr */
-f = func: x
+f = fun: x
 	return: x >> 1
 
 <% sum(5, 7) == 12
@@ -27,15 +27,15 @@ f = func: x
 title("Lambdas / alternative function definition forms")
 
 /* Unparenthesized form */
-foo = func: x, y {
+foo = fun: x, y {
 	return: x * y
 }
-/* ^^^ Here in place of `func` the token `method` can be used when defining a class method. */
+/* ^^^ Here in place of `fun` the token `method` can be used when defining a class method. */
 <% foo(9, 10) == 90
  
  /* To define a no-arg function using unparenthesized form,
   * 	a `()` must be used in place of argument list: */
-noarg = func: () {
+noarg = fun: () {
 	<% "I accept no arguments"
 }
 <% noarg() == nil

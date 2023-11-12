@@ -2,16 +2,7 @@
 
 /* Pseudo-methods are just another way to call functions where the first argument is not an object */
 /* They perform the following transformation:
- * 	value.func(arg1, arg2, ...) => func(value, arg1, arg2, ...)
+ * 	value.fun(arg1, arg2, ...) => fun(value, arg1, arg2, ...)
  */
 
-qt = func: str {
-	return: "\"" :: str :: "\""
-}
-
-str = "the quick brown fox jumps over the lazy dog"
-%% str.qt() :: newl
-%% "Substring: " :: str.substr(4, 11).qt() :: newl /* Nested pseudo-method call */
-
-/* Works on literals too */
-%% "sqrt of 1337: " :: 1337.sqrt() :: newl
+<% "sqrt of 1337: " :: 1337.sqrt() :: newl

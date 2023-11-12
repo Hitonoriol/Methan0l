@@ -1,6 +1,6 @@
 /* Yep. This only became a feature on Apr 13 '22. */
 
-f = func: () {
+f = fun: () {
 	/* Break from imperative foreach */
 	for (i, range(100)) {
 		i > 5 ? return: break

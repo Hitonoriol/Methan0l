@@ -14,7 +14,7 @@ set_max_mem(0x8000000)
 	}()
 :: "ms"
 
-execution_time = func: action, times {
+execution_time = fun: action, times {
 	tlist = []
 	for (i, range(times))
 		tlist[] = measure_time(action())
@@ -24,7 +24,7 @@ execution_time = func: action, times {
 	return: mean / tlist.size()
 }
 
-benchmark = func: bench_name, action, times => 10 {
+benchmark = fun: bench_name, action, times => 10 {
 	mem = mem_in_use()
 	<% "\n* " :: bench_name :: ":"
 	%% '\t' :: ">> "; mem_info()
@@ -46,7 +46,7 @@ class: Test {
 
 obj = new: Test()
 
-rec = func: n {
+rec = fun: n {
 	if: (n < 1) break!
 	rec(n - 1)
 }

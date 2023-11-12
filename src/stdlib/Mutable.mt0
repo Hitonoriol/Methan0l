@@ -68,7 +68,7 @@ class: MutableUnit base: Mutable {
 }
 
 class: MutableFunction base: Mutable {
-	construct => method: value => func: () -> {} -> this.super(value)
+	construct => method: value => fun: () -> {} -> this.super(value)
 }
 
 class: MutableExpression base: Mutable {
