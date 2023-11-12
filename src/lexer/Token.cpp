@@ -165,14 +165,15 @@ std::string Token::to_string(TokenType tok)
 
 std::ostream& operator <<(std::ostream &stream, const Token &val)
 {
-	stream << "[";
-
 	if (val.line != 0)
-		stream << "(@" << val.line << ":" << val.column << ") ";
+		stream << "[@" << val.line << ":" << val.column << "] ";
 
-	stream << "`" << Token::to_string(val.type) << "`";
+	stream << val.type.name;
 
-	return stream << "]";
+	if (val.type.name != val.value && !val.value.empty())
+		stream << " \"" << val.value << "\"";
+
+	return stream;
 }
 
 }
