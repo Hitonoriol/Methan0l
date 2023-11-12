@@ -19,27 +19,16 @@ namespace mtl
 
 ExprPtr FunctionParser::parse(Parser &parser, Token token)
 {
-	/* Short form with no parentheses (2 & 4) */
-	bool short_form = parser.match(Tokens::COLON)
-			|| token.get_type() == Tokens::FUNC_DEF_SHORT_ALT;
-
-	/* Parenthesized short form (3) */
-	if (!short_form &&
-			/* Parameter list formats: `@(a, b, ...)` or `(a, b, ...)` */
-			!(parser.match(Tokens::MAP_DEF_L) || parser.match(Tokens::PAREN_L)))
-		throw std::runtime_error("Invalid function definition expression");
-	/* Otherwise -- parse as a regular form definition (1) */
+	parser.consume(Tokens::COLON);
+	bool has_parens = parser.match(Tokens::PAREN_L); // Optionally match `(` - no args
 
 	ArgDefList args;
-	MapParser::parse(parser, [&](auto key, auto val) {
-		auto key_str = MapParser::key_string(key);
-		/* Handles the no-arg case for unparenthesized forms */
-		if (short_form && key_str == ReservedWord::NIL)
-			return;
-
-		args.push_back(std::make_pair(key_str, val));
-		LOG("* Parsed argdef pair")
-	}, short_form ? Tokens::NONE : Tokens::PAREN_R);
+	if (!parser.match(Tokens::PAREN_R)) { // Optionally match `)` - no args
+		MapParser::parse(parser, [&](auto key, auto val) {
+			auto key_str = MapParser::key_string(key);
+			args.push_back(std::make_pair(key_str, val));
+		}, has_parens ? Tokens::PAREN_R : Tokens::NONE);
+	}
 
 	ExprPtr body_expr;
 
@@ -72,9 +61,9 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 
 	auto &fbody = try_cast<UnitExpr>(body_expr);
 
-	/* `@:` and `f:` function definition prefixes
+	/* `f:` function definition prefix
 	 * 		make resulting expression a "true" lambda (able to capture variables from upper scopes implicitly) */
-	if (token.get_type() == Tokens::FUNC_DEF_SHORT || token.get_type() == Tokens::FUNC_DEF_SHORT_ALT)
+	if (token.get_type() == Tokens::FUNC_DEF_SHORT)
 		fbody.get_unit_ref().set_weak(true);
 
 	return make_expr<FunctionExpr>(line(token), args, fbody);

@@ -7,15 +7,19 @@ namespace mtl
 {
 
 /*
- * 1. func @(a, b, ...) {...}
- * 2. func: a, b, ... {...}
- * 3. #(a, b, ...) {...}
- * 4. @: a, b, ... {...}
- *
- * Or:
- * <1|2|3|4> -> expr
+ * Syntax:
+ * 1. func: a, b, ... {...}
+ * 2. f: a, b, ... {...}
+ * 
+ * No args:
+ * 1. func: () {...}
+ * 2. f: () {...}
+ * 
+ * Short form:
+ * 1. f: a, b, ... -> ...
+ * 2. f: a, b, ... -> expr1, expr2, ...
  */
-class FunctionParser: public PrefixParser
+class FunctionParser : public PrefixParser
 {
 	public:
 		ExprPtr parse(Parser &parser, Token token) override;
