@@ -3,6 +3,9 @@
 
 #include "PrefixParser.h"
 
+#include "ListParser.h"
+#include "UnitParser.h"
+
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -16,7 +19,8 @@
 namespace mtl
 {
 
-class LoopParser: public PrefixParser
+/* <loop-keyword> <:> <> */
+class LoopParser : public PrefixParser
 {
 	private:
 		static const size_t FOR_ARGS = 3, FOREACH_ARGS = 2, WHILE_ARGS = 1;
@@ -24,24 +28,25 @@ class LoopParser: public PrefixParser
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
 		{
-			if (!parser.match(Tokens::LIST_DEF_L))
-				parser.consume(Tokens::PAREN_L);
+			parser.consume(Tokens::COLON);
+			parser.match(Tokens::PAREN_L); // Optionally consume `(`
 
 			ExprList loop_params;
-			ListParser::parse(parser, [&](auto expr) {loop_params.push_back(expr);});
-			ExprPtr body = UnitParser::parse_ctrl_block(parser, false);
+			ListParser::parse(parser, [&](auto expr) {loop_params.push_back(expr);}, Tokens::NONE);
+			parser.match(Tokens::PAREN_R); // Optionally consume `)`
+
+			auto body = UnitParser::parse_ctrl_block(parser, false);
 			size_t size = loop_params.size();
 			uint32_t line = mtl::line(token);
-			bool legacy_loop = token == Tokens::DO;
 
-			if (token == Tokens::FOR || legacy_loop) {
+			if (token == Tokens::FOR) {
 				if (size == FOR_ARGS)
 					return make_expr<LoopExpr>(line, loop_params, body);
 
 				else if (size == FOREACH_ARGS)
 					return make_expr<LoopExpr>(line, loop_params.front(), loop_params[1], body);
 			}
-			else if ((token == Tokens::WHILE || legacy_loop) && size == WHILE_ARGS)
+			else if ((token == Tokens::WHILE) && size == WHILE_ARGS)
 				return make_expr<LoopExpr>(line, loop_params.back(), body);
 
 			throw std::runtime_error("Invalid loop expression");

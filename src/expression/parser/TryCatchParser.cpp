@@ -14,10 +14,11 @@ namespace mtl
 {
 
 /*
- * try {...} catch: ex_name {...}
+ * <try> <:> {...} <catch> <:> <ex_name> {...}
  */
 ExprPtr TryCatchParser::parse(Parser &parser, Token token)
 {
+	parser.consume(Tokens::COLON);
 	ExprPtr try_body = UnitParser::parse_ctrl_block(parser, false);
 	parser.consume(Tokens::CATCH);
 	parser.consume(Tokens::COLON);

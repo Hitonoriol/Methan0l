@@ -39,6 +39,9 @@ Methan0lLexer::Methan0lLexer()
 	register_operator(Tokens::AT);
 	register_operator(Tokens::LIST);
 	register_operator(Tokens::DOT);
+	register_operator(Tokens::BRACE_L);
+	register_operator(Tokens::BRACKET_L);
+	register_operator(Tokens::PAREN_L);
 
 	/* Multi-character operators */
 	register_operator(Tokens::SHIFT_L);
@@ -69,7 +72,6 @@ Methan0lLexer::Methan0lLexer()
 	register_operator(Tokens::IN);
 	register_operator(Tokens::OUT_NL);
 	register_operator(Tokens::INFIX_WORD_LHS_L);
-	register_operator(Tokens::FUNC_DEF_SHORT_ALT);
 	register_operator(Tokens::DOUBLE_DOLLAR);
 	register_operator(Tokens::LONG_ARROW_RIGHT);
 	register_operator(Tokens::COMP_XOR);
@@ -111,17 +113,17 @@ Methan0lLexer::Methan0lLexer()
 	register_keyword(Tokens::CONVERT);
 	register_keyword(Tokens::IMPLEMENT);
 	register_keyword(Tokens::IDENTITY);
-
-	/* Hard keywords */
-	register_keyword(Tokens::DO, true);
-	register_keyword(Tokens::FOR, true);
-	register_keyword(Tokens::WHILE, true);
-	register_keyword(Tokens::FUNC_DEF, true);
-	register_keyword(Tokens::BOX, true);
-	register_keyword(Tokens::CLASS, true);
-	register_keyword(Tokens::SET_DEF, true);
-	register_keyword(Tokens::TRY, true);
-	register_keyword(Tokens::CATCH, true);
+	register_keyword(Tokens::DO);
+	register_keyword(Tokens::FOR);
+	register_keyword(Tokens::WHILE);
+	register_keyword(Tokens::FUNC_DEF);
+	register_keyword(Tokens::CLASS);
+	register_keyword(Tokens::TRY);
+	register_keyword(Tokens::CATCH);
+	register_keyword(Tokens::BOX);
+	register_keyword(Tokens::SET_DEF);
+	register_keyword(Tokens::LIST_DEF);
+	register_keyword(Tokens::MAP_DEF);
 
 	/* Block begin tokens */
 	register_block_begin_token(Tokens::PAREN_L);

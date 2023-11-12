@@ -29,9 +29,12 @@ ExprPtr MapParser::parse(Parser &parser, Token token)
 	auto end_tok = Tokens::PAREN_R;
 
 	/* @[...] */
-	if (start_tok != Tokens::MAP_DEF_L) {
-		token.assert_type(Tokens::MAP_DEF_L_ALT);
+	if (start_tok == Tokens::MAP_DEF_L_ALT) {
 		end_tok = Tokens::BRACKET_R;
+	}
+	/* map: ... */
+	else if (start_tok == Tokens::MAP_DEF) {
+		end_tok = Tokens::NONE;
 	}
 
 	parse(parser, [&](auto key, auto val) {

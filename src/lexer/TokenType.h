@@ -59,6 +59,8 @@ class TokenType
 		char chr() const;
 };
 
+/* Standard and methan0l-specific tokens.
+ * When extending grammar, you can define a completely different set of tokens. */
 struct Tokens {
 	static constexpr TokenType
 		/* Literals */
@@ -138,7 +140,6 @@ struct Tokens {
 		IN						= "%>",
 		OUT_NL					= "<%",
 		INFIX_WORD_LHS_L		= "*[",
-		FUNC_DEF_SHORT_ALT		= "@:",
 		DOUBLE_DOLLAR			= "$$",
 		LONG_ARROW_RIGHT		= "-->",
 		COMP_XOR				= "^=",
@@ -155,8 +156,8 @@ struct Tokens {
 		DO 						= "do",
 		TYPE_ID 				= "typeid",
 		DELETE					= "delete",
-		FUNC_DEF 				= "func",
-		BOX 					= "defbox",
+		FUNC_DEF 				= "fun",
+		BOX 					= "box",
 		CLASS 					= "class",
 		IF 						= "if",
 		ELSE 					= "else",
@@ -165,7 +166,9 @@ struct Tokens {
 		HASHCODE 				= "hash_code",
 		TYPE_NAME 				= "typename",
 		NO_EVAL 				= "noeval",
-		SET_DEF 				= "defset",
+		SET_DEF 				= "set",
+		LIST_DEF 				= "list",
+		MAP_DEF 				= "map",
 		WHILE 					= "while",
 		FOR 					= "for",
 		TRY 					= "try",

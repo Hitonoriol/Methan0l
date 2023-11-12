@@ -44,13 +44,13 @@ Methan0lParser::Methan0lParser(Interpreter &context)
 	register_literal_parser(Tokens::CHAR, Type::CHAR);
 	register_literal_parser(Tokens::TOKEN, Type::TOKEN);
 	register_parser(Tokens::FORMAT_STRING, new FormatStrParser()); // $"... {} ..." arg1, arg2, ...
-	register_parser(Tokens::DOUBLE_DOT, new RangeParser());
+	register_parser(Tokens::DOUBLE_DOT, new RangeParser()); // Range expression: start..end[..stop]
 
-	/* Core syntax constructs */
+	/* Identifier expressions */
 	register_parser(Tokens::HASH, new IdentifierParser()); // #foo -- global scope lookup
 	register_parser(Tokens::IDENTIFIER, new IdentifierParser());	// foo -- local scope
-	register_prefix_opr(Tokens::PERCENT, Precedence::PREFIX);
-	register_parser(Tokens::QUESTION, new ConditionParser()); // (a && b ? "yep" : "nah")
+
+	/* Const expressions */
 	register_parser(Tokens::CONST, new ConstParser()); // const: ...
 	register_parser(Tokens::LIST, new ConstParser(Precedence::HIGHEST)); // $name
 
@@ -73,42 +73,54 @@ Methan0lParser::Methan0lParser(Interpreter &context)
 	register_parser(Tokens::LIST_DEF_L, new InvokeParser());
 	alias_infix(Tokens::LIST_DEF_L, Tokens::PAREN_L);
 
+	/* Collection definition expressions */
 	register_parser(Tokens::LIST_DEF_L, new ListParser(Tokens::PAREN_R)); // $(expr1, expr2, ...)
 	register_parser(Tokens::BRACKET_L, new ListParser(Tokens::BRACKET_R)); // [expr1, expr2, ...]
-	alias_prefix(Tokens::LIST_DEF_L, Tokens::SET_DEF); // defset $(expr1, expr2, ...)
+	alias_prefix(Tokens::LIST_DEF_L, Tokens::SET_DEF); // set: expr1, expr2, ...
+	alias_prefix(Tokens::LIST_DEF_L, Tokens::LIST_DEF); // list: expr1, expr2, ...
+
+	/* Map definition */
+	register_parser(Tokens::MAP_DEF_L, new MapParser());
+	alias_prefix(Tokens::MAP_DEF_L, Tokens::MAP_DEF_L_ALT);
+	alias_prefix(Tokens::MAP_DEF_L, Tokens::MAP_DEF); // map: key => value, ...
+	
+	/* Unit definition expressions */
 	register_parser(Tokens::BRACE_L, new UnitParser()); // {expr1; expr2; expr3}
 	register_parser(Tokens::ARROW_R, new WeakUnitParser()); // ->{expr1; expr2; expr3}
+	register_parser(Tokens::BOX, new BoxUnitParser()); // box_unit = box: {expr1, expr2, ...}
+
+	/* Index operator */
 	register_parser(Tokens::BRACKET_L, new IndexParser()); // list[expr] or list[]
 
 	/* If-else syntax:
 	 * if <condition> <then-branch> [else:] <else-branch>
 	 */
 	register_parser(Tokens::IF, new IfElseParser()); // $name
+	register_parser(Tokens::QUESTION, new ConditionParser()); // (a && b ? "yep" : "nah")
 
 	/* Loop syntax:
-	 * 1. do (condition_expr) {}
-	 * 2. while (condition_expr) {}
-	 * 3. for (init_expr, condition_expr, step_expr) {}
-	 * 4. for (as_name, iterable_expr) {}
+	 * 1. while (condition_expr) {}
+	 * 2. for (init_expr, condition_expr, step_expr) {}
+	 * 3. for (as_name, iterable_expr) {}
 	 */
-	register_parser(Tokens::DO, new LoopParser()); // do (condition_expr) {}
-	alias_prefix(Tokens::DO, Tokens::WHILE); // while (condition_expr) {}
-	alias_prefix(Tokens::DO, Tokens::FOR);
+	register_parser(Tokens::WHILE, new LoopParser());
+	alias_prefix(Tokens::WHILE, Tokens::FOR);
+
+	/* Try-catch */
+	register_parser(Tokens::TRY, new TryCatchParser()); // try { ... } catch: ex_name { ... }
 
 	/* Function definition. See `FunctionParser` header for details. */
 	register_parser(Tokens::FUNC_DEF, new FunctionParser());
 	alias_prefix(Tokens::FUNC_DEF, Tokens::FUNC_DEF_SHORT);
-	alias_prefix(Tokens::FUNC_DEF, Tokens::FUNC_DEF_SHORT_ALT);
 	alias_prefix(Tokens::FUNC_DEF, Tokens::METHOD);
 
-	register_parser(Tokens::BOX, new BoxUnitParser()); // box_unit = box {expr1, expr2, ...}
+	/* Class definition */
 	register_parser(Tokens::CLASS, new ClassParser()); // class: ClassName = @(private => $(), ...)
 	alias_prefix(Tokens::CLASS, Tokens::INTERFACE);
-	register_parser(Tokens::TRY, new TryCatchParser()); // try { ... } catch: ex_name { ... }
 
-	/* Map definition */
-	register_parser(Tokens::MAP_DEF_L, new MapParser());
-	alias_prefix(Tokens::MAP_DEF_L, Tokens::MAP_DEF_L_ALT);
+	/* Access operators */
+	register_infix_opr(Tokens::AT, Precedence::DOT, BinOprType::RIGHT_ASSOC);
+	register_infix_opr(Tokens::DOT, Precedence::DOT);
 
 	/* IO / String oprs */
 	register_prefix_opr(Tokens::OUT_NL, Precedence::IO);				// <% expr
@@ -167,7 +179,7 @@ Methan0lParser::Methan0lParser(Interpreter &context)
 	register_prefix_opr(Tokens::DECREMENT, Precedence::PREFIX_INCREMENT);		// --x
 	register_postfix_opr(Tokens::DECREMENT, Precedence::POSTFIX_INCREMENT);		// x--
 
-	/* Word oprs */
+	/* Prefix keyword operators */
 	register_word(Tokens::TYPE_ID);
 	register_word(Tokens::TYPE_NAME);
 	register_word(Tokens::DELETE);
@@ -183,15 +195,11 @@ Methan0lParser::Methan0lParser(Interpreter &context)
 	register_parser(Tokens::VAR, new VarDefParser());
 	register_word(Tokens::IDENTITY);
 
-	/* Infix word oprs */
+	/* Infix keyword operators */
 	register_infix_word(Tokens::ASSERT, Precedence::NO_EVAL);
 	register_infix_word(Tokens::INSTANCE_OF, Precedence::BIT_SHIFT);
 	register_infix_word(Tokens::REQUIRE, Precedence::NO_EVAL);
 	register_infix_word(Tokens::CONVERT, Precedence::BIT_SHIFT);
-
-	/* Class / Box field / method access operators */
-	register_infix_opr(Tokens::AT, Precedence::DOT, BinOprType::RIGHT_ASSOC);
-	register_infix_opr(Tokens::DOT, Precedence::DOT);
 }
 
 } /* namespace mtl */
