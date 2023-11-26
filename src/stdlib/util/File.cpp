@@ -76,7 +76,7 @@ File::File(Interpreter &context) : Class(context, "File")
 		auto path = std::make_shared<LiteralExpr>();
 		ExprList action_args {path};
 		for(auto& entry: fs::recursive_directory_iterator(root_path)) {
-			path->raw_ref() = entry.path().string();
+			path->raw_ref() = context.make<String>(entry.path().string());
 			context.invoke(action, action_args);
 		}
 
