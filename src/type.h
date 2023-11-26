@@ -170,6 +170,27 @@ inline Shared<T> make(Types &&...args)
 	return make<T>({}, std::forward<Types...>(args)...);
 }
 
+template <typename Alloc>
+struct alloc_deleter
+{
+	alloc_deleter(const Alloc &a) : a(a) {}
+
+	typedef typename std::allocator_traits<Alloc>::pointer pointer;
+
+	void operator()(pointer p) const
+	{
+		Alloc aa(a);
+		std::allocator_traits<Alloc>::destroy(aa, std::addressof(*p));
+		std::allocator_traits<Alloc>::deallocate(aa, p, 1);
+	}
+
+private:
+	Alloc a;
+};
+
+template <typename T>
+using UniquePmr = std::unique_ptr<T, mtl::alloc_deleter<Allocator<T>>>;
+
 }
 
 #endif /* SRC_TYPE_H_ */
