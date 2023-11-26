@@ -5,6 +5,7 @@
 #include <memory>
 #include <utility>
 
+#include <CoreLibrary.h>
 #include <cli/Methan0l.h>
 #include <cli/Runner.h>
 #include <expression/IdentifierExpr.h>
@@ -209,7 +210,7 @@ std::string InteractiveRunner::next_arg()
 	return arg;
 }
 
-/* Format: !!command */
+/* Format: /command */
 bool InteractiveRunner::process_commands(const std::string &cmd)
 {
 	if (methan0l.execution_stopped())
@@ -277,7 +278,15 @@ void InteractiveRunner::run()
 		prev_results.push_back(result);
 		auto out_prefix = str(cas_output_pattern);
 		StringFormatter(out_prefix, {"[@" + str(prev_results.size()) + "]"}).format();
-		std::cout << out_prefix << result << NL;
+
+		std::string result_str;
+		if (!result.object() && result.is_callable()) {
+			result_str = "<" + std::string(result.type_name()) + ">";
+		} else {
+			result_str = *result.to_string();
+		}
+
+		std::cout << out_prefix << result_str << NL;
 		cas_print_end();
 	}
 }
