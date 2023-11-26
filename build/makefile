@@ -53,7 +53,7 @@ LINK_STATIC := -lboost_filesystem-mt -lboost_system-mt
 LINK_DYNAMIC :=
 
 # GCC compilation flags
-FLAGS:=-std=c++2a -Wall -Wextra -Wno-unused-parameter -Wno-overloaded-virtual
+FLAGS:=-std=c++2a -Wall -Wextra -Wno-unused-parameter -Wno-overloaded-virtual -static-libgcc -static-libstdc++
 ifeq ($(CONFIGURATION),debug)
 	FLAGS += -Og -g
 else
@@ -160,7 +160,7 @@ $(STDLIB_DIR)/%.so: $(OBJ_DIR)$$(STDLIB_PATH)%.o.pic lib $$(call read_stdlib_dep
 	$(eval lib_obj:=$(word 1,$^))
 	$(eval lib_dep:=$(file < $(patsubst $(OBJ_DIR)%.o.pic,$(SRC_DIR)%.deps,$(lib_obj))))
 	$(eval lib_dep:=$(patsubst %,$(OBJ_DIR)$(STDLIB_PATH)%.o.pic,$(lib_dep)))
-	g++ $(lib_obj) $(lib_dep) -shared -L./ -l:$(LIB_NAME) -o $@ $(RPATH)
+	g++ -static-libgcc -static-libstdc++ $(lib_obj) $(lib_dep) -shared -L./ -l:$(LIB_NAME) -o $@ $(RPATH)
 	@echo 'Finished building core library: $@'
 	@echo ' '
 
