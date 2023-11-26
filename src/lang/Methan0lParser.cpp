@@ -99,9 +99,9 @@ Methan0lParser::Methan0lParser(Interpreter &context)
 	register_parser(Tokens::QUESTION, new ConditionParser()); // (a && b ? "yep" : "nah")
 
 	/* Loop syntax:
-	 * 1. while (condition_expr) {}
-	 * 2. for (init_expr, condition_expr, step_expr) {}
-	 * 3. for (as_name, iterable_expr) {}
+	 * 1. while: (condition_expr) {}
+	 * 2. for: (init_expr, condition_expr, step_expr) {}
+	 * 3. for: (as_name, iterable_expr) {}
 	 */
 	register_parser(Tokens::WHILE, new LoopParser());
 	alias_prefix(Tokens::WHILE, Tokens::FOR);

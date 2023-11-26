@@ -36,7 +36,7 @@ void ListParser::parse(Parser &parser, std::function<void(ExprPtr)> collector, T
 
 	do {
 		collector(parser.parse());
-	} while (parser.match(Tokens::COMMA) || parser.look_ahead() != end_token);
+	} while (parser.match(Tokens::COMMA) && parser.look_ahead() != end_token);
 
 	if (end_token != Tokens::NONE) {
 		parser.consume(end_token);
