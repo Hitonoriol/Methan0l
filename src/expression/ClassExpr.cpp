@@ -25,7 +25,7 @@ void ClassExpr::execute(Interpreter &context)
 	if (clazz != nullptr)
 		return;
 
-	clazz = Class::allocate(context, name);
+	clazz = context.make_shared<Class>(context, name);
 	auto &type_mgr = context.get_type_mgr();
 	auto &obj_data = clazz->get_object_data();
 

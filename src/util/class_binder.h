@@ -85,7 +85,7 @@ class ClassBinder
 	public:
 		using bound_class = C;
 		ClassBinder(Interpreter &context, const std::string &name = "") :
-			clazz(Allocatable<Class>::allocate(context, name)), context(context) {}
+			clazz(context.make_shared<Class>(context, name)), context(context) {}
 
 		inline void set_name(std::string_view name)
 		{

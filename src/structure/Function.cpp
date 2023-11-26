@@ -18,10 +18,6 @@ namespace mtl
 
 std::string Function::CALL_ARGS(".callargs");
 
-Function::Function()
-{
-}
-
 Function::Function(ArgDefList args, Unit body) : Unit(body), arg_def(args)
 {
 	argc = 0;
@@ -108,11 +104,6 @@ const ArgDefList& Function::get_arg_def() const
 Value& Function::get_callargs()
 {
 	return local_data.get(CALL_ARGS);
-}
-
-Function Function::create(ExprList body, ArgDefList args)
-{
-	return Function(args, body);
 }
 
 std::string Function::to_string()

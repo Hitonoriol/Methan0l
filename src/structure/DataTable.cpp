@@ -8,6 +8,7 @@
 #include <lexer/Token.h>
 #include <expression/IdentifierExpr.h>
 #include <structure/Value.h>
+#include <interpreter/Interpreter.h>
 #include <CoreLibrary.h>
 
 namespace mtl
@@ -17,20 +18,26 @@ const std::string DataTable::NIL_IDF(ReservedWord::NIL.name);
 
 ValList DataTable::temp_queue{};
 
-DataTable::DataTable() : map(allocate())
+DataTable::DataTable(Interpreter *context)
+	: context(context),
+	map(context->make_shared<DataMap>())
 {
 }
 
-DataTable::DataTable(const DataMap &managed_map) : map(allocate(managed_map))
+DataTable::DataTable(const DataMap &managed_map, Interpreter *context)
+	: context(context),
+	map(context->make_shared<DataMap>(managed_map))
 {
 }
 
-DataTable::DataTable(const DataTable &rhs) : map(rhs.map)
+DataTable::DataTable(const DataTable &rhs)
+	: context(rhs.context), map(rhs.map)
 {
 }
 
 DataTable& DataTable::operator=(const DataTable &rhs)
 {
+	context = rhs.context;
 	map = rhs.map;
 	return *this;
 }
@@ -107,7 +114,8 @@ Value& DataTable::nil()
 
 void DataTable::copy_managed_map()
 {
-	map = allocate(*map);
+	
+	map = context->make_shared<DataMap>(*map);
 }
 
 const DataMap& DataTable::managed_map() const
@@ -160,7 +168,7 @@ std::ostream& operator <<(std::ostream &stream, DataTable &val)
 
 DataTable DataTable::make(const ValMap &vmap, Interpreter &context)
 {
-	DataTable table;
+	DataTable table(&context);
 	table.map->reserve(vmap.size());
 	for (auto &&[key, val] : vmap) {
 		table.map->emplace(std::move(*unconst(key).to_string()), val);

@@ -25,8 +25,11 @@ using ManagedObjects = std::unordered_map<uintptr_t, T>;
 
 class Object;
 
-class Class : public Allocatable<Class>
+class Class
 {
+	protected:
+		Interpreter &context;
+		
 	private:
 		std::string name;
 		TypeID id;
@@ -44,9 +47,6 @@ class Class : public Allocatable<Class>
 		std::unique_ptr<Object> static_instance;
 
 		void add_base_class(Class*);
-
-	protected:
-		Interpreter &context;
 
 	public:
 		class MethodBinder;

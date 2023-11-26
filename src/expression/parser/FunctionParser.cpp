@@ -54,7 +54,7 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 		while (parser.match(Tokens::COMMA))
 			lambda_body.push_back(parser.parse());
 
-		body_expr = make_expr<UnitExpr>(line(token), lambda_body, false);
+		body_expr = make_expr<UnitExpr>(line(token), &parser.get_context(), lambda_body, false);
 	}
 	else
 		body_expr = UnitParser::parse_expr_block(parser);

@@ -16,33 +16,38 @@ namespace mtl
 
 const std::string Unit::RETURN_KW(ReservedVar::RETURNED.name);
 
-Unit::Unit(const ExprList &expr_list, DataTable data, bool weak) :
-		weak(weak),
+Unit::Unit(const ExprList &expr_list, DataTable data, bool weak)
+	:	weak(weak),
 		local_data(data),
 		expr_list(expr_list)
 
 {
 }
 
-Unit::Unit(const ExprList &expr_list, bool weak) : Unit(expr_list, DataTable(), weak)
+Unit::Unit(Interpreter *context, const ExprList &expr_list, bool weak)
+	: Unit(expr_list, DataTable(context), weak)
 {
 }
 
-Unit::Unit(DataTable data) : Unit(ExprList(), data)
+Unit::Unit(DataTable data)
+	: Unit(ExprList(), data)
 {
 }
 
 /* Single expression Unit */
-Unit::Unit(ExprPtr expr) : Unit( { expr }, false)
+Unit::Unit(Interpreter *context, ExprPtr expr)
+	: Unit(context, { expr }, false)
 {
 }
 
 /* Empty Unit */
-Unit::Unit() : Unit(ExprList())
+Unit::Unit(Interpreter *context)
+	: Unit(context, ExprList())
 {
 }
 
-Unit::Unit(const Unit &rhs) : Unit(rhs.expr_list, rhs.local_data, rhs.weak)
+Unit::Unit(const Unit &rhs)
+	: Unit(rhs.expr_list, rhs.local_data, rhs.weak)
 {
 	persistent = rhs.persistent;
 	noreturn = rhs.noreturn;
@@ -202,7 +207,7 @@ bool Unit::execution_finished()
 
 void Unit::new_table()
 {
-	local_data = DataTable();
+	local_data = DataTable(local_data.get_context());
 }
 
 Unit& Unit::manage_table(Unit &unit)
@@ -226,12 +231,12 @@ void Unit::append(ExprPtr expr)
 	expr_list.push_back(expr);
 }
 
-Unit Unit::from_expression(ExprPtr expr)
+Unit Unit::from_expression(Interpreter *context, ExprPtr expr)
 {
 	if (instanceof<UnitExpr>(expr))
 		return try_cast<UnitExpr>(expr).get_unit_ref();
 	else
-		return Unit(expr);
+		return Unit(context, expr);
 }
 
 bool operator ==(const Unit &lhs, const Unit &rhs)

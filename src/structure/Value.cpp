@@ -49,12 +49,12 @@ Value& Value::get()
 }
 
 /* Deep copy internal `value` contents if they're heap-stored */
-Value Value::copy()
+Value Value::copy(Interpreter *context)
 {
 	accept([&](auto &v) {
 		if constexpr (is_heap_type<VT(v)>())
 			if constexpr (!std::is_abstract<VT(*v)>::value)
-				value = Allocatable<VT(*v)>::allocate(*v);
+				value = context->make_shared<VT(*v)>(*v);
 	});
 	return *this;
 }
@@ -349,9 +349,9 @@ Value Value::ref(Value &val)
 	return ValueRef(val);
 }
 
-ExprPtr Value::wrapped(const Value &val)
+ExprPtr Value::wrapped(Interpreter *context, const Value &val)
 {
-	return Allocatable<LiteralExpr>::allocate(val);
+	return context->make_shared<LiteralExpr>(val);
 }
 
 void Value::assert_type(TypeID expected, const std::string &msg)

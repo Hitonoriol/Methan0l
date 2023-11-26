@@ -33,8 +33,8 @@ Value LoopExpr::evaluate(Interpreter &context)
 
 void LoopExpr::exec_for_loop(Interpreter &context)
 {
-	Unit &loop_proxy = context.tmp_callable(Unit());
-	Unit &body_unit = context.tmp_callable(Unit::from_expression(body));
+	Unit &loop_proxy = context.tmp_callable(Unit(&context));
+	Unit &body_unit = context.tmp_callable(Unit::from_expression(&context, body));
 
 	/* If this loop has an `init` Expr, this is a for loop,
 	 * 		else -- this is a while loop and has only the `condition` expression */
@@ -65,7 +65,7 @@ void LoopExpr::exec_foreach_loop(Interpreter &context)
 {
 	init->assert_type<IdentifierExpr>("First argument of for-each expression must be an Identifier");
 	auto as_elem = IdentifierExpr::get_name(init);
-	auto &body_unit = context.tmp_callable(Unit::from_expression(body));
+	auto &body_unit = context.tmp_callable(Unit::from_expression(&context, body));
 	IterableAdapter iterable(condition->evaluate(context));
 	auto it = iterable.iterator();
 	body_unit.call();

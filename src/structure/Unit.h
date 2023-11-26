@@ -44,10 +44,10 @@ class Unit
 		static const std::string RETURN_KW;
 
 		Unit(const ExprList &expr_list, DataTable data, bool weak = false);
-		Unit(const ExprList &expr_list, bool weak = false);
-		Unit(ExprPtr expr);
+		Unit(Interpreter *context, const ExprList &expr_list, bool weak = false);
+		Unit(Interpreter *context, ExprPtr expr);
 		Unit(DataTable data);
-		Unit();
+		Unit(Interpreter *context);
 		Unit(const Unit &rhs);
 
 		void new_table();
@@ -109,7 +109,7 @@ class Unit
 		size_t size() const;
 		bool empty() const;
 
-		static Unit from_expression(ExprPtr);
+		static Unit from_expression(Interpreter*, ExprPtr);
 
 		virtual std::string to_string();
 		friend bool operator ==(const Unit &lhs, const Unit &rhs);

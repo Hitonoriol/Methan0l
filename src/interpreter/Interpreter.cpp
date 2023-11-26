@@ -33,8 +33,6 @@
 namespace mtl
 {
 
-std::unique_ptr<Heap> Interpreter::heap;
-
 STRINGS(
 		EnvVars::LAUNCH_ARGS(".argv"),
 		EnvVars::SCRDIR(".scrdir"),
@@ -46,10 +44,12 @@ STRINGS(
 )
 
 Interpreter::Interpreter(Unique<Parser> parser, const char *path)
-	: exec_stack { &main },
-	  parser(std::move(parser))
+	: heap(Heap::create(HEAP_MEM_CAP)),
+	  env_table(this),
+	  exec_stack { &main },
+	  parser(std::move(parser)),
+	  main(this)
 {
-	init_heap();
 	load_library<Builtins>();
 	if (path) {
 		set_runpath(path);
@@ -102,7 +102,7 @@ void Interpreter::load_libraries()
 		// Load a methan0l module
 		else if (ext == PROGRAM_EXT) {
 			try {
-				Unit module;
+				Unit module(this);
 				core::load_module(*this, path.string(), module);
 				execute(module);
 				core::import(this, module);
@@ -119,15 +119,6 @@ void Interpreter::load_library(std::shared_ptr<Library> lib)
 	libraries.push_back(lib);
 }
 
-void Interpreter::init_heap(size_t initial_mem_cap)
-{
-	if (std::pmr::get_default_resource() != std::pmr::new_delete_resource())
-		return;
-
-	heap = Heap::create(initial_mem_cap);
-	std::pmr::set_default_resource(heap.get());
-}
-
 void Interpreter::register_func(const std::string &name, NativeFunc &&func)
 {
 	LOG("Registered function: " << name)
@@ -137,11 +128,6 @@ void Interpreter::register_func(const std::string &name, NativeFunc &&func)
 		DataTable &table = current_unit()->local();
 		table.set(name, func);
 	}
-}
-
-Value Interpreter::evaluate(BinaryOperatorExpr &opr)
-{
-	return apply_binary(opr.get_lhs(), opr.get_operator(), opr.get_rhs());
 }
 
 Value Interpreter::evaluate(PostfixExpr &opr)
@@ -569,7 +555,7 @@ Value Interpreter::evaluate(AssignExpr &expr)
 	}
 
 	/* Copy assignment */
-	Value rhs = unwrap_or_reference(*rexpr).copy();
+	Value rhs = unwrap_or_reference(*rexpr).copy(this);
 	if (instanceof<IdentifierExpr>(lexpr.get())) {
 		IdentifierExpr &lhs = try_cast<IdentifierExpr>(lexpr);
 		return Value::ref(lhs.assign(*this, rhs));
@@ -610,8 +596,7 @@ Value Interpreter::invoke_method(Object &obj, Value &method, Args &args)
 	argcopy.push_front(LiteralExpr::create(obj));
 	return method.is<Function>()
 			? invoke(method.get<Function>(), argcopy)
-						:
-				method.get<NativeFunc>()(argcopy);
+			: method.get<NativeFunc>()(argcopy);
 }
 
 Value Interpreter::evaluate(InvokeExpr &expr)
@@ -795,7 +780,7 @@ bool Interpreter::load_program(const std::string &path, bool change_cwd)
 		set_program_globals(std::filesystem::path(program_path_abs).string());
 		if (change_cwd) {
 			std::filesystem::current_path(
-				std::filesystem::path(program_path).parent_path()
+				std::filesystem::path(program_path_abs).parent_path()
 			);
 		}
 	}
@@ -808,7 +793,7 @@ Unit Interpreter::load_file(const std::string &path)
 
 	if (!src_file.is_open()) {
 		std::cerr << "Failed to open file: \"" + path + "\"" << std::endl;
-		return Unit();
+		return Unit(this);
 	}
 
 	Unit unit = load_unit(src_file);
@@ -825,7 +810,7 @@ Unit Interpreter::load_unit(std::istream &codestr)
 Unit Interpreter::load_unit(std::string &code)
 {
 	if (!try_load([&]() {parser->load(code);}))
-		return Unit();
+		return Unit(this);
 
 	Unit unit = parser->result();
 	parser->clear();

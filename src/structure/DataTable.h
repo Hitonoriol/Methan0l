@@ -12,17 +12,18 @@ namespace mtl
 
 class Interpreter;
 
-class DataTable : public Allocatable<DataMap>
+class DataTable
 {
 	private:
+		Interpreter* context;
 		std::shared_ptr<DataMap> map;
 		static const std::string NIL_IDF;
 
 		static ValList temp_queue;
 
 	public:
-		DataTable();
-		DataTable(const DataMap &managed_map);
+		DataTable(Interpreter*);
+		DataTable(const DataMap &managed_map, Interpreter *context);
 		DataTable(const DataTable &rhs);
 		DataTable& operator=(const DataTable &rhs);
 
@@ -46,6 +47,11 @@ class DataTable : public Allocatable<DataMap>
 
 		size_t size();
 		bool empty();
+
+		inline Interpreter* get_context()
+		{
+			return context;
+		}
 
 		friend std::ostream& operator <<(std::ostream &stream, DataTable &val);
 

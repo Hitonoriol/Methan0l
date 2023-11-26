@@ -43,7 +43,7 @@ class TypeManager
 		Class& get_class(const std::string& name);
 
 		template<typename T>
-		inline void register_type()
+		inline void register_type(Allocator<T> allocator = {})
 		{
 			/*   If T is callable, it must handle the registration itself inside its invocation operator overload
 			 * (+ the registration must not have any state bound to object of T).
@@ -53,7 +53,7 @@ class TypeManager
 				registrator();
 			}
 			else /* Allocate a mtl::Class instance and register it - for classes not backed by native classes */
-				register_type(Allocatable<T>::allocate(context));
+				register_type(std::allocate_shared<T>(allocator, context));
 		}
 
 		/*   Allocate a new object of a native-backed methan0l type.
@@ -78,13 +78,13 @@ class TypeManager
 		template<typename ...Args>
 		inline Object new_object(const std::string &type_name, Args &&...ctor_args)
 		{
-			return create_object(type_name, {Value::wrapped(ctor_args)...});
+			return create_object(type_name, {Value::wrapped(&context, ctor_args)...});
 		}
 
 		template<typename ...Args>
 		inline Object new_object(TypeID type_id, Args &&...ctor_args)
 		{
-			return create_object(type_id.type_id(), {Value::wrapped(ctor_args)...});
+			return create_object(type_id.type_id(), {Value::wrapped(&context, ctor_args)...});
 		}
 
 		inline Object bind_object(TypeID class_id, const Value &raw_obj)

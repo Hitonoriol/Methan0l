@@ -17,7 +17,8 @@ namespace mtl
 {
 
 Parser::Parser(Interpreter &context, Unique<Lexer> lexer)
-	: context(&context), lexer(std::move(lexer))
+	: context(&context),
+	lexer(std::move(lexer))
 {}
 
 void Parser::set_context(Interpreter &context)
@@ -31,7 +32,7 @@ std::shared_ptr<LiteralExpr> Parser::evaluate_const(ExprPtr expr)
 		return Expression::NOOP;
 
 	if (const_scope == nullptr) {
-		const_scope = std::make_unique<Unit>();
+		const_scope = std::make_unique<Unit>(context);
 		const_scope->set_persisent(true);
 	}
 
@@ -183,7 +184,7 @@ void Parser::parse_all()
 	if (lexer->has_unclosed_blocks())
 		throw std::runtime_error("Source code contains unclosed block or group expressions");
 
-	ExprList &expression_queue = root_unit.expressions();
+	ExprList &expression_queue = result().expressions();
 	while (!lexer->empty() || look_ahead() != Token::EOF_TOKEN) {
 			if constexpr (DEBUG)
 				out << "\nParsing next root expression...\n";
@@ -351,12 +352,15 @@ int Parser::get_lookahead_precedence(bool prefix)
 
 Unit& Parser::result()
 {
-	return root_unit;
+	if (!root_unit)
+		root_unit = context->make_shared<Unit>(context);
+
+	return *root_unit;
 }
 
 void Parser::clear()
 {
-	root_unit.clear();
+	result().clear();
 	read_queue.clear();
 }
 

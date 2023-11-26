@@ -135,7 +135,7 @@ class Interpreter
 			UNARY, BINARY
 		};
 
-		static std::unique_ptr<Heap> heap;
+		std::unique_ptr<Heap> heap;
 
 		std::vector<std::shared_ptr<SharedLibrary>> dlls;
 		std::vector<std::shared_ptr<Library>> libraries;
@@ -165,7 +165,6 @@ class Interpreter
 		Unit load_unit(std::istream &codestr);
 		Unit load_unit(std::string &code);
 
-		static void init_heap(size_t initial_mem_cap = HEAP_MEM_CAP);
 		void load_libraries();
 
 		void on_exit();
@@ -221,21 +220,6 @@ class Interpreter
 			}
 		}
 
-		inline Value apply_prefix(TokenType op, const ExprPtr &rhs)
-		{
-			return apply_operator<OperatorType::UNARY>(lazy_prefix_ops, value_prefix_ops, op, rhs, rhs);
-		}
-
-		inline Value apply_binary(const ExprPtr &lhs, TokenType op, const ExprPtr &rhs)
-		{
-			return apply_operator<OperatorType::BINARY>(lazy_infix_ops, value_infix_ops, op, lhs, rhs);
-		}
-
-		inline Value apply_postfix(TokenType op, const ExprPtr &lhs)
-		{
-			return apply_operator<OperatorType::UNARY>(lazy_postfix_ops, value_postfix_ops, op, lhs, lhs);
-		}
-
 	protected:
 		OPERATOR_DEF(lazy, prefix, LazyUnaryOpr)
 		OPERATOR_DEF(value, prefix, UnaryOpr)
@@ -284,12 +268,36 @@ class Interpreter
 		template<typename T>
 		inline T eval(Expression &expr)
 		{
-			LOG("eval<T>() for " << type_name<T>() << ", expression: " << expr.info())
 			/* T, but with `const` and `&` / `&&` stripped */
 			using V = TYPE(T);
 			constexpr bool is_builtin = Value::allowed_or_heap<typename std::remove_pointer<V>::type>();
 			constexpr bool is_convertible = std::is_arithmetic<V>::value;
-			IFDBG(std::cout << "eval<" << type_name<T>() << ">(expr) / V = " << type_name<V>() << std::endl);
+			LOG("eval<T> for T = {" << type_name<T>() << "}; V = {" << type_name<V>() << "}");
+
+			/* Special case (1): provide compatibility of mtl::native::String with std::string */
+			if constexpr (std::is_same_v<V, std::string>) {
+				auto val = eval(expr);
+				if (val.is<mtl::native::String>()) {
+					auto &str = mtl::str(val.to_string());
+					/* If for some reason a std::string* is requested */
+					if constexpr (std::is_pointer<V>::value)
+						return &str;
+					else if constexpr (std::is_rvalue_reference<T>::value) /* && */
+						return std::move(str);
+					else
+						return str; /* By-value, &, const& */
+				}
+			}
+
+			/* Special case (2): provide compatibility of mtl::native::String with C-strings
+			 * TODO: handle these conversions in some automatic way? */
+			else if constexpr (std::is_same_v<V, const char*>) {
+				auto val = eval(expr);
+				if (val.is<std::shared_ptr<mtl::native::String>>()) {
+					auto &str = mtl::str(val.to_string());
+					return &str[0];
+				}
+			}
 
 			/* Get as unevaluated expression */
 			if constexpr (std::is_same<T, Expression*>::value)
@@ -312,21 +320,6 @@ class Interpreter
 				return referenced_value(&expr).get<V>();
 			else if constexpr (is_builtin && std::is_pointer<T>::value)
 				return &referenced_value(&expr).get<typename std::remove_pointer<V>::type>();
-
-			/* Special case: provide compatibility of mtl::native::String with std::string */
-			else if constexpr (std::is_same<V, std::string>::value) {
-				auto val = eval(expr);
-				if (!val.is<std::string>()) {
-					auto &str = mtl::str(val.to_string());
-					/* If for some reason a std::string* is requested */
-					if constexpr (std::is_pointer<V>::value)
-						return &str;
-					else if constexpr (std::is_rvalue_reference<T>::value) /* && */
-						return std::move(str);
-					else
-						return str; /* By-value, &, const& */
-				}
-			}
 
 			/* Get as a value of fallback type (std::any) */
 			if constexpr (!is_builtin && !is_convertible) {
@@ -393,14 +386,14 @@ class Interpreter
 			using ArgType = typename function_traits<Functor>::template argument<i>::type;
 
 			template<typename T, typename ...TArgs>
-			inline static void inject_callarg(Args &args, TArgs&&... proxy_args)
+			inline static void inject_callarg(Interpreter *context, Args &args, TArgs&&... proxy_args)
 			{
 				constexpr auto idx = IndexOf<T, ArgType<I>...>::value;
 				IF (idx != -1) {
 					/* unconst() is safe here because callarg list is never constructed as const. */
 					unconst(args).insert(
 						args.begin() + idx,
-						Value::wrapped(T(std::forward<TArgs>(proxy_args)...))
+						Value::wrapped(context, T(std::forward<TArgs>(proxy_args)...))
 					);
 				}
 			}
@@ -412,11 +405,11 @@ class Interpreter
 					 * `mtl::Context` argument.
 					 * This argument must always precede the `CallArgs` one in the function signature if they're
 					 * both declared. */
-					inject_callarg<Context>(c, context);
+					inject_callarg<Context>(&context, c, context);
 
 					/* Inject all callargs as expression list into the argument list if bound function's signature
 					 * contains a `mtl::CallArgs` argument. */
-					inject_callarg<CallArgs>(c, context, unconst(c));
+					inject_callarg<CallArgs>(&context, c, context, unconst(c));
 				}
 
 				if (c.size() < N)
@@ -424,6 +417,7 @@ class Interpreter
 							+ str(c.size()) + " received, " + str(N) + " expected: "
 							+ str(type_name<ArgType<I>...>()));
 
+				LOG("Binding " + std::string(mtl::type_name<ArgType<I>...>()));
 				return std::invoke(f,
 						context.eval<ArgType<I>>(*c.at(I))...);
 			}
@@ -454,8 +448,19 @@ class Interpreter
 		template<typename T>
 		inline Allocator<T> allocator()
 		{
-			/* Same as default ctor as of right now */
-			return Allocator<T>(heap.get());
+			return Allocator<T>(&get_heap());
+		}
+
+		template<typename T, typename ...ArgTypes>
+		inline Shared<T> make_shared(ArgTypes&&... args)
+		{
+			return std::allocate_shared<T>(allocator<T>(), std::forward<ArgTypes>(args)...);
+		}
+
+		template<typename T, typename ...ArgTypes>
+		inline UniquePmr<T> make_unique(ArgTypes&&... args)
+		{
+			return mtl::allocate_unique<T>(allocator<T>(), std::forward<ArgTypes>(args)...);
 		}
 
 		void set_runpath(std::string_view runpath);
@@ -483,7 +488,7 @@ class Interpreter
 		inline Value make(Args &&...ctor_args)
 		{
 			IF (Value::allowed_or_heap<T>())
-				return Value::make<T>(allocator<T>());
+				return Value::make<T>(allocator<T>(), std::forward<Args>(ctor_args)...);
 			else
 				return new_object<T>(std::forward<Args>(ctor_args)...);
 		}
@@ -517,7 +522,7 @@ class Interpreter
 				if constexpr (has_default_args) {
 					ValList defaults;
 					for (auto val : default_args.get<ValList>())
-						defaults.push_back(Value::wrapped(val));
+						defaults.push_back(Value::wrapped(this, val));
 					default_args = defaults;
 				}
 
@@ -565,13 +570,28 @@ class Interpreter
 		template<typename ...Args>
 		inline Value invoke(const std::string &name, Args ...args)
 		{
-			ExprList eargs( { Value::wrapped(Value(args))... });
+			ExprList eargs( { Value::wrapped(this, Value(args))... });
 
 			if constexpr (DEBUG)
 				for (auto &&val : eargs)
 					std::cout << val << " " << std::endl;
 
 			return invoke_inbuilt_func(name, eargs);
+		}
+
+		inline Value apply_prefix(TokenType op, const ExprPtr &rhs)
+		{
+			return apply_operator<OperatorType::UNARY>(lazy_prefix_ops, value_prefix_ops, op, rhs, rhs);
+		}
+
+		inline Value apply_binary(const ExprPtr &lhs, TokenType op, const ExprPtr &rhs)
+		{
+			return apply_operator<OperatorType::BINARY>(lazy_infix_ops, value_infix_ops, op, lhs, rhs);
+		}
+
+		inline Value apply_postfix(TokenType op, const ExprPtr &lhs)
+		{
+			return apply_operator<OperatorType::UNARY>(lazy_postfix_ops, value_postfix_ops, op, lhs, lhs);
 		}
 
 		template<typename T>
@@ -619,7 +639,7 @@ class Interpreter
 		template<typename T>
 		inline TYPE(T)& tmp_callable(T &&callable)
 		{
-			tmp_call_stack.push(Allocatable<TYPE(T)>::allocate(callable));
+			tmp_call_stack.push(this->make_shared<TYPE(T)>(callable));
 
 			if constexpr (DEBUG)
 				std::cout << "* Pushing tmp callable "
@@ -703,7 +723,6 @@ class Interpreter
 		void del(ExprPtr idfr);
 		void del(const IdentifierExpr &idfr);
 
-		Value evaluate(BinaryOperatorExpr &opr);
 		Value evaluate(PostfixExpr &opr);
 		Value evaluate(PrefixExpr &opr);
 		Value evaluate(AssignExpr &expr);

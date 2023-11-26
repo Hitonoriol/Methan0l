@@ -26,7 +26,6 @@ class Function: public Unit
 	public:
 		Function(Unit body);
 		Function(ArgDefList args, Unit body);
-		Function();
 
 		void set(const Function &rhs);
 		Function(const Function &rhs);
@@ -35,8 +34,6 @@ class Function: public Unit
 		void call(Interpreter &context, const ExprList &args);
 		const ArgDefList& get_arg_def() const;
 		Value &get_callargs();
-
-		static Function create(ExprList body, ArgDefList args = ArgDefList());
 
 		std::string to_string() override;
 		friend std::ostream& operator <<(std::ostream &stream, Function &func);

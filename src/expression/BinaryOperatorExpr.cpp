@@ -16,7 +16,7 @@ BinaryOperatorExpr::BinaryOperatorExpr(ExprPtr lhs,
 
 Value BinaryOperatorExpr::evaluate(Interpreter &context)
 {
-	return context.evaluate(*this);
+	return context.apply_binary(lhs, op.get_type(), rhs);
 }
 
 void BinaryOperatorExpr::execute(Interpreter &context)

@@ -20,11 +20,8 @@ namespace mtl
 
 const std::string OBJCLASS(".class");
 
-Object::Object()
-{
-}
-
 Object::Object(Class* type)
+	: data(&type->get_context())
 {
 	def(OBJCLASS) = type;
 }

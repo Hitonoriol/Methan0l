@@ -44,6 +44,9 @@ enum class BinOprType
 class Parser
 {
 	private:
+		Interpreter *context = nullptr;
+		std::unique_ptr<Unit> const_scope;
+
 		std::unordered_map<TokenType, std::shared_ptr<InfixParser>> infix_parsers;
 		std::unordered_map<TokenType, std::shared_ptr<PrefixParser>> prefix_parsers;
 
@@ -51,13 +54,10 @@ class Parser
 		int32_t access_opr_lvl = -1;
 
 		std::deque<Token> read_queue;
-		Unit root_unit;
+		Shared<Unit> root_unit;
 
 		std::stack<PeekPos> peek_stack;
 		int32_t peek_pos = 0;
-
-		Interpreter *context = nullptr;
-		std::unique_ptr<Unit> const_scope;
 
 		void peek_mode(bool);
 		bool peeking();

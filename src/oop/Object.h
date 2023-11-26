@@ -36,7 +36,6 @@ class Object
 		DataTable data;
 
 	public:
-		Object();
 		Object(Class*);
 		Object(Class*, const DataTable &proto_data);
 		Object(const Object &rhs);

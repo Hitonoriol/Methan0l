@@ -12,7 +12,7 @@ class UnitExpr: public Expression
 		Unit unit;
 
 	public:
-		UnitExpr(ExprList unit, bool weak = false);
+		UnitExpr(Interpreter *context, ExprList unit, bool weak = false);
 
 		Unit get_unit();
 		Unit& get_unit_ref();

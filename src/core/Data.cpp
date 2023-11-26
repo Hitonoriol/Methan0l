@@ -62,6 +62,7 @@ Value filter(Object &iterable_obj, Value predicate)
 
 Value accumulate(Object &iterable_obj, Value accumulator)
 {
+	auto &context = iterable_obj.context();
 	Value result = 0.0;
 	do_for_each(
 		iterable_obj,
@@ -70,8 +71,8 @@ Value accumulate(Object &iterable_obj, Value accumulator)
 		},
 		/* Initializer: modify arg list so that the `accumulator`
 		 * is called for a pair of arguments. */
-		[&result](auto &args) {
-			args.push_front(Value::wrapped(Value::ref(result)));
+		[&context, &result](auto &args) {
+			args.push_front(Value::wrapped(&context, Value::ref(result)));
 		}
 	);
 	return result;

@@ -16,7 +16,7 @@ void LibModule::load()
 {
 	/* load(path) */
 	function("load", [&](const std::string &path) {
-		auto module_v = context->make<Unit>();
+		auto module_v = context->make<Unit>(context);
 		core::load_module(*context, path, module_v.get<Unit>());
 		return module_v;
 	});
@@ -31,7 +31,7 @@ void LibModule::load()
 	});
 
 	prefix_operator(Tokens::USING_MODULE, LazyUnaryOpr([&](auto rhs) {
-		Unit module;
+		Unit module(context);
 		core::load_module(*context, *mtl::str(val(rhs)), module);
 		if (!module.expressions().empty())
 			context->execute(module);

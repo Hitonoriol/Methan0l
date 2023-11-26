@@ -22,9 +22,11 @@
 namespace mtl
 {
 
-Class::Class(Interpreter &context, const std::string &name) :
-		static_instance(std::make_unique<Object>(this)),
-		context(context)
+Class::Class(Interpreter &context, const std::string &name)
+	: context(context),
+	class_data(&context),
+	proto_object_data(&context),
+	static_instance(std::make_unique<Object>(this))
 {
 	set_name(name);
 

@@ -210,13 +210,13 @@ class Value
 
 		Value(const TypeID&) = delete;
 
-		template<typename T>
-		inline static Value make(Allocator<T> alloc = {})
+		template<typename T, typename...Types>
+		inline static Value make(Allocator<T> alloc = {}, Types&&...args)
 		{
 			IF (!allowed_or_heap<T>())
 				throw std::runtime_error("Cannot Value::make() a value of a non-built-in type");
 			ELIF (is_heap_storable<T>())
-				return std::allocate_shared<T>(alloc);
+				return std::allocate_shared<T>(alloc, std::forward<Types>(args)...);
 			else
 				return T{};
 		}
@@ -249,7 +249,7 @@ class Value
 		TypeID type() const;
 		Int type_id() const;
 		Int fallback_type_id() const;
-		Value copy();
+		Value copy(Interpreter *context);
 
 		Int use_count();
 		bool object();
@@ -484,7 +484,7 @@ class Value
 			return ref(unconst(val));
 		}
 
-		static ExprPtr wrapped(const Value &val);
+		static ExprPtr wrapped(Interpreter *context, const Value &val);
 
 		/* Get current value by copy or convert to specified type */
 		template<typename T> inline T as() const
@@ -534,7 +534,9 @@ class Value
 		template<typename ...Args>
 		Value invoke_method(const std::string &name, Args &&...args)
 		{
-			return get<Object>().invoke_method(name, {wrapped(args)...});
+			auto &obj = get<Object>();
+			auto &context = obj.context();
+			return obj.invoke_method(name, {wrapped(&context, args)...});
 		}
 
 		template <typename T>
@@ -581,10 +583,15 @@ class Value
 					return mtl::get<std::any>(value).type() == typeid(Ptr);
 			}
 
-			if (std::holds_alternative<std::any>(value))
-				return mtl::get<std::any>(value).type() == typeid(T);
-
-			return false;
+			return unconst(*this).accept([](auto &value) -> bool {
+				using V = VT(value);
+				IF (std::is_same_v<V, std::any>)
+					return value.type() == typeid(T);
+				ELIF (std::is_same_v<V, Object>)
+					return value.get_native().as_any().type() == typeid(T);
+				else
+					return typeid(V) == typeid(T);
+			});
 		}
 
 		void assert_type(TypeID expected,

@@ -18,7 +18,7 @@ ExprPtr UnitParser::parse(Parser &parser, Token token)
 	LOG("Parsed a unit with " << exprs.size() << " exprs");
 
 	bool weak = token.get_type() == Tokens::ARROW_R;
-	return make_expr<UnitExpr>(line(token), exprs, weak);
+	return make_expr<UnitExpr>(line(token), &parser.get_context(), exprs, weak);
 }
 
 ExprPtr UnitParser::parse_expr_block(Parser &parser, bool unwrap_single_exprs)
@@ -34,7 +34,7 @@ ExprPtr UnitParser::parse_expr_block(Parser &parser, bool unwrap_single_exprs)
 	ExprList block { first_expr };
 	while (parser.match(Tokens::COMMA))
 		block.push_back(parser.parse());
-	return make_expr<UnitExpr>(block.front()->get_line(), block);
+	return make_expr<UnitExpr>(block.front()->get_line(), &parser.get_context(), block);
 }
 
 ExprPtr UnitParser::parse_ctrl_block(Parser &parser, bool unwrap_single_exprs)

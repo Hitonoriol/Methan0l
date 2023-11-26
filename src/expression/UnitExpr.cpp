@@ -5,7 +5,8 @@
 namespace mtl
 {
 
-UnitExpr::UnitExpr(ExprList unit, bool weak) : unit(unit, weak)
+UnitExpr::UnitExpr(Interpreter *context, ExprList unit, bool weak)
+	: unit(context, unit, weak)
 {
 }
 

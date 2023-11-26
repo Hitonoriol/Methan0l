@@ -242,7 +242,7 @@ void LibData::load_operators()
 		if (rval.is<Object>())
 			return rval.get<Object>().invoke_method(mtl::str(Methods::Copy), {});
 		else if (rval.is<Unit>()) {
-			auto copy = context->make<Unit>();
+			auto copy = context->make<Unit>(context);
 			return copy.as<Unit>([&](auto &box) {
 				box.box();
 				box.manage_table(rval.get<Unit>());
