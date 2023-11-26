@@ -103,7 +103,15 @@ install: all lib-headers
 # Full release tarball: cli binary, interpreter library, headers and modules
 release: all lib-headers modules
 	@echo 'Creating release tarball...'
-	tar -czf methan0l-$(OS_NAME)$(BITS).tar.gz $(CLI_BIN_NAME) $(INCLUDE_DIR) $(LIB_NAME) $(MODULE_DIR) $(STDLIB_DIR) ../baker $(EXAMPLES_DIR)
+	tar --directory=$(OUT_DIR) -czf \
+		Methan0l-$(OS_NAME)_$(BITS).tar.gz \
+		$(patsubst $(OUT_DIR)%,%,$(CLI_BIN_NAME)) \
+		$(patsubst $(OUT_DIR)%,%,$(INCLUDE_DIR)) \
+		$(patsubst $(OUT_DIR)%,%,$(LIB_NAME)) \
+		$(patsubst $(OUT_DIR)%,%,$(MODULE_DIR)) \
+		$(patsubst $(OUT_DIR)%,%,$(STDLIB_DIR)) \
+		../$(EXAMPLES_DIR) \
+		../../baker
 	@echo 'Done!'
 
 # (Attempt to) Build all modules
