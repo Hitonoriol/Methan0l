@@ -7,8 +7,8 @@
 
 #include <util/util.h>
 
-#define MAJOR_VERSION 0
-#define RELEASE_VERSION 3
+#define MAJOR_VERSION 1
+#define RELEASE_VERSION 0
 #define MINOR_VERSION 0
 #define VERSION_SUFFIX -pre
 
