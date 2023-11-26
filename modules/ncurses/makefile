@@ -1,8 +1,8 @@
 MODULE_NAME:=ncurses
 
-M_LINK_STATIC:= 
-M_LINK_DYNAMIC:=-lncurses
+M_LINK_STATIC:=-lncurses
+M_LINK_DYNAMIC:=
 MOD_FLAGS=
 
-LIB_PATH=../../build
+LIB_PATH=../../build/debug
 include ../make-module.inc
