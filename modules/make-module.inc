@@ -7,7 +7,7 @@ DEV_HEADERS=$(LIB_PATH)/include
 OUT_PATH=$(LIB_PATH)/modules
 
 DEPS=-L$(LIB_PATH) -l:libmethan0l.so -Wl,--gc-sections
-FLAGS=-std=c++17 -O3 -fdata-sections -ffunction-sections
+FLAGS=-std=c++2a -O3 -fdata-sections -ffunction-sections
 
 MODULE_BIN:=$(MODULE_NAME).so
 MODULE_DIR:=$(OUT_PATH)/$(MODULE_NAME)
@@ -33,4 +33,4 @@ $(MODULE_BIN): $(MODULE_DIR) $(OBJS)
 	@echo ' '
 
 clean:
-	rm -fv $(OBJS) $(MODULE_BIN)
+	rm -fv $(OBJS) $(MODULE_DIR)/$(MODULE_BIN)
