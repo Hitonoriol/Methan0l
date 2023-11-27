@@ -45,11 +45,19 @@ STRINGS(
 
 Interpreter::Interpreter(Unique<Parser> parser, const char *path)
 	: heap(Heap::create(HEAP_MEM_CAP)),
+	  dlls(allocator<Shared<SharedLibrary>>()),
+	  libraries(allocator<Shared<Library>>()),
 	  env_table(this),
-	  exec_stack { &main },
+	  temporaries(allocator<Value>()),
+	  inbuilt_funcs(allocator<NativeFuncMap::value_type>()),
+	  exec_stack(allocator<Unit*>()),
+	  object_stack(allocator<DataTable*>()),
+	  tmp_call_stack(allocator<std::shared_ptr<Unit>>()),
+	  on_exit_tasks(allocator<Task>()),
 	  parser(std::move(parser)),
 	  main(this)
 {
+	exec_stack.push_back(&main);
 	load_library<Builtins>();
 	if (path) {
 		set_runpath(path);
@@ -206,6 +214,7 @@ Value Interpreter::execute(Unit &unit, const bool use_own_scope)
 
 	while (unit.has_next_expr() && !unit.execution_finished())
 		exec(*(current_expr = unit.next_expression()));
+	temporaries.clear();
 
 	if (execution_stopped()) {
 		return Value::NO_VALUE;
@@ -321,7 +330,6 @@ void Interpreter::leave_scope()
 {
 	IFDBG(dump_stack())
 
-	DataTable::purge_temporary();
 	if (exec_stack.size() > 1) {
 		Unit *unit = current_unit();
 
@@ -500,13 +508,13 @@ Value& Interpreter::referenced_value(Expression *expr, bool follow_refs)
 
 	/* Create a temporary value and reference it if `expr` is not an access expression */
 	else if (!BinaryOperatorExpr::is(*expr, Tokens::DOT))
-		return expr->evaluate(*this).get_ref();
+		return expr->evaluate(*this).get_ref(this);
 
 	/* Reference an access expression's value */
 	else {
 		auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
 		ExprPtr lhs = dot_expr.get_lhs(), rhs = dot_expr.get_rhs();
-		return apply_binary(lhs, Tokens::DOT, rhs).get_ref();
+		return apply_binary(lhs, Tokens::DOT, rhs).get_ref(this);
 	}
 
 	throw std::runtime_error("Reference error");
@@ -531,7 +539,8 @@ void Interpreter::exec(Expression &expr)
 	if constexpr (DEBUG)
 		std::cout << "[Exec] " << expr.info() << std::endl;
 
-	return expr.execute(*this);
+	expr.execute(*this);
+	temporaries.clear();
 }
 
 /* Used when assigning to identifiers. */

@@ -137,10 +137,11 @@ class Interpreter
 
 		std::unique_ptr<Heap> heap;
 
-		std::vector<std::shared_ptr<SharedLibrary>> dlls;
-		std::vector<std::shared_ptr<Library>> libraries;
+		PmrVector<Shared<SharedLibrary>> dlls;
+		PmrVector<Shared<Library>> libraries;
 
 		DataTable env_table;
+		ValList temporaries;
 		TypeManager type_mgr { *this };
 		NativeFuncMap inbuilt_funcs;
 
@@ -151,13 +152,13 @@ class Interpreter
 		OperatorMap<UnaryOpr> value_prefix_ops, value_postfix_ops;
 		OperatorMap<BinaryOpr> value_infix_ops;
 
-		std::deque<Unit*> exec_stack;
-		std::deque<DataTable*> object_stack;
+		std::pmr::deque<Unit*> exec_stack;
+		std::pmr::deque<DataTable*> object_stack;
 		std::stack<std::shared_ptr<Unit>, std::pmr::deque<std::shared_ptr<Unit>>> tmp_call_stack;
 		Expression *current_expr = nullptr;
 
 		bool stopped = false;
-		std::deque<std::function<void(void)>> on_exit_tasks;
+		std::pmr::deque<Task> on_exit_tasks;
 
 		std::unique_ptr<Parser> parser;
 		Unit main;
@@ -218,6 +219,20 @@ class Interpreter
 				Value rhs = eval(b);
 				return val_ops.find(op)->second(operand_a, rhs);
 			}
+		}
+
+	public:
+		template<typename T>
+		inline Value& copy_temporary(const T& val)
+		{
+			temporaries.push_back(val);
+			return temporaries.back();
+		}
+
+		inline Value& copy_temporary(const Value& val)
+		{
+			temporaries.push_back(val);
+			return temporaries.back();
 		}
 
 	protected:
@@ -352,7 +367,8 @@ class Interpreter
 
 			/* In case of `&&` -- create a new temporary with evaluation result & return a `&&` to it. */
 			else if constexpr (std::is_rvalue_reference<T>::value) {
-				Value &tmp = DataTable::create_temporary(std::make_any<V>(eval<V>(expr)));
+				auto any = std::make_any<V>(eval<V>(expr));
+				Value &tmp = copy_temporary(any);
 				return std::move(tmp.get<V>());
 			}
 
@@ -461,6 +477,13 @@ class Interpreter
 		inline UniquePmr<T> make_unique(ArgTypes&&... args)
 		{
 			return mtl::allocate_unique<T>(allocator<T>(), std::forward<ArgTypes>(args)...);
+		}
+
+		template<typename T, typename ...Types>
+		inline Value& make_temporary(Types&&...ctor_args)
+		{
+			temporaries.push_back(this->make<T>(std::forward<Types>(ctor_args)...));
+			return temporaries.back();
 		}
 
 		void set_runpath(std::string_view runpath);
@@ -655,6 +678,8 @@ class Interpreter
 		template<typename T>
 		bool handle_exception(T &exception)
 		{
+			temporaries.clear();
+			
 			std::string msg;
 			/* Either a std::exception-derived or a Value object can be thrown */
 			constexpr bool stdex = std::is_base_of<std::exception, T>::value;

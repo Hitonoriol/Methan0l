@@ -19,8 +19,6 @@ class DataTable
 		std::shared_ptr<DataMap> map;
 		static const std::string NIL_IDF;
 
-		static ValList temp_queue;
-
 	public:
 		DataTable(Interpreter*);
 		DataTable(const DataMap &managed_map, Interpreter *context);
@@ -56,16 +54,6 @@ class DataTable
 		friend std::ostream& operator <<(std::ostream &stream, DataTable &val);
 
 		static DataTable make(const ValMap&, Interpreter&);
-
-		static Value& create_temporary(Value val);
-
-		template<typename T>
-		static inline Value& create_temporary(T &&val)
-		{
-			return create_temporary(std::forward<Value>(Value(val)));
-		}
-
-		static void purge_temporary();
 };
 
 }

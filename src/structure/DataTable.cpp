@@ -16,8 +16,6 @@ namespace mtl
 
 const std::string DataTable::NIL_IDF(ReservedWord::NIL.name);
 
-ValList DataTable::temp_queue{};
-
 DataTable::DataTable(Interpreter *context)
 	: context(context),
 	map(context->make_shared<DataMap>())
@@ -57,26 +55,6 @@ Value& DataTable::set(const std::string &id, Value value)
 Value& DataTable::get_or_create(const std::string &id)
 {
 	return (*map)[id];
-}
-
-Value& DataTable::create_temporary(Value val)
-{
-	if constexpr (DEBUG)
-		out << "Creating a temporary Value: `" << val << "`" << std::endl;
-
-	temp_queue.push_front(std::forward<Value>(val));
-
-	return temp_queue.front();
-}
-
-void DataTable::purge_temporary()
-{
-	if (!temp_queue.empty()) {
-		if constexpr (DEBUG)
-			out << "* Deleting temporaries [" << temp_queue.size() << " values]..." << std::endl;
-
-		temp_queue.clear();
-	}
 }
 
 Value& DataTable::get(const std::string &id, bool fail_if_undefined)

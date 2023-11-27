@@ -240,11 +240,7 @@ class Value
 		}
 
 		Value& get();
-
-		inline Value& get_ref()
-		{
-			return !is<ValueRef>() ? DataTable::create_temporary(*this) : get<ValueRef>().value();
-		}
+		Value& get_ref(Interpreter *context);
 
 		TypeID type() const;
 		Int type_id() const;

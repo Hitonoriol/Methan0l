@@ -76,6 +76,9 @@ using Unique = std::unique_ptr<T>;
 template<class T>
 using Allocator = std::pmr::polymorphic_allocator<T>;
 
+template<class T>
+using PmrVector = std::pmr::vector<T>;
+
 template<typename K, typename V>
 using HashMap = std::pmr::unordered_map<K, V>;
 
@@ -110,6 +113,8 @@ using ValSet = std::pmr::unordered_set<Value>;
 
 using ArgDef = std::pair<std::string, ExprPtr>;
 using ArgDefList = std::pmr::deque<ArgDef>;
+
+using Task = std::function<void(void)>;
 
 using LazyUnaryOpr = std::function<Value(const ExprPtr&)>;
 using LazyBinaryOpr = std::function<Value(const ExprPtr&, const ExprPtr&)>;

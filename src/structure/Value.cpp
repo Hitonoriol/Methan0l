@@ -48,6 +48,13 @@ Value& Value::get()
 	return *this;
 }
 
+Value& Value::get_ref(Interpreter *context)
+{
+	return !is<ValueRef>()
+		? context->copy_temporary(*this)
+		: get<ValueRef>().value();
+}
+
 /* Deep copy internal `value` contents if they're heap-stored */
 Value Value::copy(Interpreter *context)
 {
