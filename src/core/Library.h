@@ -38,19 +38,19 @@ class Library
 	protected:
 		Interpreter *context = 0;
 
-		std::string str(ExprList args, int idx = 0);
+		std::string str(const ExprList& args, int idx = 0);
 		Value str(std::string_view);
 		Value str(std::string&&);
 		Value str(const Shared<native::String>&);
 
-		double dbl(ExprList args, int idx = 0);
-		Int num(ExprList args, int idx = 0);
-		UInt unum(ExprList args, int idx = 0);
+		double dbl(const ExprList& args, int idx = 0);
+		Int num(const ExprList& args, int idx = 0);
+		UInt unum(const ExprList& args, int idx = 0);
 
 		Value val(ExprPtr expr);
 		Value& ref(ExprPtr idfr);
 		Value& ref(IdentifierExpr &idfr);
-		Value arg(ExprList args, int idx = 0);
+		Value arg(const ExprList& args, int idx = 0);
 
 		template<typename T>
 		inline void function(const std::string &name, T &&callable)

@@ -24,7 +24,7 @@ LIB_OPERATOR_DEF(postfix, UnaryOpr)
 LIB_OPERATOR_DEF(infix, LazyBinaryOpr)
 LIB_OPERATOR_DEF(infix, BinaryOpr)
 
-std::string Library::str(ExprList args, int idx)
+std::string Library::str(const ExprList& args, int idx)
 {
 	return *mtl::str(arg(args, idx));
 }
@@ -44,17 +44,17 @@ Value Library::str(const Shared<native::String> &raw_str)
 	return context->bind_object(raw_str);
 }
 
-double Library::dbl(ExprList args, int idx)
+double Library::dbl(const ExprList& args, int idx)
 {
 	return mtl::dbl(arg(args, idx));
 }
 
-Int Library::num(ExprList args, int idx)
+Int Library::num(const ExprList& args, int idx)
 {
 	return mtl::num(arg(args, idx));
 }
 
-UInt Library::unum(ExprList args, int idx)
+UInt Library::unum(const ExprList& args, int idx)
 {
 	return mtl::unum(arg(args, idx));
 }
@@ -74,7 +74,7 @@ Value& Library::ref(IdentifierExpr &idfr)
 	return context->get(idfr);
 }
 
-Value Library::arg(ExprList args, int idx)
+Value Library::arg(const ExprList& args, int idx)
 {
 	if (args.size() <= (size_t) idx)
 		throw std::runtime_error("Trying to access argument #" + std::to_string(idx) +
