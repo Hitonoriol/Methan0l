@@ -15,6 +15,8 @@
 #include <variant>
 #include <tuple>
 
+#include <boost/container/devector.hpp>
+
 #include <util/debug.h>
 
 #define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
@@ -79,6 +81,14 @@ using Allocator = std::pmr::polymorphic_allocator<T>;
 template<class T>
 using PmrVector = std::pmr::vector<T>;
 
+template<class T>
+using PmrDeque = std::pmr::deque<T>;
+
+template<class T>
+using DeVector = boost::container::devector<T, Allocator<T>>;
+
+using ValVector = PmrVector<Value>;
+
 template<typename K, typename V>
 using HashMap = std::pmr::unordered_map<K, V>;
 
@@ -103,16 +113,16 @@ using ExprExprMap = std::pmr::unordered_map<ExprPtr, ExprPtr>;
 using DataMap = std::pmr::unordered_map<std::string, Value>;
 using ValMap = std::pmr::unordered_map<Value, Value>;
 
-using ExprList = std::pmr::deque<ExprPtr>;
-using ExprListPtr = std::shared_ptr<ExprList>;
+using ExprList = DeVector<ExprPtr>;
+using ExprListPtr = Shared<ExprList>;
 using Args = const ExprList;
-using RawExprList = std::pmr::deque<Expression*>;
-using ValList = std::pmr::deque<Value>;
+using RawExprList = PmrVector<Expression*>;
+using ValList = ValVector;
 
 using ValSet = std::pmr::unordered_set<Value>;
 
 using ArgDef = std::pair<std::string, ExprPtr>;
-using ArgDefList = std::pmr::deque<ArgDef>;
+using ArgDefList = PmrDeque<ArgDef>;
 
 using Task = std::function<void(void)>;
 
