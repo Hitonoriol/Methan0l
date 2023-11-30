@@ -3,13 +3,14 @@
 #include <type.h>
 #include <parser/Parser.h>
 #include <expression/UnitExpr.h>
+#include <interpreter/Interpreter.h>
 
 namespace mtl
 {
 
 ExprPtr UnitParser::parse(Parser &parser, Token token)
 {
-	ExprList exprs;
+	ExprList exprs(parser.get_context().allocator<ExprPtr>());
 	if (!parser.match(Tokens::BRACE_R)) {
 		do {
 			exprs.push_back(parser.parse());
@@ -31,7 +32,9 @@ ExprPtr UnitParser::parse_expr_block(Parser &parser, bool unwrap_single_exprs)
 	if (unwrap_single_exprs && !parser.peek(Tokens::COMMA))
 		return first_expr;
 
-	ExprList block { first_expr };
+	ExprList block(parser.get_context().allocator<ExprPtr>());
+	block.push_back(first_expr);
+
 	while (parser.match(Tokens::COMMA))
 		block.push_back(parser.parse());
 	return make_expr<UnitExpr>(block.front()->get_line(), &parser.get_context(), block);

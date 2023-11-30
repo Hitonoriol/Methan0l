@@ -37,6 +37,7 @@ class Unit
 		ExprList::iterator break_it();
 
 	protected:
+		Interpreter *context;
 		DataTable local_data;
 		ExprList expr_list;
 

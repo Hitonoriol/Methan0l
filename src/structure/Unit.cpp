@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 
+#include <Interpreter/Interpreter.h>
 #include <lexer/Token.h>
 #include <structure/Value.h>
 #include <expression/Expression.h>
@@ -18,6 +19,7 @@ const std::string Unit::RETURN_KW(ReservedVar::RETURNED.name);
 
 Unit::Unit(const ExprList &expr_list, DataTable data, bool weak)
 	:	weak(weak),
+		context(data.get_context()),
 		local_data(data),
 		expr_list(expr_list)
 
@@ -30,19 +32,30 @@ Unit::Unit(Interpreter *context, const ExprList &expr_list, bool weak)
 }
 
 Unit::Unit(DataTable data)
-	: Unit(ExprList(), data)
+	: Unit(
+		ExprList(data.get_context()->allocator<ExprPtr>()),
+		data
+	)
 {
 }
 
 /* Single expression Unit */
 Unit::Unit(Interpreter *context, ExprPtr expr)
-	: Unit(context, { expr }, false)
+	: Unit(
+		context,
+		ExprList(context->allocator<ExprPtr>()),
+		false
+	)
 {
+	expr_list.push_back(expr);
 }
 
 /* Empty Unit */
 Unit::Unit(Interpreter *context)
-	: Unit(context, ExprList())
+	: Unit(
+		context,
+		ExprList(context->allocator<ExprPtr>())
+	)
 {
 }
 
