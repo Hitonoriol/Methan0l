@@ -141,7 +141,7 @@ class Interpreter
 		PmrVector<Shared<Library>> libraries;
 
 		DataTable env_table;
-		ValList temporaries;
+		ValVector temporaries;
 		TypeManager type_mgr { *this };
 		NativeFuncMap inbuilt_funcs;
 
@@ -152,16 +152,19 @@ class Interpreter
 		OperatorMap<UnaryOpr> value_prefix_ops, value_postfix_ops;
 		OperatorMap<BinaryOpr> value_infix_ops;
 
-		std::pmr::deque<Unit*> exec_stack;
-		std::pmr::deque<DataTable*> object_stack;
-		std::stack<std::shared_ptr<Unit>, std::pmr::deque<std::shared_ptr<Unit>>> tmp_call_stack;
+		PmrVector<Unit*> exec_stack;
+		PmrVector<DataTable*> object_stack;
+		std::stack<std::shared_ptr<Unit>, PmrVector<std::shared_ptr<Unit>>> tmp_call_stack;
 		Expression *current_expr = nullptr;
 
 		bool stopped = false;
-		std::pmr::deque<Task> on_exit_tasks;
+		PmrVector<Task> on_exit_tasks;
 
 		std::unique_ptr<Parser> parser;
 		Unit main;
+
+		size_t current_temporary_depth();
+		void clear_temporaries(size_t up_to = 0);
 
 		Unit load_unit(std::istream &codestr);
 		Unit load_unit(std::string &code);
@@ -479,6 +482,12 @@ class Interpreter
 			return mtl::allocate_unique<T>(allocator<T>(), std::forward<ArgTypes>(args)...);
 		}
 
+		template<typename T>
+		inline T make_container()
+		{
+			return T(allocator<T::element_type>());
+		}
+
 		template<typename T, typename ...Types>
 		inline Value& make_temporary(Types&&...ctor_args)
 		{
@@ -679,7 +688,7 @@ class Interpreter
 		bool handle_exception(T &exception)
 		{
 			temporaries.clear();
-			
+
 			std::string msg;
 			/* Either a std::exception-derived or a Value object can be thrown */
 			constexpr bool stdex = std::is_base_of<std::exception, T>::value;

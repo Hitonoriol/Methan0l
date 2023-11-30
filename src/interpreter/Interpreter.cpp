@@ -214,7 +214,7 @@ Value Interpreter::execute(Unit &unit, const bool use_own_scope)
 
 	while (unit.has_next_expr() && !unit.execution_finished())
 		exec(*(current_expr = unit.next_expression()));
-	temporaries.clear();
+	clear_temporaries();
 
 	if (execution_stopped()) {
 		return Value::NO_VALUE;
@@ -528,19 +528,34 @@ Value& Interpreter::get(const std::string &id, bool global, bool follow_refs)
 
 Value Interpreter::eval(Expression &expr)
 {
-	if constexpr (DEBUG)
-		std::cout << "[Eval] " << expr.info() << std::endl;
-
+	LOG("[Eval] " << expr.info());
 	return expr.evaluate(*this);
 }
 
 void Interpreter::exec(Expression &expr)
 {
-	if constexpr (DEBUG)
-		std::cout << "[Exec] " << expr.info() << std::endl;
+	LOG("[Exec] " << expr.info());
 
 	expr.execute(*this);
-	temporaries.clear();
+	clear_temporaries();
+}
+
+void Interpreter::clear_temporaries(size_t up_to)
+{
+	if (up_to == 0) {
+		temporaries.clear();
+		return;
+	}
+
+	if (up_to == temporaries.size())
+		return;
+
+	temporaries.erase(temporaries.begin() + up_to, temporaries.end());
+}
+
+size_t Interpreter::current_temporary_depth()
+{
+	return temporaries.size();
 }
 
 /* Used when assigning to identifiers. */
