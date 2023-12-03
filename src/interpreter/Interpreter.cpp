@@ -656,7 +656,7 @@ bool Interpreter::func_exists(const std::string &name)
 	return inbuilt_funcs.find(name) != inbuilt_funcs.end();
 }
 
-Value Interpreter::invoke_inbuilt_func(const std::string &name, ExprList args)
+Value Interpreter::invoke_inbuilt_func(const std::string &name, const ExprList &args)
 {
 	auto entry = inbuilt_funcs.find(name);
 	if (entry == inbuilt_funcs.end())

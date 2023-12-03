@@ -23,7 +23,10 @@ MappingIterator::MappingIterator(Mapping &mapping, Interpreter &context)
 	  mapping(mapping),
 	  it(mapping.iterable.iterator()),
 	  mapping_arg(LiteralExpr::empty()),
-	  mapping_arglist{mapping_arg} {}
+	  mapping_arglist(context.allocator<ExprPtr>())
+{
+	mapping_arglist.push_back(mapping_arg);
+}
 
 void MappingIterator::set_arg(const Value &val)
 {

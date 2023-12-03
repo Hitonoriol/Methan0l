@@ -35,7 +35,7 @@ void LibInternal::load()
 	context->register_env_getter("get_bin_path", EnvVars::BIN_PATH);
 
 	function("get_launch_args", [&] {
-		return static_cast<Interpreter*>(context)->get_main().local().get(EnvVars::LAUNCH_ARGS);
+		return context->get_main().local().get(EnvVars::LAUNCH_ARGS);
 	});
 
 	function("on_exit", mtl::member(context, &Interpreter::register_exit_task));

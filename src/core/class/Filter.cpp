@@ -20,7 +20,10 @@ FilterIterator::FilterIterator(Filter &filter, Interpreter &context)
 	: context(context), filter(filter),
 	  it(filter.iterable.iterator()),
 	  predicate_arg(LiteralExpr::empty()),
-	  predicate_arglist{predicate_arg} {}
+	  predicate_arglist(context.allocator<ExprPtr>())
+{
+	predicate_arglist.push_back(predicate_arg);
+}
 
 Value FilterIterator::next()
 {

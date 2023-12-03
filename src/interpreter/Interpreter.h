@@ -209,7 +209,7 @@ class Interpreter
 				auto &obj = operand_a.get<Object>();
 				auto [method_it, end] = find_operator_overload(obj, op);
 				if (method_it != end) {
-					ExprList args;
+					ExprList args(allocator<ExprPtr>());
 					if constexpr (Optype == OperatorType::BINARY)
 						args.push_back(b);
 					return invoke_method(obj, method_it->second, args);
@@ -248,7 +248,7 @@ class Interpreter
 		OPERATOR_DEF(lazy, infix, LazyBinaryOpr)
 		OPERATOR_DEF(value, infix, BinaryOpr)
 
-		Value invoke_inbuilt_func(const std::string &name, ExprList args);
+		Value invoke_inbuilt_func(const std::string &name, const ExprList &args);
 
 		void restore_execution_state(size_t depth);
 		inline void pop_tmp_callable()

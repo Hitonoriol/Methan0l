@@ -24,7 +24,8 @@ inline Value do_for_each(IterableAdapter iterable, F action, Initializer init = 
 	auto &context = iterable.get_context();
 	auto it = iterable.iterator();
 	auto elem_expr = LiteralExpr::empty();
-	ExprList action_args { elem_expr };
+	ExprList action_args(context.allocator<ExprList>());
+	action_args.push_back(elem_expr);
 	init(action_args);
 	while (it.has_next()) {
 		elem_expr->raw_ref() = it.next();
