@@ -39,13 +39,13 @@ class InteractiveRunner
 		void init_commands();
 		void init_env();
 
-		void save_arg(const std::string &arg);
 		std::string next_arg();
 		inline bool has_args()
 		{
 			return !arg_queue.empty();
 		}
 
+		void parse_args(const std::string &cmd);
 		bool process_commands(const std::string &cmd);
 		bool load_line(std::string &line);
 
@@ -59,6 +59,8 @@ class InteractiveRunner
 
 		std::string cmd_str(std::string_view);
 		void toggle_cas_message();
+
+		void bake_program();
 
 	public:
 		InteractiveRunner(Interpreter&);

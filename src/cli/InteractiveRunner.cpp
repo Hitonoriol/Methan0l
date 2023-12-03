@@ -1,5 +1,7 @@
 #include "InteractiveRunner.h"
 
+#include "Baker.h"
+
 #include <iomanip>
 #include <deque>
 #include <memory>
@@ -87,6 +89,12 @@ const InteractiveRunner::CommandMap InteractiveRunner::default_commands
 						Runner(mt0).run_file(path, args);
 					}
 		},
+		{ "bake [in <script.mt0>] [out <path>] [dep <path>] - bake a methan0l program into a native executable",
+				[](auto &runner)
+					{
+						runner.bake_program();
+					}
+		},
 		{ "cas - toggle CAS mode (print out each expression result after evalution); off by default",
 				[](auto &runner)
 					{
@@ -152,6 +160,24 @@ void InteractiveRunner::toggle_cas_message()
 	cas_print_end();
 }
 
+void InteractiveRunner::bake_program()
+{
+	Baker baker(&methan0l);
+	while(has_args()) {
+		auto arg = next_arg();
+		if (arg == "in") {
+			baker.set_main_file(next_arg());
+		}
+		else if (arg == "out") {
+			baker.set_out_path(next_arg());
+		}
+		else if (arg == "dep") {
+			baker.add_dependency(next_arg());
+		}
+	}
+	baker.bake();
+}
+
 Value InteractiveRunner::get_saved_value(size_t idx)
 {
 	if (idx == 0)
@@ -195,19 +221,47 @@ void InteractiveRunner::init_commands()
 	}
 }
 
-void InteractiveRunner::save_arg(const std::string &arg)
-{
-	arg_queue.push_front(arg);
-}
-
 std::string InteractiveRunner::next_arg()
 {
 	if (arg_queue.empty())
 		throw std::runtime_error("Too few arguments supplied.");
 
-	std::string arg = std::move(arg_queue.back());
-	arg_queue.pop_back();
+	std::string arg = std::move(arg_queue.front());
+	arg_queue.pop_front();
 	return arg;
+}
+
+void InteractiveRunner::parse_args(const std::string &cmd)
+{
+	std::string arg;
+	bool parsing_path = false;
+	for (auto chr : cmd) {
+		// Start of path string
+		if (!parsing_path && chr == '\"') {
+			parsing_path = true;
+			continue;
+		}
+
+		// End of path string
+		if (parsing_path && chr == '\"') {
+			parsing_path = false;
+			arg_queue.push_back(arg);
+			arg.clear();
+			continue;
+		}
+
+		// Regular non-path argument
+		if (chr == ' ') {
+			arg_queue.push_back(arg);
+			arg.clear();
+		} else {
+			arg += chr;
+		}
+	}
+	
+	if (!arg.empty()) {
+		arg_queue.push_back(arg);
+	}
 }
 
 /* Format: /command */
@@ -220,10 +274,9 @@ bool InteractiveRunner::process_commands(const std::string &cmd)
 			|| std::string_view(cmd).substr(0, cmd_prefix.size()) != cmd_prefix)
 		return false;
 
-	auto toks = split(cmd, " ");
-	auto f_cmd = commands.find(std::string_view(toks[0]).substr(cmd_prefix_len));
-	for (auto it = std::next(toks.begin()); it != toks.end(); ++it)
-		save_arg(*it);
+	parse_args(cmd);
+	auto cmd_name = next_arg().substr(cmd_prefix_len);
+	auto f_cmd = commands.find(std::string_view{cmd_name});
 
 	if (f_cmd != commands.end()) {
 		try {
