@@ -5,7 +5,7 @@
 #include <vector>
 #include <sstream>
 
-#include <Interpreter/Interpreter.h>
+#include <interpreter/Interpreter.h>
 #include <lexer/Token.h>
 #include <structure/Value.h>
 #include <expression/Expression.h>

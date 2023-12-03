@@ -46,11 +46,24 @@ LIB_INC = -I$(SRC_DIR)
 
 # Binary outputs
 CLI_BIN_NAME = $(OUT_DIR)$(addsuffix $(if $(filter $(OS_NAME),Windows),.exe,),methan0l)
-LIB_NAME = $(OUT_DIR)libmethan0l.so
+LIB_NAME = libmethan0l.so
+LIB_PATH = $(OUT_DIR)$(LIB_NAME)
 
-# Static / dynamic library dependencies
-LINK_STATIC := -lboost_filesystem-mt -lboost_system-mt
-LINK_DYNAMIC :=
+# ---------- Static / dynamic library dependencies ----------
+
+# Windows-specific
+ifeq ($(OS_NAME),Windows)
+	LINK_STATIC := -lboost_filesystem-mt -lboost_system-mt
+	LINK_DYNAMIC :=
+endif
+
+# Linux-specific
+ifeq ($(OS_NAME),Linux)
+	LINK_STATIC=
+	LINK_DYNAMIC+= -ldl -lboost_filesystem -lboost_system
+endif
+
+# -----------------------------------------------------------
 
 # GCC compilation flags
 FLAGS:=-std=c++2a -Wall -Wextra -Wno-unused-parameter -Wno-overloaded-virtual -static-libgcc -static-libstdc++
@@ -69,12 +82,6 @@ ifdef NO_STATIC
 	LINK_STATIC=
 endif
 
-ifneq ($(OS_NAME),Windows)
-	ifeq ($(OS_NAME),Linux)
-		LINK_DYNAMIC+= -ldl
-	endif
-endif
-
 .PHONY: all lib lib-headers stdlib install release modules clean lib-clean
 
 all: $(CLI_BIN_NAME)
@@ -85,7 +92,7 @@ install: all lib-headers
 	@if [ "$(OS_NAME)" = "Linux" ]; then \
 	    echo "Installing $(CLI_BIN_NAME)..." && \
 	    mkdir -p $(INSTALL_DIR) && \
-	    cp -f $(LIB_NAME) $(INSTALL_DIR) && \
+	    cp -f $(LIB_PATH) $(INSTALL_DIR) && \
 	    cp -f $(CLI_BIN_NAME) $(INSTALL_DIR) && \
 	    cp -rf $(MODULE_DIR) $(INSTALL_DIR) && \
 	    cp -rf $(STDLIB_DIR) $(INSTALL_DIR) && \
@@ -107,7 +114,7 @@ release: all lib-headers modules
 		Methan0l-$(OS_NAME)_$(BITS).tar.gz \
 		$(patsubst $(OUT_DIR)%,%,$(CLI_BIN_NAME)) \
 		$(patsubst $(OUT_DIR)%,%,$(INCLUDE_DIR)) \
-		$(patsubst $(OUT_DIR)%,%,$(LIB_NAME)) \
+		$(patsubst $(OUT_DIR)%,%,$(LIB_PATH)) \
 		$(patsubst $(OUT_DIR)%,%,$(MODULE_DIR)) \
 		$(patsubst $(OUT_DIR)%,%,$(STDLIB_DIR)) \
 		../$(EXAMPLES_DIR) \
@@ -122,11 +129,11 @@ modules: lib lib-headers
 	@echo ' '
 
 # ---------- Interpreter shared library targets ----------
-lib: $(LIB_NAME)
+lib: $(LIB_PATH)
 
-$(LIB_NAME): $(LIB_OBJS)
+$(LIB_PATH): $(LIB_OBJS)
 	@echo 'Building interpreter library: $@...'
-	g++ $(FLAGS) $(LIB_OBJS) -shared -o $(LIB_NAME) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) $(RPATH)
+	g++ $(FLAGS) $(LIB_OBJS) -shared -o $(LIB_PATH) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) $(RPATH)
 	@echo 'Finished building: $@'
 	@echo ' '
 
@@ -168,7 +175,7 @@ $(STDLIB_DIR)/%.so: $(OBJ_DIR)$$(STDLIB_PATH)%.o.pic lib $$(call read_stdlib_dep
 	$(eval lib_obj:=$(word 1,$^))
 	$(eval lib_dep:=$(file < $(patsubst $(OBJ_DIR)%.o.pic,$(SRC_DIR)%.deps,$(lib_obj))))
 	$(eval lib_dep:=$(patsubst %,$(OBJ_DIR)$(STDLIB_PATH)%.o.pic,$(lib_dep)))
-	g++ -static-libgcc -static-libstdc++ $(lib_obj) $(lib_dep) -shared -L./ -l:$(LIB_NAME) -o $@ $(RPATH)
+	g++ -static-libgcc -static-libstdc++ $(lib_obj) $(lib_dep) -shared -L$(OUT_DIR) -l:$(LIB_NAME) -o $@ $(RPATH)
 	@echo 'Finished building core library: $@'
 	@echo ' '
 
@@ -182,7 +189,7 @@ cli: $(CLI_BIN_NAME)
 
 $(CLI_BIN_NAME): lib stdlib $(CLI_OBJS)
 	@echo 'Building interpreter cli: $@'
-	g++ $(FLAGS) -o $(CLI_BIN_NAME) $(CLI_OBJS) -m$(BITS) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic -L./ -l:$(LIB_NAME) $(LINK_DYNAMIC) $(RPATH)
+	g++ $(FLAGS) -o $(CLI_BIN_NAME) $(CLI_OBJS) -m$(BITS) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic -L$(OUT_DIR) -l:$(LIB_NAME) $(LINK_DYNAMIC) $(RPATH)
 	@echo 'Finished building interpreter cli: $@'
 	@echo ' '
 
@@ -195,5 +202,5 @@ $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
 # --------------------------------------------------------
 
 clean: lib-clean
-	-$(RM) $(CLI_BIN_NAME) $(LIB_NAME) $(DEPS) $(CLI_OBJS) $(STDLIB_DIR)/* $(OBJ_DIR)/*
+	-$(RM) $(CLI_BIN_NAME) $(LIB_PATH) $(DEPS) $(CLI_OBJS) $(STDLIB_DIR)/* $(OBJ_DIR)/*
 	-@echo ' '
