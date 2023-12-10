@@ -90,7 +90,7 @@ class Lexer
 		Lexer();
 		Lexer(const Lexer&);
 		Lexer& operator=(const Lexer&);
-		~Lexer() = default;
+		virtual ~Lexer() = default;
 
 		void register_punctuator(TokenType punctuator);
 		void register_keyword(TokenType keyword, bool hard = false);

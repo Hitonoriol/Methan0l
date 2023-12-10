@@ -460,7 +460,7 @@ class Interpreter
 
 	public:
 		Interpreter(Unique<Parser> parser, const char *runpath = nullptr);
-		~Interpreter();
+		virtual ~Interpreter();
 		
 		Interpreter(const Interpreter &rhs) = delete;
 
