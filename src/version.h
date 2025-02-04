@@ -10,13 +10,16 @@
 #define MAJOR_VERSION 1
 #define RELEASE_VERSION 0
 #define MINOR_VERSION 0
-#define VERSION_SUFFIX -pre
+#define VERSION_SUFFIX -pre-2023-12-10
 
 namespace mtl
 {
 
 extern const std::string SELF_NAME;
-constexpr int VERSION_CODE = MAJOR_VERSION * 10000 + RELEASE_VERSION * 1000 + MINOR_VERSION;
+constexpr Int VERSION_CODE =
+	  MAJOR_VERSION * 100'000
+	+ RELEASE_VERSION * 1'000
+	+ MINOR_VERSION;
 extern const std::string VERSION_STR, FULL_VERSION_STR;
 extern const std::string BUILD_TIMESTAMP;
 extern const std::string BUILD_PLATFORM;

@@ -386,8 +386,7 @@ class Interpreter
 			}
 		}
 
-		template<bool Done, typename Functor, typename Container,
-				unsigned N, unsigned ...I>
+		template<bool Done, typename Functor, typename Container, unsigned N, unsigned ...I>
 		struct call_helper
 		{
 			static auto call(Interpreter &context, Functor &&f, const Container &c)
@@ -445,7 +444,6 @@ class Interpreter
 		template<typename F, typename Container>
 		auto call(F &&f, const Container &c)
 		{
-			LOG("Calling a " << type_name<F>() << " with " << c.size() << " arguments...")
 			constexpr unsigned argc = function_traits<decltype(f)>::arity;
 			using caller = call_helper<argc == 0, decltype(f), Container, argc>;
 			if constexpr (std::is_void<typename function_traits<F>::return_type>::value) {

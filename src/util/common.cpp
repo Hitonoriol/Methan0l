@@ -37,7 +37,7 @@ const std::string BUILD_PLATFORM(
 );
 
 const std::string FULL_VERSION_STR(
-	SELF_NAME + " " + VERSION_STR + " (" + BUILD_TIMESTAMP + ")"
+	SELF_NAME + " " + VERSION_STR + " (Built on " + BUILD_TIMESTAMP + ")"
 );
 
 bool USE_MONOTONIC_BUFFER = true;
