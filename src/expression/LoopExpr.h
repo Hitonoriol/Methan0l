@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_LOOPEXPR_H_
 #define SRC_EXPRESSION_LOOPEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 #include <interpreter/Interpreter.h>
 #include <util/cast.h>
@@ -15,26 +15,6 @@ class LoopExpr: public Expression
 	private:
 		ExprPtr init, condition, step;
 		ExprPtr body;
-
-		/* Perform one loop iteration
-		 *
-		 * Assigns `loop_body`'s return value to `ret` if a return has occurred.
-		 * returns `true` if loop was interrupted, `false` otherwise.
-		 */
-		static inline bool loop_iteration(Interpreter &context, Unit &loop_body, Value &ret)
-		{
-			return !(ret = context.execute(loop_body, false)).empty() || loop_body.execution_finished();
-		}
-
-		static inline void exit_loop(Interpreter &context, Value &ret)
-		{
-			context.leave_scope();
-			if (!ret.empty())
-				context.current_unit()->save_return(ret);
-		}
-
-		void exec_for_loop(Interpreter &context);
-		void exec_foreach_loop(Interpreter &context);
 
 	public:
 		/* do $(i = 0, i < 10, ++i) -> {expr1; expr2; expr3} */
@@ -57,8 +37,6 @@ class LoopExpr: public Expression
 		LoopExpr(ExprPtr condition, ExprPtr body) : LoopExpr(nullptr, condition, nullptr, body)
 		{
 		}
-
-		Value evaluate(Interpreter &context) override;
 
 		ExprPtr get_init()
 		{
@@ -94,8 +72,6 @@ class LoopExpr: public Expression
 		{
 			return !is_foreach() && !is_while();
 		}
-
-		void execute(Interpreter &context) override;
 
 		std::ostream& info(std::ostream &str) override;
 };

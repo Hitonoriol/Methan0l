@@ -28,11 +28,6 @@ ExprPtr PrefixExpr::get_rhs()
 	return rhs;
 }
 
-Value PrefixExpr::evaluate(Interpreter &context)
-{
-	return context.evaluate(*this);
-}
-
 std::ostream& PrefixExpr::info(std::ostream &str)
 {
 	return Expression::info(str

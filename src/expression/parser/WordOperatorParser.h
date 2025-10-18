@@ -1,12 +1,12 @@
 #ifndef SRC_EXPRESSION_PARSER_WORDOPERATORPARSER_H_
 #define SRC_EXPRESSION_PARSER_WORDOPERATORPARSER_H_
 
-#include "PrefixOperatorParser.h"
+#include <parser/expression/PrefixExprParser.h>
 
 namespace mtl
 {
 
-class WordOperatorParser: public PrefixOperatorParser
+class WordOperatorParser : public PrefixParser
 {
 	private:
 		TokenType word;
@@ -14,14 +14,23 @@ class WordOperatorParser: public PrefixOperatorParser
 
 	public:
 		WordOperatorParser(TokenType word, int prec = prcdc(Precedence::PREFIX), bool accept_multiple_args = false)
-			: PrefixOperatorParser(prec), word(word), multiple_args(accept_multiple_args) {}
+			: PrefixParser(prec)
+			, word(word)
+			, multiple_args(accept_multiple_args)
+		{
+		}
+
 		ExprPtr parse(Parser &parser, Token token) override;
 };
 
-class VarDefParser: public PrefixOperatorParser
+class VarDefParser : public PrefixParser
 {
 	public:
-		VarDefParser() : PrefixOperatorParser(prcdc(Precedence::HIGHEST)) {}
+		VarDefParser()
+			: PrefixParser(prcdc(Precedence::HIGHEST))
+		{
+		}
+		
 		ExprPtr parse(Parser &parser, Token token) override;
 
 };

@@ -1,7 +1,7 @@
 #ifndef EXPRESSION_ASSIGNEXPR_H_
 #define EXPRESSION_ASSIGNEXPR_H_
 
-#include "BinaryOperatorExpr.h"
+#include <expression/BinaryOperatorExpr.h>
 
 #include <string>
 
@@ -17,7 +17,6 @@ class AssignExpr: public BinaryOperatorExpr
 
 	public:
 		AssignExpr(ExprPtr lhs, Token tok, ExprPtr rhs);
-		Value evaluate(Interpreter &context) override;
 
 		bool is_move_assignment();
 

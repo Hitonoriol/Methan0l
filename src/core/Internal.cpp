@@ -21,7 +21,7 @@ void import(Interpreter *context, Unit &module)
 
 TypeID resolve_type(Interpreter &context, Expression &type_expr)
 {
-	auto type_id_val = type_expr.evaluate(context);
+	auto type_id_val = context.evaluate(type_expr);
 	TypeID type_id;
 	auto &types = context.get_type_mgr();
 

@@ -12,15 +12,14 @@ FormatStrExpr::FormatStrExpr(std::string fmt, ExprList args) : fmt(std::move(fmt
 	strip_quotes(fmt);
 }
 
-Value FormatStrExpr::evaluate(Interpreter &context)
+const std::string& FormatStrExpr::get_format() const
 {
-	auto fmt = context.make<String>(this->fmt);
-	std::vector<std::string> sargs;
-	for (auto expr : args)
-		sargs.push_back(*expr->evaluate(context).to_string());
-	StringFormatter formatter(fmt.get<String>(), sargs);
-	formatter.format();
 	return fmt;
+}
+
+const ExprList& FormatStrExpr::get_args() const
+{
+	return args;
 }
 
 std::ostream& FormatStrExpr::info(std::ostream &str)

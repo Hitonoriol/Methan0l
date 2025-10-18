@@ -1,7 +1,7 @@
 #ifndef EXPRESSION_PARSER_GROUPPARSER_H_
 #define EXPRESSION_PARSER_GROUPPARSER_H_
 
-#include "PrefixParser.h"
+#include <parser/expression/PrefixExprParser.h>
 
 namespace mtl
 {

@@ -4,9 +4,9 @@
 
 #include <lexer/Token.h>
 #include <parser/Parser.h>
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <expression/ListExpr.h>
-#include <expression/PrefixExpr.h>
+#include <parser/expression/PrefixExpr.h>
 
 namespace mtl
 {

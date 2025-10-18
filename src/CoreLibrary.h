@@ -6,6 +6,7 @@
 #include <core/Internal.h>
 #include <core/Logic.h>
 #include <core/Module.h>
+#include <core/ExpressionUtils.h>
 
 #include <core/class/String.h>
 

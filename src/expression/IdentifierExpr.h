@@ -1,7 +1,7 @@
 #ifndef EXPRESSION_IDENTIFIEREXPR_H_
 #define EXPRESSION_IDENTIFIEREXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 #include <structure/Unit.h>
 #include <util/util.h>
@@ -21,13 +21,9 @@ class IdentifierExpr: public Expression
 		IdentifierExpr() = default;
 		IdentifierExpr(const std::string &name, bool global) : name(name), global(global) {}
 
-		Value evaluate(Interpreter &context) override;
-
 		virtual Value& referenced_value(Interpreter &context, bool follow_refs = true);
 		virtual Value& assign(Interpreter &context, Value val);
 		virtual void create_if_nil(Interpreter &context);
-
-		void execute(Interpreter &context) override;
 
 		bool is_global() const;
 		const std::string& get_name() const;

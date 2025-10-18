@@ -23,11 +23,9 @@ class PrefixExpr: public Expression
 		TokenType get_operator();
 		ExprPtr get_rhs();
 
-		Value evaluate(Interpreter &context) override;
-
 		std::ostream& info(std::ostream &str) override;
 
-		_OP_EXPR_IS(PrefixExpr)
+		EXPRESSION_IS_IMPL(PrefixExpr)
 };
 
 } /* namespace mtl */

@@ -28,6 +28,15 @@ SRCS = $(call rwildcard,$(SRC_DIR),*.cpp)
 DEPS = $(patsubst $(SRC_DIR)%.cpp,$(OBJ_DIR)%.d,$(SRCS))
 EXAMPLES_DIR = ../examples/
 
+# Utility
+UTIL_SRCS = $(call rwildcard,$(SRC_DIR)/util,*.cpp)
+UTIL_OBJS = $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(patsubst %.cpp,%.o.pic,$(UTIL_SRCS)))
+
+# Parser
+PARSER_SRCS = $(call rwildcard,$(SRC_DIR)/lexer,*.cpp) $(call rwildcard,$(SRC_DIR)/parser,*.cpp)
+PARSER_LIB_OBJS = $(patsubst $(SRC_DIR)%,$(OBJ_DIR)%,$(patsubst %.cpp,%.o.pic,$(PARSER_SRCS)))
+SRCS:=$(filter-out $(PARSER_SRCS),$(SRCS))
+
 # Stdlib inputs / outputs
 STDLIB_PATH = stdlib/
 STDLIB_SCRIPTS = $(patsubst $(SRC_DIR)$(STDLIB_PATH)%,$(STDLIB_DIR)/%,$(call rwildcard,$(SRC_DIR)$(STDLIB_PATH),*.mt0))
@@ -47,10 +56,11 @@ LIB_INC = -I$(SRC_DIR)
 # Binary outputs
 CLI_BIN_NAME = $(OUT_DIR)$(addsuffix $(if $(filter $(OS_NAME),Windows),.exe,),methan0l)
 LIB_NAME = libmethan0l.so
+PARSER_LIB_NAME = libch3oh.so
 LIB_PATH = $(OUT_DIR)$(LIB_NAME)
+PARSER_LIB_PATH = $(OUT_DIR)$(PARSER_LIB_NAME)
 
 # ---------- Static / dynamic library dependencies ----------
-
 # Windows-specific
 ifeq ($(OS_NAME),Windows)
 	LINK_STATIC := -lboost_filesystem-mt -lboost_system-mt
@@ -62,7 +72,6 @@ ifeq ($(OS_NAME),Linux)
 	LINK_STATIC=
 	LINK_DYNAMIC+= -ldl -lboost_filesystem -lboost_system
 endif
-
 # -----------------------------------------------------------
 
 # GCC compilation flags
@@ -128,19 +137,40 @@ modules: lib lib-headers
 	@echo 'Finished building modules'
 	@echo ' '
 
-# ---------- Interpreter shared library targets ----------
-lib: $(LIB_PATH)
-
-$(LIB_PATH): $(LIB_OBJS)
-	@echo 'Building interpreter library: $@...'
-	g++ $(FLAGS) $(LIB_OBJS) -shared -o $(LIB_PATH) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) $(RPATH)
-	@echo 'Finished building: $@'
-	@echo ' '
-
+# ---------- Object files ----------
+# PIC
 $(OBJ_DIR)%.o.pic: $(SRC_DIR)%.cpp
 	@echo 'Building target: $@ (file: $<)'
 	@mkdir -p $(dir $@)
 	g++ $(FLAGS) $(MACROS) $(LIB_INC) -c -m$(BITS) -fPIC -MMD -MP -MF"$(@:%.o.pic=%.d)" -MT"$@" -o "$@" "$<"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+# Non-PIC
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
+	@echo 'Building target: $@, file: $<'
+	@mkdir -p $(dir $@)
+	g++ $(FLAGS) $(MACROS) $(LIB_INC) -c -Wall -fmessage-length=0 -m$(BITS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	@echo 'Finished building: $@'
+	@echo ' '
+# --------------------------------------
+
+# ---------- Parser + Lexer shared library targets ----------
+libparser: $(PARSER_LIB_PATH)
+
+$(PARSER_LIB_PATH): $(PARSER_LIB_OBJS) $(UTIL_OBJS)
+	@echo 'Building lexer / parser library: $@...'
+	g++ $(FLAGS) $(PARSER_LIB_OBJS) $(UTIL_OBJS) -shared -o $(PARSER_LIB_PATH) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) $(RPATH)
+	@echo 'Finished building: $@'
+	@echo ' '
+# -----------------------------------------------------------
+
+# ---------- Interpreter shared library ----------
+lib: $(LIB_PATH)
+
+$(LIB_PATH): libparser $(LIB_OBJS)
+	@echo 'Building interpreter library: $@...'
+	g++ $(FLAGS) $(LIB_OBJS) -shared -o $(LIB_PATH) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic $(LINK_DYNAMIC) -L$(OUT_DIR) -l:$(PARSER_LIB_NAME) $(RPATH)
 	@echo 'Finished building: $@'
 	@echo ' '
 
@@ -160,7 +190,7 @@ lib-clean:
 	-$(RM) $(INCLUDE_DIR) $(LIB_OBJS) $(STDLIB_OBJS)
 # --------------------------------------------------------
 
-# ------------ Methan0l core library targets -------------
+# ------------ Methan0l core library -------------
 read_stdlib_deps=$(patsubst %,$(OBJ_DIR)$(STDLIB_PATH)%.o.pic,$(file < $(SRC_DIR)$(STDLIB_PATH)$(1).deps))
 
 $(STDLIB_DIR):
@@ -184,20 +214,13 @@ $(STDLIB_DIR)/%.mt0: $(SRC_DIR)$(STDLIB_PATH)%.mt0
 	cp -rf $< $@
 # --------------------------------------------------------
 
-# ---------------------- CLI targets ---------------------
+# ---------------------- CLI ---------------------
 cli: $(CLI_BIN_NAME)
 
 $(CLI_BIN_NAME): lib stdlib $(CLI_OBJS)
 	@echo 'Building interpreter cli: $@'
 	g++ $(FLAGS) -o $(CLI_BIN_NAME) $(CLI_OBJS) -m$(BITS) -Wl,-Bstatic $(LINK_STATIC) -Wl,-Bdynamic -L$(OUT_DIR) -l:$(LIB_NAME) $(LINK_DYNAMIC) $(RPATH)
 	@echo 'Finished building interpreter cli: $@'
-	@echo ' '
-
-$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp
-	@echo 'Building target: $@, file: $<'
-	@mkdir -p $(dir $@)
-	g++ $(FLAGS) $(MACROS) $(LIB_INC) -c -Wall -fmessage-length=0 -m$(BITS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
-	@echo 'Finished building: $@'
 	@echo ' '
 # --------------------------------------------------------
 

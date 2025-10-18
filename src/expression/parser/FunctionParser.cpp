@@ -4,7 +4,8 @@
 #include <iostream>
 #include <memory>
 
-#include <expression/Expression.h>
+#include <lang/Methan0lParser.h>
+#include <parser/expression/Expression.h>
 #include <expression/parser/MapParser.h>
 #include <expression/parser/UnitParser.h>
 #include <expression/MapExpr.h>
@@ -13,6 +14,7 @@
 #include <lexer/Token.h>
 #include <parser/Parser.h>
 #include <util/cast.h>
+#include <core/ExpressionUtils.h>
 
 namespace mtl
 {
@@ -49,12 +51,18 @@ ExprPtr FunctionParser::parse(Parser &parser, Token token)
 		 */
 		ExprList lambda_body {
 				!parser.peek(Tokens::COMMA) ?
-						Expression::return_expr(body_expr) : body_expr };
+					ExpressionUtils::return_expr(body_expr) : body_expr };
 
 		while (parser.match(Tokens::COMMA))
 			lambda_body.push_back(parser.parse());
 
-		body_expr = make_expr<UnitExpr>(line(token), &parser.get_context(), lambda_body, false);
+		auto mtl_parser = dynamic_cast<Methan0lParser*>(&parser);
+
+		if (!mtl_parser) {
+			throw std::runtime_error("FunctionParser: invalid parser type");
+		}
+
+		body_expr = make_expr<UnitExpr>(line(token), &mtl_parser->get_context(), lambda_body, false);
 	}
 	else
 		body_expr = UnitParser::parse_expr_block(parser);

@@ -77,7 +77,7 @@ constexpr T& get(std::variant<Types...> &variant)
 
 	auto contained = std::visit([](auto &v) -> std::string_view {
 		using Contained = VT(v);
-		IF (std::is_same_v<Contained, std::any>)
+		if constexpr (std::is_same_v<Contained, std::any>)
 			return v.type().name();
 		return type_name<Contained>();
 	}, variant);
@@ -90,6 +90,12 @@ template<typename T, typename ... Types>
 inline constexpr const T& get(const std::variant<Types...> &variant)
 {
 	return mtl::get<T>(unconst(variant));
+}
+
+template<typename F>
+std::function<F> function_overload(F* func)
+{
+	return std::function<F>(func);
 }
 
 }

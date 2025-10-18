@@ -1,10 +1,10 @@
 #ifndef SRC_EXPRESSION_PARSER_LITERALPARSER_H_
 #define SRC_EXPRESSION_PARSER_LITERALPARSER_H_
 
-#include "PrefixParser.h"
+#include <parser/expression/PrefixExprParser.h>
 
 #include <parser/Parser.h>
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <expression/LiteralExpr.h>
 
 

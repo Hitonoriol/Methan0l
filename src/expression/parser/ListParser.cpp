@@ -7,7 +7,7 @@
 
 #include <lexer/Token.h>
 #include <parser/Parser.h>
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 
 namespace mtl
 {

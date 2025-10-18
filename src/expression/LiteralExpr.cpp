@@ -22,11 +22,6 @@ bool LiteralExpr::is_empty()
 	return value.empty();
 }
 
-Value LiteralExpr::evaluate(Interpreter &context)
-{
-	return value;
-}
-
 Value LiteralExpr::raw_value()
 {
 	return value;
@@ -37,24 +32,9 @@ Value& LiteralExpr::raw_ref()
 	return value;
 }
 
-void LiteralExpr::execute(Interpreter &context)
-{
-	Value evald = evaluate(context);
-	exec_literal(context, evald);
-}
-
 std::shared_ptr<LiteralExpr> LiteralExpr::empty()
 {
 	return std::make_shared<LiteralExpr>();
-}
-
-void LiteralExpr::exec_literal(Interpreter &context, Value &val)
-{
-	if (val.empty())
-		return;
-
-	if (val.type() == Type::UNIT)
-		context.invoke(val.get<Unit>());
 }
 
 std::ostream& LiteralExpr::info(std::ostream &str)

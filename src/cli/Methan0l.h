@@ -2,11 +2,14 @@
 #define SRC_CLI_METHAN0L_H_
 
 #include <string>
+#include <cstdint>
+#include <memory>
 
 namespace mtl
 {
 
 class Interpreter;
+struct Methan0lConfig;
 
 struct CLIHooks
 {
@@ -18,15 +21,17 @@ struct CLIHooks
 
 class cli
 {
-	private:
-		bool no_exit = false;
-		bool cas = false;
+public:
+	cli();
+	int run(int argc, char** argv);
 
-		void init_env(mtl::Interpreter&);
-		int parse_args(int, char**);
+private:
+	void init_env(mtl::Interpreter&);
+	int parse_args(int, char**);
 
-	public:
-		int run(int argc, char **argv);
+	std::unique_ptr<Methan0lConfig> config;
+	bool no_exit = false;
+	bool cas = false;
 };
 
 }

@@ -7,52 +7,9 @@
 namespace mtl
 {
 
-BinaryOperatorExpr::BinaryOperatorExpr(ExprPtr lhs,
-		Token opr,
-		ExprPtr rhs) :
-		lhs(lhs), op(opr), rhs(rhs)
+BinaryOperatorExpr::BinaryOperatorExpr(ExprPtr lhs, Token opr, ExprPtr rhs)
+	: InfixExpr(lhs, opr, rhs)
 {
-}
-
-Value BinaryOperatorExpr::evaluate(Interpreter &context)
-{
-	return context.apply_binary(lhs, op.get_type(), rhs);
-}
-
-void BinaryOperatorExpr::execute(Interpreter &context)
-{
-	Value val = evaluate(context);
-	if (op == Tokens::STRING_CONCAT)
-		LiteralExpr::exec_literal(context, val);
-}
-
-TokenType BinaryOperatorExpr::get_operator()
-{
-	return op.get_type();
-}
-
-Token BinaryOperatorExpr::get_token()
-{
-	return op;
-}
-
-ExprPtr& BinaryOperatorExpr::get_lhs()
-{
-	return lhs;
-}
-
-ExprPtr& BinaryOperatorExpr::get_rhs()
-{
-	return rhs;
-}
-
-std::ostream& BinaryOperatorExpr::info(std::ostream &str)
-{
-	return Expression::info(str
-			<< "Binary Operator: " << op << " " << BEG
-					<< "LHS: " << lhs->info() << NL
-					<< "RHS: " << rhs->info()
-					<< END);
 }
 
 }

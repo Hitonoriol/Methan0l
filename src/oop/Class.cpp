@@ -10,7 +10,7 @@
 #include <utility>
 #include <variant>
 
-#include <util/hash.h>
+#include <lang/util/hash.h>
 #include <oop/Object.h>
 #include <core/Library.h>
 #include <expression/LiteralExpr.h>

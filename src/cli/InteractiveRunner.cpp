@@ -15,7 +15,7 @@
 #include <util/memory.h>
 #include <version.h>
 #include <util/memory.h>
-#include <util/class_binder.h>
+#include <lang/util/class_binder.h>
 #include <lang/Methan0lParser.h>
 
 namespace mtl
@@ -319,7 +319,7 @@ void InteractiveRunner::parse()
 	/* Wrap single expressions in return expressions */
 	if (cas_mode && main.size() == 1) {
 		auto &expr = main.expressions().front();
-		expr = Expression::return_expr(expr);
+		expr = ExpressionUtils::return_expr(expr);
 	}
 	main.clear_result();
 }

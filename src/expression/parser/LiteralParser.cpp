@@ -1,6 +1,7 @@
 #include "LiteralParser.h"
 
 #include <interpreter/Interpreter.h>
+#include <lang/Methan0lParser.h>
 #include <CoreLibrary.h>
 
 namespace mtl
@@ -27,7 +28,13 @@ ExprPtr LiteralParser::parse(Parser &parser, Token token)
 		value = tokstr == ReservedWord::TRUE;
 
 	else if (type == Type::STRING) {
-		value = parser.get_context().make<String>(strip_quotes(tokstr));
+		auto mtl_parser = dynamic_cast<Methan0lParser*>(&parser);
+
+		if (!mtl_parser) {
+			throw std::runtime_error("LiteralParser: invalid parser type");
+		}
+
+		value = mtl_parser->get_context().make<String>(strip_quotes(tokstr));
 	}
 
 	else if (type == Type::CHAR)

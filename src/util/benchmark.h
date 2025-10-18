@@ -3,8 +3,6 @@
 
 #include <chrono>
 
-#include <type.h>
-
 #define ENABLE_BENCHMARK false
 
 #if ENABLE_BENCHMARK

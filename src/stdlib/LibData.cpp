@@ -194,7 +194,7 @@ void LibData::load_operators()
 
 	/* Evaluate and convert to string: $$expr */
 	prefix_operator(Tokens::DOUBLE_DOLLAR, LazyUnaryOpr([&](auto rhs) {
-		return object(rhs->evaluate(*context).to_string());
+		return object(context->evaluate(*rhs).to_string());
 	}));
 
 	prefix_operator(Tokens::NO_EVAL, LazyUnaryOpr([&](auto rhs) {
@@ -226,7 +226,7 @@ void LibData::load_operators()
 	infix_operator(Tokens::REQUIRE, LazyBinaryOpr([&](auto lhs, auto rhs) {
 		auto lval = val(lhs);
 		if (mtl::instanceof<ListExpr>(rhs)) {
-			Expression::for_one_or_multiple(rhs, [this, &lval](auto &expr) {
+			ExpressionUtils::for_one_or_multiple(rhs, [this, &lval](auto &expr) {
 				auto rval = val(expr);
 				assert_type(lval, rval);
 			});

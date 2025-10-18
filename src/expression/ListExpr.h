@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_LISTEXPR_H_
 #define SRC_EXPRESSION_LISTEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 #include <type.h>
 
@@ -16,8 +16,10 @@ class ListExpr: public Expression
 
 	public:
 		ListExpr(ExprList exprs, bool as_set = false);
+		
 		ExprList& raw_list();
-		Value evaluate(Interpreter &context) override;
+		bool is_set();
+
 		std::ostream& info(std::ostream &str) override;
 };
 

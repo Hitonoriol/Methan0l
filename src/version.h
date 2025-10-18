@@ -1,11 +1,12 @@
 #ifndef SRC_VERSION_H_
 #define SRC_VERSION_H_
 
-#include <string_view>
+#include <util/util.h>
+
 #include <boost/config.hpp>
 #include <boost/predef.h>
 
-#include <util/util.h>
+#include <string_view>
 
 #define MAJOR_VERSION 1
 #define RELEASE_VERSION 0
@@ -16,7 +17,7 @@ namespace mtl
 {
 
 extern const std::string SELF_NAME;
-constexpr Int VERSION_CODE =
+constexpr int64_t VERSION_CODE =
 	  MAJOR_VERSION * 100'000
 	+ RELEASE_VERSION * 1'000
 	+ MINOR_VERSION;
@@ -80,7 +81,7 @@ constexpr uint8_t get_bits()
 #define DO_IS_EMPTY_MACRO(VAL) VAL ## 1
 #define IS_EMPTY_MACRO(VAL) DO_IS_EMPTY_MACRO(VAL) == 1
 
-constexpr Int get_version_code()
+constexpr int64_t get_version_code()
 {
 	#if IS_EMPTY_MACRO(VERSION_SUFFIX)
 		return VERSION_CODE;

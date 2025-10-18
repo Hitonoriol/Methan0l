@@ -6,9 +6,20 @@
 #include <iterator>
 #include <algorithm>
 #include <tuple>
+#include <concepts>
+
+#define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
+#define VT(v) TYPE(decltype(v))
+#define UNCONST(T) typename std::remove_const<T>::type
 
 namespace mtl
 {
+
+template<class T>
+concept PointerType = requires(const T& obj) { *obj; };
+
+template<class T, class U>
+concept Inherits = std::is_base_of<U, T>::value;
 
 template<typename ...Ts>
 constexpr auto type_name()

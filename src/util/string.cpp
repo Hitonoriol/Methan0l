@@ -1,7 +1,7 @@
 #include "string.h"
 #include "util.h"
 
-#include <core/class/String.h>
+#include <sstream>
 
 namespace mtl
 {
@@ -67,7 +67,7 @@ std::string tab(std::string &&str)
 
 std::string tab(std::ostream &os)
 {
-	sstream ss;
+	std::stringstream ss;
 	ss << os.rdbuf();
 	return tab(std::move(ss.str()));
 }
@@ -79,7 +79,7 @@ std::string indent(std::string &&str)
 	return str;
 }
 
-std::string to_base(UInt value, uint8_t base)
+std::string to_base(uint64_t value, uint8_t base)
 {
 	std::string result;
 	if (value == 0) {
@@ -88,7 +88,7 @@ std::string to_base(UInt value, uint8_t base)
 	}
 
 	while (value != 0) {
-		UInt digit = value % base;
+		uint64_t digit = value % base;
 		result += (digit > 9 ? 'A' + digit - 10 : digit + '0');
 		value /= base;
 	}

@@ -1,7 +1,7 @@
 #ifndef EXPRESSION_INVOKEEXPR_H_
 #define EXPRESSION_INVOKEEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 #include <vector>
 
@@ -23,11 +23,6 @@ class InvokeExpr: public Expression
 				lhs(lhs),
 				args(args)
 		{
-		}
-
-		Value evaluate(Interpreter &context) override
-		{
-			return context.evaluate(*this);
 		}
 
 		ExprPtr get_lhs()

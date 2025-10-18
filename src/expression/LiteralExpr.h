@@ -1,7 +1,7 @@
 #ifndef EXPRESSION_LITERALEXPR_H_
 #define EXPRESSION_LITERALEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 #include <util/util.h>
 #include <structure/Value.h>
@@ -25,9 +25,6 @@ class LiteralExpr: public Expression
 
 		bool is_empty();
 
-		Value evaluate(Interpreter &context) override;
-		void execute(Interpreter &context) override;
-
 		Value raw_value();
 		Value& raw_ref();
 
@@ -44,8 +41,6 @@ class LiteralExpr: public Expression
 		{
 			return {create(args)...};
 		}
-
-		static void exec_literal(Interpreter &context, Value &val);
 
 		std::ostream& info(std::ostream &str) override;
 };

@@ -1,7 +1,8 @@
 #ifndef SRC_EXPRESSION_UNITEXPR_H_
 #define SRC_EXPRESSION_UNITEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
+#include <structure/Unit.h>
 
 namespace mtl
 {
@@ -16,9 +17,6 @@ class UnitExpr: public Expression
 
 		Unit get_unit();
 		Unit& get_unit_ref();
-
-		Value evaluate(Interpreter &context) override;
-		void execute(Interpreter &context) override;
 
 		std::ostream& info(std::ostream &str) override;
 };

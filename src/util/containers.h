@@ -2,8 +2,8 @@
 #define SRC_UTIL_CONTAINERS_H_
 
 #include <type_traits>
-
-#include <type.h>
+#include <utility>
+#include <cstdint>
 
 #define FWD_VAL std::forward<T>(val)
 #define LIST_T decltype(c.push_back(FWD_VAL), void())
@@ -14,16 +14,6 @@ namespace mtl
 
 template<typename C>
 using iterator_of = decltype(std::begin(std::declval<C&>()));
-
-template<typename Container, typename Tuple>
-inline auto from_tuple(Tuple &&tuple)
-{
-	return std::apply([](auto &&... elems) {
-		Container result;
-		(result.push_back(std::forward<Value>(Value(elems))), ...);
-		return result;
-	}, std::forward<Tuple>(tuple));
-}
 
 template<typename C, typename T>
 inline auto insert(C &c, T &&val) -> LIST_T
@@ -70,9 +60,9 @@ inline auto pop(C &c)
 }
 
 template<typename T, typename V>
-inline Int index_of(T &&container, V &&value)
+inline int64_t index_of(T&& container, V&& value)
 {
-	Int idx = 0;
+	int64_t idx = 0;
 	for (auto &&elem : container) {
 		if (value == elem)
 			return idx;
@@ -81,9 +71,9 @@ inline Int index_of(T &&container, V &&value)
 }
 
 template<typename C>
-Int value_container_hash_code(C &&container)
+int64_t value_container_hash_code(C &&container)
 {
-	Int hash = container.size();
+	int64_t hash = container.size();
 	for (auto &v : container)
 		hash ^= v.hash_code() + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 	return hash;

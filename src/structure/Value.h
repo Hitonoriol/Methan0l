@@ -635,8 +635,8 @@ class Value
 		POSTFIX_UNARY(--)
 };
 
-const Value __ = Value::NO_VALUE;
-const Value NEW_LINE = Value('\n');
+extern const Value __;
+extern const Value NEW_LINE;
 
 }
 

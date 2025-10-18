@@ -1,8 +1,6 @@
 #ifndef SRC_UTIL_HASH_H_
 #define SRC_UTIL_HASH_H_
 
-#include "cast.h"
-
 #include <deque>
 #include <memory>
 #include <string>
@@ -10,12 +8,13 @@
 #include <unordered_map>
 #include <utility>
 
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <structure/DataTable.h>
 #include <structure/Function.h>
 #include <oop/Object.h>
 #include <structure/Value.h>
 #include <structure/ValueRef.h>
+#include <util/cast.h>
 #include <type.h>
 
 namespace mtl

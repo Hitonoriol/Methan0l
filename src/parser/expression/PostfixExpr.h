@@ -15,15 +15,13 @@ class PostfixExpr: public Expression
 	public:
 		PostfixExpr(ExprPtr lhs, Token op);
 
-		Value evaluate(Interpreter &context) override;
-
 		ExprPtr& get_lhs();
 		Token get_token();
 		TokenType get_operator();
 
 		std::ostream& info(std::ostream &str) override;
 
-		_OP_EXPR_IS(PostfixExpr)
+		EXPRESSION_IS_IMPL(PostfixExpr)
 };
 
 } /* namespace mtl */

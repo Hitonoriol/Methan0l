@@ -16,7 +16,7 @@
 #include <expression/BinaryOperatorExpr.h>
 #include <expression/IdentifierExpr.h>
 #include <expression/LiteralExpr.h>
-#include <expression/PrefixExpr.h>
+#include <parser/expression/PrefixExpr.h>
 #include <expression/MapExpr.h>
 
 namespace mtl

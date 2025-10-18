@@ -1,5 +1,6 @@
 #include "List.h"
 
+#include <lang/util/string.h>
 #include <core/Data.h>
 
 namespace mtl

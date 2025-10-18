@@ -1,5 +1,6 @@
 #include "ConditionalExpr.h"
 
+#include <interpreter/Interpreter.h>
 #include <expression/LiteralExpr.h>
 #include <expression/UnitExpr.h>
 
@@ -44,17 +45,7 @@ bool ConditionalExpr::is_ifelse_block()
 
 ExprPtr ConditionalExpr::eval_branch(Interpreter &context)
 {
-	return (condition->evaluate(context).to_bool() ? then_expr : else_expr);
-}
-
-Value ConditionalExpr::evaluate(Interpreter &context)
-{
-	return eval_branch(context)->evaluate(context);
-}
-
-void ConditionalExpr::execute(Interpreter &context)
-{
-	eval_branch(context)->execute(context);
+	return (context.evaluate(*condition).to_bool() ? then_expr : else_expr);
 }
 
 std::ostream& ConditionalExpr::info(std::ostream &str)

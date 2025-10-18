@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_RANGEEXPR_H_
 #define SRC_EXPRESSION_RANGEEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 namespace mtl
 {
@@ -14,31 +14,14 @@ class RangeExpr: public Expression
 	public:
 		RangeExpr(ExprPtr start, ExprPtr end, ExprPtr step);
 
-		void execute(Interpreter &context) override;
-		Value evaluate(Interpreter &context) override;
-
 		inline bool has_step()
 		{
 			return step != nullptr;
 		}
 
-		inline Value get_start(Interpreter &context)
-		{
-			return start->evaluate(context);
-		}
-
-		inline Value get_end(Interpreter &context)
-		{
-			return end->evaluate(context);
-		}
-
-		inline Value get_step(Interpreter &context)
-		{
-			if (!has_step())
-				return 1;
-
-			return step->evaluate(context);
-		}
+		Value get_start(Interpreter &context);
+		Value get_end(Interpreter &context);
+		Value get_step(Interpreter &context);
 
 		inline ExprPtr get_start()
 		{

@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_MAPEXPR_H_
 #define SRC_EXPRESSION_MAPEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 namespace mtl
 {
@@ -14,11 +14,6 @@ class MapExpr: public Expression
 	public:
 		MapExpr(ExprExprMap exprs)
 			: exprs(exprs) {}
-
-		Value evaluate(Interpreter &context) override;
-
-		/* Map execution works as a local idfr init list */
-		void execute(Interpreter &context) override;
 
 		ExprExprMap raw_map()
 		{

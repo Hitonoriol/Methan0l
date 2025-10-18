@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_CONDITIONALEXPR_H_
 #define SRC_EXPRESSION_CONDITIONALEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 namespace mtl
 {
@@ -21,9 +21,6 @@ class ConditionalExpr: public Expression
 		ExprPtr get_else();
 
 		bool is_ifelse_block();
-
-		Value evaluate(Interpreter &context) override;
-		void execute(Interpreter &context) override;
 
 		std::ostream& info(std::ostream &str) override;
 };

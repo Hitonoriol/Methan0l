@@ -50,7 +50,7 @@ Value String::format(Context context, CallArgs args)
 	std::vector<std::string> sargs;
 	sargs.reserve(args->size());
 	for (auto it = args->begin() + 3; it != args->end(); ++it)
-		sargs.push_back(*(*it)->evaluate(*context).to_string());
+		sargs.push_back(*context->evaluate(**it).to_string());
 
 	StringFormatter(fmt.get<String>(), sargs).format();
 	return fmt;

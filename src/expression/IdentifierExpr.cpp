@@ -12,14 +12,6 @@
 namespace mtl
 {
 
-Value IdentifierExpr::evaluate(Interpreter &context)
-{
-	Value &v = referenced_value(context);
-	if (v.is<ExprPtr>())
-		return v.get<ExprPtr>()->evaluate(context);
-	return v;
-}
-
 Value& IdentifierExpr::referenced_value(Interpreter &context, bool follow_refs)
 {
 	return context.get(name, global, follow_refs);
@@ -38,12 +30,6 @@ void IdentifierExpr::create_if_nil(Interpreter &context)
 	DataTable *scope = context.scope_lookup(name, global);
 	if (!scope->exists(name))
 		scope->set(name, Value());
-}
-
-void IdentifierExpr::execute(mtl::Interpreter &context)
-{
-	Value val = evaluate(context);
-	LiteralExpr::exec_literal(context, val);
 }
 
 Value IdentifierExpr::eval_reserved(const std::string &name)

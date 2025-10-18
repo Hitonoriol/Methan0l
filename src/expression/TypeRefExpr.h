@@ -12,9 +12,6 @@ class TypeRefExpr : public IdentifierExpr
 		TypeRefExpr(const std::string &type_name);
 		virtual ~TypeRefExpr() = default;
 
-		Value evaluate(Interpreter &context) override;
-		void execute(Interpreter &context) override UNIMPLEMENTED
-
 		Value& referenced_value(Interpreter &context, bool follow_refs = true) override UNIMPLEMENTED
 		Value& assign(Interpreter &context, Value val) override UNIMPLEMENTED
 		void create_if_nil(Interpreter &context) override UNIMPLEMENTED

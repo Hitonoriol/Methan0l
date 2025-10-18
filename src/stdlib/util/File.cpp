@@ -12,10 +12,10 @@
 #include <filesystem>
 
 #include <util/util.h>
-#include <util/global.h>
+#include <lang/util/global.h>
 #include <interpreter/Interpreter.h>
 #include <expression/LiteralExpr.h>
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <interpreter/Interpreter.h>
 #include <structure/Function.h>
 #include <oop/Object.h>
@@ -67,7 +67,7 @@ File::File(Interpreter &context) : Class(context, "File")
 	/* file.for_each$(action) */
 	register_method("for_each", [&](Args &args) {
 		std::string root_path = path(args);
-		Value func = args[1]->evaluate(context);
+		Value func = context.evaluate(*args[1]);
 		Function &action = func.get<Function>();
 
 		if (!fs::is_directory(root_path))
@@ -143,21 +143,21 @@ File::File(Interpreter &context) : Class(context, "File")
 	/* file.equivalent$(path) */
 	register_method("equivalent", [&](Args &args) {
 		std::string file = path(args);
-		std::string rhs = *mtl::str(args[1]->evaluate(context));
+		std::string rhs = *mtl::str(context.evaluate(*args[1]));
 		return fs::equivalent(file, rhs);
 	});
 
 	/* file.copy_to$(dest_path) */
 	register_method("copy_to", [&](Args &args) {
 		std::string from = path(args);
-		std::string to = *mtl::str(args[1]->evaluate(context));
+		std::string to = *mtl::str(context.evaluate(*args[1]));
 		fs::copy(from, to);
 		return Value::NO_VALUE;
 	});
 
 	/* file.rename$(new_path) */
 	register_method("rename", [&](Args &args) {
-		fs::rename(path(args), std::string(*mtl::str(args[1]->evaluate(context))));
+		fs::rename(path(args), std::string(*mtl::str(context.evaluate(*args[1]))));
 		return Value::NO_VALUE;
 	});
 
@@ -175,17 +175,17 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.write_buffer(Buffer) */
 	register_method("write_buffer", [&](Args &args) {
-		auto buffer_v = args[1]->evaluate(context);
+		auto buffer_v = context.evaluate(*args[1]);
 		write_contents<Buffer>(path(args), buffer_v);
 		return Value::NO_VALUE;
 	});
 
 	/* file.read(Buffer, [length = Buffer.size()]) */
 	register_method("read", [&](Args &args) {
-		auto buffer = args[1]->evaluate(context);
+		auto buffer = context.evaluate(*args[1]);
 		Int max_bytes;
 		if (args.size() >= 3) {
-			max_bytes = mtl::num(args[2]->evaluate(context));
+			max_bytes = mtl::num(context.evaluate(*args[2]));
 		} else {
 			max_bytes = buffer.get<Buffer>()->size();
 		}
@@ -194,7 +194,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.write(Buffer) */
 	register_method("write", [&](Args &args) {
-		auto buffer = args[1]->evaluate(context);
+		auto buffer = context.evaluate(*args[1]);
 		write_buffer(Object::get_this(args), buffer);
 		return Value::NO_VALUE;
 	});
@@ -206,7 +206,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.write_contents$(str) */
 	register_method("write_contents", [&](Args &args) {
-		auto buffer_v = args[1]->evaluate(context);
+		auto buffer_v = context.evaluate(*args[1]);
 		write_contents<String>(path(args), buffer_v);
 		return Value::NO_VALUE;
 	});
@@ -218,7 +218,7 @@ File::File(Interpreter &context) : Class(context, "File")
 
 	/* file.write_line$(expr) */
 	register_method("write_line", [&](Args &args) {
-		write_line(Object::get_this(args), *mtl::str(args[1]->evaluate(context)));
+		write_line(Object::get_this(args), *mtl::str(context.evaluate(*args[1])));
 		return Value::NO_VALUE;
 	});
 
@@ -244,7 +244,7 @@ File::File(Interpreter &context) : Class(context, "File")
 void File::set_path(Args &args)
 {
 	auto &obj = Object::get_this(args);
-	auto path = core::path(context, *mtl::str(args[1]->evaluate(context)));
+	auto path = core::path(context, *mtl::str(context.evaluate(*args[1])));
 	obj.def(FNAME) = context.make<String>(path);
 }
 
@@ -292,7 +292,7 @@ std::string File::path(Args &args)
 {
 	/* This allows to use all `File` methods statically by providing the `path` as the last argument */
 	if (Class::static_call(args)) {
-		Value p = args[1]->evaluate(context);
+		Value p = context.evaluate(*args[1]);
 //		args.erase(std::next(args.begin()));
 		return core::path(context, p.get<String>());
 	}

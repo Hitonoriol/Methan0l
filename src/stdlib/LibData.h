@@ -11,7 +11,7 @@
 #include <expression/LiteralExpr.h>
 #include <util/meta/type_traits.h>
 #include <util/containers.h>
-#include <util/hash.h>
+#include <lang/util/hash.h>
 
 namespace mtl
 {

@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_TRYCATCHEXPR_H_
 #define SRC_EXPRESSION_TRYCATCHEXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 namespace mtl
 {
@@ -15,8 +15,8 @@ class TryCatchExpr: public Expression
 	public:
 		TryCatchExpr(ExprPtr try_body, ExprPtr catch_body, std::string &&catch_as);
 
-		virtual void execute(Interpreter &context) override;
-		virtual Value evaluate(Interpreter &context) override;
+		ExprPtr get_try() const;
+		ExprPtr get_catch() const;
 
 		void except(Interpreter &context);
 

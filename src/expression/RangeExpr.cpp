@@ -10,18 +10,22 @@ RangeExpr::RangeExpr(ExprPtr start, ExprPtr end, ExprPtr step) :
 {
 }
 
-void RangeExpr::execute(Interpreter &context)
+Value RangeExpr::get_start(Interpreter& context)
 {
-	throw IllegalOperationException();
+	return context.evaluate(*start);
 }
 
-Value RangeExpr::evaluate(Interpreter &context)
+Value RangeExpr::get_end(Interpreter& context)
 {
-	auto from = start->evaluate(context);
-	auto to = end->evaluate(context);
-	auto step = has_step() ? this->step->evaluate(context) : Value(1);
+	return context.evaluate(*end);
+}
 
-	return core::range(context, from, to, step);
+Value RangeExpr::get_step(Interpreter& context)
+{
+	if (!has_step())
+		return 1;
+
+	return context.evaluate(*step);
 }
 
 std::ostream& RangeExpr::info(std::ostream &str)

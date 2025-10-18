@@ -17,18 +17,14 @@ TryCatchExpr::TryCatchExpr(ExprPtr try_body, ExprPtr catch_body, std::string &&c
 {
 }
 
-void TryCatchExpr::execute(Interpreter &context)
+ExprPtr TryCatchExpr::get_try() const
 {
-	evaluate(context);
+	return try_body;
 }
 
-Value TryCatchExpr::evaluate(Interpreter &context)
+ExprPtr TryCatchExpr::get_catch() const
 {
-	auto &handler = context.get_exception_handler();
-	handler.register_handler(context.stack_depth(), this);
-	Value result = context.invoke(try_cast<UnitExpr>(try_body).get_unit_ref());
-	handler.current_handler();
-	return result;
+	return catch_body;
 }
 
 void TryCatchExpr::except(Interpreter &context)

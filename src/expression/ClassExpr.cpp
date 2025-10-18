@@ -20,38 +20,6 @@
 namespace mtl
 {
 
-void ClassExpr::execute(Interpreter &context)
-{
-	if (clazz != nullptr)
-		return;
-
-	clazz = context.make_shared<Class>(context, name);
-	auto &type_mgr = context.get_type_mgr();
-	auto &obj_data = clazz->get_object_data();
-
-	if (!base.empty())
-		clazz->inherit(&type_mgr.get_class(base));
-
-	if (!interfaces.empty()) {
-		for (auto &name : interfaces) {
-			auto &interface = type_mgr.get_class(name);
-			clazz->implement(&interface);
-		}
-	}
-
-	for (auto& [name, rhs] : body) {
-		auto rval = rhs->evaluate(context);
-		if (rval.is<Function>())
-			clazz->register_method(name, rval.get<Function>());
-		else if (rval.is<NativeFunc>())
-			clazz->register_method(name, rval.get<NativeFunc>());
-		else
-			obj_data.get_or_create(name) = rval;
-	}
-
-	type_mgr.register_type(clazz);
-}
-
 void ClassExpr::set_base(const std::string &name)
 {
 	base = name;
@@ -60,6 +28,36 @@ void ClassExpr::set_base(const std::string &name)
 void ClassExpr::set_interfaces(std::vector<std::string> &&interfaces)
 {
 	this->interfaces = std::move(interfaces);
+}
+
+const std::string& ClassExpr::get_name() const
+{
+	return name;
+}
+
+const std::string& ClassExpr::get_base() const
+{
+	return base;
+}
+
+const std::vector<std::string>& ClassExpr::get_interfaces() const
+{
+	return interfaces;
+}
+
+const ExprMap& ClassExpr::get_body() const
+{
+	return body;
+}
+
+const std::shared_ptr<Class>& ClassExpr::get_class() const
+{
+	return clazz;
+}
+
+void ClassExpr::set_class(const std::shared_ptr<Class>& clazz)
+{
+	this->clazz = clazz;
 }
 
 std::ostream& ClassExpr::info(std::ostream &str)

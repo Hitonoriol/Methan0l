@@ -1,7 +1,7 @@
 #ifndef SRC_UTIL_DEBUG_H_
 #define SRC_UTIL_DEBUG_H_
 
-#include "io.h"
+#include "util/io.h"
 
 #define JOIN(...) __VA_ARGS__
 

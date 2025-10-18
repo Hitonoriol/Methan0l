@@ -9,7 +9,7 @@
 #include <type.h>
 #include <structure/ValueRef.h>
 #include <util/util.h>
-#include <util/hash.h>
+#include <lang/util/hash.h>
 #include <util/meta/type_traits.h>
 #include <util/containers.h>
 #include <expression/LiteralExpr.h>
@@ -22,6 +22,9 @@ namespace mtl
 
 const Value Value::NIL(Nil { });
 const Value Value::NO_VALUE(NoValue { });
+
+const Value __ = Value::NO_VALUE;
+const Value NEW_LINE = Value('\n');
 
 const std::hash<Value> Value::hasher;
 

@@ -6,9 +6,10 @@
 #include <lexer/Token.h>
 #include <parser/Parser.h>
 #include <expression/parser/UnitParser.h>
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <expression/TryCatchExpr.h>
 #include <expression/UnitExpr.h>
+#include <core/ExpressionUtils.h>
 
 namespace mtl
 {
@@ -23,7 +24,7 @@ ExprPtr TryCatchParser::parse(Parser &parser, Token token)
 	parser.consume(Tokens::CATCH);
 	parser.consume(Tokens::COLON);
 	auto as = parser.parse();
-	std::string catch_as = Expression::get_name(as);
+	std::string catch_as = ExpressionUtils::get_name(as);
 	ExprPtr catch_body = UnitParser::parse_ctrl_block(parser, false);
 	return make_expr<TryCatchExpr>(line(token), try_body, catch_body, std::move(catch_as));
 }

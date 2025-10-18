@@ -4,6 +4,7 @@
 
 #include <core/class/List.h>
 #include <util/util.h>
+#include <lang/util/string.h>
 #include <core/Data.h>
 
 namespace mtl

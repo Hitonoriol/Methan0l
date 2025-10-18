@@ -13,11 +13,6 @@ AssignExpr::AssignExpr(ExprPtr lhs, Token tok, ExprPtr rhs) :
 	move = tok == Tokens::ARROW_L;
 }
 
-Value AssignExpr::evaluate(Interpreter &context)
-{
-	return context.evaluate(*this);
-}
-
 bool AssignExpr::is_move_assignment()
 {
 	return move;

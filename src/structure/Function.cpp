@@ -5,7 +5,7 @@
 #include <utility>
 #include <sstream>
 
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <expression/LiteralExpr.h>
 #include <structure/DataTable.h>
 #include <structure/Value.h>
@@ -82,9 +82,7 @@ void Function::call(Interpreter &context, const ExprList &args)
 	for (i = 0; i < arg_def.size(); ++i) {
 		const bool non_default = argc > i;
 		std::string arg_name = arg_def[i].first;
-		Value arg_val = non_default ?
-										args[i]->evaluate(context) :
-										arg_def[i].second->evaluate(context);
+		auto arg_val = non_default ? context.evaluate(*args[i]) : context.evaluate(*arg_def[i].second);
 		callargs->push_back(Value::ref(table.set(arg_name, arg_val)));
 	}
 

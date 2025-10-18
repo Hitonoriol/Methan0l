@@ -9,12 +9,13 @@
 #include <memory>
 #include <stack>
 
+#include "expression/Expression.h"
+#include "expression/InfixParser.h"
+#include "expression/PrefixExprParser.h"
+
 #include <type.h>
 #include <lexer/Lexer.h>
 #include <lexer/Token.h>
-#include <expression/Expression.h>
-#include <expression/parser/InfixParser.h>
-#include <expression/parser/PrefixParser.h>
 
 namespace mtl
 {
@@ -44,9 +45,6 @@ enum class BinOprType
 class Parser
 {
 	private:
-		Interpreter *context = nullptr;
-		std::unique_ptr<Unit> const_scope;
-
 		std::unordered_map<TokenType, std::shared_ptr<InfixParser>> infix_parsers;
 		std::unordered_map<TokenType, std::shared_ptr<PrefixParser>> prefix_parsers;
 
@@ -54,7 +52,7 @@ class Parser
 		int32_t access_opr_lvl = -1;
 
 		std::deque<Token> read_queue;
-		Shared<Unit> root_unit;
+		Shared<ExprList> parsed_expressions;
 
 		std::stack<PeekPos> peek_stack;
 		int32_t peek_pos = 0;
@@ -75,38 +73,22 @@ class Parser
 		int get_lookahead_precedence(bool prefix = false);
 
 	protected:
+		virtual void prepare_to_parse();
 		Unique<Lexer> lexer;
 
 	public:
-		Parser(Interpreter&, Unique<Lexer>);
+		Parser(Unique<Lexer>);
 		virtual ~Parser() = default;
 
 		Parser(const Parser&) = delete;
-
-		void set_context(Interpreter&);
-		std::shared_ptr<LiteralExpr> evaluate_const(ExprPtr);
 
 		void register_parser(TokenType token, InfixParser *parser);
 		void register_parser(TokenType token, PrefixParser *parser);
 		void alias_infix(TokenType registered_tok, TokenType alias);
 		void alias_prefix(TokenType registered_tok, TokenType alias);
 
-		void register_prefix_opr(TokenType token,
-				Precedence precedence = Precedence::PREFIX);
-
-		void register_infix_opr(TokenType token, Precedence precedence,
-				BinOprType type = BinOprType::LEFT_ASSOC);
-
-		void register_postfix_opr(TokenType token,
-				Precedence precedence = Precedence::POSTFIX);
-
-		void register_literal_parser(TokenType token, TypeID val_type);
-
-		void register_word(TokenType wordop, Precedence prec = Precedence::PREFIX,
-				bool multiarg = false);
-
-		void register_infix_word(TokenType wordop, Precedence prec,
-				BinOprType type = BinOprType::LEFT_ASSOC);
+		void register_prefix_opr(TokenType token, Precedence precedence = Precedence::PREFIX);
+		void register_postfix_opr(TokenType token, Precedence precedence = Precedence::POSTFIX);
 
 		void load(std::string &code);
 		void parse_all();
@@ -133,12 +115,10 @@ class Parser
 		bool is_parsing_access_opr();
 		void end_of_expression();
 
-		Unit& result();
+		ExprList& result();
 		void clear();
 
 		Lexer& get_lexer();
-
-		Interpreter& get_context();
 
 		void dump_queue(size_t len = 15);
 };

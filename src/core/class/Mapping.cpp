@@ -1,6 +1,6 @@
 #include "Mapping.h"
 
-#include <Grammar.h>
+#include <lang/Grammar.h>
 
 namespace mtl
 {

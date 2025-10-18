@@ -1,8 +1,7 @@
 #ifndef EXPRESSION_PARSER_ASSIGNPARSER_H_
 #define EXPRESSION_PARSER_ASSIGNPARSER_H_
 
-#include "InfixParser.h"
-
+#include <parser/expression/InfixParser.h>
 #include <expression/AssignExpr.h>
 
 namespace mtl

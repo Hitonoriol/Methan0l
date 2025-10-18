@@ -3,7 +3,7 @@
 
 #include "InfixParser.h"
 
-#include "expression/PostfixExpr.h"
+#include "PostfixExpr.h"
 
 namespace mtl
 {

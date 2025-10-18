@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_PARSER_TRYCATCHPARSER_H_
 #define SRC_EXPRESSION_PARSER_TRYCATCHPARSER_H_
 
-#include "PrefixParser.h"
+#include <parser/expression/PrefixExprParser.h>
 
 namespace mtl
 {

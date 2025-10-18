@@ -13,11 +13,6 @@ PostfixExpr::PostfixExpr(ExprPtr lhs, Token op) : lhs(lhs), op(op)
 {
 }
 
-Value PostfixExpr::evaluate(Interpreter &context)
-{
-	return context.evaluate(*this);
-}
-
 ExprPtr& PostfixExpr::get_lhs()
 {
 	return lhs;

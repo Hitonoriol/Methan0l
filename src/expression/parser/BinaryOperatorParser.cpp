@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <lexer/Token.h>
 #include <parser/Parser.h>
 

@@ -5,10 +5,10 @@
 
 #include <type.h>
 #include <util/cast.h>
-#include <util/class_binder.h>
-#include <util/debug.h>
 #include <util/io.h>
 #include <oop/Object.h>
+#include <lang/util/class_binder.h>
+#include <lang/util/debug.h>
 #include <CoreLibrary.h>
 
 namespace mtl

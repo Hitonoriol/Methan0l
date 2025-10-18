@@ -4,56 +4,17 @@
 #include <iomanip>
 #include <string>
 
-#include <interpreter/Interpreter.h>
-#include <expression/UnitExpr.h>
-#include <expression/parser/WordOperatorParser.h>
-#include <expression/parser/InfixWordOperatorParser.h>
-#include <expression/parser/LiteralParser.h>
-#include <expression/parser/PostfixExprParser.h>
+#include "expression/PostfixExprParser.h"
+#include "expression/PrefixExprParser.h"
 #include <util/containers.h>
 #include <except/except.h>
 
 namespace mtl
 {
 
-Parser::Parser(Interpreter &context, Unique<Lexer> lexer)
-	: context(&context),
-	lexer(std::move(lexer))
+Parser::Parser(Unique<Lexer> lexer)
+	: lexer(std::move(lexer))
 {}
-
-void Parser::set_context(Interpreter &context)
-{
-	this->context = &context;
-}
-
-std::shared_ptr<LiteralExpr> Parser::evaluate_const(ExprPtr expr)
-{
-	if (context == nullptr)
-		return Expression::NOOP;
-
-	if (const_scope == nullptr) {
-		const_scope = std::make_unique<Unit>(context);
-		const_scope->set_persisent(true);
-	}
-
-	context->enter_scope(*const_scope);
-	auto cval = expr->evaluate(*context);
-	context->leave_scope();
-
-	/* Handle `const: { ... }` blocks */
-	if (instanceof<UnitExpr>(expr)) {
-		auto &unit = cval.get<Unit>();
-		unit.manage_table(*const_scope);
-		unit.set_persisent(true);
-		cval = context->invoke(unit);
-		const_scope->clear_result();
-	}
-
-	if (cval.empty())
-		return Expression::NOOP;
-
-	return LiteralExpr::create(cval);
-}
 
 void Parser::register_parser(TokenType token, InfixParser *parser)
 {
@@ -81,36 +42,14 @@ void Parser::alias_prefix(TokenType registered_tok, TokenType alias)
 	prefix_parsers.emplace(alias, prefix_parsers.at(registered_tok));
 }
 
-void Parser::register_word(TokenType wordop, Precedence prec, bool multiarg)
-{
-	register_parser(wordop, new WordOperatorParser(wordop, prcdc(prec), multiarg));
-}
-
-void Parser::register_infix_word(TokenType wordop, Precedence prec, BinOprType type)
-{
-	register_parser(wordop, new InfixWordOperatorParser(prcdc(prec), type == BinOprType::RIGHT_ASSOC));
-}
-
-void Parser::register_literal_parser(TokenType token, TypeID val_type)
-{
-	register_parser(token, new LiteralParser(val_type));
-}
-
 void Parser::register_prefix_opr(TokenType token, Precedence precedence)
 {
-	register_parser(token, new PrefixOperatorParser(prcdc(precedence)));
+	register_parser(token, new PrefixParser(prcdc(precedence)));
 }
 
 void Parser::register_postfix_opr(TokenType token, Precedence precedence)
 {
 	register_parser(token, new PostfixExprParser(prcdc(precedence)));
-}
-
-void Parser::register_infix_opr(TokenType token, Precedence precedence,
-		BinOprType type)
-{
-	register_parser(token,
-			new BinaryOperatorParser(prcdc(precedence), type == BinOprType::RIGHT_ASSOC));
 }
 
 ExprPtr Parser::parse(int precedence, bool prefix_only)
@@ -184,21 +123,24 @@ void Parser::parse_all()
 	if (lexer->has_unclosed_blocks())
 		throw std::runtime_error("Source code contains unclosed block or group expressions");
 
-	ExprList &expression_queue = result().expressions();
+	prepare_to_parse();
+
+	ExprList &expression_queue = result();
 	while (!lexer->empty() || look_ahead() != Token::EOF_TOKEN) {
 			if constexpr (DEBUG)
 				out << "\nParsing next root expression...\n";
 			reset();
-			auto expression = parse();
-			if (expression != Expression::NOOP)
+			if (auto expression = parse())
 				expression_queue.push_back(expression);
 	}
 
-	if (const_scope != nullptr)
-		const_scope.reset();
-
 	if constexpr (DEBUG)
 		std::cout << "\n* Parsing complete. Expressions parsed: " << expression_queue.size() << std::endl;
+}
+
+void Parser::prepare_to_parse()
+{
+	// No impl	
 }
 
 void Parser::load(std::string &code)
@@ -350,12 +292,12 @@ int Parser::get_lookahead_precedence(bool prefix)
 	return prec;
 }
 
-Unit& Parser::result()
+ExprList& Parser::result()
 {
-	if (!root_unit)
-		root_unit = context->make_shared<Unit>(context);
+	if (!parsed_expressions)
+		parsed_expressions = std::make_shared<ExprList>();
 
-	return *root_unit;
+	return *parsed_expressions;
 }
 
 void Parser::clear()
@@ -384,11 +326,6 @@ void Parser::dump_queue(size_t len)
 	}
 	ss << "..." << UNTAB << NL;
 	out << tab(ss.str());
-}
-
-Interpreter& Parser::get_context()
-{
-	return *context;
 }
 
 } /* namespace mtl */

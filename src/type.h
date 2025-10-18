@@ -17,11 +17,10 @@
 
 #include <boost/container/devector.hpp>
 
-#include <util/debug.h>
-
-#define TYPE(T) typename std::remove_const<typename std::remove_reference<T>::type>::type
-#define VT(v) TYPE(decltype(v))
-#define UNCONST(T) typename std::remove_const<T>::type
+#include <lang/util/debug.h>
+#include <util/meta/type_traits.h>
+#include <util/memory.h>
+#include <util/string.h>
 
 #define IF(...) if constexpr (JOIN(__VA_ARGS__))
 #define ELIF(...) else IF(__VA_ARGS__)
@@ -155,9 +154,6 @@ constexpr std::string_view
 
 extern Args empty_args;
 
-constexpr char NL = '\n', TAB = '\t', UNTAB = '\b';
-constexpr std::string_view NLTAB = "\n\t";
-
 Value val(Interpreter&, ExprPtr);
 Shared<native::String> str(Value);
 std::string& str(Shared<native::String>);
@@ -184,24 +180,6 @@ inline Shared<T> make(Types &&...args)
 {
 	return make<T>({}, std::forward<Types...>(args)...);
 }
-
-template <typename Alloc>
-struct alloc_deleter
-{
-	alloc_deleter(const Alloc &a) : a(a) {}
-
-	typedef typename std::allocator_traits<Alloc>::pointer pointer;
-
-	void operator()(pointer p) const
-	{
-		Alloc aa(a);
-		std::allocator_traits<Alloc>::destroy(aa, std::addressof(*p));
-		std::allocator_traits<Alloc>::deallocate(aa, p, 1);
-	}
-
-private:
-	Alloc a;
-};
 
 template <typename T>
 using UniquePmr = std::unique_ptr<T, mtl::alloc_deleter<Allocator<T>>>;

@@ -4,7 +4,7 @@
 #include <charconv>
 
 #include <version.h>
-#include <util/global.h>
+#include <lang/util/global.h>
 #include <lang/Methan0l.h>
 #include <cli/Runner.h>
 #include <cli/InteractiveRunner.h>
@@ -37,6 +37,11 @@ std::string
 	CLIHooks::CAS_MODE(".cas"),
 	CLIHooks::INTERACTIVE_RUNNER(".interactive");
 
+cli::cli()
+	: config(std::make_unique<Methan0lConfig>())
+{
+}
+
 int cli::run(int argc, char **argv)
 {
 	auto arg_start = parse_args(argc, argv);
@@ -45,13 +50,15 @@ int cli::run(int argc, char **argv)
 
 	int return_value = 0;
 	{
-		Methan0l methan0l(argv[0]);
-		init_env(methan0l);
+		config->runpath = argv[0];
+
+		auto methan0l = Methan0l::make(std::move(*config));
+		init_env(*methan0l);
 
 		if (argc - arg_start > 0)
-			return_value = Runner(methan0l).run_file(argc, argv, arg_start);
+			return_value = Runner(*methan0l).run_file(argc, argv, arg_start);
 		else
-			InteractiveRunner(methan0l).start();
+			InteractiveRunner(*methan0l).start();
 	}
 
 	if (no_exit) {
@@ -107,22 +114,19 @@ int cli::parse_args(int argc, char **argv)
 			cli::cas = true;
 
 		else if (is_valid_arg("--max-mem", arg)) {
-			mtl::HEAP_MAX_MEM = get_numeric_arg(arg);
-			if (mtl::HEAP_MEM_CAP > mtl::HEAP_MAX_MEM)
-				mtl::HEAP_MEM_CAP = mtl::HEAP_MAX_MEM;
+			config->heap_max_capacity = get_numeric_arg(arg);
+			if (config->heap_initial_capacity > config->heap_max_capacity) {
+				config->heap_initial_capacity = config->heap_max_capacity;
+			}
 		}
 
-		else if (is_valid_arg("--initial-mem", arg))
-			mtl::HEAP_MEM_CAP = get_numeric_arg(arg);
+		else if (is_valid_arg("--initial-mem", arg)) {
+			config->heap_initial_capacity = get_numeric_arg(arg);
+		}
 
-		else if (is_valid_flag("--allocate-fully", arg))
-			mtl::HEAP_MEM_CAP = mtl::HEAP_MAX_MEM;
-
-		else if (is_valid_flag("--no-heap-limit", arg))
-			mtl::HEAP_LIMITED = false;
-
-		else if (is_valid_flag("--no-flat-buffer", arg))
-			mtl::USE_MONOTONIC_BUFFER = false;
+		else if (is_valid_flag("--allocate-fully", arg)) {
+			config->heap_initial_capacity = config->heap_max_capacity;
+		}
 
 		else if (is_valid_flag("--version", arg)) {
 			std::cout << mtl::FULL_VERSION_STR << NL;

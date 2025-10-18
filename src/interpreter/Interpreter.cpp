@@ -14,8 +14,8 @@
 #include <expression/BinaryOperatorExpr.h>
 #include <expression/ConditionalExpr.h>
 #include <expression/IdentifierExpr.h>
-#include <expression/PrefixExpr.h>
-#include <expression/PostfixExpr.h>
+#include <parser/expression/PrefixExpr.h>
+#include <parser/expression/PostfixExpr.h>
 #include <expression/UnitExpr.h>
 #include <expression/InvokeExpr.h>
 #include <expression/ListExpr.h>
@@ -43,31 +43,38 @@ STRINGS(
 
 )
 
-Interpreter::Interpreter(Unique<Parser> parser, const char *path)
-	: heap(Heap::create(HEAP_MEM_CAP)),
-	  dlls(allocator<Shared<SharedLibrary>>()),
-	  libraries(allocator<Shared<Library>>()),
-	  env_table(this),
-	  temporaries(allocator<Value>()),
-	  inbuilt_funcs(allocator<NativeFuncMap::value_type>()),
-	  exec_stack(allocator<Unit*>()),
-	  object_stack(allocator<DataTable*>()),
-	  tmp_call_stack(allocator<std::shared_ptr<Unit>>()),
-	  on_exit_tasks(allocator<Task>()),
-	  parser(std::move(parser)),
-	  main(this)
+Interpreter::Interpreter(Protected, InterpreterConfig&& config)
+	: heap(Heap::create(config.heap_initial_capacity, config.heap_max_capacity))
+	, dlls(allocator<Shared<SharedLibrary>>())
+	, libraries(allocator<Shared<Library>>())
+	, env_table(this)
+	, temporaries(allocator<Value>())
+	, inbuilt_funcs(allocator<NativeFuncMap::value_type>())
+	, exec_stack(allocator<Unit*>())
+	, object_stack(allocator<DataTable*>())
+	, tmp_call_stack(allocator<std::shared_ptr<Unit>>())
+	, on_exit_tasks(allocator<Task>())
+	, main(this)
+	, config(std::move(config))
 {
 	exec_stack.push_back(&main);
-	load_library<Builtins>();
-	if (path) {
-		set_runpath(path);
-		load_libraries();
-	}
 }
 
 Interpreter::~Interpreter()
 {
 	on_exit();
+}
+
+void Interpreter::initialize(InitConfig&& initConfig)
+{
+	this->parser = std::move(initConfig.parser);
+	this->evaluator = std::move(initConfig.evaluator);
+	load_library<Builtins>();
+
+	if (config.runpath) {
+		set_runpath(config.runpath);
+		load_libraries();
+	}
 }
 
 void Interpreter::set_runpath(std::string_view runpath)
@@ -508,7 +515,7 @@ Value& Interpreter::referenced_value(Expression *expr, bool follow_refs)
 
 	/* Create a temporary value and reference it if `expr` is not an access expression */
 	else if (!BinaryOperatorExpr::is(*expr, Tokens::DOT))
-		return expr->evaluate(*this).get_ref(this);
+		return evaluate(*expr).get_ref(this);
 
 	/* Reference an access expression's value */
 	else {
@@ -529,14 +536,14 @@ Value& Interpreter::get(const std::string &id, bool global, bool follow_refs)
 Value Interpreter::eval(Expression &expr)
 {
 	LOG("[Eval] " << expr.info());
-	return expr.evaluate(*this);
+	return evaluate(expr);
 }
 
 void Interpreter::exec(Expression &expr)
 {
 	LOG("[Exec] " << expr.info());
 
-	expr.execute(*this);
+	execute(expr);
 	clear_temporaries();
 }
 
@@ -561,7 +568,7 @@ size_t Interpreter::current_temporary_depth()
 /* Used when assigning to identifiers. */
 Value Interpreter::unwrap_or_reference(Expression &expr)
 {
-	return expr.evaluate(*this).get();
+	return evaluate(expr).get();
 }
 
 Value Interpreter::evaluate(AssignExpr &expr)
@@ -668,11 +675,14 @@ Value Interpreter::invoke_inbuilt_func(const std::string &name, const ExprList &
 	return entry->second(args);
 }
 
-/* Default evaluation */
-Value Interpreter::evaluate(Expression &expr)
+Value Interpreter::evaluate(Expression& expr)
 {
-	std::cerr << "Unimplemented expression evaluation" << std::endl;
-	return Value::NIL;
+	return evaluator->evaluate(expr);
+}
+
+void Interpreter::execute(Expression& expr)
+{
+	evaluator->execute(expr);
 }
 
 TypeManager& Interpreter::get_type_mgr()
@@ -786,7 +796,8 @@ bool Interpreter::load()
 {
 	return try_load([&]() {
 		parser->parse_all();
-		load(parser->result());
+		Unit unit(this, parser->result());
+		load(unit);
 	});
 }
 
@@ -836,7 +847,7 @@ Unit Interpreter::load_unit(std::string &code)
 	if (!try_load([&]() {parser->load(code);}))
 		return Unit(this);
 
-	Unit unit = parser->result();
+	Unit unit(this, parser->result());
 	parser->clear();
 	parser->reset();
 	parser->get_lexer().reset();

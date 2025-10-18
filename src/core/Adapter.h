@@ -1,5 +1,5 @@
 #include <structure/Value.h>
-#include <Grammar.h>
+#include <lang/Grammar.h>
 
 #define ADAPTER_INVOKE(name, ...) obj.invoke_method(STR(name), LiteralExpr::make_list(JOIN(__VA_ARGS__)))
 

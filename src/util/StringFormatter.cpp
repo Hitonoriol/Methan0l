@@ -4,7 +4,6 @@
 #include <regex>
 #include <stdexcept>
 
-#include <type.h>
 #include <util/util.h>
 #include <util/string.h>
 
@@ -40,7 +39,6 @@ StringFormatter::Modifier StringFormatter::next_modifier(mdf_it &it, mdf_it end)
 
 		value += *it;
 	}
-	LOG("Parsed format modifier: [" << static_cast<char>(type) << ", " << value << "]")
 	return Modifier(type, value);
 }
 
@@ -88,11 +86,6 @@ void StringFormatter::format()
 		format_cell(fmt_match[1].str(), replacement);
 		offset += fmt_match.position() + replacement.length();
 		fmt.replace(offset - replacement.length(), fmt_match.length(), replacement);
-
-		LOG("Match at: " << fmt_match.position() << " (local)"
-				<< ", replacement len: " << replacement.length()
-				<< ", current offset: " << offset
-				<< ", fmt len: " << fmt.length())
 	}
 }
 

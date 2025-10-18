@@ -3,7 +3,6 @@
 #include <chrono>
 #include <deque>
 #include <stdexcept>
-#include <chrono>
 #include <thread>
 #include <filesystem>
 
@@ -52,10 +51,6 @@ void LibInternal::load()
 		return context->get_heap().get_max_mem();
 	});
 
-	function("enforce_mem_limit", [&](bool val) {
-		mtl::HEAP_LIMITED = val;
-	});
-
 	function("mem_info", [&] {
 		auto &heap = context->get_heap();
 		auto in_use = heap.get_in_use(), max = heap.get_max_mem();
@@ -67,7 +62,7 @@ void LibInternal::load()
 	/* measure_time$(expr) */
 	function("measure_time", [&](Args args) {
 		auto start = std::chrono::high_resolution_clock::now();
-		args.front()->execute(*context);
+		context->execute(*args.front());
 		auto end = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration<double, std::milli>(end - start).count();
 	});
@@ -199,7 +194,7 @@ void LibInternal::load_operators()
 		/* Pseudo-method / Box function invocation */
 		else if (instanceof<InvokeExpr>(rhs)) {
 			if (lval.type() == Type::UNIT && lval.get<Unit>().is_persistent()
-					&& lval.get<Unit>().local().exists(Expression::get_name(rhs))) {
+					&& lval.get<Unit>().local().exists(ExpressionUtils::get_name(rhs))) {
 				context->use(lval.get<Unit>());
 				auto ret = context->evaluate(try_cast<InvokeExpr>(rhs));
 				context->unuse();
@@ -258,8 +253,8 @@ Value LibInternal::object_dot_operator(Object &obj, ExprPtr rhs)
 
 	if (instanceof<InvokeExpr>(rhs.get())) {
 		auto &method = try_cast<InvokeExpr>(rhs);
-		auto &method_name = try_cast<IdentifierExpr>(method.get_lhs()).get_name();
-		return obj.invoke_method(method_name, method.arg_list());
+		auto &method_idfr = try_cast<IdentifierExpr>(method.get_lhs());
+		return obj.invoke_method(method_idfr.get_name(), method.arg_list());
 	}
 	else
 		return Value::ref(obj.field(IdentifierExpr::get_name(rhs)));

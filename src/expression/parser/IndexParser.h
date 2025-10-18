@@ -1,8 +1,7 @@
 #ifndef SRC_EXPRESSION_PARSER_INDEXPARSER_H_
 #define SRC_EXPRESSION_PARSER_INDEXPARSER_H_
 
-#include "InfixParser.h"
-
+#include <parser/expression/InfixParser.h>
 #include <expression/IndexExpr.h>
 #include <expression/IdentifierExpr.h>
 

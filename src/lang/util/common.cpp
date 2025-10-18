@@ -40,9 +40,4 @@ const std::string FULL_VERSION_STR(
 	SELF_NAME + " " + VERSION_STR + " (Built on " + BUILD_TIMESTAMP + ")"
 );
 
-bool USE_MONOTONIC_BUFFER = true;
-bool HEAP_LIMITED = true;
-uint64_t HEAP_MEM_CAP = 0x100000;
-uint64_t HEAP_MAX_MEM = 0x2000000;
-
 }

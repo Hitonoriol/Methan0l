@@ -9,11 +9,7 @@ namespace mtl
 class WeakUnitParser: public UnitParser
 {
 	public:
-		ExprPtr parse(Parser &parser, Token token) override
-		{
-			parser.consume(Tokens::BRACE_L);
-			return UnitParser::parse(parser, token);
-		}
+		ExprPtr parse(Parser &parser, Token token) override;
 };
 
 } /* namespace mtl */

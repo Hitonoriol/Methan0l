@@ -1,22 +1,29 @@
 #ifndef SRC_EXPREVALUATOR_H_
 #define SRC_EXPREVALUATOR_H_
 
-#include <deque>
-#include <cmath>
-#include <utility>
-#include <type_traits>
+#include <interpreter/TypeManager.h>
+#include <interpreter/ExceptionHandler.h>
+#include <interpreter/Evaluator.h>
+#include <interpreter/Proxy.h>
+#include <lang/Methan0lEvaluator.h> // TODO replace with something more generic
+
+#include <lexer/Token.h>
+#include <lexer/Lexer.h>
+
+#include <structure/Function.h>
+#include <core/ExternalLibrary.h>
+#include <core/EvaluatingIterator.h>
 
 #include <util/Heap.h>
 #include <util/meta/function_traits.h>
 #include <util/cast.h>
 #include <util/util.h>
+#include <lang/util/containers.h>
 
-#include <lexer/Token.h>
-#include <lexer/Lexer.h>
-#include <structure/Function.h>
-#include <core/ExternalLibrary.h>
-#include <interpreter/TypeManager.h>
-#include <interpreter/ExceptionHandler.h>
+#include <deque>
+#include <cmath>
+#include <utility>
+#include <type_traits>
 
 #define OPERATOR_DEF(prefix, type, functor) \
 	inline void type##_op(TokenType tok, const functor &opr) \
@@ -65,61 +72,13 @@ STRING_ENUM(EnvVars,
 	BIN_PATH, HOME_DIR
 )
 
-template<typename T>
-class Proxy
-{
-	private:
-		T &obj;
-
-	public:
-		using type = T;
-
-		Proxy(T &obj) : obj(obj) {}
-
-		inline T& contained()
-		{
-			return obj;
-		}
-
-		inline T* operator->()
-		{
-			return &obj;
-		}
-
-		inline T& operator*()
-		{
-			return obj;
-		}
+struct InterpreterConfig {
+	const char* runpath{};
+	uint64_t heap_initial_capacity = 64 * 1024 * 1024;
+	uint64_t heap_max_capacity = heap_initial_capacity * 2;
 };
 
-/* Tag type for capturing the current context from arbitrary functions */
-struct Context : public Proxy<Interpreter>
-{
-	using Proxy<type>::Proxy;
-};
-
-/* Tag type for capturing all callargs passed to a function */
-struct CallArgs : public Proxy<ExprList>
-{
-	using iterator = EvaluatingIterator;
-
-	private:
-		Interpreter &context;
-
-	public:
-		CallArgs(Interpreter &context, ExprList& args)
-			: Proxy<type>::Proxy(args), context(context) {}
-
-		Value first()
-		{
-			return contained().front()->evaluate(context);
-		}
-
-		iterator begin() { return {context, (*this)->begin()}; }
-		iterator end() { return {context, (*this)->end()}; }
-};
-
-class Interpreter
+class Interpreter : public std::enable_shared_from_this<Interpreter>
 {
 	private:
 		friend class Library;
@@ -162,6 +121,8 @@ class Interpreter
 
 		std::unique_ptr<Parser> parser;
 		Unit main;
+
+		InterpreterConfig config;
 
 		size_t current_temporary_depth();
 		void clear_temporaries(size_t up_to = 0);
@@ -239,6 +200,10 @@ class Interpreter
 		}
 
 	protected:
+		struct Protected{};
+
+		Unique<Evaluator> evaluator;
+
 		OPERATOR_DEF(lazy, prefix, LazyUnaryOpr)
 		OPERATOR_DEF(value, prefix, UnaryOpr)
 
@@ -247,6 +212,13 @@ class Interpreter
 
 		OPERATOR_DEF(lazy, infix, LazyBinaryOpr)
 		OPERATOR_DEF(value, infix, BinaryOpr)
+
+		struct InitConfig {
+			Unique<Parser> parser;
+			Unique<Evaluator> evaluator;
+		};
+
+		virtual void initialize(InitConfig&& initConfig);
 
 		Value invoke_inbuilt_func(const std::string &name, const ExprList &args);
 
@@ -457,10 +429,11 @@ class Interpreter
 		void unhandled_exception(const std::string&);
 
 	public:
-		Interpreter(Unique<Parser> parser, const char *runpath = nullptr);
+		Interpreter(Protected, InterpreterConfig&& config);
 		virtual ~Interpreter();
 		
 		Interpreter(const Interpreter &rhs) = delete;
+		Interpreter& operator=(const Interpreter &rhs) = delete;
 
 		template<typename T>
 		inline Allocator<T> allocator()
@@ -763,6 +736,7 @@ class Interpreter
 		Value evaluate(InvokeExpr &expr);
 
 		Value evaluate(Expression &expr);
+		void execute(Expression& expr);
 
 		bool func_exists(const std::string &name);
 

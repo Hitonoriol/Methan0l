@@ -1,6 +1,6 @@
 #include "type.h"
 
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <structure/Value.h>
 #include <core/class/String.h>
 
@@ -11,7 +11,7 @@ Args empty_args;
 
 Value val(Interpreter &context, ExprPtr expr)
 {
-	return expr->evaluate(context).get();
+	return context.evaluate(*expr).get();
 }
 
 Shared<native::String> str(Value val)

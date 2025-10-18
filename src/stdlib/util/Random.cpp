@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include <expression/Expression.h>
+#include <parser/expression/Expression.h>
 #include <interpreter/Interpreter.h>
 #include <oop/Object.h>
 #include <structure/Value.h>
@@ -71,7 +71,7 @@ Random::Random(Interpreter &context) : Class(context, "Random")
 
 Int Random::extract_seed(Args &args)
 {
-	Value seed_val = args.size() > 1 ? args[1]->evaluate(context) : Value::NIL;
+	Value seed_val = args.size() > 1 ? context.evaluate(*args[1]) : Value::NIL;
 	Object &this_obj = Object::get_this(args);
 	Int seed = seed_val.nil() ? rand_dev() : seed_val.as<Int>();
 
@@ -84,7 +84,7 @@ Int Random::extract_seed(Args &args)
 
 bool Random::next_bool(Args &args)
 {
-	double prob = args.size() > 1 ? dbl(args[1]->evaluate(context)) : 0.5;
+	double prob = args.size() > 1 ? dbl(context.evaluate(*args[1])) : 0.5;
 	return dbl_distr(managed_rng(Object::get_this(args))) < prob;
 }
 

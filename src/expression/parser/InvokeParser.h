@@ -1,8 +1,7 @@
 #ifndef EXPRESSION_PARSER_INVOKEPARSER_H_
 #define EXPRESSION_PARSER_INVOKEPARSER_H_
 
-#include "InfixParser.h"
-
+#include <parser/expression/InfixParser.h>
 #include <expression/ListExpr.h>
 #include <expression/parser/ListParser.h>
 #include <expression/InvokeExpr.h>

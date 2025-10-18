@@ -10,14 +10,20 @@
 #include <cwchar>
 #include <algorithm>
 #include <cctype>
-
-#include <type.h>
+#include <cstdint>
 
 namespace mtl
 {
 
 constexpr std::string_view TAB_S = "  |  ";
 constexpr std::string_view NUM_CHARS = "-.0123456789";
+
+constexpr char
+	NL = '\n',
+	TAB = '\t',
+	UNTAB = '\b';
+
+constexpr std::string_view NLTAB = "\n\t";
 
 /* Keeps indentation levels after new line when using `\t` character */
 std::string tab(std::string&&);
@@ -27,7 +33,7 @@ std::string indent(std::string&&);
 void replace_all(std::string &str, std::string_view from, const std::string &to,
 		int limit = -1);
 std::vector<std::string> split(const std::string &s, const std::string &delimiter);
-std::string to_base(UInt value, uint8_t base);
+std::string to_base(uint64_t value, uint8_t base);
 
 template<typename T>
 inline auto str(
@@ -130,16 +136,6 @@ inline constexpr std::string_view strip_name_scope(std::string_view full_name)
 }
 
 bool is_numeric_string(const std::string& str, bool floating_point = false);
-
-template<typename T>
-inline std::string stringify_container(const T &ctr)
-{
-	auto it = std::begin(ctr), end = std::end(ctr);
-	return stringify([&] {
-		if (it == end) return empty_string;
-		return mtl::str(unconst(*(it++)).to_string());
-	});
-}
 
 }
 

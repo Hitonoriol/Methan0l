@@ -15,21 +15,20 @@ class IndexExpr: public IdentifierExpr
 		bool remove;
 		bool insert;
 
-		Value& indexed_element(Interpreter&, DataTable&);
-
 	public:
 		IndexExpr(ExprPtr list_idfr, ExprPtr idx, bool remove, bool insert) :
 				lhs(list_idfr), idx(idx), remove(remove), insert(insert)
 		{}
 
-		Value evaluate(Interpreter &context) override;
-		void execute(mtl::Interpreter &context) override;
-
+		Value& indexed_element(Interpreter&, DataTable&);
 		Value& assign(Interpreter &context, Value val) override;
 		Value& referenced_value(Interpreter &context, bool follow_refs = true) override;
 
 		ExprPtr get_lhs();
 		ExprPtr get_rhs();
+
+		bool is_remove() const;
+		bool is_insert() const;
 
 		void create_if_nil(Interpreter&) override UNIMPLEMENTED
 

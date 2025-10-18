@@ -3,15 +3,15 @@
 #include "Methan0lLexer.h"
 
 #include <lexer/Token.h>
+#include <parser/expression/PostfixExprParser.h>
+#include <parser/expression/PrefixExprParser.h>
 #include <expression/parser/AssignParser.h>
 #include <expression/parser/IdentifierParser.h>
 #include <expression/parser/GroupParser.h>
 #include <expression/parser/InvokeParser.h>
-#include <expression/parser/PrefixOperatorParser.h>
 #include <expression/parser/ConditionParser.h>
 #include <expression/parser/BinaryOperatorParser.h>
 #include <expression/parser/LiteralParser.h>
-#include <expression/parser/PostfixExprParser.h>
 #include <expression/parser/ListParser.h>
 #include <expression/parser/UnitParser.h>
 #include <expression/parser/WeakUnitParser.h>
@@ -28,14 +28,19 @@
 #include <expression/parser/RangeParser.h>
 #include <expression/parser/ConstParser.h>
 #include <expression/parser/IfElseParser.h>
+#include <expression/parser/WordOperatorParser.h>
+#include <expression/parser/InfixWordOperatorParser.h>
+#include <expression/parser/LiteralParser.h>
 
 namespace mtl
 {
 
 /* Grammar definition */
 Methan0lParser::Methan0lParser(Interpreter &context)
-	: Parser(context, std::make_unique<Methan0lLexer>())
+	: Parser(std::make_unique<Methan0lLexer>())
 {
+	set_context(context);
+
 	/* Literals */
 	register_literal_parser(Tokens::BOOLEAN, Type::BOOLEAN);
 	register_literal_parser(Tokens::STRING, Type::STRING);
@@ -200,6 +205,71 @@ Methan0lParser::Methan0lParser(Interpreter &context)
 	register_infix_word(Tokens::INSTANCE_OF, Precedence::BIT_SHIFT);
 	register_infix_word(Tokens::REQUIRE, Precedence::NO_EVAL);
 	register_infix_word(Tokens::CONVERT, Precedence::BIT_SHIFT);
+}
+
+void Methan0lParser::register_word(TokenType wordop, Precedence prec, bool multiarg)
+{
+	register_parser(wordop, new WordOperatorParser(wordop, prcdc(prec), multiarg));
+}
+
+void Methan0lParser::register_infix_word(TokenType wordop, Precedence prec, BinOprType type)
+{
+	register_parser(wordop, new InfixWordOperatorParser(prcdc(prec), type == BinOprType::RIGHT_ASSOC));
+}
+
+void Methan0lParser::register_literal_parser(TokenType token, TypeID val_type)
+{
+	register_parser(token, new LiteralParser(val_type));
+}
+
+void Methan0lParser::register_infix_opr(TokenType token, Precedence precedence,	BinOprType type)
+{
+	register_parser(token, new BinaryOperatorParser(prcdc(precedence), type == BinOprType::RIGHT_ASSOC));
+}
+
+void Methan0lParser::set_context(Interpreter& context)
+{
+	this->context = &context;
+}
+
+Interpreter& Methan0lParser::get_context()
+{
+	return *context;
+}
+
+std::shared_ptr<LiteralExpr> Methan0lParser::evaluate_const(ExprPtr expr)
+{
+	if (context == nullptr)
+		return nullptr;
+
+	if (const_scope == nullptr) {
+		const_scope = std::make_unique<Unit>(context);
+		const_scope->set_persisent(true);
+	}
+
+	context->enter_scope(*const_scope);
+	auto cval = context->evaluate(*expr);
+	context->leave_scope();
+
+	/* Handle `const: { ... }` blocks */
+	if (instanceof<UnitExpr>(expr)) {
+		auto& unit = cval.get<Unit>();
+		unit.manage_table(*const_scope);
+		unit.set_persisent(true);
+		cval = context->invoke(unit);
+		const_scope->clear_result();
+	}
+
+	if (cval.empty())
+		return nullptr;
+
+	return LiteralExpr::create(cval);
+}
+
+void Methan0lParser::prepare_to_parse()
+{
+	if (const_scope)
+		const_scope.reset();
 }
 
 } /* namespace mtl */

@@ -4,7 +4,7 @@
 #include <core/class/Iterator.h>
 #include <except/except.h>
 #include <oop/NativeClass.h>
-#include <Grammar.h>
+#include <lang/Grammar.h>
 
 namespace mtl
 {

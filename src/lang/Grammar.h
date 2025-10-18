@@ -1,9 +1,11 @@
 #ifndef SRC_GRAMMAR_H_
 #define SRC_GRAMMAR_H_
 
-#include <expression/Expression.h>
-#include <expression/AssignExpr.h>
+#include <parser/expression/Expression.h>
+#include <parser/expression/PostfixExpr.h>
+#include <parser/expression/PrefixExpr.h>
 #include <expression/BinaryOperatorExpr.h>
+#include <expression/AssignExpr.h>
 #include <expression/ClassExpr.h>
 #include <expression/ConditionalExpr.h>
 #include <expression/FormatStrExpr.h>
@@ -15,8 +17,6 @@
 #include <expression/LiteralExpr.h>
 #include <expression/LoopExpr.h>
 #include <expression/MapExpr.h>
-#include <expression/PostfixExpr.h>
-#include <expression/PrefixExpr.h>
 #include <expression/RangeExpr.h>
 #include <expression/TryCatchExpr.h>
 #include <expression/TypeRefExpr.h>

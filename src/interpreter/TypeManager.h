@@ -6,7 +6,7 @@
 
 #include <util/meta/type_traits.h>
 #include <util/memory.h>
-#include <util/hash.h>
+#include <lang/util/hash.h>
 #include <oop/Object.h>
 #include <structure/TypeID.h>
 #include <expression/ListExpr.h>

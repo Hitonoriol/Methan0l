@@ -29,13 +29,13 @@ class Random: public Class
 		template<typename T>
 		T range_min(Args &args)
 		{
-			return args.size() > 2 ? args[1]->evaluate(context).as<T>() : 0;
+			return args.size() > 2 ? context.evaluate(*args[1]).as<T>() : 0;
 		}
 
 		template<typename T>
 		T range_max(Args &args)
 		{
-			return args.size() > 1 ? args.back()->evaluate(context).as<T>() : 0;
+			return args.size() > 1 ? context.evaluate(*args.back()).as<T>() : 0;
 		}
 
 		Int next_int(std::mt19937_64 &rng, Int bound);

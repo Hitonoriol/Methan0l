@@ -1,8 +1,8 @@
 #ifndef SRC_STRUCTURE_OBJECT_NATIVECLASS_H_
 #define SRC_STRUCTURE_OBJECT_NATIVECLASS_H_
 
-#include <util/class_binder.h>
 #include <util/string.h>
+#include <lang/util/class_binder.h>
 
 namespace mtl
 {

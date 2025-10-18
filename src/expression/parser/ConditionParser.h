@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_PARSER_CONDITIONPARSER_H_
 #define SRC_EXPRESSION_PARSER_CONDITIONPARSER_H_
 
-#include "InfixParser.h"
+#include <parser/expression/InfixParser.h>
 
 namespace mtl
 {

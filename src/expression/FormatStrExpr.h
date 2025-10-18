@@ -1,7 +1,7 @@
 #ifndef SRC_EXPRESSION_FORMATSTREXPR_H_
 #define SRC_EXPRESSION_FORMATSTREXPR_H_
 
-#include "Expression.h"
+#include <parser/expression/Expression.h>
 
 namespace mtl
 {
@@ -15,7 +15,9 @@ class FormatStrExpr: public Expression
 	public:
 		FormatStrExpr(std::string fmt, ExprList args);
 
-		Value evaluate(Interpreter &context) override;
+		const std::string& get_format() const;
+		const ExprList& get_args() const;
+
 		std::ostream& info(std::ostream &str) override;
 };
 
