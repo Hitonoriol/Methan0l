@@ -61,7 +61,7 @@ UInt Library::unum(const ExprList& args, int idx)
 
 Value Library::val(ExprPtr expr)
 {
-	return context->eval(expr).get();
+	return context->evaluate(*expr).get();
 }
 
 Value& Library::ref(ExprPtr idfr)
@@ -80,7 +80,7 @@ Value Library::arg(const ExprList& args, int idx)
 		throw std::runtime_error("Trying to access argument #" + std::to_string(idx) +
 				" (only " + std::to_string(args.size()) + " argument(s) provided)");
 
-	return context->eval(args[idx]);
+	return context->evaluate(*args[idx]);
 }
 
 void Library::getter(const std::string &name, Value val)

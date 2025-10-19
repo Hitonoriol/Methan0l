@@ -145,16 +145,6 @@ void Interpreter::register_func(const std::string &name, NativeFunc &&func)
 	}
 }
 
-Value Interpreter::evaluate(PostfixExpr &opr)
-{
-	return apply_postfix(opr.get_operator(), opr.get_lhs());
-}
-
-Value Interpreter::evaluate(PrefixExpr &opr)
-{
-	return apply_prefix(opr.get_operator(), opr.get_rhs());
-}
-
 std::pair<DataMap::iterator, DataMap::iterator> Interpreter::find_operator_overload(
 	Object &obj, TokenType op
 )
@@ -220,7 +210,7 @@ Value Interpreter::execute(Unit &unit, const bool use_own_scope)
 		unit.reset_execution_state();
 
 	while (unit.has_next_expr() && !unit.execution_finished())
-		exec(*(current_expr = unit.next_expression()));
+		execute(*(current_expr = unit.next_expression()));
 	clear_temporaries();
 
 	if (execution_stopped()) {
@@ -263,7 +253,7 @@ Value Interpreter::invoke(const Function &func, ExprList &args)
 {
 	if constexpr (DEBUG) {
 		if (!args.empty()) {
-			Value f = eval(args.front());
+			Value f = evaluate(*args.front());
 			out << "Function first arg: " << f << std::endl;
 		}
 
@@ -284,7 +274,7 @@ Value Interpreter::invoke(const Unit &unit, ExprList &args)
 
 	/* Unit invocation w/ init-block */
 	else {
-		Value initv = eval(args[0]);
+		Value initv = evaluate(*args[0]);
 		Unit &init_block = initv.get<Unit>();
 		u.call();
 		init_block.manage_table(u);
@@ -533,20 +523,6 @@ Value& Interpreter::get(const std::string &id, bool global, bool follow_refs)
 	return follow_refs ? val.get() : val;
 }
 
-Value Interpreter::eval(Expression &expr)
-{
-	LOG("[Eval] " << expr.info());
-	return evaluate(expr);
-}
-
-void Interpreter::exec(Expression &expr)
-{
-	LOG("[Exec] " << expr.info());
-
-	execute(expr);
-	clear_temporaries();
-}
-
 void Interpreter::clear_temporaries(size_t up_to)
 {
 	if (up_to == 0) {
@@ -571,41 +547,6 @@ Value Interpreter::unwrap_or_reference(Expression &expr)
 	return evaluate(expr).get();
 }
 
-Value Interpreter::evaluate(AssignExpr &expr)
-{
-	ExprPtr lexpr = expr.get_lhs();
-	ExprPtr rexpr = expr.get_rhs();
-
-	/* Move (assign w/o copying) value of RHS to LHS
-	 * + if RHS is an identifier, delete it */
-	if (expr.is_move_assignment()) {
-		Value rval = unwrap_or_reference(*rexpr);
-		if (instanceof<IdentifierExpr>(rexpr))
-			del(rexpr);
-		return Value::ref(referenced_value(lexpr) = rval);
-	}
-
-	/* Copy assignment */
-	Value rhs = unwrap_or_reference(*rexpr).copy(this);
-	if (instanceof<IdentifierExpr>(lexpr.get())) {
-		IdentifierExpr &lhs = try_cast<IdentifierExpr>(lexpr);
-		return Value::ref(lhs.assign(*this, rhs));
-	}
-	else
-		return Value::ref(referenced_value(lexpr) = rhs);
-}
-
-Value Interpreter::evaluate(UnitExpr &expr)
-{
-	return eval(expr);
-}
-
-Value Interpreter::evaluate(ListExpr &expr)
-{
-	Value list = eval(expr);
-	return list;
-}
-
 Value Interpreter::invoke(const Value &callable, ExprList &args)
 {
 	return unconst(callable).accept([&](auto &c) {
@@ -628,34 +569,6 @@ Value Interpreter::invoke_method(Object &obj, Value &method, Args &args)
 	return method.is<Function>()
 			? invoke(method.get<Function>(), argcopy)
 			: method.get<NativeFunc>()(argcopy);
-}
-
-Value Interpreter::evaluate(InvokeExpr &expr)
-{
-	ExprPtr lhs = expr.get_lhs();
-	if (instanceof<IdentifierExpr>(lhs)
-			&& try_cast<IdentifierExpr>(lhs).get_name()
-					== ReservedWord::SELF_INVOKE) {
-		return invoke(current_function(), expr.arg_list());
-	}
-
-	Value callable = eval(lhs).get();
-	if (callable.nil())
-		if_instanceof<IdentifierExpr>(*lhs, [&](IdentifierExpr &fidfr) {
-			auto &fname = fidfr.get_name();
-			callable = scope_lookup(fname, true)->get(fname).get();
-		});
-
-	if constexpr (DEBUG)
-		std::cout << "Invoking a callable: " << try_cast<Expression>(&expr).info() << std::endl;
-
-	if (!callable.nil())
-		return invoke(callable, expr.arg_list());
-
-	else if (instanceof<IdentifierExpr>(lhs))
-		return invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list());
-
-	throw std::runtime_error("Invalid invocation expression");
 }
 
 bool Interpreter::func_exists(const std::string &name)
@@ -683,6 +596,7 @@ Value Interpreter::evaluate(Expression& expr)
 void Interpreter::execute(Expression& expr)
 {
 	evaluator->execute(expr);
+	clear_temporaries();
 }
 
 TypeManager& Interpreter::get_type_mgr()

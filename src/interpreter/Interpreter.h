@@ -163,7 +163,7 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 					return lazy->second(a, b);
 			}
 
-			Value operand_a = Token::is_ref_opr(op) ? Value::ref(referenced_value(a)) : eval(a).get();
+			Value operand_a = Token::is_ref_opr(op) ? Value::ref(referenced_value(a)) : evaluate(*a).get();
 
 			/* Invoke object operator overload, if any */
 			if (operand_a.get().is<Object>()) {
@@ -180,7 +180,7 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 			if constexpr (Optype == OperatorType::UNARY) {
 				return val_ops.find(op)->second(operand_a);
 			} else {
-				Value rhs = eval(b);
+				Value rhs = evaluate(*b);
 				return val_ops.find(op)->second(operand_a, rhs);
 			}
 		}
@@ -220,8 +220,6 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 
 		virtual void initialize(InitConfig&& initConfig);
 
-		Value invoke_inbuilt_func(const std::string &name, const ExprList &args);
-
 		void restore_execution_state(size_t depth);
 		inline void pop_tmp_callable()
 		{
@@ -233,22 +231,6 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 			}
 		}
 
-		Value eval(Expression &expr);
-		inline Value eval(const ExprPtr &expr)
-		{
-			return eval(*expr);
-		}
-		inline Value eval(ExprPtr &&expr)
-		{
-			return eval(expr);
-		}
-
-		void exec(Expression &expr);
-		inline void exec(ExprPtr &expr)
-		{
-			exec(*expr);
-		}
-
 		void load_main(Unit &main);
 
 		Expression* get_current_expr();
@@ -256,17 +238,17 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 
 		/* In-place evaluation & type conversion for C++ to Methan0l function parameter list binding */
 		template<typename T>
-		inline T eval(Expression &expr)
+		inline T evaluate(Expression &expr)
 		{
 			/* T, but with `const` and `&` / `&&` stripped */
 			using V = TYPE(T);
 			constexpr bool is_builtin = Value::allowed_or_heap<typename std::remove_pointer<V>::type>();
 			constexpr bool is_convertible = std::is_arithmetic<V>::value;
-			LOG("eval<T> for T = {" << type_name<T>() << "}; V = {" << type_name<V>() << "}");
+			LOG("evaluate<T> for T = {" << type_name<T>() << "}; V = {" << type_name<V>() << "}");
 
 			/* Special case (1): provide compatibility of mtl::native::String with std::string */
 			if constexpr (std::is_same_v<V, std::string>) {
-				auto val = eval(expr);
+				auto val = evaluate(expr);
 				if (val.is<mtl::native::String>()) {
 					auto &str = mtl::str(val.to_string());
 					/* If for some reason a std::string* is requested */
@@ -282,7 +264,7 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 			/* Special case (2): provide compatibility of mtl::native::String with C-strings
 			 * TODO: handle these conversions in some automatic way? */
 			else if constexpr (std::is_same_v<V, const char*>) {
-				auto val = eval(expr);
+				auto val = evaluate(expr);
 				if (val.is<std::shared_ptr<mtl::native::String>>()) {
 					auto &str = mtl::str(val.to_string());
 					return &str[0];
@@ -302,7 +284,7 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 				else if constexpr (std::is_pointer<T>::value)
 					return &referenced_value(&expr);
 				else
-					return eval(expr);
+					return evaluate(expr);
 			}
 
 			/* Get as a `&` or `*` to a value of a valid ValueContainer variant alternative */
@@ -342,14 +324,14 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 
 			/* In case of `&&` -- create a new temporary with evaluation result & return a `&&` to it. */
 			else if constexpr (std::is_rvalue_reference<T>::value) {
-				auto any = std::make_any<V>(eval<V>(expr));
+				auto any = std::make_any<V>(evaluate<V>(expr));
 				Value &tmp = copy_temporary(any);
 				return std::move(tmp.get<V>());
 			}
 
 			/* Otherwise -- evaluate and convert to T (return by value) */
 			else {
-				auto val = eval(expr);
+				auto val = evaluate(expr);
 				/* If T is (not) in variant's alternative list but is convertible to one of them */
 				if constexpr (is_convertible) {
 					return val.as<V>();
@@ -409,7 +391,7 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 
 				LOG("Binding " + std::string(mtl::type_name<ArgType<I>...>()));
 				return std::invoke(f,
-						context.eval<ArgType<I>>(*c.at(I))...);
+						context.evaluate<ArgType<I>>(*c.at(I))...);
 			}
 		};
 
@@ -582,6 +564,8 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 			return invoke_inbuilt_func(name, eargs);
 		}
 
+		Value invoke_inbuilt_func(const std::string& name, const ExprList& args);
+
 		inline Value apply_prefix(TokenType op, const ExprPtr &rhs)
 		{
 			return apply_operator<OperatorType::UNARY>(lazy_prefix_ops, value_prefix_ops, op, rhs, rhs);
@@ -727,13 +711,6 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 
 		void del(ExprPtr idfr);
 		void del(const IdentifierExpr &idfr);
-
-		Value evaluate(PostfixExpr &opr);
-		Value evaluate(PrefixExpr &opr);
-		Value evaluate(AssignExpr &expr);
-		Value evaluate(UnitExpr &expr);
-		Value evaluate(ListExpr &expr);
-		Value evaluate(InvokeExpr &expr);
 
 		Value evaluate(Expression &expr);
 		void execute(Expression& expr);

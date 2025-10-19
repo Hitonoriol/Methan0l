@@ -68,8 +68,30 @@ Methan0lEvaluator::Methan0lEvaluator(const std::shared_ptr<Interpreter>& context
 
 Value Methan0lEvaluator::evaluate(Interpreter& context, AssignExpr& expr)
 {
-	// TODO move here
-	return context.evaluate(expr);
+	auto lexpr = expr.get_lhs();
+	auto rexpr = expr.get_rhs();
+
+	/* Move (assign w/o copying) value of RHS to LHS
+	 * + if RHS is an identifier, delete it */
+	if (expr.is_move_assignment()) {
+		auto rval = context.unwrap_or_reference(*rexpr);
+
+		if (instanceof<IdentifierExpr>(rexpr)) {
+			context.del(rexpr);
+		}
+
+		return Value::ref(context.referenced_value(lexpr) = rval);
+	}
+
+	/* Copy assignment */
+	auto rhs = context.unwrap_or_reference(*rexpr).copy(&context);
+
+	if (instanceof<IdentifierExpr>(lexpr.get())) {
+		auto& lhs = try_cast<IdentifierExpr>(lexpr);
+		return Value::ref(lhs.assign(context, rhs));
+	}
+	else
+		return Value::ref(context.referenced_value(lexpr) = rhs);
 }
 
 Value Methan0lEvaluator::evaluate(Interpreter& context, BinaryOperatorExpr& expr)
@@ -218,7 +240,33 @@ Value Methan0lEvaluator::evaluate(Interpreter& context, IndexExpr& expr)
 
 Value Methan0lEvaluator::evaluate(Interpreter& context, InvokeExpr& expr)
 {
-	return context.evaluate(expr); // TODO move here
+	auto lhs = expr.get_lhs();
+
+	if (instanceof<IdentifierExpr>(lhs) && try_cast<IdentifierExpr>(lhs).get_name() == ReservedWord::SELF_INVOKE) {
+		return context.invoke(context.current_function(), expr.arg_list());
+	}
+
+	auto callable = context.evaluate(*lhs).get();
+
+	if (callable.nil()) {
+		if_instanceof<IdentifierExpr>(*lhs, [&](IdentifierExpr& fidfr) {
+			auto& fname = fidfr.get_name();
+			callable = context.scope_lookup(fname, true)->get(fname).get();
+		});
+	}
+
+	if constexpr (DEBUG) {
+		std::cout << "Invoking a callable: " << try_cast<Expression>(&expr).info() << std::endl;
+	}
+
+	if (!callable.nil()) {
+		return context.invoke(callable, expr.arg_list());
+	}
+	else if (instanceof<IdentifierExpr>(lhs)) {
+		return context.invoke_inbuilt_func(IdentifierExpr::get_name(expr.get_lhs()), expr.arg_list());
+	}
+
+	throw std::runtime_error("Invalid invocation expression");
 }
 
 template<typename T>
@@ -393,12 +441,12 @@ void Methan0lEvaluator::execute(Interpreter& context, UnitExpr& expr)
 
 Value Methan0lEvaluator::evaluate(Interpreter& context, PostfixExpr& expr)
 {
-	return context.evaluate(expr);
+	return context.apply_postfix(expr.get_operator(), expr.get_lhs());
 }
 
 Value Methan0lEvaluator::evaluate(Interpreter& context, PrefixExpr& expr)
 {
-	return context.evaluate(expr);
+	return context.apply_prefix(expr.get_operator(), expr.get_rhs());
 }
 
 }
