@@ -390,52 +390,51 @@ Function& Interpreter::current_function()
  * 	or in every possible above the current one if <global> is true */
 DataTable* Interpreter::scope_lookup(const std::string &id, bool global)
 {
-	if constexpr (DEBUG)
-		std::cout << (global ? "Global" : "Local")
-				<< " scope lookup for \"" << id << "\"" << std::endl;
-
 	/* If we're in the uppermost scope, global lookup is equivalent to the local one */
-	if (exec_stack.size() < 2)
+	if (exec_stack.size() < 2) {
 		return local_scope();
+	}
 
 	/* If there's an object/box in use, perform lookup in its DataTable first */
 	if (!global && !object_stack.empty()) {
 		DataTable *objdata = object_stack.back();
-		if (objdata->exists(id))
+		if (objdata->exists(id)) {
 			return objdata;
+		}
 	}
 
 	const bool weak = current_unit()->is_weak();
 	DataTable *local = local_scope();
-	if (!global && !weak)
+	if (!global && !weak) {
 		return local;
-
-	if constexpr (DEBUG)
-		if (weak)
-			out << "* Weak Unit lookup" << std::endl;
+	}
 
 	/* Skip current scope when looking up globally */
 	auto start = std::prev(exec_stack.end(), global ? 2 : 1);
 	for (auto scope = start; scope != exec_stack.begin(); --scope) {
 		/* We shouldn't be able to access Function-local idfrs from outer scopes */
-		if (!weak && global && instanceof<Function>(*scope))
+		if (!weak && global && instanceof<Function>(*scope)) {
 			continue;
+		}
 
 		DataTable *curscope = &((*scope)->local());
-		if (curscope->exists(id))
+		if (curscope->exists(id)) {
 			return curscope;
+		}
 
 		/* Weak Units can locally "see" any identifier above their scope up to the first Regular Unit's scope */
-		if (!global && weak && !(*scope)->is_weak())
+		if (!global && weak && !(*scope)->is_weak()) {
 			return local;
+		}
 	}
 
 	auto global_scope = this->global();
 
 	/* For weak Units -- if the uppermost scope lookup failed,
 	 * 		return the innermost local scope */
-	if (!global && !global_scope->exists(id))
+	if (!global && !global_scope->exists(id)) {
 		return local;
+	}
 
 	return global_scope;
 }
@@ -497,16 +496,14 @@ void Interpreter::set_env_var(const std::string &name, const std::string &val)
 
 Value& Interpreter::referenced_value(Expression *expr, bool follow_refs)
 {
-	LOG("? Referencing " << expr->info())
-
 	/* Reference a named value */
-	if (instanceof<IdentifierExpr>(expr))
-		return get(try_cast<IdentifierExpr>(expr), follow_refs);
-
+	if (auto idfr = dynamic_cast<IdentifierExpr*>(expr)) {
+		return get(*idfr, follow_refs);
+	}
 	/* Create a temporary value and reference it if `expr` is not an access expression */
-	else if (!BinaryOperatorExpr::is(*expr, Tokens::DOT))
+	else if (!BinaryOperatorExpr::is(*expr, Tokens::DOT)) {
 		return evaluate(*expr).get_ref(this);
-
+	}
 	/* Reference an access expression's value */
 	else {
 		auto &dot_expr = try_cast<BinaryOperatorExpr>(expr);
@@ -519,7 +516,8 @@ Value& Interpreter::referenced_value(Expression *expr, bool follow_refs)
 
 Value& Interpreter::get(const std::string &id, bool global, bool follow_refs)
 {
-	Value &val = scope_lookup(id, global)->get(id);
+	auto scope = scope_lookup(id, global);
+	Value &val = scope->get(id);
 	return follow_refs ? val.get() : val;
 }
 
@@ -780,7 +778,17 @@ bool Interpreter::load(std::string &code)
 
 bool Interpreter::load(const Unit &main)
 {
-	load_main(this->main = main);
+	auto global_data = this->main.local();
+	bool preserve_data = this->main.is_persistent();
+
+	this->main = main;
+
+	if (preserve_data) {
+		this->main.set_persisent(true);
+		this->main.local() = global_data;
+	}
+
+	load_main(this->main);
 	return !main.empty();
 }
 
