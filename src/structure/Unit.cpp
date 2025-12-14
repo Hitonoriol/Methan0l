@@ -85,6 +85,11 @@ DataTable& Unit::local()
 	return local_data;
 }
 
+const DataTable& Unit::local() const
+{
+	return local_data;
+}
+
 ExprList& Unit::expressions()
 {
 	return expr_list;

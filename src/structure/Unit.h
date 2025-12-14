@@ -57,6 +57,7 @@ class Unit
 		Unit& operator=(const Unit &rhs);
 
 		DataTable& local();
+		const DataTable& local() const;
 		ExprList& expressions();
 
 		inline bool has_next_expr()
