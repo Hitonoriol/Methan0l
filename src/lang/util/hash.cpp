@@ -1,4 +1,9 @@
 #include "hash.h"
 
-std::hash<std::string> str_hash { };
-std::hash<std::string_view> sv_hash { };
+namespace mtl
+{
+
+const std::hash<std::string> Hash::string{ };
+const std::hash<std::string_view> Hash::string_view{ };
+
+}

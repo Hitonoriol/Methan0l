@@ -20,8 +20,11 @@
 namespace mtl
 {
 
-extern std::hash<std::string> str_hash;
-extern std::hash<std::string_view> sv_hash;
+class Hash {
+public:
+	static const std::hash<std::string> string;
+	static const std::hash<std::string_view> string_view;
+};
 
 }
 
@@ -65,19 +68,19 @@ template<> struct std::hash<mtl::Value>
 
 		size_t operator()(const std::string &s) const
 		{
-			return mtl::str_hash(s);
+			return mtl::Hash::string(s);
 		}
 
 		size_t operator()(const mtl::Token &tok) const
 		{
-			return mtl::str_hash(tok.get_value());
+			return mtl::Hash::string(tok.get_value());
 		}
 
 		size_t operator()(const mtl::DataMap &map) const
 		{
 			size_t hash = map.size();
 			for (auto &entry : map)
-				hash ^= mtl::str_hash(entry.first) + entry.second.hash_code();
+				hash ^= mtl::Hash::string(entry.first) + entry.second.hash_code();
 			return hash;
 		}
 
@@ -93,7 +96,7 @@ template<> struct std::hash<mtl::Value>
 		{
 			size_t hash = operator ()((mtl::Unit&) f);
 			for (auto &entry : f.get_arg_def())
-				hash ^= mtl::str_hash(entry.first)
+				hash ^= mtl::Hash::string(entry.first)
 						+ reinterpret_cast<size_t>(entry.second.get());
 			return hash;
 		}

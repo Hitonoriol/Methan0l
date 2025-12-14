@@ -154,7 +154,7 @@ class Class
 		{
 			this->name = name;
 			if (!is_native()) {
-				auto hash = mtl::str_hash(this->name) ^ TypeID::NONE.type_id();
+				auto hash = mtl::Hash::string(this->name) ^ TypeID::NONE.type_id();
 				id = TypeID(hash, this->name);
 			}
 		}

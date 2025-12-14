@@ -104,7 +104,7 @@ Value String::substr(Context context, Int start, Int len)
 
 Int String::hash_code()
 {
-	return mtl::str_hash(contained);
+	return mtl::Hash::string(contained);
 }
 
 Value String::remove(Value value)
