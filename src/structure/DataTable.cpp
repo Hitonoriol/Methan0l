@@ -59,15 +59,9 @@ Value& DataTable::get_or_create(const std::string &id)
 
 Value& DataTable::get(const std::string &id, bool fail_if_undefined)
 {
-	if constexpr (DEBUG)
-		std::cout << "Accessing \"" << id << "\" in " << *this << std::endl;
-
 	auto val_it = map->find(id);
 	if (val_it != map->end())
 		return val_it->second;
-
-	if constexpr (DEBUG)
-		std::cout << "\t(No such identifier)" << std::endl;
 
 	if (fail_if_undefined)
 		throw std::runtime_error("\"" + id + "\" is not defined");

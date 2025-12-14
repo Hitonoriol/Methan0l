@@ -77,8 +77,6 @@ std::shared_ptr<E> make_expr(uint32_t line, Args &&...args)
 	auto expr_ptr = std::allocate_shared<E>(std::pmr::polymorphic_allocator<E>{}, std::forward<Args>(args)...);
 	expr_ptr->set_line(line);
 
-	LOG("--> " << static_cast<Expression&>(*expr_ptr).info());
-
 	return expr_ptr;
 }
 

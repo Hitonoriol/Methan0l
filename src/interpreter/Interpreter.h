@@ -388,8 +388,6 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 					throw std::runtime_error("Too few arguments: "
 							+ str(c.size()) + " received, " + str(N) + " expected: "
 							+ str(type_name<ArgType<I>...>()));
-
-				LOG("Binding " + std::string(mtl::type_name<ArgType<I>...>()));
 				return std::invoke(f,
 						context.evaluate<ArgType<I>>(*c.at(I))...);
 			}
