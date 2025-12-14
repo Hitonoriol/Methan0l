@@ -77,7 +77,7 @@ endif
 # GCC compilation flags
 FLAGS:=-std=c++2a -Wall -Wextra -Wno-unused-parameter -Wno-overloaded-virtual -static-libgcc -static-libstdc++
 ifeq ($(CONFIGURATION),debug)
-	FLAGS += -Og -g
+	FLAGS += -O0 -g
 else
 	FLAGS += -O3
 endif
