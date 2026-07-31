@@ -1,0 +1,65 @@
+#include "IdentifierExpr.h"
+
+#include <iostream>
+#include <string>
+#include <string_view>
+
+#include <ch3oh/lexer/Token.h>
+#include <methan0l/interpreter/Interpreter.h>
+#include <methan0l/structure/DataTable.h>
+#include <methan0l/structure/Value.h>
+
+namespace mtl
+{
+
+Value& IdentifierExpr::referenced_value(Interpreter &context, bool follow_refs)
+{
+	return context.get(name, global, follow_refs);
+}
+
+Value& IdentifierExpr::assign(Interpreter &context, Value val)
+{
+	create_if_nil(context);
+	Value &ref = referenced_value(context);
+	ref = val;
+	return ref;
+}
+
+void IdentifierExpr::create_if_nil(Interpreter &context)
+{
+	DataTable *scope = context.scope_lookup(name, global);
+	if (!scope->exists(name))
+		scope->set(name, Value());
+}
+
+Value IdentifierExpr::eval_reserved(const std::string &name)
+{
+	if (name == ReservedWord::NEW_LINE)
+		return NEW_LINE;
+
+	if (name == ReservedWord::NIL || name == ReservedWord::VOID)
+		return Value::NIL;
+
+	return Value::NO_VALUE;
+}
+
+bool IdentifierExpr::is_global() const
+{
+	return global;
+}
+
+const std::string& IdentifierExpr::get_name() const
+{
+	return name;
+}
+
+std::ostream& IdentifierExpr::info(std::ostream &str)
+{
+	return Expression::info(str
+			<< "{"
+					<< (global ? "Global" : "Local")
+					<< " Identifier: \"" << name << "\""
+					<< "}");
+}
+
+}

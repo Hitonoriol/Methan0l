@@ -1,0 +1,110 @@
+#ifndef SRC_UTIL_HASH_H_
+#define SRC_UTIL_HASH_H_
+
+#include <deque>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
+
+#include <ch3oh/parser/expression/Expression.h>
+#include <methan0l/structure/DataTable.h>
+#include <methan0l/structure/Function.h>
+#include <methan0l/oop/Object.h>
+#include <methan0l/structure/Value.h>
+#include <methan0l/structure/ValueRef.h>
+#include <methan0l/util/cast.h>
+#include <methan0l/type.h>
+
+namespace mtl
+{
+
+class Hash {
+public:
+	static const std::hash<std::string> string;
+	static const std::hash<std::string_view> string_view;
+};
+
+}
+
+HASH(mtl::TypeID, v, {
+	return v.type_id();
+})
+
+template<> struct std::hash<mtl::Value>
+{
+		size_t operator()() const
+		{
+			return 0;
+		}
+
+		size_t operator()(const mtl::NoValue&) const
+		{
+			return typeid(mtl::NoValue).hash_code();
+		}
+
+		size_t operator()(const mtl::Nil&) const
+		{
+			return typeid(mtl::Nil).hash_code();
+		}
+
+		size_t operator()(const mtl::Value &v) const
+		{
+			return v.hash_code();
+		}
+
+		size_t operator()(const mtl::Expression &v) const
+		{
+			return reinterpret_cast<size_t>(&v);
+		}
+
+		size_t operator()(const mtl::ValueRef &r) const
+		{
+			if (r.empty())
+				return 0;
+			return r.ptr()->hash_code();
+		}
+
+		size_t operator()(const std::string &s) const
+		{
+			return mtl::Hash::string(s);
+		}
+
+		size_t operator()(const mtl::Token &tok) const
+		{
+			return mtl::Hash::string(tok.get_value());
+		}
+
+		size_t operator()(const mtl::DataMap &map) const
+		{
+			size_t hash = map.size();
+			for (auto &entry : map)
+				hash ^= mtl::Hash::string(entry.first) + entry.second.hash_code();
+			return hash;
+		}
+
+		size_t operator()(const mtl::Unit &u) const
+		{
+			size_t hash = u.size() ^ u.is_persistent() ^ u.is_weak();
+			for (auto &expr : unconst(u).expressions())
+				hash ^= reinterpret_cast<size_t>(expr.get()) + hash;
+			return hash;
+		}
+
+		size_t operator()(const mtl::Function &f) const
+		{
+			size_t hash = operator ()((mtl::Unit&) f);
+			for (auto &entry : f.get_arg_def())
+				hash ^= mtl::Hash::string(entry.first)
+						+ reinterpret_cast<size_t>(entry.second.get());
+			return hash;
+		}
+
+		size_t operator()(const mtl::Object &obj) const
+		{
+			return mtl::unconst(obj).invoke_method(mtl::str(mtl::Methods::Hashcode));
+		}
+};
+
+#endif /* SRC_UTIL_HASH_H_ */

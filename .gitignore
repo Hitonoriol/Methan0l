@@ -1,6 +1,7 @@
 /.vscode/
-/build/*
-!/build/makefile
+/build/
+/cmake-build*/
+/out/
 
 *.o
 *.so

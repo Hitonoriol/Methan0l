@@ -7,12 +7,12 @@ Embeddable AST (tree-walking) interpreter for Methan0l, a dynamically-typed mult
 Available [here](https://methan0l.github.io/docs/).  
 
 
-## How to Use the Interpreter CLI
+## Using the Interpreter CLI
 
 **Execute a program**:  
 ```
 ./methan0l [interpreter-args] /path/to/src-file.mt0 [script-args]
-```  
+```
 \
 **Start the interpreter in interactive mode:**  
 ```
@@ -40,9 +40,6 @@ Available [here](https://methan0l.github.io/docs/).
 * Disable the heap limit. Stops the interpreter from throwing an exception on allocating more than max heap capacity:  
   `--no-heap-limit`
 
-* Disable monotonic buffer upstream for heap allocations (for testing purposes, may get removed):  
-  `--no-flat-buffer`
-
 * Print version string:  
   `--version`
 
@@ -50,48 +47,34 @@ Available [here](https://methan0l.github.io/docs/).
 ## Building Methan0l
 
 **Build requirements:**  
-* `GNU make` **4.2+**
-* `g++` **10+**
-* `libboost`
 
-For Windows machines you need to have ports of everything listed above installed and added to `PATH` ([MSYS2](https://msys2.org/) ports are recommended).  
+* CMake 3.21 or newer
+* Any C++20 compiler
+* vcpkg (with `VCPKG_ROOT` environment variable set)
 
-\
-**Build interpreter & CLI:**  
+Build release (artifacts under `build/runtime/release`):
+
+```bash
+cmake --preset release && cmake --build --preset release --parallel
+```
+
+Build debug (artifacts under `build/runtime/debug`):
+
+```bash
+cmake --preset debug && cmake --build --preset debug --parallel
+```
+
+Install the runtime and development headers:
 
 ```
-cd build && make all
-```  
-\
-**Build interpreter only (`libmethan0l.so`):**  
+cmake --install build --prefix /opt/methan0l
+```
+
+Create the release archive with:
 
 ```
-cd build && make lib
-```  
-\
-As a result, `libmethan0l.so` and / or CLI binary will be located in `build` directory and all headers will be copied under `build/include/` preserving their directory structure.  
-
-\
-**Build modules:**
-
+cmake --build build --target package
 ```
-cd build && make modules
-```
-or to build a specific module:
-```
-cd modules/[module_name] && make
-```
-where `[module_name]` is the name of the directory that contains the module's sources.
-
-\
-**Create an archive with CLI binary, `libmethan0l.so`, all modules and development headers:**  
-
-```
-cd build && make release
-```  
-
-Resulting `methan0l-<OS_NAME><BITS>.tar.gz` will be located in `build` directory.  
-
 
 ## Tools
 

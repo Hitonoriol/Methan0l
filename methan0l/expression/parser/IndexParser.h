@@ -1,0 +1,43 @@
+#ifndef SRC_EXPRESSION_PARSER_INDEXPARSER_H_
+#define SRC_EXPRESSION_PARSER_INDEXPARSER_H_
+
+#include <ch3oh/parser/expression/InfixParser.h>
+#include <methan0l/expression/IndexExpr.h>
+#include <methan0l/expression/IdentifierExpr.h>
+
+namespace mtl
+{
+
+/* All types:
+ * 	Remove element: ctr[~expr]
+ * 	Clear container: ctr[~]
+ * 	For-each: ctr[do: funcexpr]
+ *
+ * Lists & Strings:
+ * 	Append a new element: list[] = expr
+ * 	Index element: list[expr]
+ * 	Sublist/substring: list[start..end[..step]]
+ *
+ * Maps:
+ * 	Add a new element: map[expr1] = expr2
+ * 	Access an element: map[expr]
+ *
+ * Sets:
+ * 	Insert a new element: set[->expr]
+ * 	Test element's existence: set[expr]
+ */
+class IndexParser: public InfixParser
+{
+	public:
+		ExprPtr parse(Parser &parser, ExprPtr lhs, Token token);
+		virtual ~IndexParser() = default;
+
+		int precedence() override
+		{
+			return static_cast<int>(Precedence::INDEX);
+		}
+};
+
+} /* namespace mtl */
+
+#endif /* SRC_EXPRESSION_PARSER_INDEXPARSER_H_ */

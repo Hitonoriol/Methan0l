@@ -1,13 +1,7 @@
-#include <methan0l.h>
-#include <CoreLibrary.h>
+#include <methan0l/methan0l.h>
+#include <methan0l/CoreLibrary.h>
 
-#ifdef __linux__
-	#include <ncurses.h>
-#else // Windows
-	// MSYS2 only has static ncurses binaries as of Nov 2023
-	#define NCURSES_STATIC
-	#include <ncurses/ncurses.h>
-#endif
+#include <curses.h>
 
 LOAD_MODULE
 {
@@ -81,7 +75,7 @@ LOAD_MODULE
 	REG_FUNC(mvaddch)
 	REG_FUNC(addch)
 
-	REG_FUNC(getch)
+	function("getch", []() {return getch();});
 	REG_FUNC(getstr)
 
 	REG_FUNC(raw)

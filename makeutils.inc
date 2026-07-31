@@ -1,1 +1,0 @@
-rwildcard=$(foreach d,$(wildcard $(patsubst %,%/*,$(patsubst %/,%,$1))),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))

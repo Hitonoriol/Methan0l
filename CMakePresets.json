@@ -1,0 +1,62 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "x64-windows-clang",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "environment": {
+        "VCPKG_DEFAULT_TRIPLET": "x64-windows",
+        "VCPKG_DEFAULT_HOST_TRIPLET": "x64-windows",
+        "AR": "llvm-lib",
+        "RANLIB": "llvm-ranlib"
+      },
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "CMAKE_C_COMPILER": "clang-cl",
+        "CMAKE_CXX_COMPILER": "clang-cl",
+        "CMAKE_LINKER": "lld-link.exe",
+        "CMAKE_AR": "llvm-lib",
+        "CMAKE_RANLIB": "llvm-ranlib",
+        "CMAKE_C_COMPILER_AR": "llvm-lib",
+        "CMAKE_CXX_COMPILER_AR": "llvm-lib",
+        "CMAKE_C_COMPILER_RANLIB": "llvm-ranlib",
+        "CMAKE_CXX_COMPILER_RANLIB": "llvm-ranlib",
+        "VCPKG_MANIFEST_MODE": "ON",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_HOST_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "debug-x64-windows-clang",
+      "inherits": "x64-windows-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release-x64-windows-clang",
+      "inherits": "x64-windows-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug-x64-windows-clang",
+      "configurePreset": "debug-x64-windows-clang"
+    },
+    {
+      "name": "release-x64-windows-clang",
+      "configurePreset": "release-x64-windows-clang"
+    }
+  ]
+}

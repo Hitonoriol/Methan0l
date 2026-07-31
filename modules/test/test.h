@@ -1,7 +1,8 @@
 #ifndef MODULES_TEST_TEST_H_
 #define MODULES_TEST_TEST_H_
 
-#include <methan0l.h>
+#include <methan0l/methan0l.h>
+#include <methan0l/CoreLibrary.h>
 
 int my_sum(int a, int b);
 std::string &retain_first_word(std::string&);
@@ -15,7 +16,7 @@ void dump_data_table(mtl::DataTable&);
  * (1) short-form binding:
  * 		In header: NATIVE_CLASS(bound_name, native_class_name)
  *		In source file: 
- *			NATIVE_CLASS_INIT(bound_name, {
+ *			NATIVE_CLASS_BINDING(bound_name, {
  *				... // Use get_binder() to get this class's binder instance and bind its constructor and methods using it.
  *			})
  *			

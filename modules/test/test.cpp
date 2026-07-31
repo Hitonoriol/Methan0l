@@ -46,7 +46,9 @@ LOAD_MODULE
 }
 
 /* Initialize the binding process for `TestClass` */
-NATIVE_CLASS_INIT(TestClass, {
+using mtl::Methods;
+
+NATIVE_CLASS_BINDING(TestClass, {
 	auto &binder = get_binder();
 	binder.bind_constructor<std::string&>();
 	binder.bind_method("get_stuff", &THIS_CLASS::get_stuff);

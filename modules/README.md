@@ -1,17 +1,9 @@
 # Methan0l Modules
 
-### Build individual modules
+### Build all modules
 
 ```
-cd module && make
-```  
-
-Where `module` is the name of the folder which contains the module's sources.  
-
-### Build all modules  
-
-```
-make
+cmake --build build --target modules
 ```
 
 ### Use modules inside Methan0l

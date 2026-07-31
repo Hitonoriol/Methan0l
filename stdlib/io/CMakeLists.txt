@@ -1,0 +1,8 @@
+file(GLOB_RECURSE STDLIB_IO_SOURCES CONFIGURE_DEPENDS "*.cpp")
+file(GLOB_RECURSE STDLIB_IO_HEADERS CONFIGURE_DEPENDS "*.h")
+
+methan0l_add_stdlib(stdlib_io LibIO
+	${STDLIB_IO_SOURCES}
+	${STDLIB_IO_HEADERS}
+	${PROJECT_SOURCE_DIR}/methan0l/lang/util/hash.cpp
+)

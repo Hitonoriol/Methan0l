@@ -34,7 +34,7 @@ lib_name = "libmethan0l.so"
  */
 out =
 "
-	#include <Interpreter.h>
+	#include <methan0l/interpreter/Interpreter.h>
 	#include <string>
 
 	int main(int argc, char **argv)
@@ -50,7 +50,7 @@ out =
 	}
 "
 
-build_script = "g++ --std=c++17 -O3 -I{2}/methan0l-sdk {3}/{1}-baked.cpp -o {3}/{1} -L{2} -l:{4}"
+build_script = "g++ --std=c++20 -O3 -I{2}/include {3}/{1}-baked.cpp -o {3}/{1} -L{2} -l:{4}"
 
 src = File@read_contents(args[1] :: ".mt0")
 fname = File@filename(args[1])

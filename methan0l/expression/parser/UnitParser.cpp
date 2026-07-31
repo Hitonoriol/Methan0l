@@ -1,0 +1,67 @@
+#include "UnitParser.h"
+
+#include <methan0l/type.h>
+#include <ch3oh/parser/Parser.h>
+#include <methan0l/expression/UnitExpr.h>
+#include <methan0l/interpreter/Interpreter.h>
+#include <methan0l/lang/Methan0lParser.h>
+
+namespace mtl
+{
+
+ExprPtr UnitParser::parse(Parser &parser, Token token)
+{
+	auto mtl_parser = dynamic_cast<Methan0lParser*>(&parser);
+
+	if (!mtl_parser) {
+		throw std::runtime_error("UnitParser: invalid parser type");
+	}
+
+	ExprList exprs(mtl_parser->get_context().allocator<ExprPtr>());
+	if (!parser.match(Tokens::BRACE_R)) {
+		do {
+			exprs.push_back(parser.parse());
+		} while (!parser.match(Tokens::BRACE_R));
+	}
+	LOG("Parsed a unit with " << exprs.size() << " exprs");
+
+	bool weak = token.get_type() == Tokens::ARROW_R;
+
+	return make_expr<UnitExpr>(line(token), &mtl_parser->get_context(), exprs, weak);
+}
+
+ExprPtr UnitParser::parse_expr_block(Parser &parser, bool unwrap_single_exprs)
+{
+	ExprPtr first_expr = parser.parse();
+
+	if (instanceof<UnitExpr>(first_expr))
+		return first_expr;
+
+	if (unwrap_single_exprs && !parser.peek(Tokens::COMMA))
+		return first_expr;
+
+	auto mtl_parser = dynamic_cast<Methan0lParser*>(&parser);
+
+	if (!mtl_parser) {
+		throw std::runtime_error("UnitParser: invalid parser type");
+	}
+
+	ExprList block(mtl_parser->get_context().allocator<ExprPtr>());
+	block.push_back(first_expr);
+
+	while (parser.match(Tokens::COMMA))
+		block.push_back(parser.parse());
+
+	return make_expr<UnitExpr>(block.front()->get_line(), &mtl_parser->get_context(), block);
+}
+
+ExprPtr UnitParser::parse_ctrl_block(Parser &parser, bool unwrap_single_exprs)
+{
+	auto block = parse_expr_block(parser, unwrap_single_exprs);
+	if_instanceof<UnitExpr>(*block, [](auto &uexpr){
+		uexpr.get_unit_ref().expr_block();
+	});
+	return block;
+}
+
+}

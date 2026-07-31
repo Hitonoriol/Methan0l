@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "ch3oh",
+  "version-string": "1.0-pre-2023-12-10",
+  "builtin-baseline": "296b89248ad13be09e9324488eb4f74dd322d26c",
+  "dependencies": [
+    "boost-container"
+  ]
+}
