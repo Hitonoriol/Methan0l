@@ -38,6 +38,7 @@ Boolean contains(Object &iterable_obj, Value);
 Int count(Object &iterable_obj);
 
 Value for_each(Object &iterable_obj, Value action);
+Value for_each(Object &iterable_obj, Function &action);
 Value map(Object &iterable_obj, Value mapper);
 Value filter(Object &iterable_obj, Value predicate);
 Value accumulate(Object &iterable_obj, Value accumulator);

@@ -321,61 +321,17 @@ static inline void exit_loop(Interpreter& context, Value& ret)
 		context.current_unit()->save_return(ret);
 }
 
-void exec_for_loop(Interpreter& context, LoopExpr& expr)
+void exec_while_loop(Interpreter& context, LoopExpr& expr)
 {
 	auto body = expr.get_body();
-	auto init = expr.get_init();
-	auto step = expr.get_step();
 	auto condition = expr.get_condition();
 
-	Unit& loop_proxy = context.tmp_callable(Unit(&context));
 	Unit& body_unit = context.tmp_callable(Unit::from_expression(&context, body));
-
-	/* If this loop has an `init` Expr, this is a for loop,
-	 * 		else -- this is a while loop and has only the `condition` expression */
-	const bool for_loop = init != nullptr;
-	loop_proxy.expr_block();
-	context.enter_scope(loop_proxy);
-	if (for_loop) {
-		loop_proxy.append(init);
-		context.execute(loop_proxy, false);
-		loop_proxy.clear();
-		loop_proxy.append(step);
-	}
-
+	body_unit.call();
+	body_unit.expr_block();
 	context.enter_scope(body_unit);
 	Value ret;
 	while (context.evaluate(*condition).as<bool>()) {
-		if (loop_iteration(context, body_unit, ret))
-			break;
-
-		if (for_loop)
-			context.execute(loop_proxy, false);
-	}
-	context.leave_scope(); // leave `loop_body`
-	exit_loop(context, ret);
-}
-
-void exec_foreach_loop(Interpreter& context, LoopExpr& expr)
-{
-	auto body = expr.get_body();
-	auto init = expr.get_init();
-	auto step = expr.get_step();
-	auto condition = expr.get_condition();
-
-	init->assert_type<IdentifierExpr>("First argument of for-each expression must be an Identifier");
-	auto as_elem = IdentifierExpr::get_name(init);
-	auto& body_unit = context.tmp_callable(Unit::from_expression(&context, body));
-	IterableAdapter iterable(context.evaluate(*condition));
-	auto it = iterable.iterator();
-	body_unit.call();
-	body_unit.expr_block();
-	auto& local = body_unit.local();
-	context.enter_scope(body_unit);
-	auto& elem = local.get_or_create(as_elem);
-	Value ret;
-	while (it.has_next()) {
-		elem = it.next();
 		if (loop_iteration(context, body_unit, ret))
 			break;
 	}
@@ -384,12 +340,7 @@ void exec_foreach_loop(Interpreter& context, LoopExpr& expr)
 
 Value Methan0lEvaluator::evaluate(Interpreter& context, LoopExpr& expr)
 {
-	if (expr.is_foreach()) {
-		exec_foreach_loop(context, expr);
-	}
-	else {
-		exec_for_loop(context, expr);
-	}
+	exec_while_loop(context, expr);
 	
 	return Value::NO_VALUE;
 }

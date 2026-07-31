@@ -11,7 +11,7 @@ METHAN0L_CLASS_BODY(Iterable, {
 	ABSTRACT_METHOD(iterator)
 
 	/* Transformations */
-	BIND_EXTERNAL_MUTATOR_METHOD(core::for_each)
+	class_binder.bind_external_mutator_method(STR(core::for_each), static_cast<Value(*)(Object&, Value)>(&core::for_each));
 	METHOD_ALIAS(for_each, IndexOperator::Foreach)
 	BIND_EXTERNAL_METHOD(core::map)
 	BIND_EXTERNAL_METHOD(core::filter)

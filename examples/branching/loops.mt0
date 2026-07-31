@@ -1,17 +1,19 @@
 <% "Loops" :: newl
 
-<% "For Loop"
-for: (i = 1, i < 100, ++i) {
+<% "While loop"
+i = 1
+while: (i < 100) {
 	%% i :: " "
 	if: (i % 10 == 0)
 		%% newl
+	++i
 }
 <% newl
 
-<% "Foreach loop (works for any Iterable)"
+<% "Functional iteration (works for any Iterable)"
 some_list = ["first element", 999, -0.123456, false, -1, false, true, "another element", 1337]
 <% "List: " :: some_list
-for: (elem, some_list) {
+some_list.for_each(f: elem {
 	%% "* " :: elem :: " "
 	if: (elem is: String)
 		<% "(Length: " :: elem.size() :: ")"
@@ -19,20 +21,18 @@ for: (elem, some_list) {
 		<% "is positive: " :: (elem > 0)
 	else:
 		<% "is a " :: typename: elem
-}
+})
 <% newl
 
-<% "Braces can be omitted for one-line loops"
-for: (val, ["a", "b", "c", "d", "e"])
-	%% val :: " "
+<% "Single-expression callbacks"
+["a", "b", "c", "d", "e"].for_each(f: val -> %% val :: " ")
 <% newl
 
-<% "For loop alternative"
-for: (i, range(15))
-	%% i :: " "
+<% "Range iteration"
+range(15).for_each(f: i -> %% i :: " ")
 <% newl
 
-<% "While loop"
+<% "Another while loop"
 foo = some_list.size() * 6.75
 while: (foo > 50) {
 	%% "<While Loop> "

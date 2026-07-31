@@ -23,7 +23,7 @@ namespace mtl
 class LoopParser : public PrefixParser
 {
 	private:
-		static const size_t FOR_ARGS = 3, FOREACH_ARGS = 2, WHILE_ARGS = 1;
+		static const size_t WHILE_ARGS = 1;
 
 	public:
 		ExprPtr parse(Parser &parser, Token token) override
@@ -39,14 +39,7 @@ class LoopParser : public PrefixParser
 			size_t size = loop_params.size();
 			uint32_t line = mtl::line(token);
 
-			if (token == Tokens::FOR) {
-				if (size == FOR_ARGS)
-					return make_expr<LoopExpr>(line, loop_params, body);
-
-				else if (size == FOREACH_ARGS)
-					return make_expr<LoopExpr>(line, loop_params.front(), loop_params[1], body);
-			}
-			else if ((token == Tokens::WHILE) && size == WHILE_ARGS)
+			if ((token == Tokens::WHILE) && size == WHILE_ARGS)
 				return make_expr<LoopExpr>(line, loop_params.back(), body);
 
 			throw std::runtime_error("Invalid loop expression");

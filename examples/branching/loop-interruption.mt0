@@ -1,10 +1,12 @@
 /* Yep. This only became a feature on Apr 13 '22. */
 
 f = fun: () {
-	/* Break from imperative foreach */
-	for: (i, range(100)) {
+	/* Break from while loop */
+	i = 0
+	while: (i < 100) {
 		i > 5 ? return: break
 		<% $"i = {}" i
+		++i
 	}
 	
 	/* Break from while loop */
@@ -19,12 +21,14 @@ f = fun: () {
 		}
 	}
 	
-	/* Return from for loop */
-	for: (i = 0, i < 100, ++i) {
+	/* Return from while loop */
+	i = 0
+	while: (i < 100) {
 		if: (i == 10) {
 			return: 123
 		}
 		<% $"I drank {} bottles o' moonshine" i
+		++i
 	}
 	<% "Unreachable"
 }

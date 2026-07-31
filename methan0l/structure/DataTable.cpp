@@ -18,18 +18,20 @@ const std::string DataTable::NIL_IDF(ReservedWord::NIL.name);
 
 DataTable::DataTable(Interpreter *context)
 	: context(context),
-	map(context->make_shared<DataMap>())
+	map(context->make_shared<DataMap>()),
+	data_version(std::make_shared<size_t>(0))
 {
 }
 
 DataTable::DataTable(const DataMap &managed_map, Interpreter *context)
 	: context(context),
-	map(context->make_shared<DataMap>(managed_map))
+	map(context->make_shared<DataMap>(managed_map)),
+	data_version(std::make_shared<size_t>(0))
 {
 }
 
 DataTable::DataTable(const DataTable &rhs)
-	: context(rhs.context), map(rhs.map)
+	: context(rhs.context), map(rhs.map), data_version(rhs.data_version)
 {
 }
 
@@ -37,6 +39,7 @@ DataTable& DataTable::operator=(const DataTable &rhs)
 {
 	context = rhs.context;
 	map = rhs.map;
+	data_version = rhs.data_version;
 	return *this;
 }
 
@@ -44,17 +47,21 @@ Value& DataTable::set(const std::string &id, Value value)
 {
 	auto result = map->emplace(id, value);
 	if (!result.second) {
-		Value &replaced = map->at(id);
+		Value &replaced = result.first->second;
 		replaced = std::move(value);
 		return replaced;
 	}
 
+	++*data_version;
 	return result.first->second;
 }
 
 Value& DataTable::get_or_create(const std::string &id)
 {
-	return (*map)[id];
+	auto result = map->try_emplace(id);
+	if (result.second)
+		++*data_version;
+	return result.first->second;
 }
 
 Value& DataTable::get(const std::string &id, bool fail_if_undefined)
@@ -79,15 +86,21 @@ bool DataTable::exists(const std::string &id)
 	return map->find(id) != map->end();
 }
 
+Value* DataTable::find(const std::string &id)
+{
+	auto entry = map->find(id);
+	return entry == map->end() ? nullptr : &entry->second;
+}
+
 Value& DataTable::nil()
 {
-	return (*map)[NIL_IDF];
+	return get_or_create(NIL_IDF);
 }
 
 void DataTable::copy_managed_map()
 {
-	
 	map = context->make_shared<DataMap>(*map);
+	data_version = std::make_shared<size_t>(*data_version + 1);
 }
 
 const DataMap& DataTable::managed_map() const
@@ -102,7 +115,8 @@ std::shared_ptr<DataMap> DataTable::map_ptr()
 
 void DataTable::del(const std::string &id)
 {
-	map->erase(id);
+	if (map->erase(id) != 0)
+		++*data_version;
 }
 
 void DataTable::del(ExprPtr idfr)
@@ -113,6 +127,7 @@ void DataTable::del(ExprPtr idfr)
 void DataTable::purge()
 {
 	map.reset();
+	++*data_version;
 }
 
 void DataTable::clear()
@@ -120,7 +135,10 @@ void DataTable::clear()
 	if constexpr (DEBUG)
 		std::cout << "[clear] " << *this << std::endl;
 
-	map->clear();
+	if (!map->empty()) {
+		map->clear();
+		++*data_version;
+	}
 }
 
 size_t DataTable::size()
@@ -131,6 +149,11 @@ size_t DataTable::size()
 bool DataTable::empty()
 {
 	return map->empty();
+}
+
+size_t DataTable::version() const
+{
+	return *data_version;
 }
 
 std::ostream& operator <<(std::ostream &stream, DataTable &val)

@@ -42,9 +42,9 @@ map[~1337]
 	:: map["another map"]["foo"]
 
 <% "Iterating over a map"
-for: (entry, map) {
+map.for_each(f: entry {
 	<% "Key: " :: entry.key() :: ", Value: " :: entry.value()
-}
+})
 <% ""
 
 <% "Iterating over values using Iterable@map(Function) and for_each"

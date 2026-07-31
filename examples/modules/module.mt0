@@ -36,11 +36,7 @@ for_each = {
 }
 
 mean = fun: num_list {
-	sum = 0.0
-	for: (n, num_list) {
-		sum += n
-	}
-	sum / num_list.size()!
+	num_list.sum() / num_list.size()!
 }
 
 /* Weak Unit syntax is used to omit the # prefix before module-local variable names */

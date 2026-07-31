@@ -13,34 +13,11 @@ namespace mtl
 class LoopExpr: public Expression
 {
 	private:
-		ExprPtr init, condition, step;
-		ExprPtr body;
+		ExprPtr condition, body;
 
 	public:
-		/* do $(i = 0, i < 10, ++i) -> {expr1; expr2; expr3} */
-		LoopExpr(ExprPtr init, ExprPtr condition, ExprPtr step, ExprPtr body) :
-				init(init), condition(condition), step(step), body(body)
+		LoopExpr(ExprPtr condition, ExprPtr body) : condition(condition), body(body)
 		{
-		}
-
-		LoopExpr(ExprList params, ExprPtr body) : LoopExpr(params[0], params[1], params[2], body)
-		{
-		}
-
-		/* do $(as_elem, list) -> {} */
-		LoopExpr(ExprPtr elem_name, ExprPtr list, ExprPtr body) :
-				init(elem_name), condition(list), body(body)
-		{
-		}
-
-		/* do $(i < 10) -> {expr1; expr2; expr3} */
-		LoopExpr(ExprPtr condition, ExprPtr body) : LoopExpr(nullptr, condition, nullptr, body)
-		{
-		}
-
-		ExprPtr get_init()
-		{
-			return init;
 		}
 
 		ExprPtr get_condition()
@@ -48,29 +25,9 @@ class LoopExpr: public Expression
 			return condition;
 		}
 
-		ExprPtr get_step()
-		{
-			return step;
-		}
-
 		ExprPtr get_body()
 		{
 			return body;
-		}
-
-		inline bool is_foreach()
-		{
-			return init != nullptr && condition != nullptr && step == nullptr;
-		}
-
-		inline bool is_while()
-		{
-			return !is_foreach() && init == nullptr;
-		}
-
-		inline bool is_for()
-		{
-			return !is_foreach() && !is_while();
 		}
 
 		std::ostream& info(std::ostream &str) override;

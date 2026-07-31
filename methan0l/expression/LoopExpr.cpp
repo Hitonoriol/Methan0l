@@ -19,13 +19,9 @@ namespace mtl
 
 std::ostream& LoopExpr::info(std::ostream &str)
 {
-	bool lforeach = is_foreach(), lfor = is_for();
 	return Expression::info(str
-					<< (lforeach ? "For-Each" : (lfor ? "For" : "While"))
-					<< " Loop: " << BEG
-					<< (lforeach || lfor ? ("Init: " + init->info() + mtl::str(NL)) : "")
+					<< "While Loop: " << BEG
 					<< "Condition: " << condition->info() << NL
-					<< (lfor ? ("Step: " + step->info() + mtl::str(NL)) : "")
 					<< "Body: " << body->info() << NL
 					<< END);
 }

@@ -14,11 +14,11 @@ const: {
 	STR = "String Constant"
 }
 
-for: (i, 1..10) {
+(1..10).for_each(f: i {
 	/* `$STR` and `$N` expressions don't exist in program's intermediate representation -
 	 * they're replaced by literal values containing values computed at parse-time */
 	<% $"[{}] N + {} = {}", $STR, i, $N + i
-}
+})
 
 /* Const blocks can also return a value.
  * Returned value will replace the entire block after const-evaluation. */

@@ -17,6 +17,7 @@ class DataTable
 	private:
 		Interpreter* context;
 		std::shared_ptr<DataMap> map;
+		std::shared_ptr<size_t> data_version;
 		static const std::string NIL_IDF;
 
 	public:
@@ -26,6 +27,7 @@ class DataTable
 		DataTable& operator=(const DataTable &rhs);
 
 		bool exists(const std::string &id);
+		Value* find(const std::string &id);
 		Value& set(const std::string &id, Value value);
 		Value& get(const std::string &id, bool fail_if_undefined = false);
 		const Value& cget(const std::string &id) const;
@@ -45,6 +47,7 @@ class DataTable
 
 		size_t size();
 		bool empty();
+		size_t version() const;
 
 		inline Interpreter* get_context()
 		{

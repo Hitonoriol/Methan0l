@@ -114,7 +114,6 @@ Methan0lLexer::Methan0lLexer()
 	register_keyword(Tokens::IMPLEMENT);
 	register_keyword(Tokens::IDENTITY);
 	register_keyword(Tokens::DO);
-	register_keyword(Tokens::FOR);
 	register_keyword(Tokens::WHILE);
 	register_keyword(Tokens::FUNC_DEF);
 	register_keyword(Tokens::CLASS);

@@ -43,9 +43,60 @@ Int count(Object &iterable_obj)
 
 Value for_each(Object &iterable_obj, Value action)
 {
+	if (action.is<Function>()) {
+		return for_each(iterable_obj, action.get<Function>());
+	}
+
 	return do_for_each(iterable_obj, [&action](auto &context, auto &args) {
 		context.invoke(action, args);
 	});
+}
+
+Value for_each(Object &iterable_obj, Function &callback)
+{
+	if (callback.get_arg_def().size() > 1) {
+		return do_for_each(iterable_obj, [&callback](auto &context, auto &args) {
+			callback.call(context, args);
+			context.execute(callback);
+		});
+	}
+
+	IterableAdapter iterable(iterable_obj);
+	auto &context = iterable.get_context();
+	auto iterator = iterable.iterator();
+	auto elem_expr = LiteralExpr::empty();
+	ExprList args(context.allocator<ExprList>());
+	args.push_back(elem_expr);
+
+	context.enter_scope(callback);
+
+	try {
+		auto execute_callback = [&] {
+			if (callback.execution_finished())
+				callback.begin();
+
+			context.execute(callback, false);
+		};
+
+		if (callback.get_arg_def().empty()) {
+			while (iterator.has_next()) {
+				elem_expr->raw_ref() = iterator.next();
+				callback.call(context, args);
+				execute_callback();
+			}
+		} else {
+			while (iterator.has_next()) {
+				callback.get_first_arg(args) = iterator.next();
+				execute_callback();
+			}
+		}
+	} catch (...) {
+		context.leave_scope();
+		throw;
+	}
+
+	context.leave_scope();
+	return iterable_obj;
 }
 
 Value map(Object &iterable_obj, Value mapper)

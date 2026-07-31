@@ -23,8 +23,11 @@ my_box = box: {
 		else:
 			die("Unsupported type")
 		
-		for: (i = iterable.size() - 1, i >= 0, --i)
+		i = iterable.size() - 1
+		while: (i >= 0) {
 			rev += iterable[i]
+			--i
+		}
 
 		return: rev
 	}

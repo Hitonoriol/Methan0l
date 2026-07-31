@@ -170,7 +170,6 @@ struct Tokens {
 		LIST_DEF 				= "list",
 		MAP_DEF 				= "map",
 		WHILE 					= "while",
-		FOR 					= "for",
 		TRY 					= "try",
 		CATCH 					= "catch",
 		USING_MODULE 			= "using_module",
