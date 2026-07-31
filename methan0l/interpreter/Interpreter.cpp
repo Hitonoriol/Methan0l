@@ -645,7 +645,7 @@ void Interpreter::on_exit()
 void Interpreter::register_exit_task(Value &callable)
 {
 	on_exit_tasks.push_back([=, this]() mutable {
-		Args noargs;
+		ExprList noargs;
 		invoke(callable, noargs);
 	});
 }

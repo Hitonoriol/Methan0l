@@ -125,6 +125,10 @@ Methan0lLexer::Methan0lLexer()
 	register_keyword(Tokens::LIST_DEF);
 	register_keyword(Tokens::MAP_DEF);
 
+	/* Reserved literals */
+	register_reserved_word(ReservedWord::TRUE);
+	register_reserved_word(ReservedWord::FALSE);
+
 	/* Block begin tokens */
 	register_block_begin_token(Tokens::PAREN_L);
 	register_block_begin_token(Tokens::BRACKET_L);

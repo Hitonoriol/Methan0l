@@ -3,6 +3,7 @@
 
 #include <methan0l/util/id.h>
 #include <methan0l/util/meta/function_traits.h>
+#include <ch3oh/parser/expression/Expression.h>
 
 #include <memory>
 #include <map>
@@ -29,7 +30,8 @@ namespace mtl::core
 			auto eval_it = evaluators.find(id);
 
 			if (eval_it == evaluators.end()) {
-				throw std::runtime_error("Expression evaluator is not registered");
+				throw std::runtime_error("Expression evaluator is not registered for "
+						+ std::string(typeid(expr).name()));
 			}
 
 			return eval_it->second(*context, expr);

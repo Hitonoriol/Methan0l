@@ -36,4 +36,4 @@ c = -100
 
 /* Return operator: `return: expr`. Any Unit can return a value. 
  * Main Unit must return a numeric value if launched via the CLI. */
-return: foo
+return: 0

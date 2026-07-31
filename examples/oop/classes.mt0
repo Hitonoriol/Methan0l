@@ -43,10 +43,10 @@ class: Point {
 	}
 	
 	/* Operator overloads */
-	`+` => method: rhs -> (objcopy: this).add(rhs)
-	`-` => method: rhs -> (objcopy: this).sub(rhs)
-	`*` => method: rhs -> (objcopy: this).mul(rhs)
-	`/` => method: rhs -> (objcopy: this).div(rhs)
+	`+` => method: rhs -> (copy: this).add(rhs)
+	`-` => method: rhs -> (copy: this).sub(rhs)
+	`*` => method: rhs -> (copy: this).mul(rhs)
+	`/` => method: rhs -> (copy: this).div(rhs)
 	`+=` => method: rhs -> this.add(rhs)
 	`-=` => method: rhs -> this.sub(rhs)
 	`*=` => method: rhs -> this.mul(rhs)
@@ -64,8 +64,8 @@ foo = new: Point(1, 2)
 bar = new: Point(0.5, 0.25)
 empty = new: Point()
 
-/* Sum as a new object via `objcopy` operator */
-foo_plus_bar = (objcopy: foo).add(bar)
+/* Sum as a new object via `copy` operator */
+foo_plus_bar = (copy: foo).add(bar)
 
 /* Using overloaded operators */
 sum = foo + bar

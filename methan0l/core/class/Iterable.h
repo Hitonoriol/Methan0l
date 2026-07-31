@@ -67,6 +67,6 @@ class IterableAdapter : public Adapter
 } /* namespace mtl */
 
 #define BIND_NATIVE_ITERATOR() \
-	BIND_EXTERNAL_METHOD(native::IteratorProvider<bound_class>::template iterator<>)
+	BIND_EXTERNAL_METHOD_AS("iterator", native::IteratorProvider<bound_class>::template iterator<>)
 
 #endif /* SRC_LANG_CORE_CLASS_ITERABLE_H_ */

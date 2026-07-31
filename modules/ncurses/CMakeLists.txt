@@ -8,6 +8,24 @@ methan0l_add_module(module_ncurses ncurses
 
 if(METHAN0L_CURSES_TARGET)
 	target_link_libraries(module_ncurses PRIVATE ${METHAN0L_CURSES_TARGET})
+	if(WIN32)
+		get_target_property(METHAN0L_CURSES_LIBRARY
+			${METHAN0L_CURSES_TARGET} IMPORTED_LOCATION_RELEASE)
+		get_filename_component(METHAN0L_CURSES_ROOT
+			"${METHAN0L_CURSES_LIBRARY}/../.." ABSOLUTE)
+		find_file(METHAN0L_CURSES_RUNTIME
+			NAMES pdcurses.dll curses.dll
+			HINTS "${METHAN0L_CURSES_ROOT}/bin"
+			NO_DEFAULT_PATH)
+		if(METHAN0L_CURSES_RUNTIME)
+			add_custom_command(TARGET module_ncurses POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different
+					"${METHAN0L_CURSES_RUNTIME}"
+					"${METHAN0L_RUNTIME_DIR}"
+			)
+			install(FILES "${METHAN0L_CURSES_RUNTIME}" DESTINATION .)
+		endif()
+	endif()
 else()
 	target_include_directories(module_ncurses PRIVATE ${CURSES_INCLUDE_DIRS})
 	target_compile_options(module_ncurses PRIVATE ${CURSES_CFLAGS})

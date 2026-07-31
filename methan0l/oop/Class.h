@@ -118,11 +118,11 @@ class Class
 			if (rhs_id == id)
 				return true;
 
-			if (has_superclass() && rhs_id == superclass->id)
+			if (has_superclass() && superclass->equals_or_inherits(clazz))
 				return true;
 
 			for (auto &cl : interfaces)
-				if (rhs_id == cl->id)
+				if (cl->equals_or_inherits(clazz))
 					return true;
 			return false;
 		}

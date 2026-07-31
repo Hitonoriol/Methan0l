@@ -94,6 +94,7 @@ class Lexer
 
 		void register_punctuator(TokenType punctuator);
 		void register_keyword(TokenType keyword, bool hard = false);
+		void register_reserved_word(TokenType reserved_word);
 		void register_operator(TokenType op);
 		void register_block_begin_token(TokenType tok);
 		void register_block_end_token(TokenType tok);

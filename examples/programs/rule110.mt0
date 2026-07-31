@@ -5,14 +5,14 @@ rule110 = fun: size => 50 {
 
 	board[size - 2] = 1
 
-	for (i = 0, i < size - 2, ++i) {
-		for (j = 0, j < size, ++j) {
+	for: (i = 0, i < size - 2, ++i) {
+		for: (j = 0, j < size, ++j) {
 			%% chars[board[j]]
 		}
 		%% '\n'
 
 		pattern = (board[0] << 1) | board[1]
-		for (j = 1, j < size - 1, ++j) {
+		for: (j = 1, j < size - 1, ++j) {
 			pattern = ((pattern << 1) & 7) | board[j + 1]
 			board[j] = (110 >> pattern) & 1
 		}

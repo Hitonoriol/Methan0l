@@ -2,14 +2,14 @@
 
 f = fun: () {
 	/* Break from imperative foreach */
-	for (i, range(100)) {
+	for: (i, range(100)) {
 		i > 5 ? return: break
 		<% $"i = {}" i
 	}
 	
 	/* Break from while loop */
 	x = 100
-	while (x > 0) {
+	while: (x > 0) {
 		%% --x
 		if: (x < 91) {
 			%% newl
@@ -20,7 +20,7 @@ f = fun: () {
 	}
 	
 	/* Return from for loop */
-	for (i = 0, i < 100, ++i) {
+	for: (i = 0, i < 100, ++i) {
 		if: (i == 10) {
 			return: 123
 		}

@@ -73,7 +73,7 @@ list = list_populator({i = 0; max = 10; new_list = []})
 /* Ways to iterate over a List */
 
 <% "Foreach loop"
-for (val, list) {
+for: (val, list) {
 	<% "* " :: val
 }
 <% ""

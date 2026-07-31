@@ -94,6 +94,11 @@ const std::string& Token::get_value() const
 	return value;
 }
 
+void Token::set_value(std::string value)
+{
+	this->value = std::move(value);
+}
+
 void Token::set_line(uint32_t line)
 {
 	this->line = line;

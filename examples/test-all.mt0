@@ -1,39 +1,40 @@
-<% "Running all examples" :: newl
+import: "$:/modules/system"
 
-start = now()
+<% "Running all examples in isolated interpreter processes" :: newl
+
+started = now()
 args = get_launch_args()
-
 this = File@filename(args[0])
-root = new: File((new: File(args[0])).parent())
+root = new: File((new: File(args[0])).parent_path())
 
 if: (!root.exists() || !root.is_dir())
-	die($"Failed to open directory {}", root)
+	die($"Failed to open examples directory {}" root)
 
-title = fun: char, str => "", width => 50 {
-	pad = char.repeat((width - str.size()) / 2 - 2)
-	space = str.is_empty() ? "" : " "
-	title = pad :: space :: str :: space :: pad
-	if: ((n = width - title.size()) > 0)
-		title[] = char.repeat(n)
+candidate = new: File("")
+total = passed = failed = 0
 
-	return: title
-}
-
-tmp = new: File("")
-count = 0
 root.for_each(f: file {
-	tmp.set(file)
-	if: (tmp.extension() != ".mt0" || tmp.filename() == #this)
+	candidate.set(file)
+	if: (candidate.extension() != ".mt0" || candidate.filename() == this)
 		nil!
 
-	<% newl :: title("v", file)
-	try { 
-		time = measure_time(load(file))
+	++total
+	test_started = now()
+	result = run_process(get_bin_path(), candidate.absolute_path())
+	elapsed = now() - test_started
+
+	if: (result.y() == 0) {
+		++passed
+		<% $"PASS {} ({} ms)" candidate, elapsed
+	} else: {
+		++failed
+		<% $"FAIL {} ({} ms, exit code {})" candidate, elapsed, result.y()
+		if: (!result.x().is_empty())
+			<% result.x()
 	}
-	catch: ex {
-		<% $"{} threw an exception: ", ex
-	}
-	<% title("^", "Finished in {} secs".format(time / 1000.0)) :: newl
-	++count
 })
-<% $"Done running examples ({} in total). {} secs elapsed." count, (now() - start) / 1000.0
+
+<% newl :: $"Passed: {}  Failed: {}  Total: {}" passed, failed, total
+<% $"Finished in {} ms." (now() - started)
+
+return: failed

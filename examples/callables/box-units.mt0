@@ -14,17 +14,17 @@ my_box = box: {
 	
 	/* This was written when the real `Iterable`s didn't exist */
 	reverse = fun: iterable {
-		@(rev, type => typeid: iterable)
+		var: rev
 		
-		if: (type == (List))
+		if: (iterable is: List)
 			rev = $()
-		else: if: (type == (String))
+		else: if: (iterable is: String)
 			rev = ""
 		else:
 			die("Unsupported type")
 		
-		for (i = iterable.size() - 1, i >= 0, --i)
-			rev[] = iterable[i]
+		for: (i = iterable.size() - 1, i >= 0, --i)
+			rev += iterable[i]
 
 		return: rev
 	}
@@ -55,13 +55,13 @@ my_box = box: {
  * Anonymous object methods must have explicit `this` argument in their parameter list. */
 {
 	obj = new: @[
-		x => 123
-		y => "some text"
+		"x" => 123
+		"y" => "some text"
 
-		some_func => fun: x
+		"some_func" => fun: x
 			return: x * 10
 
-		foo => method: this, n
+		"foo" => method: this, n
 			return: this.x * n
 	]
 

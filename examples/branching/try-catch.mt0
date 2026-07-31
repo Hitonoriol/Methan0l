@@ -1,7 +1,7 @@
 <% "Try-catch" :: newl
 
 f = fun: () {
-	try {
+	try: {
 		<% "Throwing an exception..."
 		/* Any Value can be thrown here, not just Strings */
 		die("Some exception")
@@ -16,7 +16,7 @@ f()
 <% "x = " :: x
 
 <% "Doing some other stuff that shouldn't throw"
-try
+try:
 	x *= 1.5
 catch: ex
 	<% $"This shouldn't happen: `{}`" ex

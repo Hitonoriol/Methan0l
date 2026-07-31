@@ -115,7 +115,7 @@ class RangeIterator : public Iterator
 			return n >= range.start;
 		}
 
-		Value skip(/* TODO: change to `Value` */ Int skip = 1)
+		Value skip(/* TODO: change to `Value` */ Int skip = 1) override
 		{
 			if (!can_skip(skip))
 				throw IllegalOperationException();
@@ -123,7 +123,7 @@ class RangeIterator : public Iterator
 			return n += skip;
 		}
 
-		bool can_skip(/* TODO: change to `Value` */ Int skip = 1)
+		bool can_skip(/* TODO: change to `Value` */ Int skip = 1) override
 		{
 			return (n + skip) < range.end;
 		}

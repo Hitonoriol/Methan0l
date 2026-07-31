@@ -14,7 +14,7 @@ const: {
 	STR = "String Constant"
 }
 
-for (i, 1..10) {
+for: (i, 1..10) {
 	/* `$STR` and `$N` expressions don't exist in program's intermediate representation -
 	 * they're replaced by literal values containing values computed at parse-time */
 	<% $"[{}] N + {} = {}", $STR, i, $N + i

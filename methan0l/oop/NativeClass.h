@@ -176,7 +176,9 @@ class NativeClass
 
 #define METHOD_ALIAS(method_name, alias) \
 	STANDARD_METHOD(alias) (Args args) { \
-		return Object::get_this(args).invoke_method(STR(method_name), args); \
+		ExprList forwarded(args); \
+		forwarded.pop_front(); \
+		return Object::get_this(args).invoke_method(STR(method_name), forwarded); \
 	}; \
 
 } /* namespace mtl */

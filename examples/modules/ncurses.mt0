@@ -1,3 +1,10 @@
+import: "$:/modules/system"
+
+if: (!is_terminal()) {
+	<% "Skipping interactive ncurses demo: no terminal is attached."
+	return: 0
+}
+
 import: "$:/modules/ncurses"
 
 print_center = fun: msg {

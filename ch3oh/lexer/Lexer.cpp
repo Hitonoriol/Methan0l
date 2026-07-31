@@ -44,6 +44,11 @@ void Lexer::register_keyword(TokenType keyword, bool hard)
 		soft_word_ops.push_back(keyword);
 }
 
+void Lexer::register_reserved_word(TokenType reserved_word)
+{
+	reserved_words.push_back(reserved_word);
+}
+
 void Lexer::register_operator(TokenType op)
 {
 	if (op->size() > 1)
@@ -189,6 +194,8 @@ Token& Lexer::finalize_token(Token &&tok)
 	cur_sep = Separator::NONE;
 	/* If this token is a token literal (e.g. `token`) */
 	if (token_literal) {
+		if (tok.get_value().empty())
+			tok.set_value(Token::to_string(tok.get_type()));
 		tok.set_type(Tokens::TOKEN);
 		next_char(); // Skip the second '`'
 		token_literal = false;
@@ -457,10 +464,17 @@ inline bool Lexer::match_next(TokenType tok)
 bool Lexer::match_next_punctuator(TokenType tok)
 {
 	for (auto it = cur_chr; it != input_end; ++it) {
-		if (*it == tok)
+		if (!std::isspace(static_cast<unsigned char>(*it))) {
+			if (*it != tok)
+				return false;
+
+			/* A soft keyword delimiter must be the standalone `:` token,
+			 * not the first character of `::` or `:=`. */
+			if (tok == Tokens::COLON && std::next(it) != input_end)
+				return *std::next(it) != Tokens::COLON && *std::next(it) != Tokens::ASSIGN;
+
 			return true;
-		if (is_punctuator(*it))
-			return false;
+		}
 	}
 	return false;
 }

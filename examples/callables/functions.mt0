@@ -49,5 +49,5 @@ baz = f: () -> a = 123, b = 456, out = a * b, out!
 <% baz() == 56088
  
  /* More examples */
-sum_up_to = f: x -> sum = 0, (1..x)[do: f: n, %sum -> sum += n], sum!
+sum_up_to = f: x -> sum = 0, (1..(x + 1))[do: f: n -> sum += n], sum!
 <% sum_up_to(10) == 55

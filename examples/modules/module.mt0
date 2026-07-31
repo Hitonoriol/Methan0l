@@ -32,12 +32,12 @@ for_each = {
 		}
 		
 		repeater
-	} ({i = 0; end = size(#list)})
+	} ({i = 0; end = #list.size()})
 }
 
 mean = fun: num_list {
 	sum = 0.0
-	for (n, num_list) {
+	for: (n, num_list) {
 		sum += n
 	}
 	sum / num_list.size()!

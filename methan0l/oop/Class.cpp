@@ -169,7 +169,10 @@ Value Class::invoke_method(Object &obj, const std::string &name, Args &args)
 
 Value Anonymous::invoke_method(Object &obj, const std::string &name, Args &args)
 {
-	return context.invoke_method(obj, obj.field(name), args);
+	if (obj.get_data().exists(name))
+		return context.invoke_method(obj, obj.field(name), args);
+
+	return Class::invoke_method(obj, name, args);
 }
 
 Value Class::invoke_static(const std::string &name, Args &args)

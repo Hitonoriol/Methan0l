@@ -22,7 +22,7 @@ print()
  * - LHS is not of RHS type
  * - LHS does not inherit any of classes / interfaces on the RHS */
 list = new: List()
-list require: Collection, Iterable
+list require: [Collection, Iterable]
 bool require: Boolean
 
 /* Type check: `val is: type_expr` */

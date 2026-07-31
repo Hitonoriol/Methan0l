@@ -55,7 +55,7 @@ class File : public Class
 			if (!file.is_open())
 				throw std::runtime_error("Failed to open \"" + fname + "\" for reading");
 			auto contents = context.make<C>();
-			contents.move_in(typename  C::bound_class::wrapped_type { std::istreambuf_iterator { file }, { } });
+			contents.template move_in<C>(typename C::bound_class::wrapped_type { std::istreambuf_iterator { file }, { } });
 			file.close();
 			return contents;
 		}

@@ -107,6 +107,8 @@ bool LibData::instanceof(Value &lhs, ExprPtr rhs_expr)
 {
 	auto type = core::resolve_type(*context, *rhs_expr);
 	if (lhs.object()) {
+		if (Type::get(type.type_id()) != TypeID::NONE)
+			return false;
 		auto clazz = lhs.get<Object>().get_class();
 		return clazz->equals_or_inherits(&context->get_type_mgr().get_class(type.type_id()));
 	}
@@ -227,12 +229,10 @@ void LibData::load_operators()
 		auto lval = val(lhs);
 		if (mtl::instanceof<ListExpr>(rhs)) {
 			ExpressionUtils::for_one_or_multiple(rhs, [this, &lval](auto &expr) {
-				auto rval = val(expr);
-				assert_type(lval, rval);
+				assert_type(lval, expr);
 			});
 		} else {
-			auto rval = val(rhs);
-			assert_type(lval, rval);
+			assert_type(lval, rhs);
 		}
 		return Value::NO_VALUE;
 	}));

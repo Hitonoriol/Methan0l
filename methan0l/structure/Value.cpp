@@ -63,7 +63,7 @@ Value Value::copy(Interpreter *context)
 {
 	accept([&](auto &v) {
 		if constexpr (is_heap_type<VT(v)>())
-			if constexpr (!std::is_abstract<VT(*v)>::value)
+			if constexpr (!std::is_abstract<VT(*v)>::value && !std::is_same_v<VT(*v), Expression>)
 				value = context->make_shared<VT(*v)>(*v);
 	});
 	return *this;

@@ -163,7 +163,19 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 					return lazy->second(a, b);
 			}
 
-			Value operand_a = Token::is_ref_opr(op) ? Value::ref(referenced_value(a)) : evaluate(*a).get();
+			Value operand_a;
+			if (Token::is_ref_opr(op)) {
+				auto &referenced = referenced_value(a);
+				/* A lazily stored expression becomes the current value when a
+				 * mutating operator first uses it. */
+				if (referenced.is<ExprPtr>()) {
+					auto evaluated = evaluate(*a).get();
+					referenced = evaluated;
+				}
+				operand_a = Value::ref(referenced);
+			} else {
+				operand_a = evaluate(*a).get();
+			}
 
 			/* Invoke object operator overload, if any */
 			if (operand_a.get().is<Object>()) {
@@ -249,7 +261,7 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 			/* Special case (1): provide compatibility of mtl::native::String with std::string */
 			if constexpr (std::is_same_v<V, std::string>) {
 				auto val = evaluate(expr);
-				if (val.is<mtl::native::String>()) {
+				if (val.is<Shared<mtl::native::String>>()) {
 					auto &str = mtl::str(val.to_string());
 					/* If for some reason a std::string* is requested */
 					if constexpr (std::is_pointer<V>::value)
@@ -265,7 +277,7 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 			 * TODO: handle these conversions in some automatic way? */
 			else if constexpr (std::is_same_v<V, const char*>) {
 				auto val = evaluate(expr);
-				if (val.is<std::shared_ptr<mtl::native::String>>()) {
+				if (val.is<Shared<mtl::native::String>>()) {
 					auto &str = mtl::str(val.to_string());
 					return &str[0];
 				}
@@ -497,7 +509,7 @@ class Interpreter : public std::enable_shared_from_this<Interpreter>
 				};
 			}
 			/* Function accepts the ExprList itself - no binding required */
-			else if constexpr (std::is_same<TYPE(typename function_traits<F>::argument<0>::type), mtl::ExprList>::value) {
+			else if constexpr (std::is_same<TYPE(typename function_traits<F>::template argument<0>::type), mtl::ExprList>::value) {
 				return NativeFunc(f);
 			}
 			else {

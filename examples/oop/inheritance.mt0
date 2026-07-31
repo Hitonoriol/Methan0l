@@ -27,7 +27,7 @@ class: Rectangle base: Shape {
 	}
 	get_name => method: () -> "Rectangle"
 	to_string => method: () {
-		return: Shape@to_string(this) + $", {}x{}" this.w, this.h
+		return: Shape@get_method("to_string")(this) :: $", {}x{}" this.w, this.h
 	}
 }
 
@@ -42,4 +42,4 @@ rect.draw()
 <% $"shape is a Rectangle: {}" (shape is: Rectangle)
 
 /* Interface requirement operator. Throws if any of the requirements are not satisfied. */
-rect require: Shape, Drawable
+rect require: [Shape, Drawable]

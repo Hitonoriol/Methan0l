@@ -41,6 +41,7 @@ class Token
 		void set_type(TokenType);
 		TokenType get_type() const;
 		const std::string& get_value() const;
+		void set_value(std::string value);
 
 		void set_line(uint32_t);
 		uint32_t get_line() const;

@@ -4,7 +4,8 @@
  * This makes the following madness possible:
  */
 
-(return = f: return {return: return}) -> [nil, return = return("This is madness")][0]
+return = f: return {return: return}
+return = return("This is madness")
 typename = typename: return
 
 <% $"Function return() return value: \"{}\"" return

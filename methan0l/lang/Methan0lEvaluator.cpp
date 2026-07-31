@@ -52,6 +52,7 @@ Methan0lEvaluator::Methan0lEvaluator(const std::shared_ptr<Interpreter>& context
 	REGISTER_EVALUATOR(FunctionExpr);
 	REGISTER_EVALUATOR(IdentifierExpr);
 	REGISTER_EVALUATOR(IndexExpr);
+	REGISTER_EVALUATOR(InvokeExpr);
 	REGISTER_EVALUATOR(ListExpr);
 	REGISTER_EVALUATOR(LiteralExpr);
 	REGISTER_EXECUTOR(LiteralExpr);
@@ -145,6 +146,8 @@ void Methan0lEvaluator::execute(Interpreter& context, ClassExpr& expr)
 Value Methan0lEvaluator::evaluate(Interpreter& context, ConditionalExpr& expr)
 {
 	auto branch = context.evaluate(*expr.get_condition()).to_bool() ? expr.get_then() : expr.get_else();
+	if (instanceof<UnitExpr>(branch))
+		return context.invoke(try_cast<UnitExpr>(branch).get_unit_ref());
 	return context.evaluate(*branch);
 }
 
@@ -184,7 +187,7 @@ Value Methan0lEvaluator::evaluate(Interpreter& context, IndexExpr& expr)
 	auto idx = expr.get_rhs();
 
 	Value val = instanceof<IndexExpr>(lhs)
-		? context.evaluate(try_cast<IndexExpr>(lhs))
+		? context.evaluate(try_cast<IndexExpr>(lhs)).get()
 		: context.referenced_value(lhs);
 
 	if (idx != nullptr) {

@@ -11,7 +11,7 @@ file = new: File("#:/file.txt") /* `#:/` expands into the script run directory *
 
 file.open()
 i = 1
-while (!file.is_eof())
+while: (!file.is_eof())
 	<% "Line #" :: (i++) :: ": " :: file.read_line()
 <% "End of file"
 file.close()

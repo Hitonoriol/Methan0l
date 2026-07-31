@@ -8,15 +8,11 @@
 }
 <% ""
 
-<% "A noeval \"loop\":"
+<% "Repeated lazy evaluation:"
 {
-	x = noeval: [
-		[
-			i == nil ? i = 10,
-			--i,
-			i > 0 ? %% x :: " "
-		][1],
-		delete: i
-	][0]
-	x
+	i = 3
+	next = noeval: --i
+	<% next
+	<% next
+	<% next
 }

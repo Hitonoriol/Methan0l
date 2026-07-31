@@ -42,7 +42,7 @@ map[~1337]
 	:: map["another map"]["foo"]
 
 <% "Iterating over a map"
-for (entry, map) {
+for: (entry, map) {
 	<% "Key: " :: entry.key() :: ", Value: " :: entry.value()
 }
 <% ""
