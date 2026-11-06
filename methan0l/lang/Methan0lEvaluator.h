@@ -22,6 +22,7 @@ class ListExpr;
 class LiteralExpr;
 class LoopExpr;
 class MapExpr;
+class PipelineExpr;
 class RangeExpr;
 class TryCatchExpr;
 class TypeRefExpr;
@@ -60,6 +61,8 @@ public:
 	static Value evaluate(Interpreter& context, LoopExpr& expr);
 
 	static Value evaluate(Interpreter& context, MapExpr& expr);
+
+	static Value evaluate(Interpreter& context, PipelineExpr& expr);
 
 	static Value evaluate(Interpreter& context, RangeExpr& expr);
 

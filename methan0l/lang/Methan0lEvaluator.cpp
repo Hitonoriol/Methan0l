@@ -16,6 +16,7 @@
 #include <methan0l/expression/LiteralExpr.h>
 #include <methan0l/expression/LoopExpr.h>
 #include <methan0l/expression/MapExpr.h>
+#include <methan0l/expression/PipelineExpr.h>
 #include <methan0l/expression/RangeExpr.h>
 #include <methan0l/expression/TryCatchExpr.h>
 #include <methan0l/expression/TypeRefExpr.h>
@@ -58,6 +59,7 @@ Methan0lEvaluator::Methan0lEvaluator(const std::shared_ptr<Interpreter>& context
 	REGISTER_EXECUTOR(LiteralExpr);
 	REGISTER_EVALUATOR(LoopExpr);
 	REGISTER_EVALUATOR(MapExpr);
+	REGISTER_EVALUATOR(PipelineExpr);
 	REGISTER_EVALUATOR(RangeExpr);
 	REGISTER_EVALUATOR(TryCatchExpr);
 	REGISTER_EVALUATOR(TypeRefExpr);
@@ -352,6 +354,34 @@ Value Methan0lEvaluator::evaluate(Interpreter& context, MapExpr& expr)
 			map->emplace(context.evaluate(*entry.first), context.evaluate(*entry.second));
 		}
 	});
+}
+
+Value Methan0lEvaluator::evaluate(Interpreter& context, PipelineExpr& expr)
+{
+	/* Evaluating the input here (rather than rewriting the AST) guarantees that
+	 * every stage receives the preceding stage's result exactly once. */
+	auto input = context.evaluate(*expr.get_input()).get();
+	auto input_expr = LiteralExpr::create(input);
+
+	if (expr.get_stage_type() == PipelineStageType::OPERATOR) {
+		auto application = make_expr<BinaryOperatorExpr>(
+			expr.get_line(), input_expr, expr.get_operator(), expr.get_stage());
+		return context.evaluate(*application);
+	}
+
+	auto &stage = try_cast<InvokeExpr>(expr.get_stage());
+	if (expr.get_stage_type() == PipelineStageType::FUNCTION) {
+		auto args = stage.arg_list();
+		args.push_front(input_expr);
+		auto invocation = make_expr<InvokeExpr>(expr.get_line(), stage.get_lhs(), args);
+		return context.evaluate(*invocation);
+	}
+
+	Token dot(Tokens::DOT);
+	dot.set_line(expr.get_line());
+	auto method_call = make_expr<BinaryOperatorExpr>(
+		expr.get_line(), input_expr, dot, expr.get_stage());
+	return context.evaluate(*method_call);
 }
 
 Value Methan0lEvaluator::evaluate(Interpreter& context, RangeExpr& expr)

@@ -26,6 +26,7 @@
 #include <methan0l/expression/parser/TryCatchParser.h>
 #include <methan0l/expression/parser/FormatStrParser.h>
 #include <methan0l/expression/parser/RangeParser.h>
+#include <methan0l/expression/parser/PipelineParser.h>
 #include <methan0l/expression/parser/ConstParser.h>
 #include <methan0l/expression/parser/IfElseParser.h>
 #include <methan0l/expression/parser/WordOperatorParser.h>
@@ -50,6 +51,7 @@ Methan0lParser::Methan0lParser(Interpreter &context)
 	register_literal_parser(Tokens::TOKEN, Type::TOKEN);
 	register_parser(Tokens::FORMAT_STRING, new FormatStrParser()); // $"... {} ..." arg1, arg2, ...
 	register_parser(Tokens::DOUBLE_DOT, new RangeParser()); // Range expression: start..end[..stop]
+	register_parser(Tokens::PIPELINE, new PipelineParser()); // value |> method(args)
 
 	/* Identifier expressions */
 	register_parser(Tokens::HASH, new IdentifierParser()); // #foo -- global scope lookup

@@ -8,7 +8,9 @@ namespace mtl
 
 ExprPtr RangeParser::parse(Parser &parser, ExprPtr lhs, Token token)
 {
-	auto end = parser.parse();
+	/* Keep lower-precedence expressions (notably pipelines) outside the range,
+	 * while still allowing the second `..` in start..end..step. */
+	auto end = parser.parse(precedence() - 1);
 	ExprPtr step = nullptr;
 
 	/* If there is a `step` specified, current range was parsed as: start..(end..step)

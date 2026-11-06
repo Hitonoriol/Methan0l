@@ -82,6 +82,7 @@ Methan0lLexer::Methan0lLexer()
 	register_operator(Tokens::COMP_MOD);
 	register_operator(Tokens::DOUBLE_SLASH);
 	register_operator(Tokens::DOUBLE_DOT);
+	register_operator(Tokens::PIPELINE);
 	register_operator(Tokens::MAP_DEF_L_ALT);
 
 	/* Soft keywords */

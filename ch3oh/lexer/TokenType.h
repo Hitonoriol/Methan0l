@@ -150,6 +150,7 @@ struct Tokens {
 		COMP_MOD				= "%=",
 		DOUBLE_SLASH			= "//",
 		DOUBLE_DOT				= "..",
+		PIPELINE				= "|>",
 		MAP_DEF_L_ALT			= "@[",
 
 		/* Keywords */
