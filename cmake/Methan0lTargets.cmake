@@ -13,7 +13,7 @@ endfunction()
 function(methan0l_configure_core_library target output_name)
 	methan0l_configure_cpp_target(${target})
 	target_include_directories(${target} PUBLIC
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+		$<BUILD_INTERFACE:${METHAN0L_SOURCE_DIR}>
 		$<INSTALL_INTERFACE:include>
 	)
 	set_target_properties(${target} PROPERTIES
@@ -31,7 +31,7 @@ endfunction()
 function(methan0l_add_stdlib target output_name)
 	add_library(${target} MODULE ${ARGN})
 	methan0l_configure_cpp_target(${target})
-	target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}")
+	target_include_directories(${target} PRIVATE "${METHAN0L_SOURCE_DIR}")
 	target_link_libraries(${target} PRIVATE methan0l)
 	set_target_properties(${target} PROPERTIES
 		PREFIX ""
@@ -53,7 +53,7 @@ endfunction()
 function(methan0l_add_module target output_name)
 	add_library(${target} MODULE ${ARGN})
 	methan0l_configure_cpp_target(${target})
-	target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}")
+	target_include_directories(${target} PRIVATE "${METHAN0L_SOURCE_DIR}")
 	target_link_libraries(${target} PRIVATE methan0l)
 	set_target_properties(${target} PROPERTIES
 		PREFIX ""

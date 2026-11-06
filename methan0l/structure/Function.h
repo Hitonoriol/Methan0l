@@ -31,7 +31,6 @@ class Function: public Unit
 		ArgDefList arg_def;
 		void acquire_call_scope();
 		void release_call_scope();
-		void call(Interpreter &context, const ExprList &args);
 
 	public:
 		Function(Unit body);

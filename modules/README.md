@@ -1,12 +1,12 @@
 # Methan0l Modules
 
-### Build all modules
+## Build all modules
 
 ```
 cmake --build build --target modules
 ```
 
-### Use modules inside Methan0l
+## Use modules inside Methan0l
 
 You can load `.so` and `.mt0` modules as **Box Units** in Methan0l using the following syntax:  
 

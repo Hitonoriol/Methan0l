@@ -7,14 +7,22 @@
     "boost-container",
     "boost-dll",
     "boost-filesystem",
-    "boost-system",
-    {
-      "name": "ncurses",
-      "platform": "!windows"
-    },
-    {
-      "name": "pdcurses",
-      "platform": "windows"
+    "boost-system"
+  ],
+  "features": {
+    "modules": {
+      "description": "Dependencies for all native Methan0l modules",
+      "dependencies": [
+        {
+          "name": "ncurses",
+          "platform": "!windows"
+        },
+        {
+          "name": "pdcurses",
+          "platform": "windows"
+        },
+        "wxwidgets"
+      ]
     }
-  ]
+  }
 }

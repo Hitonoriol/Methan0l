@@ -32,7 +32,7 @@ void load_module(Interpreter &context, const std::string &path, Unit &unit)
 		return;
 	}
 
-	boost::dll::shared_library module(name);
+	boost::dll::shared_library module(name, boost::dll::load_mode::load_with_altered_search_path);
 	auto &module_scope = unit.local();
 	context.enter_scope(unit);
 	if (!module.has(ModuleSymbols::ENTRYPOINT))

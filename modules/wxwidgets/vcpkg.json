@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "methan0l-wxwidgets",
+  "version-string": "0.1",
+  "builtin-baseline": "296b89248ad13be09e9324488eb4f74dd322d26c",
+  "dependencies": [
+    "boost-container",
+    "boost-dll",
+    "boost-filesystem",
+    "boost-system",
+    "wxwidgets"
+  ]
+}

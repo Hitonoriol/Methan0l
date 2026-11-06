@@ -1,3 +1,20 @@
+cmake_minimum_required(VERSION 3.21)
+
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+	project(Methan0lNcursesModule LANGUAGES CXX)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/Methan0lModule.cmake")
+methan0l_bootstrap_module()
+
+if(WIN32)
+	find_package(unofficial-pdcurses CONFIG REQUIRED)
+	set(METHAN0L_CURSES_TARGET unofficial::pdcurses::pdcurses)
+else()
+	set(CURSES_NEED_WIDE TRUE)
+	find_package(Curses REQUIRED)
+endif()
+
 file(GLOB_RECURSE MODULE_NCURSES_SOURCES CONFIGURE_DEPENDS "*.cpp")
 file(GLOB_RECURSE MODULE_NCURSES_HEADERS CONFIGURE_DEPENDS "*.h")
 

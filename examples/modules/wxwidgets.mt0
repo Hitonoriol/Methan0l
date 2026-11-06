@@ -1,0 +1,13 @@
+import: "$:/modules/wxwidgets"
+
+window = new: Window("wxWidgets + Methan0l", 420, 180)
+prompt = new: Label(window, "What is your name?")
+name = new: InputField(window, "World")
+hello = new: Button(window, "Say hello")
+
+hello.on_click(f: () {
+	prompt.set_text("Hello, " :: name.get_text() :: "!")
+})
+
+window.show()
+run()

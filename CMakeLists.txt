@@ -1,8 +1,17 @@
 cmake_minimum_required(VERSION 3.21)
 
+option(METHAN0L_BUILD_MODULES "Build the native Methan0l modules" ON)
+
+# The vcpkg toolchain is evaluated by project(), so select the dependencies for
+# the complete module set before then.
+if(METHAN0L_BUILD_MODULES)
+	list(APPEND VCPKG_MANIFEST_FEATURES modules)
+	list(REMOVE_DUPLICATES VCPKG_MANIFEST_FEATURES)
+endif()
+
 project(Methan0l VERSION 1.0.0 LANGUAGES CXX)
 
-option(METHAN0L_BUILD_MODULES "Build the native Methan0l modules" ON)
+set(METHAN0L_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 math(EXPR METHAN0L_BITS "${CMAKE_SIZEOF_VOID_P} * 8")
 
 if(POLICY CMP0167)
